@@ -10,6 +10,7 @@
 #include "vi_vpss_vo.h"
 #include "vo.h"
 #include "pingpangbuffer.h"
+#include "image_package.h"
 
 namespace suanzi {
 
@@ -24,12 +25,31 @@ class CameraReader : QThread {
     void run();
 
  signals:
-  void txFrame(PingPangBuffer<MmzImage> *buffer);
+  void txFrame(PingPangBuffer<ImagePackage> *buffer);
 
  private:
-    Vi *pVi_;
-    Vpss *pVpss_;
-    Vi_Vpss *pVi_Vpss_;
+    Vi *pVi_bgr_;
+    Vpss *pVpss_bgr_;
+    Vi_Vpss *pVi_Vpss_bgr_;
+
+    const int DEV_IDX_BRG=1;
+    const int PIPE_IDX_BRG=2;
+
+    const int DEV_IDX_NIR=0;
+    const int PIPE_IDX_NIR=0;
+
+    const SZ_SIZE vpss_ch_sizes_bgr[2] = {{1920, 1080}, {256, 256}};
+    const SZ_SIZE vpss_ch_sizes_nir[2] = {{1920, 1080}, {256, 256}};
+
+    const int ch_indexes_bgr[2] = {0, 1};
+    const bool ch_rotates_bgr[2] = {false, false};
+
+    const int ch_indexes_nir[2] = {0, 1};
+    const bool ch_rotates_nir[2] = {false, false};
+
+    const int VO_W = 800;
+    const int VO_H = 1280;
+    
 };
 
 }  // namespace suanzi
