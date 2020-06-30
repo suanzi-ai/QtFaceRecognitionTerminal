@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include "pingpangbuffer.h"
+#include "image_package.h"
 
 namespace suanzi {
 
@@ -14,7 +15,7 @@ class DetectTask : QObject {
     ~DetectTask();
 
  private slots:
-    void rxFrame(PingPangBuffer<MmzImage> *buffer);
+    void rxFrame(PingPangBuffer<ImagePackage> *buffer);
 
  signals:
     void txFrame(PingPangBuffer<MmzImage> *buffer);

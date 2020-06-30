@@ -34,14 +34,17 @@ CameraReader::~CameraReader() {
 
 void CameraReader::run() {
 
-  MmzImage ping(256, 256, SZ_IMAGETYPE_NV21);
-  MmzImage pang(256, 256, SZ_IMAGETYPE_NV21);
-  PingPangBuffer<MmzImage> pingpang(&ping, &pang);
+  ImagePackage image_package[2];
+   image_package[0].img_bgr_small = new MmzImage(256, 256, SZ_IMAGETYPE_NV21);
+   image_package[1].img_bgr_small = new MmzImage(256, 256, SZ_IMAGETYPE_NV21);
+//   MmzImage ping(256, 256, SZ_IMAGETYPE_NV21);
+//   MmzImage pang(256, 256, SZ_IMAGETYPE_NV21);
+  PingPangBuffer<ImagePackage> pingpang(&image_package[0], &image_package[1]);
   while (1) {
-    MmzImage *pPing = pingpang.getPing();
-    if (pVpss_bgr_->getYuvFrame(pPing, 1)) {
+    ImagePackage *pPing = pingpang.getPing();
+    if (pVpss_bgr_->getYuvFrame(pPing->img_bgr_small, 1)) {
       pingpang.switchToPang();
-    //   emit txFrame(&pingpang);
+      emit txFrame(&pingpang);
       // printf("tx0 threadId=%x   %x\n", QThread::currentThreadId(), pPing);
     } else {
       QThread::msleep(1);

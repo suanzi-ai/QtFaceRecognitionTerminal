@@ -31,14 +31,14 @@ VideoPlayer::VideoPlayer(QWidget *parent)
     pRecognizeTask_= new RecognzieTask(this);
 
     connect((const QObject *)pCameralReader0_,
-                     SIGNAL(txFrame(PingPangBuffer<MmzImage>*)),
+                     SIGNAL(txFrame(PingPangBuffer<ImagePackage>*)),
                     (const QObject *)pAliveTask_,
-                     SLOT(rxFrame(PingPangBuffer<MmzImage>*)));
+                     SLOT(rxFrame(PingPangBuffer<ImagePackage>*)));
 
     connect((const QObject *)pCameralReader1_,
-                     SIGNAL(txFrame(PingPangBuffer<MmzImage>*)),
+                     SIGNAL(txFrame(PingPangBuffer<ImagePackage>*)),
                     (const QObject *)pDetectTask_,
-                     SLOT(rxFrame(PingPangBuffer<MmzImage>*)));
+                     SLOT(rxFrame(PingPangBuffer<ImagePackage>*)));
 
     connect((const QObject *)pDetectTask_,
                      SIGNAL(txFrame(PingPangBuffer<MmzImage>*)),

@@ -25,8 +25,8 @@ DetectTask::~DetectTask() {
 }
 
 
-void DetectTask::rxFrame(PingPangBuffer<MmzImage> *buffer) {
-    MmzImage *pPang = buffer->getPang();
+void DetectTask::rxFrame(PingPangBuffer<ImagePackage> *buffer) {
+    ImagePackage *pPang = buffer->getPang();
     //printf("rx0 threadId=%x   %x\n", QThread::currentThreadId(), pPang);
     QThread::msleep(100);
     buffer->switchToPing();
