@@ -16,7 +16,8 @@ VideoPlayer::VideoPlayer(QWidget *parent)
     pDetectTipWidget_ = new DetectTipWidget();
     pDetectTipWidget_->hide();
     pRecognizeTipWidget_ = new RecognizeTipWidget();
-    pRecognizeTipWidget_->setFixedSize(500, 100);
+    //pRecognizeTipWidget_->setFixedSize(500, 100);
+    pRecognizeTipWidget_->setGeometry(150, 200, 500, 100);
     pRecognizeTipWidget_->hide();
 
 
@@ -47,7 +48,6 @@ VideoPlayer::VideoPlayer(QWidget *parent)
                      SIGNAL(txResult(Person)),
                     (const QObject *)pRecognizeTipWidget_,
                      SLOT(rxResult(Person)));
-
 
 #if 0
     //pVideoFrameWidget_ = new VideoFrameWidget(this);

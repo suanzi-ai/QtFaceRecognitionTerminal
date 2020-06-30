@@ -12,7 +12,6 @@ class RecognizeTipWidget : public QWidget
 public:
     RecognizeTipWidget(QWidget *parent = nullptr);
     ~RecognizeTipWidget() override;
-    void paint(QPainter *painter);
 
 protected:
     void paintEvent(QPaintEvent *event);
