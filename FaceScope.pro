@@ -27,6 +27,7 @@ HEADERS = \
     core/app/alive_task.h \
     core/app/detect_task.h \
     core/app/recognize_task.h \
+    core/image_package.h \
     core/io/hdmi.h \
     core/io/isp.h \
     core/io/ive.h \
@@ -74,7 +75,6 @@ SOURCES += \
     core/io/vi_vpss_vo.cpp \
     core/io/vo.cpp \
     core/io/vpss.cpp \
-    core/person.cpp \
     main.cpp \
     ui/detecttipwidget.cpp \
     ui/recognizetipwidget.cpp \
