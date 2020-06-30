@@ -15,7 +15,6 @@ class PingPangBuffer {
     PingPangBuffer(T *pPingBuffer, T *pPangBuffer) {
         pPing_ = pPingBuffer;
         pPang_ = pPangBuffer;
-        printf("here\n");
     }
 
      T *getPing() {
@@ -43,7 +42,6 @@ class PingPangBuffer {
      }
 
  private:
-    bool bPing;
     QAtomicInteger<quint32> pingPangSwitch_;
     T *pPing_;
     T *pPang_;

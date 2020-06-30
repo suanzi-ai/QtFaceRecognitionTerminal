@@ -9,14 +9,15 @@ VideoPlayer::VideoPlayer(QWidget *parent)
     : QWidget(parent)
 {
     QPalette pal = palette();
-    pal.setColor(QPalette::Background, QColor(0x00,0xff,0x00,0x00));
-    pal.setColor (QPalette::Foreground, QColor(0,255,0,255));
+    pal.setColor(QPalette::Background, Qt::transparent);
+    pal.setColor (QPalette::Foreground, Qt::green);
     setPalette(pal);
 
-    pDetectTipWidget_ = new DetectTipWidget(this);
+    pDetectTipWidget_ = new DetectTipWidget();
     pDetectTipWidget_->hide();
-    pRecognizeTipWidget_ = new RecognizeTipWidget(this);
-    //pRecognizeTipWidget_->hide();
+    pRecognizeTipWidget_ = new RecognizeTipWidget();
+    pRecognizeTipWidget_->setFixedSize(500, 100);
+    pRecognizeTipWidget_->hide();
 
 
 
@@ -48,10 +49,11 @@ VideoPlayer::VideoPlayer(QWidget *parent)
                      SLOT(rxResult(Person)));
 
 
-#if 1
+#if 0
     //pVideoFrameWidget_ = new VideoFrameWidget(this);
     QBoxLayout *layout = new QVBoxLayout;
     layout->addWidget(pRecognizeTipWidget_);
+    layout->setAlignment(Qt::AlignCenter);
     setLayout(layout);
 //    connect((const QObject *)pCameralReader,
 //                     SIGNAL(txVideoFrame(PingPangBuffer<MmzImage>*)),
@@ -70,7 +72,8 @@ void VideoPlayer::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
     //pVideoFrameWidget_->paint(&painter);
-    pRecognizeTipWidget_->paint(&painter);
-   // painter.drawRect(150, 300, 500, 500);
+    //if (pRecognizeTipWidget_->isVisible())
+    //QPainter painter1(pRecognizeTipWidget_);
+    painter.drawRect(150, 300, 500, 500);
 }
 

@@ -14,6 +14,9 @@ public:
     ~RecognizeTipWidget() override;
     void paint(QPainter *painter);
 
+protected:
+    void paintEvent(QPaintEvent *event);
+
 private slots:
     void rxResult(Person person);
     void hideSelf();

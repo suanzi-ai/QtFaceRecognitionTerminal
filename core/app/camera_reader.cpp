@@ -43,7 +43,7 @@ void CameraReader::run() {
         if (pVpss_->getYuvFrame(pPing, 1)) {
             pingpang.switchToPang();
             emit txFrame(&pingpang);
-            printf("tx0 threadId=%x   %x\n", QThread::currentThreadId(), pPing);
+            //printf("tx0 threadId=%x   %x\n", QThread::currentThreadId(), pPing);
         } else {
             QThread::msleep(1);
         }

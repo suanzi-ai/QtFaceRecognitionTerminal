@@ -27,10 +27,10 @@ RecognizeTipWidget::~RecognizeTipWidget()
 void RecognizeTipWidget::rxResult(Person person) {
     person_ = person;
     printf("rxResult person\n");
-    //QTimer::singleShot(3000, this, SLOT(hideSelf()));
-    if (isVisible())
-        update();
-    else
+    QTimer::singleShot(3000, this, SLOT(hideSelf()));
+    //if (isVisible())
+        //update();
+    //else
         show();
 }
 
@@ -40,12 +40,29 @@ void RecognizeTipWidget::hideSelf() {
 }
 
 
+void RecognizeTipWidget::paintEvent(QPaintEvent *event) {
+    QPainter painter(this);
+    painter.drawRect(geometry());
+    painter.drawText(geometry(), 0, QString(person_.name.c_str()));
+}
+
+
 void RecognizeTipWidget::paint(QPainter *painter) {
 
-    painter->setPen(Qt::gray);
-    painter->setBrush(Qt::green);
-    painter->drawRect(10,10,200,200);
-    painter->drawText(0, 0, "hello");
-    printf("hahaaaa\n");
+    painter->save();
 
+    QFont font = painter->font();
+    font.setPixelSize(48);
+    painter->setFont(font);
+    painter->setPen(Qt::red);
+    //painter->setBrush(Qt::green);
+    painter->drawRect(geometry());
+
+    painter->drawText(geometry(), 0, QString(person_.name.c_str()));
+
+    painter->restore();
+    if (isVisible())
+        printf("visible\n");
+    else
+        printf("invisible\n");
 }

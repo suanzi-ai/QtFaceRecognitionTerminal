@@ -17,11 +17,15 @@ RecognzieTask::~RecognzieTask() {
 
 void RecognzieTask::rxFrame(PingPangBuffer<MmzImage> *buffer) {
     MmzImage *pPang = buffer->getPang();
-    printf("rx1 threadId=%x   %x\n", QThread::currentThreadId(), pPang);
+    //printf("rx1 threadId=%x   %x\n", QThread::currentThreadId(), pPang);
     QThread::msleep(100);
     buffer->switchToPing();
 
-    static Person person;
-    person.name = "hahaha";
-    emit txResult(person);
+    static bool bInit = false;
+    if (!bInit) {
+        static Person person;
+        person.name = "hahaha";
+        emit txResult(person);
+        bInit = true;
+    }
 }
