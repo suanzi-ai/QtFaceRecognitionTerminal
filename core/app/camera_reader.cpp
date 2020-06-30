@@ -16,7 +16,7 @@ CameraReader::CameraReader(int cameralIndex, QObject *parent) {
   // int chIndexes[2] = {0, 1};
 
   pVi_bgr_ = new Vi(DEV_IDX_BRG, PIPE_IDX_BRG, SONY_IMX307_MIPI_2M_30FPS_12BIT);
-  pVpss_bgr_ = new Vpss(DEV_IDX_BRG, vpss_ch_sizes_bgr[0][0], vpss_ch_sizes_bgr[0][1]);
+  pVpss_bgr_ = new Vpss(DEV_IDX_BRG, vpss_ch_sizes_bgr[0].width, vpss_ch_sizes_bgr[0].height);
   pVi_Vpss_bgr_ = new Vi_Vpss(pVi_bgr_, pVpss_bgr_, vpss_ch_sizes_bgr,
                               ch_indexes_bgr, ch_rotates_bgr, 2);
 
