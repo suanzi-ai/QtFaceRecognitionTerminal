@@ -4,6 +4,7 @@
 #include <QObject>
 #include "pingpangbuffer.h"
 #include "person.h"
+#include "detection_float.h"
 
 namespace suanzi {
 
@@ -15,8 +16,7 @@ class RecognzieTask : QObject {
     ~RecognzieTask();
 
  private slots:
-    void rxFrame(PingPangBuffer<MmzImage> *buffer);
-
+    void rxFrame(PingPangBuffer<MmzImage> *buffer, DetectionFloat detection);
 
  signals:
     void txResult(Person person);

@@ -27,15 +27,16 @@ void CameraReader::run() {
 
   ImagePackage image_package1(VPSS_CH_SIZES_BGR[0], VPSS_CH_SIZES_BGR[2], VPSS_CH_SIZES_NIR[0], VPSS_CH_SIZES_NIR[1]);
   ImagePackage image_package2(VPSS_CH_SIZES_BGR[0], VPSS_CH_SIZES_BGR[2], VPSS_CH_SIZES_NIR[0], VPSS_CH_SIZES_NIR[1]);
-  PingPangBuffer<ImagePackage> pingpang(&image_package1, &image_package2);
+  PingPangBuffer<ImagePackage> pingpang_buffer(&image_package1, &image_package2);
 
   while (1) {
-    ImagePackage *pPing = pingpang.getPing();
+    ImagePackage *pPing = pingpang_buffer.getPing();
     if (pvpss_bgr_->getYuvFrame(pPing->img_bgr_small, 2)) {
-      pingpang.switchToPang();
-      emit txFrame(&pingpang);
+      pingpang_buffer.switchToPang();
+      emit txFrame(&pingpang_buffer);
 
       printf("tx0 threadId=%x   %x\n", QThread::currentThreadId(), pPing);
+
     } else {
       QThread::msleep(1);
     }

@@ -5,10 +5,6 @@ using namespace suanzi;
 
 AliveTask::AliveTask(QThread *pThread, QObject *parent) {
 
-    static MmzImage ping(256, 256, SZ_IMAGETYPE_NV21);
-    static MmzImage pang(256, 256, SZ_IMAGETYPE_NV21);
-    pPingpangBuffer_ =  new PingPangBuffer<MmzImage>(&ping, &pang);
-
     if (pThread == nullptr) {
         static QThread thread;
         moveToThread(&thread);
@@ -25,21 +21,13 @@ AliveTask::~AliveTask() {
 }
 
 
-void AliveTask::rxFrame(PingPangBuffer<ImagePackage> *buffer) {
+void AliveTask::rxFrame(PingPangBuffer<ImagePackage> *buffer, DetectionFloat detection) {
     ImagePackage *pPang = buffer->getPang();
     //printf("rx0 threadId=%x   %x\n", QThread::currentThreadId(), pPang);
     QThread::msleep(100);
-    buffer->switchToPing();
 
+    bool is_live;
+    emit txFrame(pPang->frame_idx, is_live);
 
-    //TODO
-    //send detect result
-    MmzImage *pPing = pPingpangBuffer_->getPing();
-
-    //TODO
-    //fill ping buffer
-
-    pPingpangBuffer_->switchToPang();
-    emit txFrame(pPingpangBuffer_);
     //printf("tx1 threadId=%x   %x\n", QThread::currentThreadId(), pPing);
 }

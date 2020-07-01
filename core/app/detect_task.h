@@ -4,6 +4,7 @@
 #include <QObject>
 #include "pingpangbuffer.h"
 #include "image_package.h"
+#include "detection_float.h"
 
 namespace suanzi {
 
@@ -18,10 +19,13 @@ class DetectTask : QObject {
     void rxFrame(PingPangBuffer<ImagePackage> *buffer);
 
  signals:
-    void txFrame(PingPangBuffer<MmzImage> *buffer);
+    // for display and recognition
+    void tx_detection_bgr(PingPangBuffer<ImagePackage> *buffer, DetectionFloat detection);
+    // for face spoofing
+    void tx_detection_nir(PingPangBuffer<ImagePackage> *buffer, DetectionFloat detection);
 
  private:
-    PingPangBuffer<MmzImage> *pPingpangBuffer_;
+    int handled_cnt_;
 };
 
 }  // namespace suanzi

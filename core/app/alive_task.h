@@ -4,6 +4,7 @@
 #include <QObject>
 #include "pingpangbuffer.h"
 #include "image_package.h"
+#include "detection_float.h"
 
 namespace suanzi {
 
@@ -15,13 +16,13 @@ class AliveTask : QObject {
     ~AliveTask();
 
  private slots:
-    void rxFrame(PingPangBuffer<ImagePackage> *buffer);
+    void rxFrame(PingPangBuffer<ImagePackage> *buffer, DetectionFloat detection);
 
  signals:
-    void txFrame(PingPangBuffer<MmzImage> *buffer);
+    void txFrame(int frame_idx, bool is_live);
 
  private:
-    PingPangBuffer<MmzImage> *pPingpangBuffer_;
+
 };
 
 }  // namespace suanzi

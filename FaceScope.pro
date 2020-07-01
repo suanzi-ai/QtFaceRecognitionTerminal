@@ -27,6 +27,7 @@ HEADERS = \
     core/app/alive_task.h \
     core/app/detect_task.h \
     core/app/recognize_task.h \
+    core/detection_float.h \
     core/image_package.h \
     core/io/hdmi.h \
     core/io/isp.h \
