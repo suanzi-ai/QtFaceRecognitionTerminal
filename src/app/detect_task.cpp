@@ -5,6 +5,11 @@
 #include "quface/common.hpp"
 #include "quface/face.hpp"
 
+#include <chrono>
+#include <ctime>
+#include <string>
+#include <iostream>
+
 using namespace suanzi;
 
 DetectTask::DetectTask(QThread *pThread, QObject *parent) {
@@ -26,12 +31,23 @@ DetectTask::~DetectTask() {
 
 void DetectTask::rxFrame(PingPangBuffer<ImagePackage> *buffer) {
   ImagePackage *pPang = buffer->getPang();
-  // printf("DetectTask threadId=%x  %x %d\n", QThread::currentThreadId(), pPang,
-        //  pPang->frame_idx);
+  // printf("DetectTask threadId=%x  %x %d\n", QThread::currentThreadId(),
+  // pPang,
+  //  pPang->frame_idx);
   // QThread::msleep(100);
 
+  std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+
   std::vector<suanzi::FaceDetection> detections;
-  face_detector_->detect((const SVP_IMAGE_S *)pPang->img_bgr_small->pImplData, detections);
+  face_detector_->detect((const SVP_IMAGE_S *)pPang->img_bgr_small->pImplData,
+                         detections);
+
+  std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+  std::chrono::duration<double> time_span =
+      std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
+  std::cout << "det: "
+            << ": \t" << time_span.count() << "\tseconds." << std::endl;
+
   printf("det size: %d \n", detections.size());
   for (int i = 0; i < detections.size(); i++) {
     auto rect = detections[i].bbox;
@@ -47,15 +63,14 @@ void DetectTask::rxFrame(PingPangBuffer<ImagePackage> *buffer) {
 
   DetectionFloat detection_bgr;
   DetectionFloat detection_nir;
-  if(detections.size()>0)
-  {
+  if (detections.size() > 0) {
     int w = pPang->img_bgr_small->width;
     int h = pPang->img_bgr_small->height;
     auto rect = detections[0].bbox;
-    detection_bgr.x = rect.x*1.0/w;
-    detection_bgr.y = rect.y*1.0/h;
-    detection_bgr.width = rect.width*1.0/w;
-    detection_bgr.height = rect.height*1.0/h;
+    detection_bgr.x = rect.x * 1.0 / w;
+    detection_bgr.y = rect.y * 1.0 / h;
+    detection_bgr.width = rect.width * 1.0 / w;
+    detection_bgr.height = rect.height * 1.0 / h;
   }
   emit tx_detection_bgr(buffer, detection_bgr);
   emit tx_detection_nir(buffer, detection_nir);
