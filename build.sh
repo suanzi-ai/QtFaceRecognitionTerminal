@@ -4,6 +4,14 @@ set -e
 
 export LC_ALL=C
 
+if [[ $QT_SDK_HOME ]]; then
+    echo -e "-- Found QT_SDK_HOME=$QT_SDK_HOME"
+else
+    echo -e "-- Please specify the QT SDK Home:"
+    echo -e "--    'export QT_SDK_HOME=path/to/qt/sdk'"
+    exit 1
+fi
+
 build_type="Release"
 cmake_generator="Unix Makefiles"
 
@@ -66,6 +74,7 @@ cmake $source_dir -G "$cmake_generator" \
     -DHISI_SDK_PLATFORM=rp-dv300 \
     -DDOWNLOAD_DEPENDENCY=ON \
     -DPROJECT_DEPENDENCY_DIR=$dep_dir \
+    -DQT_SDK_PREFIX=$QT_SDK_HOME \
     -DCMAKE_TOOLCHAIN_FILE=$source_dir/cmake/himix200.toolchain.cmake \
     -DCMAKE_BUILD_TYPE=$build_type \
     -DQUFACE_SDK_PREFIX=$quface_dir \
