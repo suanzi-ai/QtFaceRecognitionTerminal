@@ -43,15 +43,21 @@ VideoPlayer::VideoPlayer(QWidget *parent)
 //                    (const QObject *)pRecognizeTask_,
 //                     SLOT(rxFrame(PingPangBuffer<MmzImage> *, DetectionFloat)));
 
+//    connect((const QObject *)pDetectTask_,
+//                     SIGNAL(tx_detection_bgr(PingPangBuffer<ImagePackage> *, DetectionFloat)),
+//                    (const QObject *)pRecognizeTask_,
+//                     SLOT(rxFrame(PingPangBuffer<MmzImage> *, DetectionFloat)));
+
 
 //    connect((const QObject *)pRecognizeTask_,
 //                     SIGNAL(txResult(Person)),
 //                    (const QObject *)pRecognizeTipWidget_,
 //                     SLOT(rxResult(Person)));
-//    connect((const QObject *)pDetectTask_,
-//                     SIGNAL(tx_result(QRect)),
-//                    (const QObject *)pDetectTipWidget_,
-//                     SLOT(rx_result(QRect)));
+
+   connect((const QObject *)pDetectTask_,
+                   SIGNAL(tx_detection_bgr(PingPangBuffer<ImagePackage> *, DetectionFloat)),
+                   (const QObject *)pDetectTipWidget_,
+                    SLOT(rx_result(PingPangBuffer<ImagePackage> *, DetectionFloat)));
 
     QTimer::singleShot(1, this, SLOT(init_widgets()));
 }

@@ -3,6 +3,8 @@
 #include <QPaintEvent>
 #include <QTimer>
 
+
+
 DetectTipWidget::DetectTipWidget(QWidget *parent)
     : QWidget(parent)
 {
@@ -19,10 +21,14 @@ DetectTipWidget::~DetectTipWidget()
 }
 
 
-void DetectTipWidget::rx_result(QRect rect) {
-    this->rect_ = rect;
+void DetectTipWidget::rx_result(PingPangBuffer<ImagePackage> *img, DetectionFloat detection) {
+    int w = 800;
+    int h = 1280;
+    printf("rx_result\n");
+    this->rect_ = QRect(detection.x * w, detection.y * h, detection.width * w, detection.height * h);
+    
     QTimer::singleShot(3000, this, SLOT(hide_self()));
-    update();
+    show();
 }
 
 

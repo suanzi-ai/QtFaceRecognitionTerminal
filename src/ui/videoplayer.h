@@ -11,6 +11,8 @@
 #include "detect_task.h"
 #include "recognize_task.h"
 #include "alive_task.h"
+#include "image_package.h"
+#include "detection_float.h"
 
 using namespace suanzi;
 

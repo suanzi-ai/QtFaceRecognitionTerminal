@@ -47,6 +47,16 @@ void DetectTask::rxFrame(PingPangBuffer<ImagePackage> *buffer) {
 
   DetectionFloat detection_bgr;
   DetectionFloat detection_nir;
+  if(detections.size()>0)
+  {
+    int w = pPang->img_bgr_small->width;
+    int h = pPang->img_bgr_small->height;
+    auto rect = detections[0].bbox;
+    detection_bgr.x = rect.x*1.0/w;
+    detection_bgr.y = rect.y*1.0/h;
+    detection_bgr.width = rect.width*1.0/w;
+    detection_bgr.height = rect.height*1.0/h;
+  }
   emit tx_detection_bgr(buffer, detection_bgr);
   emit tx_detection_nir(buffer, detection_nir);
 

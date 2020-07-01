@@ -6,6 +6,8 @@ int main(int argc, char *argv[])
 {
 
     qRegisterMetaType<Person>("Person");
+    qRegisterMetaType<DetectionFloat>("DetectionFloat");
+    
     QApplication app(argc, argv);
 
     VideoPlayer player;
