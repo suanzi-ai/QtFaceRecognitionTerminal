@@ -118,12 +118,10 @@ message(STATUS "Found QuFaceSDK ${QuFaceSDK_VERSION}")
 
 find_package(Qt5 REQUIRED COMPONENTS Widgets)
 
-aux_source_directory(ui _UI_FILES)
-aux_source_directory(core _UI_CORE_FILES)
-aux_source_directory(core/io _CORE_IO_FILES)
-aux_source_directory(core/app _CORE_APP_FILES)
+add_subdirectory(src/app)
+add_subdirectory(src/lib)
+add_subdirectory(src/ui)
 
-add_executable(main main.cpp ${_UI_FILES} ${_UI_CORE_FILES} ${_CORE_IO_FILES} ${_CORE_APP_FILES})
+add_executable(main main.cpp)
 
-target_include_directories(main PRIVATE ui core core/io core/app)
-target_link_libraries(main QuFaceSDK::face Qt5::Widgets)
+target_link_libraries(main PRIVATE ui)
