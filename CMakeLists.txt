@@ -93,16 +93,6 @@ if(DOWNLOAD_DEPENDENCY)
 
   download_and_extract(
     URL
-    https://quvision.oss-cn-beijing.aliyuncs.com/qufacesdk/releases/QuFaceSDK-latest-hisi-rp-dv300.tar.gz
-    FILENAME
-    ${DOWNLOAD_DIR}/QuFaceSDK-latest-hisi-rp-dv300.tar.gz
-    HASH_TYPE
-    SHA256
-    EXTRACT_DIR
-    ${QUFACE_SDK_PREFIX})
-
-  download_and_extract(
-    URL
     https://quvision.oss-cn-beijing.aliyuncs.com/qufacesdk/models/hisi-model-latest.tar.gz
     FILENAME
     ${DOWNLOAD_DIR}/hisi-model-latest.tar.gz
@@ -127,5 +117,7 @@ add_executable(main main.cpp)
 target_link_libraries(main PRIVATE ui)
 
 install(TARGETS main DESTINATION .)
-install(DIRECTORY ${RESOURCE_PREFIX}/models/ ${RESOURCE_PREFIX}/fonts/ asserts/
+# install(DIRECTORY ${RESOURCE_PREFIX}/models/ ${RESOURCE_PREFIX}/fonts/ asserts/
+#         DESTINATION .)
+install(DIRECTORY ${RESOURCE_PREFIX}/models/
         DESTINATION .)
