@@ -23,7 +23,7 @@ DetectTask::~DetectTask() {
 
 void DetectTask::rxFrame(PingPangBuffer<ImagePackage> *buffer) {
     ImagePackage *pPang = buffer->getPang();
-    //printf("rx0 threadId=%x   %x\n", QThread::currentThreadId(), pPang);
+    printf("DetectTask threadId=%x  %x %d\n", QThread::currentThreadId(), pPang, pPang->frame_idx);
     QThread::msleep(100);
 
     //TODO

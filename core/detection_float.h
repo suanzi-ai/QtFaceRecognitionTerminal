@@ -3,15 +3,13 @@
 
 #include <QMetaType>
 
-class DetectionFloat {
+struct DetectionFloat {
 
- public:
     float x;
     float y;
     float width;
     float height;
     float landmark[5][2];
-
 };
 
 Q_DECLARE_METATYPE(DetectionFloat);
