@@ -30,18 +30,20 @@ void CameraReader::run() {
   PingPangBuffer<ImagePackage> pingpang_buffer(&image_package1, &image_package2);
   int frame_idx=0;
   while (1) {
+    pingpang_buffer.startWrite();
     ImagePackage *pPing = pingpang_buffer.getPing();
     if (pvpss_bgr_->getYuvFrame(pPing->img_bgr_small, 2)) {
         frame_idx++;
         pPing->frame_idx = frame_idx;
-
-      pingpang_buffer.switchToPang();
+        pingpang_buffer.endWrite();
+      //pingpang_buffer.switchToPang();
       emit txFrame(&pingpang_buffer);
 
-      printf("tx0 threadId=%x   %x %d\n", QThread::currentThreadId(), pPing, frame_idx);
+      // printf("tx0 threadId=%x   %x %d\n", QThread::currentThreadId(), pPing, frame_idx);
 
 
     } else {
+      pingpang_buffer.endWrite();
       QThread::msleep(1);
     }
   }

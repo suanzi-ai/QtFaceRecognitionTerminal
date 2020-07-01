@@ -26,16 +26,19 @@ DetectTask::~DetectTask() {
 
 void DetectTask::rxFrame(PingPangBuffer<ImagePackage> *buffer) {
   ImagePackage *pPang = buffer->getPang();
-  printf("DetectTask threadId=%x  %x %d\n", QThread::currentThreadId(), pPang,
-         pPang->frame_idx);
-  QThread::msleep(100);
+  // printf("DetectTask threadId=%x  %x %d\n", QThread::currentThreadId(), pPang,
+        //  pPang->frame_idx);
+  // QThread::msleep(100);
 
   std::vector<suanzi::FaceDetection> detections;
-  face_detector_->detect((const SVP_IMAGE_S *)pPang->img_bgr_small, detections);
+  face_detector_->detect((const SVP_IMAGE_S *)pPang->img_bgr_small->pImplData, detections);
+  printf("det size: %d \n", detections.size());
   for (int i = 0; i < detections.size(); i++) {
     auto rect = detections[i].bbox;
-    printf("%d: %d %d %d %d \n", rect.x, rect.y, rect.width, rect.height);
+    printf("%d: %d %d %d %d \n", i, rect.x, rect.y, rect.width, rect.height);
   }
+
+  buffer->switchToPing();
 
   // TODO
   // bgr and nir face detection
