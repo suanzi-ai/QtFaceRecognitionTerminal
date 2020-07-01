@@ -8,7 +8,7 @@ if [[ $QT_SDK_HOME ]]; then
     echo -e "-- Found QT_SDK_HOME=$QT_SDK_HOME"
 else
     echo -e "-- Please specify the QT SDK Home:"
-    echo -e "--    'export QT_SDK_HOME=path/to/qt/sdk'"
+    echo -e "--    'export QT_SDK_HOME=path/to/qtsdk'"
     exit 1
 fi
 
@@ -18,9 +18,6 @@ cmake_generator="Unix Makefiles"
 source_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 build_root_dir="$source_dir/build"
 clean_3rd="no"
-
-qt5_dir=/home/niyayu/qt5.12-dv300
-quface_dir=/home/niyayu/quface/install
 
 for i in "$@"; do
     case $i in
@@ -76,9 +73,7 @@ cmake $source_dir -G "$cmake_generator" \
     -DPROJECT_DEPENDENCY_DIR=$dep_dir \
     -DQT_SDK_PREFIX=$QT_SDK_HOME \
     -DCMAKE_TOOLCHAIN_FILE=$source_dir/cmake/himix200.toolchain.cmake \
-    -DCMAKE_BUILD_TYPE=$build_type \
-    -DQUFACE_SDK_PREFIX=$quface_dir \
-    -DQT_SDK_PREFIX=$qt5_dir
+    -DCMAKE_BUILD_TYPE=$build_type
 
 cmake --build . -- -j 4
 cmake --build . --target install
