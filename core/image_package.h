@@ -3,7 +3,9 @@
 
 #include <QMetaType>
 #include <mmzimage.h>
-#include "sz_common.h"
+#include "quface/common.hpp"
+
+namespace suanzi {
 
 class ImagePackage {
 
@@ -17,7 +19,7 @@ class ImagePackage {
 
     ImagePackage(){}
 
-    ImagePackage(SZ_SIZE size_bgr_large, SZ_SIZE size_bgr_small, SZ_SIZE size_nir_large,SZ_SIZE size_nir_small)
+    ImagePackage(Size size_bgr_large, Size size_bgr_small, Size size_nir_large,Size size_nir_small)
     {
         img_bgr_small = new MmzImage(size_bgr_small.width, size_bgr_small.height, SZ_IMAGETYPE_NV21);
         img_bgr_large = new MmzImage(size_bgr_large.width, size_bgr_large.height, SZ_IMAGETYPE_NV21);
@@ -37,6 +39,8 @@ class ImagePackage {
     }
 };
 
-Q_DECLARE_METATYPE(ImagePackage);
+}
+
+Q_DECLARE_METATYPE(suanzi::ImagePackage);
 
 #endif

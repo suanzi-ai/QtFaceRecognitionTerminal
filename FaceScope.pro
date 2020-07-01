@@ -3,15 +3,24 @@ TARGET = FaceScope
 CONFIG  += C++11
 QT += widgets
 
-INCLUDEPATH += lib/hisi_sdk/include \
-    lib/sz_sdk/include \
+QUFACE = $$PWD/../quface
+
+INCLUDEPATH += \
+    $$QUFACE/deps/hisi/rp-dv300-sdk/include \
+    $$QUFACE/deps/hisi/Release/include \
+    $$QUFACE/install/include/quface \
+    $$QUFACE/install/include \
+    $$QUFACE/src/common \
     lib \
     core \
     core/app \
     core/io \
     ui
 
-LIBS += -L$$PWD/lib/hisi_sdk/lib \
+LIBS += \
+    -L$$QUFACE/deps/hisi/rp-dv300-sdk/lib/ \
+    -L$$QUFACE/deps/hisi/Release/lib \
+    -L$$QUFACE/install/lib \
     -ltde -lsvpruntime -lnnie \
     -lsns_os05a \
     -lsns_mn34220 -lsns_imx458 -lsns_imx335 \
@@ -20,10 +29,11 @@ LIBS += -L$$PWD/lib/hisi_sdk/lib \
     -lhifisheyecalibrate -lhi_cipher -lhdmi -lisp \
     -l_hidehaze -l_hidrc -l_hildci -lmpi \
     -ldnvqe -lupvqe -lsecurec -lVoiceEngine \
-    -L$$PWD/lib/spdlog \
-    -lspdlog
+    -lspdlog \
+    -lsz_common -lsz_face -lsz_database -lsz_image -lsz_license -lsz_net
 
 HEADERS = \
+    $$QUFACE/src/common/logger.hpp \
     core/app/alive_task.h \
     core/app/detect_task.h \
     core/app/recognize_task.h \
@@ -56,6 +66,7 @@ HEADERS = \
 
 
 SOURCES += \
+    $$QUFACE/src/common/logger.cpp \
     core/app/alive_task.cpp \
     core/app/detect_task.cpp \
     core/app/recognize_task.cpp \
