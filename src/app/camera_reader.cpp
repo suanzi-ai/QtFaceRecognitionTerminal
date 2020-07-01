@@ -31,10 +31,21 @@ CameraReader::~CameraReader() {
 }
 
 void CameraReader::run() {
-  ImagePackage image_package1(VPSS_CH_SIZES_BGR[1], VPSS_CH_SIZES_BGR[2],
-                              VPSS_CH_SIZES_NIR[0], VPSS_CH_SIZES_NIR[1]);
-  ImagePackage image_package2(VPSS_CH_SIZES_BGR[1], VPSS_CH_SIZES_BGR[2],
-                              VPSS_CH_SIZES_NIR[0], VPSS_CH_SIZES_NIR[1]);
+  Size size_bgr_1 = VPSS_CH_SIZES_BGR[1];
+  Size size_bgr_2 = VPSS_CH_SIZES_BGR[2];
+  if (CH_INDEXES_BGR[1]) {
+    size_bgr_1.height = VPSS_CH_SIZES_BGR[1].width;
+    size_bgr_1.width = VPSS_CH_SIZES_BGR[1].height;
+  }
+  if (CH_INDEXES_BGR[2]) {
+    size_bgr_2.height = VPSS_CH_SIZES_BGR[2].width;
+    size_bgr_2.width = VPSS_CH_SIZES_BGR[2].height;
+  }
+
+  ImagePackage image_package1(size_bgr_1, size_bgr_2, VPSS_CH_SIZES_NIR[0],
+                              VPSS_CH_SIZES_NIR[1]);
+  ImagePackage image_package2(size_bgr_1, size_bgr_2, VPSS_CH_SIZES_NIR[0],
+                              VPSS_CH_SIZES_NIR[1]);
   PingPangBuffer<ImagePackage> pingpang_buffer(&image_package1,
                                                &image_package2);
   int frame_idx = 0;

@@ -37,8 +37,8 @@ class CameraReader : QThread {
     const int DEV_IDX_NIR=0;
     const int PIPE_IDX_NIR=0;
 
-    const Size VPSS_CH_SIZES_BGR[3] = {{1920, 1080}, {1080, 688}, {256, 256}};   // larger small
-    const Size VPSS_CH_SIZES_NIR[2] = {{1920, 1080}, {256, 256}};   // larger small
+    const Size VPSS_CH_SIZES_BGR[3] = {{1920, 1080}, {1080, 688}, {320, 224}};   // larger small
+    const Size VPSS_CH_SIZES_NIR[2] = {{1920, 1080}, {320, 224}};   // larger small
     const int CH_INDEXES_BGR[3] = {0, 1, 2};
     const bool CH_ROTATES_BGR[3] = {false, true, true};
     const int CH_INDEXES_NIR[2] = {0, 1};
