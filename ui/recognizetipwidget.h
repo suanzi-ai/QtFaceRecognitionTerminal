@@ -17,8 +17,8 @@ protected:
     void paintEvent(QPaintEvent *event);
 
 private slots:
-    void rxResult(Person person);
-    void hideSelf();
+    void rx_result(Person person);
+    void hide_self();
 
 private:
     Person person_;

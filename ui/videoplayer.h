@@ -26,7 +26,7 @@ protected:
     void paintEvent(QPaintEvent *event) override;
 
 private slots:
-    void initWidgets();
+    void init_widgets();
 
 private:
     VideoFrameWidget *pVideoFrameWidget_;
@@ -38,6 +38,9 @@ private:
     AliveTask *pAliveTask_;
     DetectTask *pDetectTask_;
     RecognzieTask *pRecognizeTask_;
+
+    const QRect RECOGNIZE_BOX = {150, 300, 500, 500};
+    const QRect RECOGNIZE_TIP_BOX = {150, 200, 500, 100};
 };
 
 #endif

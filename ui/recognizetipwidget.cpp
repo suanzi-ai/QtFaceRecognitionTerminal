@@ -19,14 +19,14 @@ RecognizeTipWidget::~RecognizeTipWidget()
 }
 
 
-void RecognizeTipWidget::rxResult(Person person) {
+void RecognizeTipWidget::rx_result(Person person) {
     person_ = person;
-    QTimer::singleShot(3000, this, SLOT(hideSelf()));
+    QTimer::singleShot(3000, this, SLOT(hide_self()));
     show();
 }
 
 
-void RecognizeTipWidget::hideSelf() {
+void RecognizeTipWidget::hide_self() {
     hide();
 }
 
@@ -38,8 +38,6 @@ void RecognizeTipWidget::paintEvent(QPaintEvent *event) {
     font.setPixelSize(48);
     painter.setFont(font);
     painter.setPen(Qt::red);
-
-    //person_.name = "xiaoli";
 
     QRect r = rect();
     QFontMetrics metrics = painter.fontMetrics();

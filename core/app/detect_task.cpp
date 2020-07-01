@@ -1,5 +1,6 @@
 #include "detect_task.h"
 #include <QThread>
+#include <QRect>
 
 using namespace suanzi;
 
@@ -29,7 +30,6 @@ void DetectTask::rxFrame(PingPangBuffer<ImagePackage> *buffer) {
     // bgr and nir face detection
     // 2 detection results combine
     // send msgs for next steps
-
 
     DetectionFloat  detection_bgr;
     DetectionFloat  detection_nir;

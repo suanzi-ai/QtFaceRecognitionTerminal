@@ -27,7 +27,7 @@ void RecognzieTask::rxFrame(PingPangBuffer<MmzImage> *buffer, DetectionFloat det
     if (!bInit) {
         static Person person;
         person.name = "hahaha";
-        emit txResult(person);
+        emit tx_result(person);
         bInit = true;
     }
 }

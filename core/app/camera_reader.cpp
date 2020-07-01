@@ -1,7 +1,7 @@
 #include "camera_reader.h"
 #include "sz_common.h"
 #include "vi.h"
-
+#include <QDebug>
 using namespace suanzi;
 
 CameraReader::CameraReader(int cameralIndex, QObject *parent) {
@@ -34,6 +34,7 @@ void CameraReader::run() {
     if (pvpss_bgr_->getYuvFrame(pPing->img_bgr_small, 2)) {
       pingpang_buffer.switchToPang();
       emit txFrame(&pingpang_buffer);
+
 
       printf("tx0 threadId=%x   %x\n", QThread::currentThreadId(), pPing);
 

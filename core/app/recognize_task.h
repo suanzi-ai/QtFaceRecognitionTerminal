@@ -19,7 +19,7 @@ class RecognzieTask : QObject {
     void rxFrame(PingPangBuffer<MmzImage> *buffer, DetectionFloat detection);
 
  signals:
-    void txResult(Person person);
+    void tx_result(Person person);
 
  private:
 

@@ -38,16 +38,22 @@ VideoPlayer::VideoPlayer(QWidget *parent)
                     (const QObject *)pDetectTask_,
                      SLOT(rxFrame(PingPangBuffer<ImagePackage>*)));
 
-    connect((const QObject *)pDetectTask_,
-                     SIGNAL(txFrame(PingPangBuffer<MmzImage>*)),
-                    (const QObject *)pRecognizeTask_,
-                     SLOT(rxFrame(PingPangBuffer<MmzImage>*)));
+//    connect((const QObject *)pDetectTask_,
+//                     SIGNAL(tx_detection_bgr(PingPangBuffer<ImagePackage> *, DetectionFloat)),
+//                    (const QObject *)pRecognizeTask_,
+//                     SLOT(rxFrame(PingPangBuffer<MmzImage> *, DetectionFloat)));
+
+
     connect((const QObject *)pRecognizeTask_,
                      SIGNAL(txResult(Person)),
                     (const QObject *)pRecognizeTipWidget_,
                      SLOT(rxResult(Person)));
+    connect((const QObject *)pDetectTask_,
+                     SIGNAL(tx_result(QRect)),
+                    (const QObject *)pDetectTipWidget_,
+                     SLOT(rx_result(QRect)));
 
-    QTimer::singleShot(1, this, SLOT(initWidgets()));
+    QTimer::singleShot(1, this, SLOT(init_widgets()));
 }
 
 VideoPlayer::~VideoPlayer()
@@ -58,12 +64,15 @@ VideoPlayer::~VideoPlayer()
 void VideoPlayer::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
-    painter.drawRect(150, 300, 500, 500);
+    painter.drawRect(RECOGNIZE_BOX);
 }
 
 
-void VideoPlayer::initWidgets() {
-    pRecognizeTipWidget_->setFixedSize(500, 100);
-    pRecognizeTipWidget_->move(150, 200);
+void VideoPlayer::init_widgets() {
+    pRecognizeTipWidget_->setFixedSize(RECOGNIZE_TIP_BOX.width(), RECOGNIZE_TIP_BOX.height());
+    pRecognizeTipWidget_->move(RECOGNIZE_TIP_BOX.x(), RECOGNIZE_TIP_BOX.y());
     //pRecognizeTipWidget_->show();
+    /*pDetectTipWidget_->setFixedSize(RECOGNIZE_BOX.width(), RECOGNIZE_BOX.height());
+    pDetectTipWidget_->move(RECOGNIZE_BOX.x(), RECOGNIZE_BOX.y());
+    pDetectTipWidget_->show();*/
 }

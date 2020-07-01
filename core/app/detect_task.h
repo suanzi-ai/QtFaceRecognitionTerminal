@@ -2,6 +2,7 @@
 #define DETECT_TASK_H
 
 #include <QObject>
+#include <QRect>
 #include "pingpangbuffer.h"
 #include "image_package.h"
 #include "detection_float.h"

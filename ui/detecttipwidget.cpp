@@ -6,14 +6,11 @@
 DetectTipWidget::DetectTipWidget(QWidget *parent)
     : QWidget(parent)
 {
-    setAutoFillBackground(false);
-    setAttribute(Qt::WA_NoSystemBackground, true);
-
     QPalette palette = this->palette();
-    palette.setColor(QPalette::Background, Qt::black);
+    palette.setColor(QPalette::Background, Qt::transparent);
+    palette.setColor (QPalette::Foreground, Qt::green);
     setPalette(palette);
-
-    setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+    rect_ = QRect(100, 100, 100, 100);
 }
 
 DetectTipWidget::~DetectTipWidget()
@@ -22,25 +19,20 @@ DetectTipWidget::~DetectTipWidget()
 }
 
 
-void DetectTipWidget::rxResult(QRect &rect) {
+void DetectTipWidget::rx_result(QRect rect) {
     this->rect_ = rect;
-    QTimer::singleShot(3000, this, SLOT(hideSelf()));
+    QTimer::singleShot(3000, this, SLOT(hide_self()));
     update();
 }
 
 
-void DetectTipWidget::hideSelf() {
+void DetectTipWidget::hide_self() {
     hide();
 }
 
 
 void DetectTipWidget::paintEvent(QPaintEvent *event)
 {
-    /*QPainter painter(this);
-    if (image.isNull()) {
-        //draw default
-        painter.fillRect(event->rect(), palette().background());
-    } else {
-        painter.drawImage(0, 0, image);
-    }*/
+    QPainter painter(this);
+    painter.drawRect(rect_);
 }
