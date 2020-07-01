@@ -7,6 +7,8 @@
 #include "image_package.h"
 #include "detection_float.h"
 
+#include "quface/face.hpp"
+
 namespace suanzi {
 
 class DetectTask : QObject {
@@ -27,6 +29,8 @@ class DetectTask : QObject {
 
  private:
     int handled_cnt_;
+
+    suanzi::FaceDetector  *face_detector_;
 };
 
 }  // namespace suanzi
