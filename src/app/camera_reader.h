@@ -46,7 +46,7 @@ class CameraReader : QThread {
 
     const int VO_W = 800;
     const int VO_H = 1280;
-    
+
 };
 
 }  // namespace suanzi
