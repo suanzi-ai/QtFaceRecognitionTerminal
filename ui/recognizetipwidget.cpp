@@ -2,21 +2,26 @@
 #include <QPainter>
 #include <QPaintEvent>
 #include <QTimer>
+#include <QDebug>
 
 RecognizeTipWidget::RecognizeTipWidget(QWidget *parent)
-    : QWidget(parent) {
+    : QWidget(parent)
+{
     QPalette palette = this->palette();
     palette.setColor(QPalette::Background, Qt::transparent);
+    palette.setColor (QPalette::Foreground, Qt::red);
     setPalette(palette);
 }
 
-RecognizeTipWidget::~RecognizeTipWidget() {
+RecognizeTipWidget::~RecognizeTipWidget()
+{
 
 }
 
 
 void RecognizeTipWidget::rxResult(Person person) {
     person_ = person;
+    printf("rxResult person\n");
     QTimer::singleShot(3000, this, SLOT(hideSelf()));
     show();
 }
@@ -28,10 +33,20 @@ void RecognizeTipWidget::hideSelf() {
 
 
 void RecognizeTipWidget::paintEvent(QPaintEvent *event) {
+
     QPainter painter(this);
     QFont font = painter.font();
     font.setPixelSize(48);
     painter.setFont(font);
-    painter.setPen(Qt::green);
-    painter.drawText(geometry(), 0, QString(person_.name.c_str()));
+    painter.setPen(Qt::red);
+
+    person_.name = "xiaoli";
+
+    QRect r = rect();
+    QFontMetrics metrics = painter.fontMetrics();
+    int stringHeight = metrics.ascent() + metrics.descent(); // 不算 line gap
+    int stringWidth = metrics.width(QString(person_.name.c_str())); // 字符串的宽度
+    int x = r.x() + (r.width() - stringWidth) / 2;
+    int y = r.y() + (r.height() - stringHeight) / 2 + metrics.ascent();
+    painter.drawText(x, y, QString(person_.name.c_str()));
 }

@@ -26,7 +26,7 @@ protected:
     void paintEvent(QPaintEvent *event) override;
 
 private slots:
-
+    void initWidgets();
 
 private:
     VideoFrameWidget *pVideoFrameWidget_;
