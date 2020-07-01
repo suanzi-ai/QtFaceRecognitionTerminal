@@ -56,10 +56,10 @@ message(STATUS "set THIRD_PARTY_PREFIX to: ${THIRD_PARTY_PREFIX}")
 message(STATUS "set QUFACE_SDK_PREFIX to: ${QUFACE_SDK_PREFIX}")
 message(STATUS "set QT_SDK_PREFIX to: ${QT_SDK_PREFIX}")
 
-if(NOT EXISTS QUFACE_SDK_PREFIX)
+if(NOT EXISTS ${QUFACE_SDK_PREFIX})
   message(STATUS "HINTS:     cd path_to_quface")
   message(STATUS "HINTS:     ./build_hisi.sh --install-to=${QUFACE_SDK_PREFIX}")
-  message(FATAL_ERROR "QUFACE_SDK_PREFIX not exists!")
+  message(FATAL_ERROR "QUFACE_SDK_PREFIX: ${QUFACE_SDK_PREFIX} not exists!")
 endif()
 
 set(CMAKE_FIND_ROOT_PATH ${HISI_SDK_PREFIX} ${THIRD_PARTY_PREFIX}
