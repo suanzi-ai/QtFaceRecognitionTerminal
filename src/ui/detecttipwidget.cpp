@@ -27,7 +27,7 @@ void DetectTipWidget::rx_result(PingPangBuffer<ImagePackage> *img, DetectionFloa
     printf("rx_result\n");
     this->rect_ = QRect(detection.x * w, detection.y * h, detection.width * w, detection.height * h);
     
-    QTimer::singleShot(3000, this, SLOT(hide_self()));
+    QTimer::singleShot(30, this, SLOT(hide_self()));
     show();
 }
 

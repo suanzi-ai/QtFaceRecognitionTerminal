@@ -1,14 +1,14 @@
 #include "detect_task.h"
+
 #include <QRect>
 #include <QThread>
+#include <chrono>
+#include <ctime>
+#include <iostream>
+#include <string>
 
 #include "quface/common.hpp"
 #include "quface/face.hpp"
-
-#include <chrono>
-#include <ctime>
-#include <string>
-#include <iostream>
 
 using namespace suanzi;
 
@@ -40,8 +40,7 @@ void DetectTask::rxFrame(PingPangBuffer<ImagePackage> *buffer) {
 
   std::vector<suanzi::FaceDetection> detections;
   face_detector_->detect((const SVP_IMAGE_S *)pPang->img_bgr_small->pImplData,
-                         detections);
-
+                         detections);  // 256*256  7ms
   std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
   std::chrono::duration<double> time_span =
       std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
