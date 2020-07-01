@@ -15,7 +15,7 @@ VideoPlayer::VideoPlayer(QWidget *parent)
     pal.setColor (QPalette::Foreground, Qt::green);
     setPalette(pal);
 
-    pDetectTipWidget_ = new DetectTipWidget();
+    pDetectTipWidget_ = new DetectTipWidget(this);
     pDetectTipWidget_->hide();
     pRecognizeTipWidget_ = new RecognizeTipWidget();
     pRecognizeTipWidget_->hide();
@@ -70,7 +70,8 @@ VideoPlayer::~VideoPlayer()
 void VideoPlayer::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
-    painter.drawRect(RECOGNIZE_BOX);
+    pDetectTipWidget_->paint(&painter);
+    //painter.drawRect(RECOGNIZE_BOX);
 }
 
 

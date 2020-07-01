@@ -2,6 +2,7 @@
 
 #include <QRect>
 #include <QThread>
+
 #include <chrono>
 #include <ctime>
 #include <iostream>
@@ -70,6 +71,9 @@ void DetectTask::rxFrame(PingPangBuffer<ImagePackage> *buffer) {
     detection_bgr.y = rect.y * 1.0 / h;
     detection_bgr.width = rect.width * 1.0 / w;
     detection_bgr.height = rect.height * 1.0 / h;
+    detection_bgr.b_valid = true;
+  } else {
+    detection_bgr.b_valid = false;
   }
   emit tx_detection_bgr(buffer, detection_bgr);
   emit tx_detection_nir(buffer, detection_nir);

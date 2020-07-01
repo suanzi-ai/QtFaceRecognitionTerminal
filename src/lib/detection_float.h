@@ -10,6 +10,7 @@ struct DetectionFloat {
     float width;
     float height;
     float landmark[5][2];
+    bool b_valid;
 };
 
 Q_DECLARE_METATYPE(DetectionFloat);

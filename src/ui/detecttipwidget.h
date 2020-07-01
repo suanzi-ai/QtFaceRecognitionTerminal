@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include <QImage>
-
+#include <QPainter>
 #include "detection_float.h"
 #include "pingpangbuffer.h"
 #include "image_package.h"
@@ -17,6 +17,7 @@ class DetectTipWidget : public QWidget
 public:
     DetectTipWidget(QWidget *parent = nullptr);
     ~DetectTipWidget() override;
+    void paint(QPainter *painter);
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -27,6 +28,7 @@ private slots:
 
 private:
     QRect rect_;
+    bool b_update_;
 
 };
 

@@ -12,7 +12,7 @@ DetectTipWidget::DetectTipWidget(QWidget *parent)
     palette.setColor(QPalette::Background, Qt::transparent);
     palette.setColor (QPalette::Foreground, Qt::green);
     setPalette(palette);
-    rect_ = QRect(100, 100, 100, 100);
+    b_update_ = false;
 }
 
 DetectTipWidget::~DetectTipWidget()
@@ -20,20 +20,27 @@ DetectTipWidget::~DetectTipWidget()
 
 }
 
+void DetectTipWidget::paint(QPainter *painter) {
+    if (b_update_)
+        painter->drawRect(rect_);
+}
 
 void DetectTipWidget::rx_result(PingPangBuffer<ImagePackage> *img, DetectionFloat detection) {
     int w = 800;
     int h = 1280;
-    printf("rx_result\n");
-    this->rect_ = QRect(detection.x * w, detection.y * h, detection.width * w, detection.height * h);
+    b_update_ = detection.b_valid;
+    if (b_update_)
+        this->rect_ = QRect(detection.x * w, detection.y * h, detection.width * w, detection.height * h);
     
-    QTimer::singleShot(30, this, SLOT(hide_self()));
-    show();
+    //QTimer::singleShot(25, this, SLOT(hide_self()));
+    //show();
+    QWidget *p = (QWidget *)parent();
+    p->update();
 }
 
 
 void DetectTipWidget::hide_self() {
-    hide();
+    //hide();
 }
 
 
