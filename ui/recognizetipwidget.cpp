@@ -21,7 +21,6 @@ RecognizeTipWidget::~RecognizeTipWidget()
 
 void RecognizeTipWidget::rxResult(Person person) {
     person_ = person;
-    printf("rxResult person\n");
     QTimer::singleShot(3000, this, SLOT(hideSelf()));
     show();
 }
