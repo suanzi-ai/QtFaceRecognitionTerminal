@@ -8,7 +8,3 @@ target_include_directories(
   PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/lib/io>)
 
 target_link_libraries(lib PUBLIC QuFaceSDK::face Qt5::Widgets)
-
-install(TARGETS main DESTINATION .)
-install(DIRECTORY ${RESOURCE_PREFIX}/models/ ${RESOURCE_PREFIX}/fonts/ asserts/
-        DESTINATION .)

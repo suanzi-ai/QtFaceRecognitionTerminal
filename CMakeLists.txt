@@ -125,3 +125,7 @@ add_subdirectory(src/ui)
 add_executable(main main.cpp)
 
 target_link_libraries(main PRIVATE ui)
+
+install(TARGETS main DESTINATION .)
+install(DIRECTORY ${RESOURCE_PREFIX}/models/ ${RESOURCE_PREFIX}/fonts/ asserts/
+        DESTINATION .)
