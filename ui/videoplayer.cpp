@@ -65,5 +65,5 @@ void VideoPlayer::paintEvent(QPaintEvent *event)
 void VideoPlayer::initWidgets() {
     pRecognizeTipWidget_->setFixedSize(500, 100);
     pRecognizeTipWidget_->move(150, 200);
-    pRecognizeTipWidget_->show();
+    //pRecognizeTipWidget_->show();
 }

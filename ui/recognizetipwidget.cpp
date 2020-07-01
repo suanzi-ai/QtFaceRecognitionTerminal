@@ -39,7 +39,7 @@ void RecognizeTipWidget::paintEvent(QPaintEvent *event) {
     painter.setFont(font);
     painter.setPen(Qt::red);
 
-    person_.name = "xiaoli";
+    //person_.name = "xiaoli";
 
     QRect r = rect();
     QFontMetrics metrics = painter.fontMetrics();
