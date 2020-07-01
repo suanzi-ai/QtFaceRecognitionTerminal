@@ -107,6 +107,7 @@ find_package(QuFaceSDK REQUIRED)
 message(STATUS "Found QuFaceSDK ${QuFaceSDK_VERSION}")
 
 find_package(Qt5 REQUIRED COMPONENTS Widgets)
+message(STATUS "Found Qt5 ${Qt5_VERSION}")
 
 add_subdirectory(src/app)
 add_subdirectory(src/lib)
@@ -117,7 +118,4 @@ add_executable(main main.cpp)
 target_link_libraries(main PRIVATE ui)
 
 install(TARGETS main DESTINATION .)
-# install(DIRECTORY ${RESOURCE_PREFIX}/models/ ${RESOURCE_PREFIX}/fonts/ asserts/
-#         DESTINATION .)
-install(DIRECTORY ${RESOURCE_PREFIX}/models/
-        DESTINATION .)
+install(DIRECTORY ${RESOURCE_PREFIX}/models/ DESTINATION .)
