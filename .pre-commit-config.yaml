@@ -1,0 +1,26 @@
+---
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v2.5.0
+  hooks:
+    - id: check-added-large-files
+      args: ["--maxkb=200"]
+    - id: check-merge-conflict
+    - id: check-json
+    - id: check-yaml
+    - id: end-of-file-fixer
+    - id: trailing-whitespace
+    - id: mixed-line-ending
+      args: ["--fix=lf"]
+- repo: https://github.com/cheshirekow/cmake-format-precommit
+  rev: v0.6.9
+  hooks:
+    - id: cmake-format
+- repo: local
+  hooks:
+    - id: clang-format
+      name: clang-format
+      entry: clang-format
+      description: Formats C/CPP code
+      files: \.(c|cc|cxx|cpp|h|hpp|hxx|m)$
+      language: system
+      additional_dependencies: [clang-format]
