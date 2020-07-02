@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 
+#include <algorithm>
 #include <opencv2/opencv.hpp>
 
 #include "base64.hpp"
@@ -84,30 +85,46 @@ SZ_RETCODE FaceService::extract_image_feature(
 
   SZ_RETCODE ret;
   std::vector<FaceDetection> detections;
-  ret = detector_->detect(decodedImage.ptr(), width, height, detections);
-  if (ret != SZ_RETCODE_OK) {
-    SZ_LOG_ERROR("face detect failed!");
-    return ret;
-  }
-  if (detections.size() > 1) {
-    SZ_LOG_ERROR("more than one faces!");
-    ret = SZ_RETCODE_FAILED;
-    return SZ_RETCODE_FAILED;
-  }
 
-  ret = extractor_->extract(decodedImage.ptr(), width, height, detections[0],
-                            feature);
-  if (ret != SZ_RETCODE_OK) {
-    SZ_LOG_ERROR("extractor.extractFeature failed!");
-    return ret;
-  }
+  size_t size = width * height * 3;
+  SZ_BYTE *bgr = new SZ_BYTE[size];
+  std::copy(decodedImage.ptr(), decodedImage.ptr() + size, bgr);
 
-  if (!save_image(faceId, imgBuf)) {
-    SZ_LOG_ERROR("Save image data failed!");
-    return SZ_RETCODE_FAILED;
-  }
+  do {
+    ret = detector_->detect(bgr, width, height, detections);
+    if (ret != SZ_RETCODE_OK) {
+      SZ_LOG_ERROR("face detect failed!");
+      break;
+    }
 
-  return SZ_RETCODE_OK;
+    if (detections.size() == 0) {
+      SZ_LOG_ERROR("no faces!");
+      ret = SZ_RETCODE_FAILED;
+      break;
+    }
+
+    if (detections.size() > 1) {
+      SZ_LOG_ERROR("more than one faces!");
+      ret = SZ_RETCODE_FAILED;
+      break;
+    }
+
+    ret = extractor_->extract(bgr, width, height, detections[0], feature);
+    if (ret != SZ_RETCODE_OK) {
+      SZ_LOG_ERROR("extractor.extractFeature failed!");
+      break;
+    }
+
+    if (!save_image(faceId, imgBuf)) {
+      SZ_LOG_ERROR("Save image data failed!");
+      ret = SZ_RETCODE_FAILED;
+      break;
+    }
+  } while (0);
+
+  delete bgr;
+
+  return ret;
 }
 
 SZ_RETCODE FaceService::read_image_as_base64(SZ_UINT32 id,
