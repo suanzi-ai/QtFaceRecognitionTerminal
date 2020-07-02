@@ -4,9 +4,8 @@
 
 #include <opencv2/opencv.hpp>
 
-#include "curl_util.hpp"
-#include "logger.hpp"
 #include "base64.hpp"
+#include "logger.hpp"
 
 #define MAX_PERSON_INFO_SIZE 1024
 
@@ -119,11 +118,6 @@ SZ_RETCODE FaceService::read_buffer(const PersonImageInfo &face,
   if (face.face_image.size() > 0) {
     auto buf = base64_decode(face.face_image.c_str());
     imgBuf = std::vector<SZ_BYTE>(buf.begin(), buf.end());
-  } else if (face.face_url.size() > 0) {
-    ret = suanzi::download_to_buffer(face.face_url, imgBuf);
-    if (ret != SZ_RETCODE_OK) {
-      return ret;
-    }
   } else if (face.face_path.size() > 0) {
     std::ifstream fd(face.face_path);
     if (!fd.is_open()) {
@@ -205,33 +199,19 @@ json FaceService::db_add_many(const json &body) {
 
     json failedPersons;
 
-    std::vector<std::string> urls;
-    std::map<std::string, std::vector<SZ_BYTE>> imgBufs;
-    for (auto &face : faceArrary) {
-      urls.push_back(face.face_url);
-    }
-    ret = suanzi::download_to_buffer(urls, imgBufs);
-    if (ret != SZ_RETCODE_OK) {
-      SZ_LOG_ERROR("download_to_buffer failed!");
-      return {
-          {"ok", false},
-          {"message", "failed"},
-          {"code", "DOWNLOAD_FACE_FAILED"},
-      };
-    }
+    std::vector<SZ_BYTE> imgBuf;
 
     for (auto &face : faceArrary) {
       SZ_LOG_DEBUG("[Add many] id = {}", face.id);
 
-      auto pImgBuf = imgBufs.find(face.face_url);
-      if (pImgBuf == imgBufs.end()) {
-        failedPersons.push_back(
-            json({{"id", face.id}, {"reason", "EXTRACT_FACE_FAILED"}}));
-        SZ_LOG_WARN("[Add many] failed face id: {} reason: {}", face.id,
-                    "DOWNLOAD_FACE_FAILED");
-        continue;
+      ret = read_buffer(face, imgBuf);
+      if (ret != SZ_RETCODE_OK) {
+        return {
+            {"ok", false},
+            {"message", "read image failed"},
+            {"code", "READ_IMAGE_FAILED"},
+        };
       }
-      auto imgBuf = pImgBuf->second;
 
       ret = extract_image_feature(face.id, imgBuf, feature);
       if (ret != SZ_RETCODE_OK) {

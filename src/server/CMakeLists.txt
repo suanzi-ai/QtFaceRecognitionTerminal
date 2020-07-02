@@ -8,7 +8,6 @@ target_include_directories(
 target_link_libraries(
   server
   PUBLIC lib
-  PUBLIC CURL::libcurl
   PUBLIC httplib::httplib
   PUBLIC QuFaceSDK::face
   PUBLIC QuFaceSDK::database)
