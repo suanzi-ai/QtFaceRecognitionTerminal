@@ -115,13 +115,19 @@ message(STATUS "Found QuFaceSDK ${QuFaceSDK_VERSION}")
 find_package(Qt5 REQUIRED COMPONENTS Widgets)
 message(STATUS "Found Qt5 ${Qt5_VERSION}")
 
+find_package(httplib)
+
 add_subdirectory(src/app)
 add_subdirectory(src/lib)
 add_subdirectory(src/ui)
+add_subdirectory(src/server)
 
 add_executable(main main.cpp)
 
 target_link_libraries(main PRIVATE ui)
+
+add_executable(svr server.cpp)
+target_link_libraries(svr PRIVATE server)
 
 install(TARGETS main DESTINATION .)
 install(DIRECTORY ${RESOURCE_PREFIX}/models/ DESTINATION .)
