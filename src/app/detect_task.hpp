@@ -22,6 +22,7 @@ class DetectTask : QObject {
   void rx_frame(PingPangBuffer<ImagePackage> *buffer);
 
  signals:
+  void tx_finish();
   // for display and recognition
   void tx_detection_bgr(PingPangBuffer<ImagePackage> *buffer,
                         DetectionFloat detection);

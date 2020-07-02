@@ -39,6 +39,11 @@ VideoPlayer::VideoPlayer(QWidget *parent) : QWidget(parent) {
           (const QObject *)detect_task_,
           SLOT(rx_frame(PingPangBuffer<ImagePackage> *)));
 
+  connect((const QObject *)detect_task_,
+          SIGNAL(tx_finish()),
+          (const QObject *)camera_reader_1_,
+          SLOT(rx_finish()));
+
   //   connect(
   //       (const QObject *)detect_task_,
   //       SIGNAL(tx_detection_bgr(PingPangBuffer<ImagePackage> *,

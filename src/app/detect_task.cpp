@@ -31,8 +31,12 @@ DetectTask::~DetectTask() {
   if (face_detector_) delete face_detector_;
 }
 
-void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
-  ImagePackage *image = buffer->get_pang();
+void DetectTask::rxFrame(PingPangBuffer<ImagePackage> *buffer) {
+  ImagePackage *pPang = buffer->get_pang();
+  printf("DetectTask0 threadId=%x  %x %d\n", QThread::currentThreadId(),
+  pPang,
+  pPang->frame_idx);
+  //QThread::msleep(1000);
 
   // std::chrono::steady_clock::time_point t1 =
   // std::chrono::steady_clock::now();
@@ -65,8 +69,11 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
       max_area = area;
     }
   }
-
-  // buffer->switchToPing();
+    printf("DetectTask1 threadId=%x  %x %d\n", QThread::currentThreadId(),
+  pPang,
+  pPang->frame_idx);
+  buffer->switch_buffer();
+  emit tx_finish();
 
   // TODO
   // bgr and nir face detection

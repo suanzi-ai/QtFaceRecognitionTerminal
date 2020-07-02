@@ -24,6 +24,9 @@ class CameraReader : QThread {
  private:
     void run();
 
+ private slots:
+    void rx_finish();
+
  signals:
   void txFrame(PingPangBuffer<ImagePackage> *buffer);
 
@@ -46,6 +49,7 @@ class CameraReader : QThread {
 
     const int VO_W = 800;
     const int VO_H = 1280;
+    bool b_tx_ok;
 
 };
 
