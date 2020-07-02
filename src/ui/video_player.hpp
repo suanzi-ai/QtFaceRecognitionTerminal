@@ -7,12 +7,12 @@
 #include "alive_task.h"
 #include "camera_reader.h"
 #include "detect_task.h"
-#include "detection_float.h"
 #include "detect_tip_widget.hpp"
+#include "detection_float.h"
 #include "image_package.h"
 #include "pingpang_buffer.h"
 #include "recognize_task.h"
-#include "recognizetipwidget.h"
+#include "recognize_tip_widget.hpp"
 #include "videoframewidget.h"
 
 namespace suanzi {
