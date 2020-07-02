@@ -55,7 +55,10 @@ void CameraReader::run() {
     pingpang_buffer.startWrite();
     ImagePackage *pPing = pingpang_buffer.getPing();
     if (pvpss_bgr_->getYuvFrame(pPing->img_bgr_small, 2)) {
-      pvpss_bgr_->getYuvFrame(pPing->img_bgr_large, 1);
+      while(!pvpss_bgr_->getYuvFrame(pPing->img_bgr_large, 1))
+      {
+        QThread::usleep(1);
+      }
       frame_idx++;
       pPing->frame_idx = frame_idx;
       pingpang_buffer.endWrite();
