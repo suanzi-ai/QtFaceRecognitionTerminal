@@ -8,7 +8,7 @@
 #include "camera_reader.h"
 #include "detect_task.h"
 #include "detection_float.h"
-#include "detecttipwidget.h"
+#include "detect_tip_widget.hpp"
 #include "image_package.h"
 #include "pingpangbuffer.h"
 #include "recognize_task.h"
