@@ -30,7 +30,7 @@ DetectTask::~DetectTask() {
   if (face_detector_) delete face_detector_;
 }
 
-void DetectTask::rxFrame(PingPangBuffer<ImagePackage> *buffer) {
+void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
   ImagePackage *pPang = buffer->get_pang();
   // printf("DetectTask threadId=%x  %x %d\n", QThread::currentThreadId(),
   // pPang,

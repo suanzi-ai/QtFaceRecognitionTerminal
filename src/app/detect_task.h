@@ -19,7 +19,7 @@ class DetectTask : QObject {
     ~DetectTask();
 
  private slots:
-    void rxFrame(PingPangBuffer<ImagePackage> *buffer);
+    void rx_frame(PingPangBuffer<ImagePackage> *buffer);
 
  signals:
     // for display and recognition

@@ -11,7 +11,7 @@
 #include "detection_float.h"
 #include "image_package.h"
 #include "pingpang_buffer.h"
-#include "recognize_task.h"
+#include "recognize_task.hpp"
 #include "recognize_tip_widget.hpp"
 #include "videoframewidget.h"
 

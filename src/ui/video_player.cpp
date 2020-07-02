@@ -32,24 +32,24 @@ VideoPlayer::VideoPlayer(QWidget *parent) : QWidget(parent) {
   //   connect((const QObject *)camera_reader_0_,
   //           SIGNAL(txFrame(PingPangBuffer<MmzImage> *)),
   //           (const QObject *)antispoof_task_,
-  //           SLOT(rxFrame(PingPangBuffer<MmzImage> *)));
+  //           SLOT(rx_frame(PingPangBuffer<MmzImage> *)));
 
   connect((const QObject *)camera_reader_1_,
           SIGNAL(txFrame(PingPangBuffer<ImagePackage> *)),
           (const QObject *)detect_task_,
-          SLOT(rxFrame(PingPangBuffer<ImagePackage> *)));
+          SLOT(rx_frame(PingPangBuffer<ImagePackage> *)));
 
   //   connect(
   //       (const QObject *)detect_task_,
   //       SIGNAL(tx_detection_bgr(PingPangBuffer<ImagePackage> *,
   //       DetectionFloat)), (const QObject *)recognize_task_,
-  //       SLOT(rxFrame(PingPangBuffer<MmzImage> *, DetectionFloat)));
+  //       SLOT(rx_frame(PingPangBuffer<MmzImage> *, DetectionFloat)));
 
   //   connect(
   //       (const QObject *)detect_task_,
   //       SIGNAL(tx_detection_bgr(PingPangBuffer<ImagePackage> *,
   //       DetectionFloat)), (const QObject *)recognize_task_,
-  //       SLOT(rxFrame(PingPangBuffer<MmzImage> *, DetectionFloat)));
+  //       SLOT(rx_frame(PingPangBuffer<MmzImage> *, DetectionFloat)));
 
   //   connect((const QObject *)recognize_task_, SIGNAL(txResult(Person)),
   //           (const QObject *)recognize_tip_widget_, SLOT(rxResult(Person)));

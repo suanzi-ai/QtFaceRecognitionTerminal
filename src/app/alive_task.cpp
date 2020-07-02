@@ -21,7 +21,7 @@ AliveTask::~AliveTask() {
 }
 
 
-void AliveTask::rxFrame(PingPangBuffer<ImagePackage> *buffer, DetectionFloat detection) {
+void AliveTask::rx_frame(PingPangBuffer<ImagePackage> *buffer, DetectionFloat detection) {
     ImagePackage *pPang = buffer->get_pang();
     //printf("rx0 threadId=%x   %x\n", QThread::currentThreadId(), pPang);
     QThread::msleep(100);
