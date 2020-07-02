@@ -50,7 +50,7 @@ void DetectTipWidget::rx_result(PingPangBuffer<ImagePackage> *img,
       rect_.setHeight(MOVING_AVERAGE(detection.height * h, rect_.height(),
                                      MOVING_AVERAGE_RATIO));
     } else
-      rect = current_rect;
+      rect_ = current_rect;
 
     for (int i = 0; i < 5; i++) {
       landmark_[i][0] = detection.landmark[i][0] * w;
