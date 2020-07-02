@@ -4,6 +4,8 @@
 #include <QPainter>
 #include <QTimer>
 
+#define MOVING_AVERAGE(a, b, r) ((r) * (a) + (1 - (r)) * (b))
+
 using namespace suanzi;
 
 DetectTipWidget::DetectTipWidget(QWidget *parent) : QWidget(parent) {
@@ -11,6 +13,7 @@ DetectTipWidget::DetectTipWidget(QWidget *parent) : QWidget(parent) {
   palette.setColor(QPalette::Background, Qt::transparent);
   palette.setColor(QPalette::Foreground, Qt::green);
   setPalette(palette);
+
   is_updated_ = false;
 }
 
@@ -27,16 +30,20 @@ void DetectTipWidget::paint(QPainter *painter) {
 
 void DetectTipWidget::rx_result(PingPangBuffer<ImagePackage> *img,
                                 DetectionFloat detection) {
-    int w = 800;
-  int h = 1280;
+  // TODO: add global configuration
+  const int w = 800;
+  const int h = 1280;
+
   is_updated_ = detection.b_valid;
   if (is_updated_) {
-    int x = detection.x * w;
-    int y = detection.y * h;
-    int width = detection.width * w;
-    int height = detection.height * h;
-    this->rect_ = QRect(x, y, width, height);
-    printf("%d: %d %d %d %d \n", 0, x, y, width, height);
+    rect_.setX(
+        MOVING_AVERAGE(detection.x * w, rect_.x(), MOVING_AVERAGE_RATIO));
+    rect_.setY(
+        MOVING_AVERAGE(detection.y * h, rect_.y(), MOVING_AVERAGE_RATIO));
+    rect_.setWidth(MOVING_AVERAGE(detection.width * w, rect_.width(),
+                                  MOVING_AVERAGE_RATIO));
+    rect_.setHeight(MOVING_AVERAGE(detection.height * h, rect_.height(),
+                                   MOVING_AVERAGE_RATIO));
 
     for (int i = 0; i < 5; i++) {
       landmark_[i][0] = detection.landmark[i][0] * w;

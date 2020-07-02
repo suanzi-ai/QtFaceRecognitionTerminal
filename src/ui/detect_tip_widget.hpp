@@ -28,8 +28,11 @@ class DetectTipWidget : public QWidget {
   void hide_self();
 
  private:
+  static constexpr float MOVING_AVERAGE_RATIO = 0.75;
+
   QRect rect_;
   float landmark_[5][2];
+
   bool is_updated_;
 };
 
