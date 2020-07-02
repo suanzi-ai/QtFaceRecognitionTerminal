@@ -31,8 +31,8 @@ void DetectTipWidget::paint(QPainter *painter) {
 void DetectTipWidget::rx_result(PingPangBuffer<ImagePackage> *img,
                                 DetectionFloat detection) {
   // TODO: add global configuration
-  const int w = 800;
-  const int h = 1280;
+  const int w = 800-1;
+  const int h = 1280-1;
 
   is_updated_ = detection.b_valid;
   if (is_updated_) {

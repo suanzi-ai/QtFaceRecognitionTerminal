@@ -11,6 +11,7 @@ struct DetectionFloat {
     float height;
     float landmark[5][2];
     bool b_valid;
+    int frame_idx;
 };
 
 Q_DECLARE_METATYPE(DetectionFloat);

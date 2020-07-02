@@ -31,11 +31,11 @@ void RecognzieTask::rxFrame(PingPangBuffer<ImagePackage> *buffer,
   ImagePackage *pPang = buffer->get_pang();
   // printf("RecognzieTask threadId=%x   %x %d\n", QThread::currentThreadId(),
   // pPang, pPang->frame_idx);
-  QThread::msleep(10);
+  //   QThread::msleep(100);
 
   suanzi::FaceDetection face_detection;
-  int w = pPang->img_bgr_large->width;
-  int h = pPang->img_bgr_large->height;
+  int w = pPang->img_bgr_large->width-1;
+  int h = pPang->img_bgr_large->height-1;
   if (detection.b_valid) {
     face_detection.bbox.x = detection.x * w;
     face_detection.bbox.y = detection.y * h;
@@ -46,9 +46,9 @@ void RecognzieTask::rxFrame(PingPangBuffer<ImagePackage> *buffer,
       face_detection.landmarks.point[i].y = detection.landmark[i][1] * h;
     }
 
-    printf("frame:%d  %f %f %f %f \n", pPang->frame_idx, face_detection.bbox.x,
-           face_detection.bbox.y, face_detection.bbox.width,
-           face_detection.bbox.height);
+    printf("frame:%d  %f %f %f %f \n", detection.frame_idx,
+           face_detection.bbox.x, face_detection.bbox.y,
+           face_detection.bbox.width, face_detection.bbox.height);
 
     std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
 
@@ -62,6 +62,11 @@ void RecognzieTask::rxFrame(PingPangBuffer<ImagePackage> *buffer,
         std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
     std::cout << "extract: "
               << ": \t" << time_span.count() << "\tseconds." << std::endl;
+
+    for (int i = 0; i < 10; i++) {
+      printf("%0.3f ", feature.value[i]);
+    }
+    printf("\n");
   }
 
   //
