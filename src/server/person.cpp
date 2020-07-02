@@ -10,8 +10,8 @@ void suanzi::to_json(json &j, const PersonData &p) {
       {"department", p.department},
       {"mobile", p.mobile},
       {"status", p.status},
-      {"faceUrl", p.face_url},
-      {"faceImage", p.face_image},
+      {"faceURL", p.face_url},
+      {"facePath", p.face_path},
   };
 }
 
@@ -25,11 +25,11 @@ void suanzi::from_json(const json &j, PersonData &p) {
   j.at("mobile").get_to(p.mobile);
   j.at("status").get_to(p.status);
 
-  if (j.contains("faceUrl")) {
-    j.at("faceUrl").get_to(p.face_url);
+  if (j.contains("faceURL")) {
+    j.at("faceURL").get_to(p.face_url);
   }
 
-  if (j.contains("faceImage")) {
-    j.at("faceImage").get_to(p.face_image);
+  if (j.contains("facePath")) {
+    j.at("facePath").get_to(p.face_path);
   }
 }

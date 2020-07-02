@@ -27,10 +27,12 @@ class FaceService {
   typedef std::shared_ptr<suanzi::FaceDatabase> FaceDatabasePtr;
 
   FaceService(FaceDatabasePtr db, FaceDetectorPtr detector,
-              FaceExtractorPtr extractor, bool store_image = false)
+              FaceExtractorPtr extractor, const std::string &image_store_dir,
+              bool store_image = false)
       : db_(db),
         detector_(detector),
         extractor_(extractor),
+        image_store_dir_(image_store_dir),
         store_image_(store_image) {}
   ~FaceService() {}
 
@@ -54,6 +56,7 @@ class FaceService {
   FaceDatabasePtr db_;
   FaceDetectorPtr detector_;
   FaceExtractorPtr extractor_;
+  std::string image_store_dir_;
   bool store_image_;
 };
 

@@ -18,7 +18,7 @@ struct PersonData {
   std::string mobile;
   std::string status;
   std::string face_url;
-  std::string face_image;
+  std::string face_path;
 };
 
 void to_json(json &j, const PersonData &p);

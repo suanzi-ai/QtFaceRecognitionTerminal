@@ -141,7 +141,7 @@ SZ_RETCODE FaceService::read_buffer(const PersonImageInfo &face,
                                     std::vector<SZ_BYTE> &imgBuf) {
   SZ_RETCODE ret;
   if (face.face_path.size() > 0) {
-    std::ifstream fd(face.face_path);
+    std::ifstream fd(image_store_dir_ + face.face_path);
     if (!fd.is_open()) {
       SZ_LOG_DEBUG("Read file {} failed", face.face_path);
       return SZ_RETCODE_FAILED;
