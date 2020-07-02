@@ -6,7 +6,7 @@
 
 #include "alive_task.h"
 #include "camera_reader.h"
-#include "detect_task.h"
+#include "detect_task.hpp"
 #include "detect_tip_widget.hpp"
 #include "detection_float.h"
 #include "image_package.h"
