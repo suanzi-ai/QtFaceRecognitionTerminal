@@ -1,4 +1,5 @@
-#include "videoplayer.h"
+#include "video_player.hpp"
+
 #include "videoframewidget.h"
 #include <QBoxLayout>
 #include <QPainter>

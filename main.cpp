@@ -1,17 +1,18 @@
-#include <QtWidgets/QApplication>
-#include "videoplayer.h"
 #include <QMetaType>
+#include <QtWidgets/QApplication>
 
-int main(int argc, char *argv[])
-{
+#include "video_player.hpp"
 
-    qRegisterMetaType<Person>("Person");
-    qRegisterMetaType<DetectionFloat>("DetectionFloat");
-    
-    QApplication app(argc, argv);
+using namespace suanzi;
 
-    VideoPlayer player;
-    player.show();
+int main(int argc, char *argv[]) {
+  qRegisterMetaType<Person>("Person");
+  qRegisterMetaType<DetectionFloat>("DetectionFloat");
 
-    return app.exec();
+  QApplication app(argc, argv);
+
+  VideoPlayer player;
+  player.show();
+
+  return app.exec();
 }
