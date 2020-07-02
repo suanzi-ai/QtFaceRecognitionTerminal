@@ -4,24 +4,29 @@
 #include <QObject>
 
 #include "detection_float.h"
-#include "person.h"
+#include "image_package.h"
 #include "pingpang_buffer.h"
+#include "person.h"
+
+#include "quface/face.hpp"
 
 namespace suanzi {
 
 class RecognzieTask : QObject {
   Q_OBJECT
  public:
-  RecognzieTask(QObject *parent = nullptr);
-  ~RecognzieTask();
+    RecognzieTask(QThread *pThread = nullptr, QObject *parent = nullptr);
+    ~RecognzieTask();
 
  private slots:
-  void rx_frame(PingPangBuffer<MmzImage> *buffer, DetectionFloat detection);
+    void rxFrame(PingPangBuffer<ImagePackage> *buffer, DetectionFloat detection);
 
  signals:
   void tx_result(Person person);
 
  private:
+  suanzi::FaceExtractor  *face_extractor_;
+
 };
 
 }  // namespace suanzi

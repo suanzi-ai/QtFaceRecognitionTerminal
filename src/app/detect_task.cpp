@@ -50,8 +50,8 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
 
   for (int i = 0; i < detections.size(); i++) {
     auto rect = detections[i].bbox;
-    printf("%d: %0.2f %0.2f %0.2f %0.2f \n", i, rect.x, rect.y, rect.width,
-           rect.height);
+    printf("det %d: %0.2f %0.2f %0.2f %0.2f \n", image->frame_idx, rect.x,
+           rect.y, rect.width, rect.height);
     break;
   }
 
@@ -66,7 +66,7 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
     }
   }
 
-  buffer->switch_buffer();
+  // buffer->switchToPing();
 
   // TODO
   // bgr and nir face detection
