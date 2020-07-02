@@ -67,9 +67,9 @@ void CameraReader::run() {
           std::chrono::steady_clock::now();
       std::chrono::duration<double> time_span =
           std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
-      std::cout << "getFrame: "
-                << ": \t" << time_span.count() << "\tseconds." << std::endl;
-      // pingpang_buffer.switchToPang();
+      // std::cout << "getFrame: "
+      //           << ": \t" << time_span.count() << "\tseconds." << std::endl;
+
       emit txFrame(&pingpang_buffer);
 
       // printf("tx0 threadId=%x   %x %d\n", QThread::currentThreadId(), pPing,

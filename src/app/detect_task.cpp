@@ -45,13 +45,14 @@ void DetectTask::rxFrame(PingPangBuffer<ImagePackage> *buffer) {
   std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
   std::chrono::duration<double> time_span =
       std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
-  std::cout << "det: "
-            << ": \t" << time_span.count() << "\tseconds." << std::endl;
-
-  printf("det size: %d \n", detections.size());
+  //   std::cout << "det: "
+  //             << ": \t" << time_span.count() << "\tseconds." << std::endl;
+  //   printf("det size: %d \n", detections.size());
   for (int i = 0; i < detections.size(); i++) {
     auto rect = detections[i].bbox;
-    printf("%d: %d %d %d %d \n", i, rect.x, rect.y, rect.width, rect.height);
+    printf("%d: %0.2f %0.2f %0.2f %0.2f \n", i, rect.x, rect.y, rect.width,
+           rect.height);
+    break;
   }
 
   buffer->switchToPing();
@@ -72,6 +73,10 @@ void DetectTask::rxFrame(PingPangBuffer<ImagePackage> *buffer) {
     detection_bgr.width = rect.width * 1.0 / w;
     detection_bgr.height = rect.height * 1.0 / h;
     detection_bgr.b_valid = true;
+    for (int i = 0; i < 5; i++) {
+      detection_bgr.landmark[i][0] = detections[0].landmarks.point[i].x / w;
+      detection_bgr.landmark[i][1] = detections[0].landmarks.point[i].y / h;
+    }
   } else {
     detection_bgr.b_valid = false;
   }
