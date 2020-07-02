@@ -36,14 +36,21 @@ void DetectTipWidget::rx_result(PingPangBuffer<ImagePackage> *img,
 
   is_updated_ = detection.b_valid;
   if (is_updated_) {
-    rect_.setX(
-        MOVING_AVERAGE(detection.x * w, rect_.x(), MOVING_AVERAGE_RATIO));
-    rect_.setY(
-        MOVING_AVERAGE(detection.y * h, rect_.y(), MOVING_AVERAGE_RATIO));
-    rect_.setWidth(MOVING_AVERAGE(detection.width * w, rect_.width(),
-                                  MOVING_AVERAGE_RATIO));
-    rect_.setHeight(MOVING_AVERAGE(detection.height * h, rect_.height(),
-                                   MOVING_AVERAGE_RATIO));
+    QRect current_rect(detection.x * w, detection.y * h, detection.width * w,
+                       detection.height * h);
+
+    // Apply moving average to face bbox if intersects
+    if (rect_.intersects(current_rect)) {
+      rect_.setX(
+          MOVING_AVERAGE(detection.x * w, rect_.x(), MOVING_AVERAGE_RATIO));
+      rect_.setY(
+          MOVING_AVERAGE(detection.y * h, rect_.y(), MOVING_AVERAGE_RATIO));
+      rect_.setWidth(MOVING_AVERAGE(detection.width * w, rect_.width(),
+                                    MOVING_AVERAGE_RATIO));
+      rect_.setHeight(MOVING_AVERAGE(detection.height * h, rect_.height(),
+                                     MOVING_AVERAGE_RATIO));
+    } else
+      rect = current_rect;
 
     for (int i = 0; i < 5; i++) {
       landmark_[i][0] = detection.landmark[i][0] * w;
