@@ -55,6 +55,16 @@ void DetectTask::rxFrame(PingPangBuffer<ImagePackage> *buffer) {
     break;
   }
 
+  int max_id = 0;
+  float max_area = detections[0].bbox.width * detections[0].bbox.height;
+  for (int i = 1; i < detections.size(); i++) {
+    float area = detections[i].bbox.width * detections[i].bbox.height;
+    if (area > max_area) {
+      max_id = i;
+      max_area = area;
+    }
+  }
+
   buffer->switchToPing();
 
   // TODO
@@ -67,15 +77,15 @@ void DetectTask::rxFrame(PingPangBuffer<ImagePackage> *buffer) {
   if (detections.size() > 0) {
     int w = pPang->img_bgr_small->width;
     int h = pPang->img_bgr_small->height;
-    auto rect = detections[0].bbox;
+    auto rect = detections[max_id].bbox;
     detection_bgr.x = rect.x * 1.0 / w;
     detection_bgr.y = rect.y * 1.0 / h;
     detection_bgr.width = rect.width * 1.0 / w;
     detection_bgr.height = rect.height * 1.0 / h;
     detection_bgr.b_valid = true;
     for (int i = 0; i < 5; i++) {
-      detection_bgr.landmark[i][0] = detections[0].landmarks.point[i].x / w;
-      detection_bgr.landmark[i][1] = detections[0].landmarks.point[i].y / h;
+      detection_bgr.landmark[i][0] = detections[max_id].landmarks.point[i].x / w;
+      detection_bgr.landmark[i][1] = detections[max_id].landmarks.point[i].y / h;
     }
   } else {
     detection_bgr.b_valid = false;
