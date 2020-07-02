@@ -123,11 +123,10 @@ add_subdirectory(src/ui)
 add_subdirectory(src/server)
 
 add_executable(main main.cpp)
-
 target_link_libraries(main PRIVATE ui)
 
 add_executable(svr server.cpp)
 target_link_libraries(svr PRIVATE server)
 
-install(TARGETS main DESTINATION .)
+install(TARGETS main svr DESTINATION .)
 install(DIRECTORY ${RESOURCE_PREFIX}/models/ DESTINATION .)
