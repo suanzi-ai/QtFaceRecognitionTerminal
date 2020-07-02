@@ -29,6 +29,7 @@ class DetectTipWidget : public QWidget {
 
  private:
   QRect rect_;
+  float landmark_[5][2];
   bool is_updated_;
 };
 
