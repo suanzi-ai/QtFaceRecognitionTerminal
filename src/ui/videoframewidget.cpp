@@ -29,7 +29,7 @@ VideoFrameWidget::~VideoFrameWidget()
 }
 
 void VideoFrameWidget::rxVideoFrame(PingPangBuffer<MmzImage> *buffer) {
-    MmzImage *pImage = buffer->getPang();
+    MmzImage *pImage = buffer->get_pang();
     image = QImage(pImage->pData, pImage->width, pImage->height, QImage::Format_RGB888);
     pingPang_ = buffer;
     printf("rx rgb frame\n");
@@ -57,6 +57,6 @@ void VideoFrameWidget::paint(QPainter *painter) {
         //painter->drawImage(0, 0, image);
 
         if (pingPang_ != nullptr)
-            pingPang_->switchToPing();
+            pingPang_->switch_buffer();
     }
 }

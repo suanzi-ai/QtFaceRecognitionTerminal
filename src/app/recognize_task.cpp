@@ -16,12 +16,12 @@ RecognzieTask::~RecognzieTask() {
 
 
 void RecognzieTask::rxFrame(PingPangBuffer<MmzImage> *buffer, DetectionFloat detection) {
-    MmzImage *pPang = buffer->getPang();
+    MmzImage *pPang = buffer->get_pang();
     //printf("rx1 threadId=%x   %x\n", QThread::currentThreadId(), pPang);
     QThread::msleep(100);
 
     // if condition
-    buffer->switchToPing();
+    buffer->switch_buffer();
 
     static bool bInit = false;
     if (!bInit) {

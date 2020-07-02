@@ -20,8 +20,8 @@ class PingPangBuffer {
         b_write = false;
     }
 
-     T *getPing() {
-         //if (pingPangSwitch_.testAndSetOrdered(0, 0))
+     T *get_ping() {
+         b_write = true;
          if (b_switch)
              return pPing_;
          else {
@@ -29,30 +29,18 @@ class PingPangBuffer {
          }
      }
 
-     void startWrite() {
-        b_write = true;
-     }
-
-     void endWrite() {
+     void stop_write_ping() {
         b_write = false;
      }
 
-     void switchToPang() {
-        //pingPangSwitch_.testAndSetOrdered(0, 1);
-     }
-
-     void switchToPing() {
-        //pingPangSwitch_.testAndSetOrdered(1, 0);
+     void switch_buffer() {
          while(b_write) {
             QThread::usleep(1);
          }
          b_switch = !b_switch;
-
-
      }
 
-     T *getPang() {
-         //if (pingPangSwitch_.testAndSetOrdered(1, 1))
+     T *get_pang() {
          if (b_switch)
              return pPang_;
          else {
@@ -61,7 +49,6 @@ class PingPangBuffer {
      }
 
  private:
-    //QAtomicInteger<quint32> pingPangSwitch_;
     bool b_switch;
     bool b_write;
     T *pPing_;

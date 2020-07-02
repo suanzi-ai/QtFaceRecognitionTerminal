@@ -51,9 +51,7 @@ void CameraReader::run() {
   int frame_idx = 0;
   while (1) {
     std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
-
-    pingpang_buffer.startWrite();
-    ImagePackage *pPing = pingpang_buffer.getPing();
+    ImagePackage *pPing = pingpang_buffer.get_ping();
     if (pvpss_bgr_->getYuvFrame(pPing->img_bgr_small, 2)) {
       while(!pvpss_bgr_->getYuvFrame(pPing->img_bgr_large, 1))
       {
@@ -61,7 +59,7 @@ void CameraReader::run() {
       }
       frame_idx++;
       pPing->frame_idx = frame_idx;
-      pingpang_buffer.endWrite();
+      pingpang_buffer.stop_write_ping();
 
       std::chrono::steady_clock::time_point t2 =
           std::chrono::steady_clock::now();
@@ -76,7 +74,7 @@ void CameraReader::run() {
       // frame_idx);
 
     } else {
-      pingpang_buffer.endWrite();
+      pingpang_buffer.stop_write_ping();
       QThread::usleep(1);
     }
   }

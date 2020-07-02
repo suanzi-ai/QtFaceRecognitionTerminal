@@ -31,7 +31,7 @@ DetectTask::~DetectTask() {
 }
 
 void DetectTask::rxFrame(PingPangBuffer<ImagePackage> *buffer) {
-  ImagePackage *pPang = buffer->getPang();
+  ImagePackage *pPang = buffer->get_pang();
   // printf("DetectTask threadId=%x  %x %d\n", QThread::currentThreadId(),
   // pPang,
   //  pPang->frame_idx);
@@ -65,7 +65,7 @@ void DetectTask::rxFrame(PingPangBuffer<ImagePackage> *buffer) {
     }
   }
 
-  buffer->switchToPing();
+  buffer->switch_buffer();
 
   // TODO
   // bgr and nir face detection
