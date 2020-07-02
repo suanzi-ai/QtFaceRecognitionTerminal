@@ -120,13 +120,13 @@ find_package(httplib)
 add_subdirectory(src/app)
 add_subdirectory(src/lib)
 add_subdirectory(src/ui)
-add_subdirectory(src/server)
+add_subdirectory(src/service)
 
 add_executable(main main.cpp)
 target_link_libraries(main PRIVATE ui)
 
-add_executable(svr server.cpp)
-target_link_libraries(svr PRIVATE server)
+add_executable(server server.cpp)
+target_link_libraries(server PRIVATE service)
 
-install(TARGETS main svr DESTINATION .)
+install(TARGETS main server DESTINATION .)
 install(DIRECTORY ${RESOURCE_PREFIX}/models/ DESTINATION .)

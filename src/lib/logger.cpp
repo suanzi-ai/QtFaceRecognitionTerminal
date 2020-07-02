@@ -13,7 +13,7 @@ LoggerConfig Logger::config_ = {
 #ifdef DEBUG
     "debug",  // log_level
 #else
-    "info",  // log_level
+    "debug",  // log_level
 #endif
     "stdout",           // log_std
     "logs/quface/log",  // log_file
