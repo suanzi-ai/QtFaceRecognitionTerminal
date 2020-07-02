@@ -27,8 +27,11 @@ class FaceService {
   typedef std::shared_ptr<suanzi::FaceDatabase> FaceDatabasePtr;
 
   FaceService(FaceDatabasePtr db, FaceDetectorPtr detector,
-              FaceExtractorPtr extractor)
-      : db_(db), detector_(detector), extractor_(extractor) {}
+              FaceExtractorPtr extractor, bool store_image = false)
+      : db_(db),
+        detector_(detector),
+        extractor_(extractor),
+        store_image_(store_image) {}
   ~FaceService() {}
 
   json db_add(const json &body);
@@ -38,7 +41,8 @@ class FaceService {
   json db_get_all(const json &body);
 
  private:
-  SZ_RETCODE read_buffer(const PersonImageInfo& face, std::vector<SZ_BYTE> &imgBuf);
+  SZ_RETCODE read_buffer(const PersonImageInfo &face,
+                         std::vector<SZ_BYTE> &imgBuf);
   std::string get_image_file_name(SZ_UINT32 faceId);
   bool save_image(SZ_UINT32 faceId, const std::vector<SZ_BYTE> &buffer);
   bool load_image(SZ_UINT32 faceId, std::vector<SZ_BYTE> &buffer);
@@ -50,6 +54,7 @@ class FaceService {
   FaceDatabasePtr db_;
   FaceDetectorPtr detector_;
   FaceExtractorPtr extractor_;
+  bool store_image_;
 };
 
 }  // namespace suanzi

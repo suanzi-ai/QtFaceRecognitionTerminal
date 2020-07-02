@@ -42,6 +42,10 @@ std::string FaceService::get_image_file_name(SZ_UINT32 faceId) {
 
 bool FaceService::save_image(SZ_UINT32 faceId,
                              const std::vector<SZ_BYTE> &buffer) {
+  if (!store_image_) {
+    return true;
+  }
+
   std::string fName = get_image_file_name(faceId);
   std::ofstream fd(fName, std::ios::binary);
   if (fd.is_open()) {
@@ -52,6 +56,10 @@ bool FaceService::save_image(SZ_UINT32 faceId,
 }
 
 bool FaceService::load_image(SZ_UINT32 faceId, std::vector<SZ_BYTE> &buffer) {
+  if (!store_image_) {
+    return true;
+  }
+
   std::string fName = get_image_file_name(faceId);
   std::ifstream fd(fName, std::ios::binary);
   if (fd.is_open()) {
@@ -115,19 +123,22 @@ SZ_RETCODE FaceService::read_image_as_base64(SZ_UINT32 id,
 SZ_RETCODE FaceService::read_buffer(const PersonImageInfo &face,
                                     std::vector<SZ_BYTE> &imgBuf) {
   SZ_RETCODE ret;
-  if (face.face_image.size() > 0) {
-    auto buf = base64_decode(face.face_image.c_str());
-    imgBuf = std::vector<SZ_BYTE>(buf.begin(), buf.end());
-  } else if (face.face_path.size() > 0) {
+  if (face.face_path.size() > 0) {
     std::ifstream fd(face.face_path);
     if (!fd.is_open()) {
+      SZ_LOG_DEBUG("Read file {} failed", face.face_path);
       return SZ_RETCODE_FAILED;
     }
     imgBuf = std::vector<SZ_BYTE>(std::istreambuf_iterator<char>(fd),
                                   std::istreambuf_iterator<char>{});
+  } else if (face.face_image.size() > 0) {
+    auto buf = base64_decode(face.face_image.c_str());
+    imgBuf = std::vector<SZ_BYTE>(buf.begin(), buf.end());
   } else {
+    SZ_LOG_ERROR("No image found");
     return SZ_RETCODE_FAILED;
   }
+  return SZ_RETCODE_OK;
 }
 
 json FaceService::db_add(const json &body) {
@@ -342,7 +353,7 @@ json FaceService::db_get_all(const json &body) {
   for (int i = (page - 1) * limit; i < personIDList.size() && i < page * limit;
        i++) {
     std::string faceBase64;
-    if (with_image) {
+    if (with_image && store_image_) {
       SZ_RETCODE ret = read_image_as_base64(personIDList[i], faceBase64);
       if (ret != SZ_RETCODE_OK) {
         SZ_LOG_ERROR("Read image #{} as base64 failed", personIDList[i]);
