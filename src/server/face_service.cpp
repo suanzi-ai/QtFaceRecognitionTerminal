@@ -6,7 +6,7 @@
 
 #include "curl_util.hpp"
 #include "logger.hpp"
-#include "openssl_util.hpp"
+#include "base64.hpp"
 
 #define MAX_PERSON_INFO_SIZE 1024
 
@@ -107,7 +107,7 @@ SZ_RETCODE FaceService::read_image_as_base64(SZ_UINT32 id,
                                              std::string &result) {
   std::vector<SZ_BYTE> buffer;
   if (load_image(id, buffer)) {
-    result = suanzi::server::base64_encode(buffer);
+    result = base64_encode(buffer.data(), buffer.size());
     return SZ_RETCODE_OK;
   }
   return SZ_RETCODE_FAILED;
@@ -117,7 +117,8 @@ SZ_RETCODE FaceService::read_buffer(const PersonImageInfo &face,
                                     std::vector<SZ_BYTE> &imgBuf) {
   SZ_RETCODE ret;
   if (face.face_image.size() > 0) {
-    imgBuf = suanzi::server::base64_decode(face.face_image.c_str());
+    auto buf = base64_decode(face.face_image.c_str());
+    imgBuf = std::vector<SZ_BYTE>(buf.begin(), buf.end());
   } else if (face.face_url.size() > 0) {
     ret = suanzi::download_to_buffer(face.face_url, imgBuf);
     if (ret != SZ_RETCODE_OK) {
