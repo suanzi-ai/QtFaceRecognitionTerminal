@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include <QImage>
-#include "pingpangbuffer.h"
+#include "pingpang_buffer.h"
 
 class VideoFrameWidget : public QWidget
 {

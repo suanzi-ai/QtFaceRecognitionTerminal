@@ -2,7 +2,7 @@
 #define RECOGNIZE_TASK_H
 
 #include <QObject>
-#include "pingpangbuffer.h"
+#include "pingpang_buffer.h"
 #include "person.h"
 #include "detection_float.h"
 

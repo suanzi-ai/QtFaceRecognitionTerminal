@@ -10,7 +10,7 @@
 #include "detection_float.h"
 #include "detect_tip_widget.hpp"
 #include "image_package.h"
-#include "pingpangbuffer.h"
+#include "pingpang_buffer.h"
 #include "recognize_task.h"
 #include "recognizetipwidget.h"
 #include "videoframewidget.h"

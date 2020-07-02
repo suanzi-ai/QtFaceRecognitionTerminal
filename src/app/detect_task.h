@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QRect>
-#include "pingpangbuffer.h"
+#include "pingpang_buffer.h"
 #include "image_package.h"
 #include "detection_float.h"
 

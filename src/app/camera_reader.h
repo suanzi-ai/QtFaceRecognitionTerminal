@@ -9,7 +9,7 @@
 #include "vi_vpss.h"
 #include "vi_vpss_vo.h"
 #include "vo.h"
-#include "pingpangbuffer.h"
+#include "pingpang_buffer.h"
 #include "image_package.h"
 
 namespace suanzi {
