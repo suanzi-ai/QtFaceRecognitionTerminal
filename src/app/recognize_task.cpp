@@ -26,7 +26,7 @@ RecognzieTask::~RecognzieTask() {
   if (face_extractor_) delete face_extractor_;
 }
 
-void RecognzieTask::rxFrame(PingPangBuffer<ImagePackage> *buffer,
+void RecognzieTask::rx_frame(PingPangBuffer<ImagePackage> *buffer,
                             DetectionFloat detection) {
   ImagePackage *pPang = buffer->get_pang();
   // printf("RecognzieTask threadId=%x   %x %d\n", QThread::currentThreadId(),

@@ -25,7 +25,7 @@ VideoPlayer::VideoPlayer(QWidget *parent) : QWidget(parent) {
   //   camera_reader_0_ = new CameraReader(0, this);
 
   static QThread detectThread;
-  antispoof_task_ = new AntispoofTask(&detectThread, this);
+  // antispoof_task_ = new AntispoofTask(&detectThread, this);
   detect_task_ = new DetectTask(&detectThread, this);
   recognize_task_ = new RecognzieTask(&detectThread, this);
 
@@ -39,10 +39,8 @@ VideoPlayer::VideoPlayer(QWidget *parent) : QWidget(parent) {
           (const QObject *)detect_task_,
           SLOT(rx_frame(PingPangBuffer<ImagePackage> *)));
 
-  connect((const QObject *)detect_task_,
-          SIGNAL(tx_finish()),
-          (const QObject *)camera_reader_1_,
-          SLOT(rx_finish()));
+  connect((const QObject *)detect_task_, SIGNAL(tx_finish()),
+          (const QObject *)camera_reader_1_, SLOT(rx_finish()));
 
   //   connect(
   //       (const QObject *)detect_task_,
@@ -50,11 +48,11 @@ VideoPlayer::VideoPlayer(QWidget *parent) : QWidget(parent) {
   //       DetectionFloat)), (const QObject *)recognize_task_,
   //       SLOT(rx_frame(PingPangBuffer<MmzImage> *, DetectionFloat)));
 
-    connect(
+  connect(
       (const QObject *)detect_task_,
       SIGNAL(tx_detection_bgr(PingPangBuffer<ImagePackage> *, DetectionFloat)),
       (const QObject *)recognize_task_,
-      SLOT(rxFrame(PingPangBuffer<ImagePackage> *, DetectionFloat)));
+      SLOT(rx_frame(PingPangBuffer<ImagePackage> *, DetectionFloat)));
 
   //   connect((const QObject *)recognize_task_, SIGNAL(txResult(Person)),
   //           (const QObject *)recognize_tip_widget_, SLOT(rxResult(Person)));

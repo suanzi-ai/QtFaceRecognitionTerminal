@@ -19,7 +19,7 @@ class RecognzieTask : QObject {
     ~RecognzieTask();
 
  private slots:
-    void rxFrame(PingPangBuffer<ImagePackage> *buffer, DetectionFloat detection);
+    void rx_frame(PingPangBuffer<ImagePackage> *buffer, DetectionFloat detection);
 
  signals:
   void tx_result(Person person);
