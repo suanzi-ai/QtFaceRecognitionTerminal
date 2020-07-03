@@ -1,4 +1,4 @@
-#include "camera_reader.h"
+#include "camera_reader.hpp"
 
 #include <QDebug>
 #include <chrono>
@@ -20,7 +20,7 @@ CameraReader::CameraReader(int cameralIndex, QObject *parent) {
 
   static Vo vo_bgr(0, VO_INTF_MIPI, VO_W, VO_H);
   static Vi_Vpss_Vo vi_vpss_vo(pvi_vpss_bgr_, &vo_bgr);
-  b_tx_ok = true;
+  b_tx_ok_ = true;
   start();
 }
 
@@ -30,7 +30,7 @@ CameraReader::~CameraReader() {
   delete pvi_vpss_bgr_;
 }
 
-void CameraReader::rx_finish() { b_tx_ok = true; }
+void CameraReader::rx_finish() { b_tx_ok_ = true; }
 
 void CameraReader::run() {
   Size size_bgr_1 = VPSS_CH_SIZES_BGR[1];
@@ -60,14 +60,9 @@ void CameraReader::run() {
       }
       pPing->frame_idx = frame_idx++;
 
-      if (b_tx_ok) {
-        b_tx_ok = false;
-        b_data_ready = false;  
+      if (b_tx_ok_) {
+        b_tx_ok_ = false;
         emit tx_frame(&pingpang_buffer);
-        printf("tx threadId=%x  %x %d\n", QThread::currentThreadId(), pPing,
-               pPing->frame_idx);
-      } else {
-         b_data_ready = true;  
       }
     } else {
       if (b_data_ready && b_tx_ok) {

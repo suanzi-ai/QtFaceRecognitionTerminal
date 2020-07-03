@@ -5,7 +5,7 @@
 #include <QWidget>
 
 #include "antispoof_task.hpp"
-#include "camera_reader.h"
+#include "camera_reader.hpp"
 #include "detect_task.hpp"
 #include "detect_tip_widget.hpp"
 #include "detection_float.h"
