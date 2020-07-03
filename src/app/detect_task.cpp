@@ -81,11 +81,11 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
   // send msgs for next steps
 
   DetectionFloat detection_bgr;
-  detection_bgr.frame_idx = image->frame_idx;
+  detection_bgr.frame_idx = pPang->frame_idx;
   // DetectionFloat detection_nir;
   if (detections.size() > 0) {
-    int w = image->img_bgr_small->width-1;
-    int h = image->img_bgr_small->height-1;
+    int w = pPang->img_bgr_small->width-1;
+    int h = pPang->img_bgr_small->height-1;
     auto rect = detections[max_id].bbox;
     detection_bgr.x = rect.x * 1.0 / w;
     detection_bgr.y = rect.y * 1.0 / h;
