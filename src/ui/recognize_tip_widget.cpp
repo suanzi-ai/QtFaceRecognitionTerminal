@@ -18,7 +18,7 @@ RecognizeTipWidget::~RecognizeTipWidget() {}
 
 void RecognizeTipWidget::rx_result(Person person) {
   person_ = person;
-  QTimer::singleShot(3000, this, SLOT(hide_self()));
+  //QTimer::singleShot(3000, this, SLOT(hide_self()));
   show();
 }
 
@@ -30,16 +30,16 @@ void RecognizeTipWidget::paintEvent(QPaintEvent *event) {
   font.setPixelSize(48);
   painter.setFont(font);
   painter.setPen(Qt::red);
-  person_.name = "hello";
+  person_.name = "hello宋小集";
   QRect r = rect();
   QFontMetrics metrics = painter.fontMetrics();
   int string_height = metrics.ascent() + metrics.descent();  // 不算 line gap
   int string_width =
       metrics.width(QString(person_.name.c_str()));  // 字符串的宽度
   int x = r.x() + (r.width() - string_width) / 2;
-  int y = r.y() + (r.height() - string_height) / 2 + metrics.ascent();
+  //int y = r.y() + (r.height() - string_height) / 2 + metrics.ascent();
+  int y = r.height() - 30;
   
-
   painter.drawPixmap(rect(), QPixmap("avatar_unknown.jpg"), QRect());
   painter.drawText(x, y, QString(person_.name.c_str()));
 }
