@@ -51,6 +51,7 @@ void CameraReader::run() {
   PingPangBuffer<ImagePackage> pingpang_buffer(&image_package1,
                                                &image_package2);
   int frame_idx = 0;
+  bool b_data_ready = false;
   while (1) {
     ImagePackage *pPing = pingpang_buffer.get_ping();
     if (pvpss_bgr_->getYuvFrame(pPing->img_bgr_small, 2)) {
@@ -61,11 +62,21 @@ void CameraReader::run() {
 
       if (b_tx_ok) {
         b_tx_ok = false;
+        b_data_ready = false;  
         emit tx_frame(&pingpang_buffer);
         printf("tx threadId=%x  %x %d\n", QThread::currentThreadId(), pPing,
                pPing->frame_idx);
+      } else {
+         b_data_ready = true;  
       }
     } else {
+      if (b_data_ready && b_tx_ok) {
+         b_tx_ok = false;
+         b_data_ready = false;  
+         emit tx_frame(&pingpang_buffer);
+        printf("tx threadId=%x  %x %d\n", QThread::currentThreadId(), pPing,
+               pPing->frame_idx);
+      }
       QThread::usleep(1);
     }
   }
