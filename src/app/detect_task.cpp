@@ -58,6 +58,7 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
   } else {
     DetectionFloat no_face;
     no_face.b_valid = false;
+    emit tx_display(no_face);
     emit tx_recognize(buffer, no_face);
   }
 }
@@ -81,7 +82,7 @@ DetectionFloat DetectTask::select_face(
   detection_bgr.x = rect.x * 1.0 / width;
   detection_bgr.y = rect.y * 1.0 / height;
   detection_bgr.width = rect.width * 1.0 / width;
-  detection_bgr.height = rect.height * 1.0 / height;
+  detection_bgr.height = rect.height * 0.8 / height; // remove neck
   detection_bgr.b_valid = true;
   for (int i = 0; i < 5; i++) {
     detection_bgr.landmark[i][0] =
