@@ -18,21 +18,16 @@ VideoPlayer::VideoPlayer(QWidget *parent) : QWidget(parent) {
 
   detect_tip_widget_ = new DetectTipWidget(this);
   detect_tip_widget_->hide();
-  recognize_tip_widget_ = new RecognizeTipWidget();
-  recognize_tip_widget_->hide();
+  // recognize_tip_widget_ = new RecognizeTipWidget();
+  // recognize_tip_widget_->hide();
 
+  // RGB Camera
   camera_reader_1_ = new CameraReader(1, this);
-  //   camera_reader_0_ = new CameraReader(0, this);
+  // IR Camera
+  // camera_reader_0_ = new CameraReader(0, this);
 
-  static QThread detectThread;
-  // antispoof_task_ = new AntispoofTask(&detectThread, this);
-  detect_task_ = new DetectTask(&detectThread, this);
-  recognize_task_ = new RecognzieTask(&detectThread, this);
-
-  //   connect((const QObject *)camera_reader_0_,
-  //           SIGNAL(tx_frame(PingPangBuffer<MmzImage> *)),
-  //           (const QObject *)antispoof_task_,
-  //           SLOT(rx_frame(PingPangBuffer<MmzImage> *)));
+  detect_task_ = new DetectTask(nullptr, this);
+  recognize_task_ = new RecognzieTask(nullptr, this);
 
   connect((const QObject *)camera_reader_1_,
           SIGNAL(tx_frame(PingPangBuffer<ImagePackage> *)),
@@ -42,26 +37,20 @@ VideoPlayer::VideoPlayer(QWidget *parent) : QWidget(parent) {
   connect((const QObject *)detect_task_, SIGNAL(tx_finish()),
           (const QObject *)camera_reader_1_, SLOT(rx_finish()));
 
-  //   connect(
-  //       (const QObject *)detect_task_,
-  //       SIGNAL(tx_detection_bgr(PingPangBuffer<ImagePackage> *,
-  //       DetectionFloat)), (const QObject *)recognize_task_,
-  //       SLOT(rx_frame(PingPangBuffer<MmzImage> *, DetectionFloat)));
+  connect((const QObject *)detect_task_, SIGNAL(tx_display(DetectionFloat)),
+          (const QObject *)detect_tip_widget_, SLOT(rx_display(DetectionFloat)));
 
   connect(
       (const QObject *)detect_task_,
-      SIGNAL(tx_detection_bgr(PingPangBuffer<ImagePackage> *, DetectionFloat)),
+      SIGNAL(tx_recognize(PingPangBuffer<ImagePackage> *, DetectionFloat)),
       (const QObject *)recognize_task_,
       SLOT(rx_frame(PingPangBuffer<ImagePackage> *, DetectionFloat)));
 
+  connect((const QObject *)recognize_task_, SIGNAL(tx_finish()),
+          (const QObject *)detect_task_, SLOT(rx_finish()));
+
   //   connect((const QObject *)recognize_task_, SIGNAL(txResult(Person)),
   //           (const QObject *)recognize_tip_widget_, SLOT(rxResult(Person)));
-
-  connect(
-      (const QObject *)detect_task_,
-      SIGNAL(tx_detection_bgr(PingPangBuffer<ImagePackage> *, DetectionFloat)),
-      (const QObject *)detect_tip_widget_,
-      SLOT(rx_result(PingPangBuffer<ImagePackage> *, DetectionFloat)));
 
   QTimer::singleShot(1, this, SLOT(init_widgets()));
 }

@@ -24,7 +24,7 @@ class DetectTipWidget : public QWidget {
   void paintEvent(QPaintEvent *event) override;
 
  private slots:
-  void rx_result(PingPangBuffer<ImagePackage> *img, DetectionFloat detection);
+  void rx_display(DetectionFloat detection);
   void hide_self();
 
  private:

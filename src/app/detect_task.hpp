@@ -20,18 +20,23 @@ class DetectTask : QObject {
 
  private slots:
   void rx_frame(PingPangBuffer<ImagePackage> *buffer);
+  void rx_finish();
 
  signals:
   void tx_finish();
-  // for display and recognition
-  void tx_detection_bgr(PingPangBuffer<ImagePackage> *buffer,
-                        DetectionFloat detection);
-  // for face spoofing
-  void tx_detection_nir(PingPangBuffer<ImagePackage> *buffer,
-                        DetectionFloat detection);
+
+  // for display
+  void tx_display(DetectionFloat detection);
+
+  // for recognition
+  void tx_recognize(PingPangBuffer<ImagePackage> *buffer,
+                    DetectionFloat detection);
 
  private:
-  int handled_cnt_;
+  DetectionFloat select_face(std::vector<suanzi::FaceDetection> &detections,
+                             int width, int height);
+
+  bool b_tx_ok_;
 
   suanzi::FaceDetector *face_detector_;
 };
