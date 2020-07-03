@@ -5,7 +5,7 @@
 
 #include "detection_float.h"
 #include "image_package.h"
-#include "person.h"
+#include "person.hpp"
 #include "pingpang_buffer.h"
 
 #include "quface/db.hpp"
@@ -13,17 +13,17 @@
 
 namespace suanzi {
 
-class RecognzieTask : QObject {
+class RecognizeTask : QObject {
   Q_OBJECT
  public:
-  RecognzieTask(QThread *thread = nullptr, QObject *parent = nullptr);
-  ~RecognzieTask();
+  RecognizeTask(QThread *thread = nullptr, QObject *parent = nullptr);
+  ~RecognizeTask();
 
  private slots:
   void rx_frame(PingPangBuffer<ImagePackage> *buffer, DetectionFloat detection);
 
  signals:
-  void tx_result(Person person);
+  void tx_display(PersonDisplay person);
   void tx_finish();
 
  private:
@@ -38,14 +38,16 @@ class RecognzieTask : QObject {
   suanzi::FaceDetection to_detection(DetectionFloat detection_ratio, int width,
                                      int height);
 
-  bool query(std::vector<suanzi::QueryResult> history, int &face_id);
+  void query_success(const suanzi::QueryResult &person_info);
+  void query_empty_database();
+  void query_no_face();
+
+  bool sequence_query(std::vector<suanzi::QueryResult> history, int &face_id);
 
   suanzi::FaceExtractor *face_extractor_;
   suanzi::FaceDatabase *face_database_;
 
   std::vector<suanzi::QueryResult> history_;
-
-  int lost_age_;
 };
 
 }  // namespace suanzi

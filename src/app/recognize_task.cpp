@@ -11,12 +11,10 @@
 
 using namespace suanzi;
 
-RecognzieTask::RecognzieTask(QThread *thread, QObject *parent) {
+RecognizeTask::RecognizeTask(QThread *thread, QObject *parent) {
   // TODO: global configuration
   face_extractor_ = new suanzi::FaceExtractor("facemodel.bin");
   face_database_ = new suanzi::FaceDatabase("quface");
-
-  lost_age_ = 0;
 
   if (thread == nullptr) {
     static QThread new_thread;
@@ -28,61 +26,44 @@ RecognzieTask::RecognzieTask(QThread *thread, QObject *parent) {
   }
 }
 
-RecognzieTask::~RecognzieTask() {
+RecognizeTask::~RecognizeTask() {
   if (face_extractor_) delete face_extractor_;
 }
 
-void RecognzieTask::rx_frame(PingPangBuffer<ImagePackage> *buffer,
+void RecognizeTask::rx_frame(PingPangBuffer<ImagePackage> *buffer,
                              DetectionFloat detection) {
   ImagePackage *pang = buffer->get_pang();
 
   if (detection.b_valid) {
-    lost_age_ = 0;
-  
     // crop in large image
     int width = pang->img_bgr_large->width;
     int height = pang->img_bgr_large->height;
     suanzi::FaceDetection face_detection =
         to_detection(detection, width, height);
 
-    // 25ms
+    // extract: 25ms
     suanzi::FaceFeature feature;
     face_extractor_->extract(
         (const SVP_IMAGE_S *)pang->img_bgr_large->pImplData, face_detection,
         feature);
 
-    buffer->switch_buffer();
-    emit tx_finish();
-
     // push query result to history
     std::vector<suanzi::QueryResult> results;
-    if (SZ_RETCODE_OK == face_database_->query(feature, 1, results))
-      history_.push_back(results[0]);
-
-    // deduce recognize results
-    if (history_.size() >= HISTORY_SIZE) {
-      int face_id;
-
-      if (query(history_, face_id)) {
-        SZ_LOG_INFO("recognized: face_id = {}", face_id);
-      } else {
-        SZ_LOG_INFO("recognized: unknown", face_id);
-      }
-
-      history_.clear();
+    SZ_RETCODE ret = face_database_->query(feature, 1, results);
+    if (SZ_RETCODE_OK == ret) {
+      query_success(results[0]);
+    } else if (SZ_RETCODE_EMPTY_DATABASE == ret) {
+      query_empty_database();
     }
-
   } else {
-    // no face
-    lost_age_ += 1;
-    if (lost_age_ >= MAX_LOST_AGE) {
-      history_.clear();
-      lost_age_ = 0;
-    }
+    query_no_face();
   }
+
+  buffer->switch_buffer();
+  emit tx_finish();
 }
 
-suanzi::FaceDetection RecognzieTask::to_detection(
+suanzi::FaceDetection RecognizeTask::to_detection(
     DetectionFloat detection_ratio, int width, int height) {
   suanzi::FaceDetection face_detection;
   face_detection.bbox.x = detection_ratio.x * width;
@@ -100,21 +81,56 @@ suanzi::FaceDetection RecognzieTask::to_detection(
   return face_detection;
 }
 
-bool RecognzieTask::query(std::vector<suanzi::QueryResult> history,
-                          int &face_id) {
+void RecognizeTask::query_success(const suanzi::QueryResult &person_info) {
+  if (history_.size() >= HISTORY_SIZE) {
+    int face_id;
+
+    if (sequence_query(history_, face_id)) {
+      SZ_LOG_INFO("recognized: face_id = {}", face_id);
+      tx_display({"Welcome " + face_id, "avatar_unknown.jpg"});
+    } else {
+      SZ_LOG_INFO("recognized: unknown");
+      tx_display({"Welcome " + face_id, "avatar_unknown.jpg"});
+    }
+
+    history_.clear();
+  }
+}
+
+void RecognizeTask::query_empty_database() {
+  static int empty_age = 0;
+  if (++empty_age >= HISTORY_SIZE) {
+    SZ_LOG_INFO("recognized: unknown (empty database)");
+    history_.clear();
+    tx_display({"Welcome unknown", ""});
+    empty_age = 0;
+  }
+}
+
+void RecognizeTask::query_no_face() {
+  static int lost_age = 0;
+  if (++lost_age >= MAX_LOST_AGE) {
+    history_.clear();
+    tx_display({});
+    lost_age = 0;
+  }
+}
+
+bool RecognizeTask::sequence_query(std::vector<suanzi::QueryResult> history,
+                                   int &face_id) {
   std::map<int, int> person_counts;
   std::map<int, float> person_accumulate_score;
   std::map<int, float> person_max_score;
 
   // initialize map
-  for (auto &person : history_) {
+  for (auto &person : history) {
     person_counts[person.face_id] = 0;
     person_accumulate_score[person.face_id] = 0.f;
     person_max_score[person.face_id] = 0.f;
   }
 
   // accumulate id and score
-  for (auto &person : history_) {
+  for (auto &person : history) {
     person_counts[person.face_id] += 1;
     person_accumulate_score[person.face_id] += person.score;
     person_max_score[person.face_id] =
@@ -136,15 +152,12 @@ bool RecognzieTask::query(std::vector<suanzi::QueryResult> history,
   if (max_count >= MIN_RECOGNIZE_COUNT &&
       max_person_accumulate_score >= MIN_ACCUMULATE_SCORE &&
       max_person_score >= MIN_RECOGNIZE_SCORE) {
-
-    SZ_LOG_DEBUG("id={}, count={}, accumulate_score={}",
-                 max_person_id, max_count,
-                 person_accumulate_score[max_person_id]);
+    SZ_LOG_DEBUG("id={}, count={}, accumulate_score={}", max_person_id,
+                 max_count, person_accumulate_score[max_person_id]);
 
     face_id = max_person_id;
     return true;
-  }
-  else {
+  } else {
     return false;
   }
 }

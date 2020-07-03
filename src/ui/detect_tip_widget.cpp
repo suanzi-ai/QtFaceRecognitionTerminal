@@ -58,14 +58,8 @@ void DetectTipWidget::rx_display(DetectionFloat detection) {
     }
   }
 
-  // QTimer::singleShot(25, this, SLOT(hide_self()));
-  // show();
   QWidget *p = (QWidget *)parent();
   p->update();
-}
-
-void DetectTipWidget::hide_self() {
-  // hide();
 }
 
 void DetectTipWidget::paintEvent(QPaintEvent *event) {

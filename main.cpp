@@ -6,7 +6,7 @@
 using namespace suanzi;
 
 int main(int argc, char *argv[]) {
-  qRegisterMetaType<Person>("Person");
+  qRegisterMetaType<PersonDisplay>("PersonDisplay");
   qRegisterMetaType<DetectionFloat>("DetectionFloat");
 
   QApplication app(argc, argv);

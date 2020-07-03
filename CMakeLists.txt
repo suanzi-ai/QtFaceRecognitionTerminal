@@ -45,7 +45,7 @@ set(THIRD_PARTY_PREFIX
     "${PROJECT_DEPENDENCY_DIR}/3rd"
     CACHE STRING "Dir for 3rd")
 set(QUFACE_SDK_PREFIX
-    "${PROJECT_DEPENDENCY_DIR}/qufacesdk"
+    "/home/niyayu/quface/install/"
     CACHE STRING "Dir for quface sdk")
 set(QT_SDK_PREFIX
     "${PROJECT_DEPENDENCY_DIR}/qtsdk"

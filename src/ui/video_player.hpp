@@ -43,7 +43,7 @@ class VideoPlayer : public QWidget {
 
   AntispoofTask *antispoof_task_;
   DetectTask *detect_task_;
-  RecognzieTask *recognize_task_;
+  RecognizeTask *recognize_task_;
 };
 
 }  // namespace suanzi

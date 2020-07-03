@@ -18,8 +18,8 @@ VideoPlayer::VideoPlayer(QWidget *parent) : QWidget(parent) {
 
   detect_tip_widget_ = new DetectTipWidget(this);
   detect_tip_widget_->hide();
-  // recognize_tip_widget_ = new RecognizeTipWidget();
-  // recognize_tip_widget_->hide();
+  recognize_tip_widget_ = new RecognizeTipWidget(nullptr);
+  recognize_tip_widget_->hide();
 
   // RGB Camera
   camera_reader_1_ = new CameraReader(1, this);
@@ -27,7 +27,7 @@ VideoPlayer::VideoPlayer(QWidget *parent) : QWidget(parent) {
   // camera_reader_0_ = new CameraReader(0, this);
 
   detect_task_ = new DetectTask(nullptr, this);
-  recognize_task_ = new RecognzieTask(nullptr, this);
+  recognize_task_ = new RecognizeTask(nullptr, this);
 
   connect((const QObject *)camera_reader_1_,
           SIGNAL(tx_frame(PingPangBuffer<ImagePackage> *)),
@@ -49,8 +49,8 @@ VideoPlayer::VideoPlayer(QWidget *parent) : QWidget(parent) {
   connect((const QObject *)recognize_task_, SIGNAL(tx_finish()),
           (const QObject *)detect_task_, SLOT(rx_finish()));
 
-  //   connect((const QObject *)recognize_task_, SIGNAL(txResult(Person)),
-  //           (const QObject *)recognize_tip_widget_, SLOT(rxResult(Person)));
+  connect((const QObject *)recognize_task_, SIGNAL(tx_display(PersonDisplay)),
+          (const QObject *)recognize_tip_widget_, SLOT(rx_display(PersonDisplay)));
 
   QTimer::singleShot(1, this, SLOT(init_widgets()));
 }
@@ -60,7 +60,6 @@ VideoPlayer::~VideoPlayer() {}
 void VideoPlayer::paintEvent(QPaintEvent *event) {
   QPainter painter(this);
   detect_tip_widget_->paint(&painter);
-  // painter.drawRect(RECOGNIZE_BOX);
 }
 
 void VideoPlayer::init_widgets() {
@@ -68,7 +67,4 @@ void VideoPlayer::init_widgets() {
                                       RECOGNIZE_TIP_BOX.height());
   recognize_tip_widget_->move(RECOGNIZE_TIP_BOX.x(), RECOGNIZE_TIP_BOX.y());
   recognize_tip_widget_->show();
-  /*detect_tip_widget_->setFixedSize(RECOGNIZE_BOX.width(),
-  RECOGNIZE_BOX.height()); detect_tip_widget_->move(RECOGNIZE_BOX.x(),
-  RECOGNIZE_BOX.y()); detect_tip_widget_->show();*/
 }

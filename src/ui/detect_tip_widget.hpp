@@ -25,10 +25,9 @@ class DetectTipWidget : public QWidget {
 
  private slots:
   void rx_display(DetectionFloat detection);
-  void hide_self();
 
  private:
-  static constexpr float MOVING_AVERAGE_RATIO = 1.0;
+  static constexpr float MOVING_AVERAGE_RATIO = 0.75;
 
   QRect rect_;
   float landmark_[5][2];

@@ -4,7 +4,7 @@
 #include <QImage>
 #include <QWidget>
 
-#include "person.h"
+#include "person.hpp"
 
 namespace suanzi {
 
@@ -19,11 +19,11 @@ class RecognizeTipWidget : public QWidget {
   void paintEvent(QPaintEvent *event);
 
  private slots:
-  void rx_result(Person person);
+  void rx_display(PersonDisplay person);
   void hide_self();
 
  private:
-  Person person_;
+  PersonDisplay person_;
 };
 
 }  // namespace suanzi
