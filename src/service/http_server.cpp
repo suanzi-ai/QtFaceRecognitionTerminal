@@ -3,14 +3,14 @@
 using namespace suanzi;
 
 HTTPServer::HTTPServer() {
-  m_svr = std::make_shared<Server>();
+  server_ = std::make_shared<Server>();
 
-  m_svr->set_logger([](const Request& req, const Response& res) {
+  server_->set_logger([](const Request& req, const Response& res) {
     SZ_LOG_INFO("HTTP {} {} {} {}", req.method, req.path, req.content_length,
                 res.status);
   });
 
-  m_svr->set_error_handler([](const Request& req, Response& res) {
+  server_->set_error_handler([](const Request& req, Response& res) {
     auto fmt = "<p>Error Status: <span style='color:red;'>%d</span></p>";
     char buf[BUFSIZ];
     snprintf(buf, sizeof(buf), fmt, res.status);
@@ -61,7 +61,7 @@ void HTTPServer::run(uint16_t port) {
     // res.set_content("Hello World!", "application/json");
   };
 
-  m_svr->Post(R"(^/db/(.+))", handler);
+  server_->Post(R"(^/db/(.+))", handler);
 
-  m_svr->listen("0.0.0.0", port);
+  server_->listen("0.0.0.0", port);
 }

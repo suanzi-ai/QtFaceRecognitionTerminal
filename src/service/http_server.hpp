@@ -19,6 +19,6 @@ class HTTPServer : public EventEmitter {
   void run(uint16_t port);
 
  private:
-  std::shared_ptr<Server> m_svr;
+  std::shared_ptr<Server> server_;
 };
 }  // namespace suanzi

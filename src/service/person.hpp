@@ -29,7 +29,8 @@ class PersonService {
  public:
   typedef std::shared_ptr<PersonService> ptr;
 
-  PersonService(const std::string &uri, int port) : client_(uri, port) {}
+  PersonService(const std::string &scheme_host_port)
+      : client_(scheme_host_port.c_str()) {}
 
   SZ_RETCODE get_person(uint id, PersonData &person) {
     std::string path = "/api/v1/persons/" + std::to_string(id);
@@ -42,7 +43,35 @@ class PersonService {
     return SZ_RETCODE_FAILED;
   }
 
+  SZ_RETCODE report_face_record(uint person_id, const std::string &status,
+                                const std::string &image_content) {
+    httplib::MultipartFormDataItems items = {
+        {"file", image_content, "face.jpg", "images/jpeg"},
+        {"type", "record", "", ""},
+    };
+
+    std::string filePath;
+    auto imgRes = client_.Post("/api/v1/images", items);
+    if (imgRes && imgRes->status == 200) {
+      json body(imgRes->body);
+      filePath = body["filePath"];
+      return SZ_RETCODE_OK;
+    }
+
+    json j = {
+        {"personID", person_id},
+        {"status", status},
+        {"facePath", filePath},
+    };
+    std::string path = "/api/v1/faceRecords";
+    auto res = client_.Post(path.c_str(), j.dump(), "application/json");
+    if (res && res->status == 200) {
+      return SZ_RETCODE_OK;
+    }
+    return SZ_RETCODE_FAILED;
+  }
+
  private:
-  httplib::Client client_;
+  httplib::Client2 client_;
 };
 }  // namespace suanzi
