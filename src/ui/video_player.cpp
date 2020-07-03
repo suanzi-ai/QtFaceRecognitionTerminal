@@ -25,17 +25,17 @@ VideoPlayer::VideoPlayer(QWidget *parent) : QWidget(parent) {
   //   camera_reader_0_ = new CameraReader(0, this);
 
   static QThread detectThread;
-  antispoof_task_ = new AliveTask(&detectThread, this);
+  antispoof_task_ = new AntispoofTask(&detectThread, this);
   detect_task_ = new DetectTask(&detectThread, this);
   recognize_task_ = new RecognzieTask(&detectThread, this);
 
   //   connect((const QObject *)camera_reader_0_,
-  //           SIGNAL(txFrame(PingPangBuffer<MmzImage> *)),
+  //           SIGNAL(tx_frame(PingPangBuffer<MmzImage> *)),
   //           (const QObject *)antispoof_task_,
   //           SLOT(rx_frame(PingPangBuffer<MmzImage> *)));
 
   connect((const QObject *)camera_reader_1_,
-          SIGNAL(txFrame(PingPangBuffer<ImagePackage> *)),
+          SIGNAL(tx_frame(PingPangBuffer<ImagePackage> *)),
           (const QObject *)detect_task_,
           SLOT(rx_frame(PingPangBuffer<ImagePackage> *)));
 

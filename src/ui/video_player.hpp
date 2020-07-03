@@ -4,7 +4,7 @@
 #include <QScopedPointer>
 #include <QWidget>
 
-#include "alive_task.h"
+#include "antispoof_task.hpp"
 #include "camera_reader.h"
 #include "detect_task.hpp"
 #include "detect_tip_widget.hpp"
@@ -41,7 +41,7 @@ class VideoPlayer : public QWidget {
   CameraReader *camera_reader_0_;
   CameraReader *camera_reader_1_;
 
-  AliveTask *antispoof_task_;
+  AntispoofTask *antispoof_task_;
   DetectTask *detect_task_;
   RecognzieTask *recognize_task_;
 };

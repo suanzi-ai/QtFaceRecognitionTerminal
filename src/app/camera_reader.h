@@ -28,7 +28,7 @@ class CameraReader : QThread {
     void rx_finish();
 
  signals:
-  void txFrame(PingPangBuffer<ImagePackage> *buffer);
+  void tx_frame(PingPangBuffer<ImagePackage> *buffer);
 
  private:
     Vi *pvi_bgr_;

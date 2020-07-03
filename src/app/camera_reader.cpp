@@ -30,11 +30,7 @@ CameraReader::~CameraReader() {
   delete pvi_vpss_bgr_;
 }
 
-
-void CameraReader::rx_finish() {
-    b_tx_ok = true;
-}
-
+void CameraReader::rx_finish() { b_tx_ok = true; }
 
 void CameraReader::run() {
   Size size_bgr_1 = VPSS_CH_SIZES_BGR[1];
@@ -56,26 +52,18 @@ void CameraReader::run() {
                                                &image_package2);
   int frame_idx = 0;
   while (1) {
-    std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
     ImagePackage *pPing = pingpang_buffer.get_ping();
     if (pvpss_bgr_->getYuvFrame(pPing->img_bgr_small, 2)) {
-      while(!pvpss_bgr_->getYuvFrame(pPing->img_bgr_large, 1)) {
+      while (!pvpss_bgr_->getYuvFrame(pPing->img_bgr_large, 1)) {
         QThread::usleep(1);
       }
       pPing->frame_idx = frame_idx++;
 
-      std::chrono::steady_clock::time_point t2 =
-          std::chrono::steady_clock::now();
-      std::chrono::duration<double> time_span =
-          std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
-      // std::cout << "getFrame: "
-      //           << ": \t" << time_span.count() << "\tseconds." << std::endl;
       if (b_tx_ok) {
         b_tx_ok = false;
-        emit txFrame(&pingpang_buffer);
-        printf("tx threadId=%x  %x %d\n", QThread::currentThreadId(),
-          pPing,
-          pPing->frame_idx);
+        emit tx_frame(&pingpang_buffer);
+        printf("tx threadId=%x  %x %d\n", QThread::currentThreadId(), pPing,
+               pPing->frame_idx);
       }
     } else {
       QThread::usleep(1);

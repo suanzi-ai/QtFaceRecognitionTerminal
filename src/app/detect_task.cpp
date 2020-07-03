@@ -31,7 +31,7 @@ DetectTask::~DetectTask() {
   if (face_detector_) delete face_detector_;
 }
 
-void DetectTask::rxFrame(PingPangBuffer<ImagePackage> *buffer) {
+void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
   ImagePackage *pPang = buffer->get_pang();
   printf("DetectTask0 threadId=%x  %x %d\n", QThread::currentThreadId(),
   pPang,
@@ -43,7 +43,7 @@ void DetectTask::rxFrame(PingPangBuffer<ImagePackage> *buffer) {
 
   std::vector<suanzi::FaceDetection> detections;
   // 256x256  7ms
-  face_detector_->detect((const SVP_IMAGE_S *)image->img_bgr_small->pImplData,
+  face_detector_->detect((const SVP_IMAGE_S *)pPang->img_bgr_small->pImplData,
                          detections);
 
   // std::chrono::steady_clock::time_point t2 =
@@ -54,7 +54,7 @@ void DetectTask::rxFrame(PingPangBuffer<ImagePackage> *buffer) {
 
   for (int i = 0; i < detections.size(); i++) {
     auto rect = detections[i].bbox;
-    printf("det %d: %0.2f %0.2f %0.2f %0.2f \n", image->frame_idx, rect.x,
+    printf("det %d: %0.2f %0.2f %0.2f %0.2f \n", pPang->frame_idx, rect.x,
            rect.y, rect.width, rect.height);
     break;
   }
@@ -83,8 +83,8 @@ void DetectTask::rxFrame(PingPangBuffer<ImagePackage> *buffer) {
   DetectionFloat detection_bgr;
   // DetectionFloat detection_nir;
   if (detections.size() > 0) {
-    int w = image->img_bgr_small->width;
-    int h = image->img_bgr_small->height;
+    int w = pPang->img_bgr_small->width;
+    int h = pPang->img_bgr_small->height;
     auto rect = detections[max_id].bbox;
     detection_bgr.x = rect.x * 1.0 / w;
     detection_bgr.y = rect.y * 1.0 / h;
