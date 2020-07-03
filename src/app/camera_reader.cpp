@@ -65,12 +65,12 @@ void CameraReader::run() {
         emit tx_frame(&pingpang_buffer);
       }
     } else {
-      if (b_data_ready && b_tx_ok) {
-         b_tx_ok = false;
-         b_data_ready = false;  
-         emit tx_frame(&pingpang_buffer);
-        printf("tx threadId=%x  %x %d\n", QThread::currentThreadId(), pPing,
-               pPing->frame_idx);
+      if (b_data_ready && b_tx_ok_) {
+        b_tx_ok_ = false;
+        b_data_ready = false;
+        emit tx_frame(&pingpang_buffer);
+        // printf("tx threadId=%x  %x %d\n", QThread::currentThreadId(), pPing,
+        //        pPing->frame_idx);
       }
       QThread::usleep(1);
     }
