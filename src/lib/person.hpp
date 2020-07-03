@@ -12,6 +12,7 @@ class PersonDisplay {
   PersonDisplay(std::string name, std::string avatar_path) {
     this->name = name;
     this->avatar_path = avatar_path;
+    this->to_clear = false;
   }
 
   std::string name;

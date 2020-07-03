@@ -59,7 +59,6 @@ void RecognizeTask::rx_frame(PingPangBuffer<ImagePackage> *buffer,
     query_no_face();
   }
 
-  buffer->switch_buffer();
   emit tx_finish();
 }
 
@@ -82,15 +81,16 @@ suanzi::FaceDetection RecognizeTask::to_detection(
 }
 
 void RecognizeTask::query_success(const suanzi::QueryResult &person_info) {
+  history_.push_back(person_info);
   if (history_.size() >= HISTORY_SIZE) {
     int face_id;
 
     if (sequence_query(history_, face_id)) {
       SZ_LOG_INFO("recognized: face_id = {}", face_id);
-      tx_display({"Welcome " + face_id, "avatar_unknown.jpg"});
+      tx_display({std::to_string(face_id), "avatar_unknown.jpg"});
     } else {
       SZ_LOG_INFO("recognized: unknown");
-      tx_display({"Welcome " + face_id, "avatar_unknown.jpg"});
+      tx_display({"UNKNOWN", "avatar_unknown.jpg"});
     }
 
     history_.clear();
@@ -102,7 +102,7 @@ void RecognizeTask::query_empty_database() {
   if (++empty_age >= HISTORY_SIZE) {
     SZ_LOG_INFO("recognized: unknown (empty database)");
     history_.clear();
-    tx_display({"Welcome unknown", ""});
+    tx_display({"UNKNOWN", "avatar_unknown.jpg"});
     empty_age = 0;
   }
 }
@@ -149,12 +149,12 @@ bool RecognizeTask::sequence_query(std::vector<suanzi::QueryResult> history,
   float max_person_accumulate_score = person_accumulate_score[max_person_id];
   float max_person_score = person_max_score[max_person_id];
 
+  SZ_LOG_DEBUG("id={}, count={}, max_score={}, accumulate_score={}",
+               max_person_id, max_count, max_person_score,
+               person_accumulate_score[max_person_id]);
   if (max_count >= MIN_RECOGNIZE_COUNT &&
       max_person_accumulate_score >= MIN_ACCUMULATE_SCORE &&
       max_person_score >= MIN_RECOGNIZE_SCORE) {
-    SZ_LOG_DEBUG("id={}, count={}, accumulate_score={}", max_person_id,
-                 max_count, person_accumulate_score[max_person_id]);
-
     face_id = max_person_id;
     return true;
   } else {
