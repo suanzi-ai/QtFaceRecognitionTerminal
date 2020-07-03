@@ -80,7 +80,7 @@ void VideoPlayer::init_widgets() {
   recognize_tip_widget_->setFixedSize(RECOGNIZE_TIP_BOX.width(),
                                       RECOGNIZE_TIP_BOX.height());
   recognize_tip_widget_->move(RECOGNIZE_TIP_BOX.x(), RECOGNIZE_TIP_BOX.y());
-  // recognize_tip_widget_->show();
+  recognize_tip_widget_->show();
   /*detect_tip_widget_->setFixedSize(RECOGNIZE_BOX.width(),
   RECOGNIZE_BOX.height()); detect_tip_widget_->move(RECOGNIZE_BOX.x(),
   RECOGNIZE_BOX.y()); detect_tip_widget_->show();*/

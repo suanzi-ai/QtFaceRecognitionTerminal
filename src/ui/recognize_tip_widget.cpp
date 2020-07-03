@@ -30,7 +30,7 @@ void RecognizeTipWidget::paintEvent(QPaintEvent *event) {
   font.setPixelSize(48);
   painter.setFont(font);
   painter.setPen(Qt::red);
-
+  person_.name = "hello";
   QRect r = rect();
   QFontMetrics metrics = painter.fontMetrics();
   int string_height = metrics.ascent() + metrics.descent();  // 不算 line gap
@@ -38,5 +38,8 @@ void RecognizeTipWidget::paintEvent(QPaintEvent *event) {
       metrics.width(QString(person_.name.c_str()));  // 字符串的宽度
   int x = r.x() + (r.width() - string_width) / 2;
   int y = r.y() + (r.height() - string_height) / 2 + metrics.ascent();
+  
+
+  painter.drawPixmap(rect(), QPixmap("avatar_unknown.jpg"), QRect());
   painter.drawText(x, y, QString(person_.name.c_str()));
 }

@@ -32,7 +32,7 @@ class VideoPlayer : public QWidget {
 
  private:
   const QRect RECOGNIZE_BOX = {150, 300, 500, 500};
-  const QRect RECOGNIZE_TIP_BOX = {150, 200, 500, 100};
+  const QRect RECOGNIZE_TIP_BOX = {150, 300, 500, 500};
 
   VideoFrameWidget *video_frame_widget_;
   DetectTipWidget *detect_tip_widget_;
