@@ -27,11 +27,11 @@ class RecognizeTask : QObject {
   void tx_finish();
 
  private:
-  static constexpr int HISTORY_SIZE = 20;
+  static constexpr int HISTORY_SIZE = 15;
 
   static constexpr int MIN_RECOGNIZE_COUNT = 10;
-  static constexpr float MIN_RECOGNIZE_SCORE = 0.55f;
-  static constexpr float MIN_ACCUMULATE_SCORE = 5.0f; // 0.5 * 10;
+  static constexpr float MIN_RECOGNIZE_SCORE = 0.75f;
+  static constexpr float MIN_ACCUMULATE_SCORE = 7.0f; // 0.7 * 10;
 
   static constexpr int MAX_LOST_AGE = 20;
 
