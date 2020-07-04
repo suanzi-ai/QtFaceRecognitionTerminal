@@ -49,7 +49,7 @@ void DetectTipWidget::paint(QPainter *painter) {
     float bottom_x = top_x + width;
     float bottom_y = top_y + height;
 
-    painter->setPen(QPen(Qt::blue, 5));
+    painter->setPen(QPen(QColor(0, 0, 255, 128), 5));
     painter->drawLine(top_x, top_y, top_x + width / 5, top_y);
     painter->drawLine(top_x, top_y, top_x, top_y + height / 5);
     painter->drawLine(top_x, bottom_y, top_x + width / 5, bottom_y);
