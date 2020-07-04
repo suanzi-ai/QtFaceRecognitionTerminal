@@ -19,8 +19,8 @@ DetectTipWidget::~DetectTipWidget() {}
 
 void DetectTipWidget::paint(QPainter *painter) {
   if (rects_.size() > 0) {
-    int sum_x = 0, sum_y = 0, sum_width = 0, sum_height = 0;
-    int count = 0;
+    float sum_x = 0, sum_y = 0, sum_width = 0, sum_height = 0;
+    float count = 0;
 
     auto it = rects_.end();
     QRect latest = rects_.back();
@@ -33,13 +33,13 @@ void DetectTipWidget::paint(QPainter *painter) {
       float iou = 1.f * inter_section.width() * inter_section.height() /
                   united_section.width() / united_section.height();
 
-      if (iou < 0.9) break;
+      float weight = pow(iou, 6);
 
-      sum_x += it->x();
-      sum_y += it->y();
-      sum_width += it->width();
-      sum_height += it->height();
-      count += 1;
+      sum_x += weight * it->x();
+      sum_y += weight * it->y();
+      sum_width += weight * it->width();
+      sum_height += weight * it->height();
+      count += weight;
 
     } while (it != rects_.begin());
 
