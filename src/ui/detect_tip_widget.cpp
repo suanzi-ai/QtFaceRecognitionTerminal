@@ -9,7 +9,6 @@ using namespace suanzi;
 DetectTipWidget::DetectTipWidget(QWidget *parent) : QWidget(parent) {
   QPalette palette = this->palette();
   palette.setColor(QPalette::Background, Qt::transparent);
-  palette.setColor(QPalette::Foreground, Qt::green);
   setPalette(palette);
 
   is_updated_ = false;
@@ -43,8 +42,22 @@ void DetectTipWidget::paint(QPainter *painter) {
 
     } while (it != rects_.begin());
 
-    painter->drawRect(QRect(sum_x / count, sum_y / count, sum_width / count,
-                            sum_height / count));
+    float width = sum_width / count;
+    float height = sum_height / count;
+    float top_x = sum_x / count;
+    float top_y = sum_y / count;
+    float bottom_x = top_x + width;
+    float bottom_y = top_y + height;
+
+    painter->setPen(QPen(Qt::blue, 5));
+    painter->drawLine(top_x, top_y, top_x + width / 5, top_y);
+    painter->drawLine(top_x, top_y, top_x, top_y + height / 5);
+    painter->drawLine(top_x, bottom_y, top_x + width / 5, bottom_y);
+    painter->drawLine(top_x, bottom_y, top_x, bottom_y - height / 5);
+    painter->drawLine(bottom_x, top_y, bottom_x, top_y + height / 5);
+    painter->drawLine(bottom_x, top_y, bottom_x - width / 5, top_y);
+    painter->drawLine(bottom_x, bottom_y, bottom_x, bottom_y - height / 5);
+    painter->drawLine(bottom_x, bottom_y, bottom_x - width / 5, bottom_y);
   }
 }
 
