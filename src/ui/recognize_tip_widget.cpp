@@ -4,7 +4,6 @@
 #include <QDebug>
 #include <QPaintEvent>
 #include <QPainter>
-#include <QTimer>
 
 #include <iostream>
 
@@ -44,7 +43,7 @@ void RecognizeTipWidget::paintEvent(QPaintEvent *event) {
     painter.drawLine(350, 50, 350, 230);
 
     // draw datetime
-    QDateTime now = QDateTime::currentDateTime();
+    QDateTime now = QDateTime::currentDateTime().toUTC().addSecs(8 * 3600);
     QString time = now.toString("hh : mm");
     QString date = now.toString("yyyy年MM月dd日");
 
