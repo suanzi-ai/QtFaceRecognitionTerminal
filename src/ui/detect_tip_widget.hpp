@@ -27,10 +27,10 @@ class DetectTipWidget : public QWidget {
   void rx_display(DetectionFloat detection);
 
  private:
-  static constexpr float MOVING_AVERAGE_RATIO = 0.75;
+  static constexpr int MAX_RECT_COUNT = 10;
+  static constexpr int MAX_LOST_AGE = 5;
 
-  QRect rect_;
-  float landmark_[5][2];
+  std::vector<QRect> rects_;
 
   bool is_updated_;
 };

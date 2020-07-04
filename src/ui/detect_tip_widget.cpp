@@ -4,8 +4,6 @@
 #include <QPainter>
 #include <QTimer>
 
-#define MOVING_AVERAGE(a, b, r) ((r) * (a) + (1 - (r)) * (b))
-
 using namespace suanzi;
 
 DetectTipWidget::DetectTipWidget(QWidget *parent) : QWidget(parent) {
@@ -20,41 +18,57 @@ DetectTipWidget::DetectTipWidget(QWidget *parent) : QWidget(parent) {
 DetectTipWidget::~DetectTipWidget() {}
 
 void DetectTipWidget::paint(QPainter *painter) {
-  if (is_updated_) {
-    painter->drawRect(rect_);
-    for (int i = 0; i < 5; i++) {
-      painter->drawPoint(landmark_[i][0], landmark_[i][1]);
-    }
+  if (rects_.size() > 0) {
+    int sum_x = 0, sum_y = 0, sum_width = 0, sum_height = 0;
+    int count = 0;
+
+    auto it = rects_.end();
+    QRect latest = rects_.back();
+    do {
+      it -= 1;
+
+      QRect inter_section = latest.intersected(*it);
+      QRect united_section = latest.united(*it);
+
+      float iou = 1.f * inter_section.width() * inter_section.height() /
+                  united_section.width() / united_section.height();
+
+      if (iou < 0.9) break;
+
+      sum_x += it->x();
+      sum_y += it->y();
+      sum_width += it->width();
+      sum_height += it->height();
+      count += 1;
+
+    } while (it != rects_.begin());
+
+    painter->drawRect(QRect(sum_x / count, sum_y / count, sum_width / count,
+                            sum_height / count));
   }
 }
 
 void DetectTipWidget::rx_display(DetectionFloat detection) {
-
   // TODO: add global configuration
-  const int w = 800-1;
-  const int h = 1280-1;
+  const int w = 800 - 1;
+  const int h = 1280 - 1;
 
   is_updated_ = detection.b_valid;
   if (is_updated_) {
-    QRect current_rect(detection.x * w, detection.y * h, detection.width * w,
-                       detection.height * h);
+    // resize to square
+    float center_x = (detection.x + .5f * detection.width) * w;
+    float center_Y = (detection.y + .5f * detection.height) * h;
+    float size = .5f * (detection.width * w + detection.height * h);
 
-    // Apply moving average to face bbox if intersects
-    if (rect_.intersects(current_rect)) {
-      rect_.setX(
-          MOVING_AVERAGE(detection.x * w, rect_.x(), MOVING_AVERAGE_RATIO));
-      rect_.setY(
-          MOVING_AVERAGE(detection.y * h, rect_.y(), MOVING_AVERAGE_RATIO));
-      rect_.setWidth(MOVING_AVERAGE(detection.width * w, rect_.width(),
-                                    MOVING_AVERAGE_RATIO));
-      rect_.setHeight(MOVING_AVERAGE(detection.height * h, rect_.height(),
-                                     MOVING_AVERAGE_RATIO));
-    } else
-      rect_ = current_rect;
+    QRect next_rect(center_x - .5f * size, center_Y - .5f * size, size, size);
+    rects_.push_back(next_rect);
+    if (rects_.size() > MAX_RECT_COUNT) rects_.erase(rects_.begin());
 
-    for (int i = 0; i < 5; i++) {
-      landmark_[i][0] = detection.landmark[i][0] * w;
-      landmark_[i][1] = detection.landmark[i][1] * h;
+  } else {
+    static int lost_age = 0;
+    if (++lost_age > MAX_LOST_AGE) {
+      rects_.clear();
+      lost_age = 0;
     }
   }
 
@@ -62,7 +76,4 @@ void DetectTipWidget::rx_display(DetectionFloat detection) {
   p->update();
 }
 
-void DetectTipWidget::paintEvent(QPaintEvent *event) {
-  QPainter painter(this);
-  painter.drawRect(rect_);
-}
+void DetectTipWidget::paintEvent(QPaintEvent *event) {}
