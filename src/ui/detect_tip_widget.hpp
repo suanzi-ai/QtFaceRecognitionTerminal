@@ -20,9 +20,6 @@ class DetectTipWidget : public QWidget {
 
   void paint(QPainter *painter);
 
- protected:
-  void paintEvent(QPaintEvent *event) override;
-
  private slots:
   void rx_display(DetectionFloat detection);
 

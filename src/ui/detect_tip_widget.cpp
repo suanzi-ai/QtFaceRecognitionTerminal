@@ -88,5 +88,3 @@ void DetectTipWidget::rx_display(DetectionFloat detection) {
   QWidget *p = (QWidget *)parent();
   p->update();
 }
-
-void DetectTipWidget::paintEvent(QPaintEvent *event) {}
