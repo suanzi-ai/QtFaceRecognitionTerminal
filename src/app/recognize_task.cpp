@@ -87,10 +87,10 @@ void RecognizeTask::query_success(const suanzi::QueryResult &person_info) {
 
     if (sequence_query(history_, face_id)) {
       SZ_LOG_INFO("recognized: face_id = {}", face_id);
-      tx_display({std::to_string(face_id), "avatar_unknown.jpg"});
+      tx_display({std::to_string(face_id), "识别成功", "avatar_unknown.jpg"});
     } else {
       SZ_LOG_INFO("recognized: unknown");
-      tx_display({"UNKNOWN", "avatar_unknown.jpg"});
+      tx_display({"", "访客", "avatar_unknown.jpg"});
     }
 
     history_.clear();
@@ -101,8 +101,9 @@ void RecognizeTask::query_empty_database() {
   static int empty_age = 0;
   if (++empty_age >= HISTORY_SIZE) {
     SZ_LOG_INFO("recognized: unknown (empty database)");
+    tx_display({"", "访客", "avatar_unknown.jpg"});
+
     history_.clear();
-    tx_display({"UNKNOWN", "avatar_unknown.jpg"});
     empty_age = 0;
   }
 }

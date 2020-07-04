@@ -59,17 +59,20 @@ void RecognizeTipWidget::paintEvent(QPaintEvent *event) {
     painter.drawText(48, 200, date);
 
     // draw avatar
-    painter.drawPixmap(QRect(400, 65, 150, 150), QPixmap("avatar_unknown.jpg"),
-                       QRect());
+    if (person_.avatar_path.length() > 0)
+      painter.drawPixmap(QRect(400, 65, 150, 150),
+                         QPixmap(person_.avatar_path.c_str()), QRect());
 
     // draw person info
-    font.setPixelSize(50);
+    font.setPixelSize(45);
     painter.setFont(font);
     painter.setPen(Qt::white);
-    painter.drawText(580, 130, "倪亚宇");
+    painter.drawText(580, 130, person_.name.c_str());
 
-    font.setPixelSize(35);
-    painter.setFont(font);
-    painter.drawText(580, 200, QString(("ID: " + person_.name).c_str()));
+    if (person_.id.length() > 0) {
+      font.setPixelSize(30);
+      painter.setFont(font);
+      painter.drawText(580, 200, QString(("ID: " + person_.id).c_str()));
+    }
   }
 }

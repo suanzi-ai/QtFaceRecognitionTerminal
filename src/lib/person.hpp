@@ -9,7 +9,8 @@ class PersonDisplay {
  public:
   PersonDisplay() { to_clear = true; }
 
-  PersonDisplay(std::string name, std::string avatar_path) {
+  PersonDisplay(std::string id, std::string name, std::string avatar_path) {
+    this->id = id;
     this->name = name;
     this->avatar_path = avatar_path;
     this->to_clear = false;
@@ -17,6 +18,8 @@ class PersonDisplay {
 
   std::string name;
   std::string avatar_path;
+  std::string id;
+
   bool to_clear;
 };
 
