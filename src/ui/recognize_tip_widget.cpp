@@ -1,16 +1,18 @@
 #include "recognize_tip_widget.hpp"
 
+#include <QDateTime>
 #include <QDebug>
 #include <QPaintEvent>
 #include <QPainter>
 #include <QTimer>
+
+#include <iostream>
 
 using namespace suanzi;
 
 RecognizeTipWidget::RecognizeTipWidget(QWidget *parent) : QWidget(parent) {
   QPalette palette = this->palette();
   palette.setColor(QPalette::Background, Qt::transparent);
-  palette.setColor(QPalette::Foreground, Qt::red);
   setPalette(palette);
 }
 
@@ -31,19 +33,43 @@ void RecognizeTipWidget::hide_self() { hide(); }
 void RecognizeTipWidget::paintEvent(QPaintEvent *event) {
   if (!person_.to_clear) {
     QPainter painter(this);
+    const QRect RECOGNIZE_TIP_BOX = {0, 0, 800, 280};
+
+    // draw background
+    painter.fillRect(RECOGNIZE_TIP_BOX, QColor(0, 0, 10, 150));
+
+    // draw border and seperator
+    painter.setPen(QPen(QColor(0, 0, 255, 128), 5));
+    painter.drawRect(RECOGNIZE_TIP_BOX);
+    painter.drawLine(350, 50, 350, 230);
+
+    // draw datetime
+    QDateTime now = QDateTime::currentDateTime();
+    QString time = now.toString("hh : mm");
+    QString date = now.toString("yyyy年MM月dd日");
+
     QFont font = painter.font();
-    font.setPixelSize(48);
+    font.setPixelSize(70);
     painter.setFont(font);
     painter.setPen(Qt::white);
+    painter.drawText(70, 140, time);
 
-    QRect r = rect();
-    QFontMetrics metrics = painter.fontMetrics();
-    int string_height = metrics.ascent() + metrics.descent();
-    int string_width = metrics.width(QString(person_.name.c_str()));
-    int x = r.x() + (r.width() - string_width) / 2;
-    int y = r.height() - 30;
+    font.setPixelSize(35);
+    painter.setFont(font);
+    painter.drawText(48, 200, date);
 
-    painter.drawPixmap(rect(), QPixmap(person_.avatar_path.c_str()), QRect());
-    painter.drawText(x, y, QString(person_.name.c_str()));
+    // draw avatar
+    painter.drawPixmap(QRect(400, 65, 150, 150), QPixmap("avatar_unknown.jpg"),
+                       QRect());
+
+    // draw person info
+    font.setPixelSize(50);
+    painter.setFont(font);
+    painter.setPen(Qt::white);
+    painter.drawText(580, 130, "倪亚宇");
+
+    font.setPixelSize(35);
+    painter.setFont(font);
+    painter.drawText(580, 200, QString(("ID: " + person_.name).c_str()));
   }
 }

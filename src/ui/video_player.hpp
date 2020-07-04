@@ -30,8 +30,8 @@ class VideoPlayer : public QWidget {
   void init_widgets();
 
  private:
-  const QRect RECOGNIZE_BOX = {150, 300, 500, 500};
-  const QRect RECOGNIZE_TIP_BOX = {150, 300, 500, 500};
+  // TODO: gloabal configuration
+  const QRect RECOGNIZE_TIP_BOX = {0, 1000, 800, 280};
 
   DetectTipWidget *detect_tip_widget_;
   RecognizeTipWidget *recognize_tip_widget_;
