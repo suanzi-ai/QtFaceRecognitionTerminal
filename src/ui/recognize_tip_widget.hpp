@@ -22,6 +22,8 @@ class RecognizeTipWidget : public QWidget {
   void rx_display(PersonDisplay person);
   void hide_self();
 
+  QPixmap rectangle_to_round(QPixmap &input_image);
+
  private:
   PersonDisplay person_;
 };

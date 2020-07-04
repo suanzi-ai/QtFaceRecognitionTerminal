@@ -87,7 +87,7 @@ void RecognizeTask::query_success(const suanzi::QueryResult &person_info) {
 
     if (sequence_query(history_, face_id)) {
       SZ_LOG_INFO("recognized: face_id = {}", face_id);
-      tx_display({std::to_string(face_id), "识别成功", "avatar_unknown.jpg"});
+      tx_display({std::to_string(face_id), "打卡成功", "avatar_unknown.jpg"});
     } else {
       SZ_LOG_INFO("recognized: unknown");
       tx_display({"", "访客", "avatar_unknown.jpg"});

@@ -1,5 +1,6 @@
 #include "recognize_tip_widget.hpp"
 
+#include <QBitmap>
 #include <QDateTime>
 #include <QDebug>
 #include <QPaintEvent>
@@ -21,8 +22,7 @@ void RecognizeTipWidget::rx_display(PersonDisplay person) {
   person_ = person;
 
   hide();
-  if (!person_.to_clear)
-    show();
+  if (!person_.to_clear) show();
 }
 
 void RecognizeTipWidget::hide_self() { hide(); }
@@ -56,9 +56,11 @@ void RecognizeTipWidget::paintEvent(QPaintEvent *event) {
     painter.drawText(48, 200, date);
 
     // draw avatar
+    QPixmap avatar(person_.avatar_path.c_str());
     if (person_.avatar_path.length() > 0)
-      painter.drawPixmap(QRect(400, 65, 150, 150),
-                         QPixmap(person_.avatar_path.c_str()), QRect());
+      painter.drawPixmap(
+          QRect(400, 65, 150, 150),
+          rectangle_to_round(avatar), QRect());
 
     // draw person info
     font.setPixelSize(45);
@@ -72,4 +74,21 @@ void RecognizeTipWidget::paintEvent(QPaintEvent *event) {
       painter.drawText(580, 200, QString(("ID: " + person_.id).c_str()));
     }
   }
+}
+
+QPixmap RecognizeTipWidget::rectangle_to_round(QPixmap &input_image) {
+  if (input_image.isNull()) {
+    return QPixmap();
+  }
+  QSize size(input_image.size());
+  QBitmap mask(input_image.size());
+  QPainter painter(&mask);
+  painter.setRenderHint(QPainter::Antialiasing);
+  painter.setRenderHint(QPainter::SmoothPixmapTransform);
+  painter.fillRect(mask.rect(), Qt::white);
+  painter.setBrush(QColor(0, 0, 0));
+  painter.drawRoundedRect(mask.rect(), size.width() / 2, size.height() / 2);
+  QPixmap image = input_image;
+  image.setMask(mask);
+  return image;
 }
