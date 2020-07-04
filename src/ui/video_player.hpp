@@ -13,7 +13,6 @@
 #include "pingpang_buffer.h"
 #include "recognize_task.hpp"
 #include "recognize_tip_widget.hpp"
-#include "videoframewidget.h"
 
 namespace suanzi {
 
@@ -34,7 +33,6 @@ class VideoPlayer : public QWidget {
   const QRect RECOGNIZE_BOX = {150, 300, 500, 500};
   const QRect RECOGNIZE_TIP_BOX = {150, 300, 500, 500};
 
-  VideoFrameWidget *video_frame_widget_;
   DetectTipWidget *detect_tip_widget_;
   RecognizeTipWidget *recognize_tip_widget_;
 

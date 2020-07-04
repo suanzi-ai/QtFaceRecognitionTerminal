@@ -6,8 +6,6 @@
 #include <QPushButton>
 #include <QTimer>
 
-#include "videoframewidget.h"
-
 using namespace suanzi;
 
 VideoPlayer::VideoPlayer(QWidget *parent) : QWidget(parent) {
