@@ -20,11 +20,9 @@ RecognizeTipWidget::~RecognizeTipWidget() {}
 void RecognizeTipWidget::rx_display(PersonDisplay person) {
   person_ = person;
 
-  if (person_.to_clear) {
-    hide();
-  } else {
+  hide();
+  if (!person_.to_clear)
     show();
-  }
 }
 
 void RecognizeTipWidget::hide_self() { hide(); }
