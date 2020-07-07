@@ -12,7 +12,7 @@ else
     exit 1
 fi
 
-build_type="Debug"
+build_type="Release"
 cmake_generator="Unix Makefiles"
 
 source_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"

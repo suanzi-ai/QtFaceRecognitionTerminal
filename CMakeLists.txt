@@ -45,7 +45,7 @@ set(THIRD_PARTY_PREFIX
     "${PROJECT_DEPENDENCY_DIR}/3rd"
     CACHE STRING "Dir for 3rd")
 set(QUFACE_SDK_PREFIX
-    "/home/niyayu/quface/install/"
+    "${PROJECT_DEPENDENCY_DIR}/qufacesdk"
     CACHE STRING "Dir for quface sdk")
 set(QT_SDK_PREFIX
     "${PROJECT_DEPENDENCY_DIR}/qtsdk"
@@ -115,18 +115,15 @@ message(STATUS "Found QuFaceSDK ${QuFaceSDK_VERSION}")
 find_package(Qt5 REQUIRED COMPONENTS Widgets)
 message(STATUS "Found Qt5 ${Qt5_VERSION}")
 
-#find_package(httplib)
+find_package(httplib)
 
 add_subdirectory(src/app)
 add_subdirectory(src/lib)
 add_subdirectory(src/ui)
-#add_subdirectory(src/service)
+add_subdirectory(src/service)
 
 add_executable(main main.cpp)
 target_link_libraries(main PRIVATE ui)
-
-#add_executable(server server.cpp)
-#target_link_libraries(server PRIVATE service)
 
 install(TARGETS main DESTINATION .)
 install(DIRECTORY ${RESOURCE_PREFIX}/models/ DESTINATION .)
