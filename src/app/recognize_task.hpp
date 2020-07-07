@@ -6,8 +6,8 @@
 #include "detection_float.h"
 #include "image_package.h"
 #include "person.hpp"
+#include "person_service.hpp"
 #include "pingpang_buffer.h"
-
 #include "quface/db.hpp"
 #include "quface/face.hpp"
 
@@ -31,21 +31,24 @@ class RecognizeTask : QObject {
 
   static constexpr int MIN_RECOGNIZE_COUNT = 10;
   static constexpr float MIN_RECOGNIZE_SCORE = 0.75f;
-  static constexpr float MIN_ACCUMULATE_SCORE = 7.0f; // 0.7 * 10;
+  static constexpr float MIN_ACCUMULATE_SCORE = 7.0f;  // 0.7 * 10;
 
   static constexpr int MAX_LOST_AGE = 20;
 
   suanzi::FaceDetection to_detection(DetectionFloat detection_ratio, int width,
                                      int height);
 
-  void query_success(const suanzi::QueryResult &person_info);
+  void report(SZ_UINT32 face_id, ImagePackage *img);
+  void query_success(const suanzi::QueryResult &person_info, ImagePackage *img);
   void query_empty_database();
   void query_no_face();
 
-  bool sequence_query(std::vector<suanzi::QueryResult> history, int &face_id);
+  bool sequence_query(std::vector<suanzi::QueryResult> history,
+                      SZ_UINT32 &face_id);
 
   suanzi::FaceExtractor *face_extractor_;
   suanzi::FaceDatabase *face_database_;
+  suanzi::PersonService *person_service_;
 
   std::vector<suanzi::QueryResult> history_;
 };

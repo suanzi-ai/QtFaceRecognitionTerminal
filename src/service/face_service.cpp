@@ -343,6 +343,7 @@ json FaceService::db_get_all(const json &body) {
   int page = 1;
   int limit = 10;
   bool with_image = false;
+  bool no_pagination = false;
 
   if (body.contains("page")) {
     page = body["page"].get<int>();
@@ -352,6 +353,9 @@ json FaceService::db_get_all(const json &body) {
   }
   if (body.contains("with_image")) {
     with_image = body["with_image"].get<bool>();
+  }
+  if (body.contains("no_pagination")) {
+    no_pagination = body["no_pagination"].get<bool>();
   }
 
   SZ_LOG_DEBUG("db.get_all");
@@ -367,8 +371,14 @@ json FaceService::db_get_all(const json &body) {
   }
 
   std::vector<PersonImageInfo> persons;
-  for (int i = (page - 1) * limit; i < personIDList.size() && i < page * limit;
-       i++) {
+  int start = (page - 1) * limit;
+  int end = page * limit;
+  if (no_pagination) {
+    start = 0;
+    end = personIDList.size();
+  }
+
+  for (int i = start; i < personIDList.size() && i < end; i++) {
     std::string faceBase64;
     if (with_image && store_image_) {
       SZ_RETCODE ret = read_image_as_base64(personIDList[i], faceBase64);

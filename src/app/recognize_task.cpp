@@ -1,7 +1,6 @@
 #include "recognize_task.hpp"
 
 #include <QThread>
-
 #include <chrono>
 #include <ctime>
 #include <iostream>
@@ -15,6 +14,8 @@ RecognizeTask::RecognizeTask(QThread *thread, QObject *parent) {
   // TODO: global configuration
   face_extractor_ = new suanzi::FaceExtractor("facemodel.bin");
   face_database_ = new suanzi::FaceDatabase("quface");
+  person_service_ =
+      new PersonService("http://localhost:8008", "/user/go-app/upload/");
 
   if (thread == nullptr) {
     static QThread new_thread;
@@ -27,7 +28,9 @@ RecognizeTask::RecognizeTask(QThread *thread, QObject *parent) {
 }
 
 RecognizeTask::~RecognizeTask() {
-  if (face_extractor_) delete face_extractor_;
+  delete face_extractor_;
+  delete face_database_;
+  delete person_service_;
 }
 
 void RecognizeTask::rx_frame(PingPangBuffer<ImagePackage> *buffer,
@@ -51,7 +54,7 @@ void RecognizeTask::rx_frame(PingPangBuffer<ImagePackage> *buffer,
     std::vector<suanzi::QueryResult> results;
     SZ_RETCODE ret = face_database_->query(feature, 1, results);
     if (SZ_RETCODE_OK == ret) {
-      query_success(results[0]);
+      query_success(results[0], pang);
     } else if (SZ_RETCODE_EMPTY_DATABASE == ret) {
       query_empty_database();
     }
@@ -80,18 +83,37 @@ suanzi::FaceDetection RecognizeTask::to_detection(
   return face_detection;
 }
 
-void RecognizeTask::query_success(const suanzi::QueryResult &person_info) {
+void RecognizeTask::report(SZ_UINT32 face_id, ImagePackage *img) {
+  std::vector<SZ_UINT8> image_buffer;
+  if (img->get_jpeg_buffer(img->img_bgr_small, image_buffer)) {
+    SZ_RETCODE ret = person_service_->report_face_record(face_id, image_buffer);
+    if (ret != SZ_RETCODE_OK) {
+      SZ_LOG_ERROR("Report face record error");
+    }
+  } else {
+    SZ_LOG_ERROR("Decode image failed");
+  }
+}
+
+void RecognizeTask::query_success(const suanzi::QueryResult &person_info,
+                                  ImagePackage *img) {
   history_.push_back(person_info);
   if (history_.size() >= HISTORY_SIZE) {
-    int face_id;
+    SZ_UINT32 face_id;
 
     if (sequence_query(history_, face_id)) {
-      SZ_LOG_INFO("recognized: face_id = {}", face_id);
-      tx_display({std::to_string(face_id), "打卡成功", "avatar_unknown.jpg"});
+      suanzi::PersonData person;
+      SZ_RETCODE ret = person_service_->get_person(face_id, person);
+      if (ret == SZ_RETCODE_OK) {
+        SZ_LOG_INFO("recognized: id = {}, name = {}", person.id, person.name);
+        tx_display({std::to_string(face_id), person.name, person.face_path});
+      }
     } else {
       SZ_LOG_INFO("recognized: unknown");
       tx_display({"", "访客", "avatar_unknown.jpg"});
     }
+
+    report(face_id, img);
 
     history_.clear();
   }
@@ -118,10 +140,10 @@ void RecognizeTask::query_no_face() {
 }
 
 bool RecognizeTask::sequence_query(std::vector<suanzi::QueryResult> history,
-                                   int &face_id) {
-  std::map<int, int> person_counts;
-  std::map<int, float> person_accumulate_score;
-  std::map<int, float> person_max_score;
+                                   SZ_UINT32 &face_id) {
+  std::map<SZ_UINT32, int> person_counts;
+  std::map<SZ_UINT32, float> person_accumulate_score;
+  std::map<SZ_UINT32, float> person_max_score;
 
   // initialize map
   for (auto &person : history) {
@@ -145,7 +167,7 @@ bool RecognizeTask::sequence_query(std::vector<suanzi::QueryResult> history,
         return i.second < j.second;
       });
 
-  int max_person_id = max_person->first;
+  SZ_UINT32 max_person_id = max_person->first;
   int max_count = max_person->second;
   float max_person_accumulate_score = person_accumulate_score[max_person_id];
   float max_person_score = person_max_score[max_person_id];
