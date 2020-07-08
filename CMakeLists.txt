@@ -122,7 +122,7 @@ add_subdirectory(src/lib)
 add_subdirectory(src/ui)
 add_subdirectory(src/service)
 
-add_executable(main main.cpp)
+add_executable(main main.cpp resource.qrc)
 target_link_libraries(main PRIVATE ui)
 
 install(TARGETS main DESTINATION .)

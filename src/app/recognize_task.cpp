@@ -105,7 +105,7 @@ void RecognizeTask::query_success(const suanzi::QueryResult &person_info,
       }
     } else {
       SZ_LOG_INFO("recognized: unknown");
-      tx_display({"", "访客", "avatar_unknown.jpg"});
+      tx_display({"", "访客", ":asserts/avatar_unknown.jpg"});
     }
 
     report(face_id, img);

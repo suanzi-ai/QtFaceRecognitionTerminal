@@ -5,6 +5,8 @@
 #include <quface/db.hpp>
 #include <quface/face.hpp>
 
-typedef std::shared_ptr<suanzi::FaceDetector> FaceDetectorPtr;
-typedef std::shared_ptr<suanzi::FaceExtractor> FaceExtractorPtr;
-typedef std::shared_ptr<suanzi::FaceDatabase> FaceDatabasePtr;
+namespace suanzi {
+typedef std::shared_ptr<FaceDetector> FaceDetectorPtr;
+typedef std::shared_ptr<FaceExtractor> FaceExtractorPtr;
+typedef std::shared_ptr<FaceDatabase> FaceDatabasePtr;
+}  // namespace suanzi
