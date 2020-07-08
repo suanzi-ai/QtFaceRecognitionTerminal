@@ -52,6 +52,7 @@ class RecognizeTask : QObject {
   suanzi::PersonService::ptr person_service_;
 
   std::vector<suanzi::QueryResult> history_;
+  SZ_UINT32 last_face_id_ = 0;
 };
 
 }  // namespace suanzi

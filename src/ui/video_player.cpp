@@ -9,7 +9,7 @@
 using namespace suanzi;
 
 VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
-                         FaceExtractorPtr extractor, suanzi::Config::ptr config,
+                         FaceExtractorPtr extractor, Config::ptr config,
                          QWidget *parent)
     : config_(config), QWidget(parent) {
   QPalette pal = palette();

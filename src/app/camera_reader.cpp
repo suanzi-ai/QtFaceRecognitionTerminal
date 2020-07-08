@@ -30,7 +30,10 @@ CameraReader::~CameraReader() {
   delete pvi_vpss_bgr_;
 }
 
-void CameraReader::rx_finish() { b_tx_ok_ = true; }
+void CameraReader::rx_finish() {
+  last_rx_ = chrono::system_clock::now();
+  b_tx_ok_ = true;
+}
 
 void CameraReader::run() {
   Size size_bgr_1 = VPSS_CH_SIZES_BGR[1];
@@ -52,27 +55,42 @@ void CameraReader::run() {
                                                &image_package2);
   int frame_idx = 0;
   bool b_data_ready = false;
+  last_rx_ = chrono::system_clock::now();
+
   while (1) {
+    if (!b_tx_ok_) {
+      auto now = chrono::system_clock::now();
+      auto duration =
+          chrono::duration_cast<chrono::milliseconds>(now - last_rx_).count();
+      if (duration > 1000) {
+        SZ_LOG_WARN("rx_finish timeout of {}ms", duration);
+        last_rx_ = chrono::system_clock::now();
+        b_tx_ok_ = true;
+      }
+    }
+
     ImagePackage *pPing = pingpang_buffer.get_ping();
     if (pvpss_bgr_->getYuvFrame(pPing->img_bgr_small, 2)) {
       while (!pvpss_bgr_->getYuvFrame(pPing->img_bgr_large, 1)) {
-        QThread::usleep(1);
+        QThread::usleep(10 * 1000);
       }
       pPing->frame_idx = frame_idx++;
 
       if (b_tx_ok_) {
         b_tx_ok_ = false;
+        // SZ_LOG_DEBUG("tx_frame");
         emit tx_frame(&pingpang_buffer);
       }
     } else {
       if (b_data_ready && b_tx_ok_) {
         b_tx_ok_ = false;
         b_data_ready = false;
+        // SZ_LOG_DEBUG("tx_frame");
         emit tx_frame(&pingpang_buffer);
         // printf("tx threadId=%x  %x %d\n", QThread::currentThreadId(), pPing,
         //        pPing->frame_idx);
       }
-      QThread::usleep(1);
+      QThread::usleep(10 * 1000);
     }
   }
 }

@@ -30,17 +30,23 @@ DetectTask::DetectTask(FaceDetectorPtr detector, QThread *thread,
 DetectTask::~DetectTask() {}
 
 void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
+  // SZ_LOG_DEBUG("rx_frame");
   ImagePackage *pang = buffer->get_pang();
 
   // 256x256  7ms
   std::vector<suanzi::FaceDetection> detections;
-  face_detector_->detect((const SVP_IMAGE_S *)pang->img_bgr_small->pImplData,
+  SZ_RETCODE ret = face_detector_->detect((const SVP_IMAGE_S *)pang->img_bgr_small->pImplData,
                          detections);
   buffer->switch_buffer();
+  // SZ_LOG_DEBUG("tx_finish");
   emit tx_finish();
 
+  if (ret != SZ_RETCODE_OK) {
+    SZ_LOG_ERROR("Detect error ret={}", ret);
+  }
+
   // if face detected
-  if (detections.size() > 0) {
+  if (ret == SZ_RETCODE_OK && detections.size() > 0) {
     int width = pang->img_bgr_small->width;
     int height = pang->img_bgr_small->height;
     DetectionFloat largest_face = select_face(detections, width, height);

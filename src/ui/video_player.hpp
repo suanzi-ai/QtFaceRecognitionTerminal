@@ -22,7 +22,7 @@ class VideoPlayer : public QWidget {
 
  public:
   VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
-              FaceExtractorPtr extractor, suanzi::Config::ptr config,
+              FaceExtractorPtr extractor, Config::ptr config,
               QWidget *parent = nullptr);
   ~VideoPlayer();
 

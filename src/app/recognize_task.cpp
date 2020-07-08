@@ -94,7 +94,7 @@ void RecognizeTask::query_success(const suanzi::QueryResult &person_info,
                                   ImagePackage *img) {
   history_.push_back(person_info);
   if (history_.size() >= HISTORY_SIZE) {
-    SZ_UINT32 face_id;
+    SZ_UINT32 face_id = 0;
 
     if (sequence_query(history_, face_id)) {
       suanzi::PersonData person;
@@ -108,7 +108,10 @@ void RecognizeTask::query_success(const suanzi::QueryResult &person_info,
       tx_display({"", "访客", ":asserts/avatar_unknown.jpg"});
     }
 
-    report(face_id, img);
+    if (last_face_id_ != face_id) {
+      report(face_id, img);
+      last_face_id_ = face_id;
+    }
 
     history_.clear();
   }

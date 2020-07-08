@@ -4,6 +4,8 @@
 #include <QImage>
 #include <QSharedPointer>
 #include <QThread>
+#include <chrono>
+
 #include "image_package.h"
 #include "pingpang_buffer.h"
 #include "vi.h"
@@ -13,6 +15,7 @@
 #include "vpss.h"
 
 namespace suanzi {
+namespace chrono = std::chrono;
 
 class CameraReader : QThread {
   Q_OBJECT
@@ -51,6 +54,7 @@ class CameraReader : QThread {
   const int VO_H = 1280;
 
   bool b_tx_ok_;
+  chrono::system_clock::time_point last_rx_;
 };
 
 }  // namespace suanzi
