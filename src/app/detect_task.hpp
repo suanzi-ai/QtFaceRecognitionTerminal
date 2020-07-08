@@ -7,15 +7,15 @@
 #include "detection_float.h"
 #include "image_package.h"
 #include "pingpang_buffer.h"
-
-#include "quface/face.hpp"
+#include "quface_common.hpp"
 
 namespace suanzi {
 
 class DetectTask : QObject {
   Q_OBJECT
  public:
-  DetectTask(QThread *thread = nullptr, QObject *parent = nullptr);
+  DetectTask(FaceDetectorPtr detector, QThread *thread = nullptr,
+             QObject *parent = nullptr);
   ~DetectTask();
 
  private slots:
@@ -38,7 +38,7 @@ class DetectTask : QObject {
 
   bool b_tx_ok_;
 
-  suanzi::FaceDetector *face_detector_;
+  FaceDetectorPtr face_detector_;
 };
 
 }  // namespace suanzi

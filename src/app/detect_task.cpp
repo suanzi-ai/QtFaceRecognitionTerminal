@@ -2,7 +2,6 @@
 
 #include <QRect>
 #include <QThread>
-
 #include <chrono>
 #include <ctime>
 #include <iostream>
@@ -13,9 +12,9 @@
 
 using namespace suanzi;
 
-DetectTask::DetectTask(QThread *thread, QObject *parent) {
-  // TODO: global configuration for model path
-  face_detector_ = new suanzi::FaceDetector("facemodel.bin");
+DetectTask::DetectTask(FaceDetectorPtr detector, QThread *thread,
+                       QObject *parent)
+    : face_detector_(detector) {
   b_tx_ok_ = true;
 
   if (thread == nullptr) {
@@ -28,9 +27,7 @@ DetectTask::DetectTask(QThread *thread, QObject *parent) {
   }
 }
 
-DetectTask::~DetectTask() {
-  if (face_detector_) delete face_detector_;
-}
+DetectTask::~DetectTask() {}
 
 void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
   ImagePackage *pang = buffer->get_pang();
@@ -82,7 +79,7 @@ DetectionFloat DetectTask::select_face(
   detection_bgr.x = rect.x * 1.0 / width;
   detection_bgr.y = rect.y * 1.0 / height;
   detection_bgr.width = rect.width * 1.0 / width;
-  detection_bgr.height = rect.height * 0.8 / height; // remove neck
+  detection_bgr.height = rect.height * 0.8 / height;  // remove neck
   detection_bgr.b_valid = true;
   for (int i = 0; i < 5; i++) {
     detection_bgr.landmark[i][0] =

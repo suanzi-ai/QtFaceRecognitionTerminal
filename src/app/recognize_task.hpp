@@ -8,15 +8,16 @@
 #include "person.hpp"
 #include "person_service.hpp"
 #include "pingpang_buffer.h"
-#include "quface/db.hpp"
-#include "quface/face.hpp"
+#include "quface_common.hpp"
 
 namespace suanzi {
 
 class RecognizeTask : QObject {
   Q_OBJECT
  public:
-  RecognizeTask(QThread *thread = nullptr, QObject *parent = nullptr);
+  RecognizeTask(FaceDatabasePtr db, FaceExtractorPtr extractor,
+                PersonService::ptr person_service, QThread *thread = nullptr,
+                QObject *parent = nullptr);
   ~RecognizeTask();
 
  private slots:
@@ -46,9 +47,9 @@ class RecognizeTask : QObject {
   bool sequence_query(std::vector<suanzi::QueryResult> history,
                       SZ_UINT32 &face_id);
 
-  suanzi::FaceExtractor *face_extractor_;
-  suanzi::FaceDatabase *face_database_;
-  suanzi::PersonService *person_service_;
+  FaceExtractorPtr face_extractor_;
+  FaceDatabasePtr face_database_;
+  suanzi::PersonService::ptr person_service_;
 
   std::vector<suanzi::QueryResult> history_;
 };

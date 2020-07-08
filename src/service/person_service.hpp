@@ -38,6 +38,11 @@ class PersonService {
  public:
   typedef std::shared_ptr<PersonService> ptr;
 
+  template <typename... Args>
+  static ptr make_shared(Args &&... args) {
+    return std::make_shared<PersonService>(std::forward<Args>(args)...);
+  }
+
   PersonService(const std::string &scheme_host_port,
                 const std::string &image_store_path)
       : client_(scheme_host_port.c_str()),

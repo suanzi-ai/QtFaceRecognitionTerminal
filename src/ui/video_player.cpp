@@ -8,7 +8,10 @@
 
 using namespace suanzi;
 
-VideoPlayer::VideoPlayer(QWidget *parent) : QWidget(parent) {
+VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
+                         FaceExtractorPtr extractor, suanzi::Config::ptr config,
+                         QWidget *parent)
+    : config_(config), QWidget(parent) {
   QPalette pal = palette();
   pal.setColor(QPalette::Background, Qt::transparent);
   pal.setColor(QPalette::Foreground, Qt::green);
@@ -24,8 +27,12 @@ VideoPlayer::VideoPlayer(QWidget *parent) : QWidget(parent) {
   // IR Camera
   // camera_reader_0_ = new CameraReader(0, this);
 
-  detect_task_ = new DetectTask(nullptr, this);
-  recognize_task_ = new RecognizeTask(nullptr, this);
+  auto person_service = PersonService::make_shared(
+      config->person_service_base_url, config->image_store_path);
+
+  detect_task_ = new DetectTask(detector, nullptr, this);
+  recognize_task_ =
+      new RecognizeTask(db, extractor, person_service, nullptr, this);
 
   connect((const QObject *)camera_reader_1_,
           SIGNAL(tx_frame(PingPangBuffer<ImagePackage> *)),
@@ -36,19 +43,20 @@ VideoPlayer::VideoPlayer(QWidget *parent) : QWidget(parent) {
           (const QObject *)camera_reader_1_, SLOT(rx_finish()));
 
   connect((const QObject *)detect_task_, SIGNAL(tx_display(DetectionFloat)),
-          (const QObject *)detect_tip_widget_, SLOT(rx_display(DetectionFloat)));
+          (const QObject *)detect_tip_widget_,
+          SLOT(rx_display(DetectionFloat)));
 
-  connect(
-      (const QObject *)detect_task_,
-      SIGNAL(tx_recognize(PingPangBuffer<ImagePackage> *, DetectionFloat)),
-      (const QObject *)recognize_task_,
-      SLOT(rx_frame(PingPangBuffer<ImagePackage> *, DetectionFloat)));
+  connect((const QObject *)detect_task_,
+          SIGNAL(tx_recognize(PingPangBuffer<ImagePackage> *, DetectionFloat)),
+          (const QObject *)recognize_task_,
+          SLOT(rx_frame(PingPangBuffer<ImagePackage> *, DetectionFloat)));
 
   connect((const QObject *)recognize_task_, SIGNAL(tx_finish()),
           (const QObject *)detect_task_, SLOT(rx_finish()));
 
   connect((const QObject *)recognize_task_, SIGNAL(tx_display(PersonDisplay)),
-          (const QObject *)recognize_tip_widget_, SLOT(rx_display(PersonDisplay)));
+          (const QObject *)recognize_tip_widget_,
+          SLOT(rx_display(PersonDisplay)));
 
   QTimer::singleShot(1, this, SLOT(init_widgets()));
 }

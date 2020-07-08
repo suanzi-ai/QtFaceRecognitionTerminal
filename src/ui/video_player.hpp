@@ -6,6 +6,7 @@
 
 #include "antispoof_task.hpp"
 #include "camera_reader.hpp"
+#include "config.hpp"
 #include "detect_task.hpp"
 #include "detect_tip_widget.hpp"
 #include "detection_float.h"
@@ -20,7 +21,9 @@ class VideoPlayer : public QWidget {
   Q_OBJECT
 
  public:
-  VideoPlayer(QWidget *parent = nullptr);
+  VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
+              FaceExtractorPtr extractor, suanzi::Config::ptr config,
+              QWidget *parent = nullptr);
   ~VideoPlayer();
 
  protected:
@@ -42,6 +45,11 @@ class VideoPlayer : public QWidget {
   AntispoofTask *antispoof_task_;
   DetectTask *detect_task_;
   RecognizeTask *recognize_task_;
+
+  suanzi::Config::ptr config_;
+  FaceDatabasePtr db_;
+  FaceDetectorPtr detector_;
+  FaceExtractorPtr extractor_;
 };
 
 }  // namespace suanzi

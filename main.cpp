@@ -5,33 +5,33 @@
 #include "http_server.hpp"
 #include "video_player.hpp"
 
-#include "quface/db.hpp"
-#include "quface/face.hpp"
-
 using namespace suanzi;
 
-int main(int argc, char *argv[]) {
-
-  // TODO: global configuration
-  // TODO: server class
-  std::string model = "facemodel.bin";
-  std::string storePath = "/user/go-app/upload/";
-  if (argc > 2) {
-    model = argv[1];
-    storePath = argv[2];
+int main(int argc, char* argv[]) {
+  std::string cfg_file = "config.json";
+  if (argc > 1) {
+    cfg_file = argv[1];
   }
 
-  auto detector = std::make_shared<FaceDetector>(model);
-  auto extractor = std::make_shared<FaceExtractor>(model);
-  auto db = std::make_shared<FaceDatabase>("quface");
+  auto config = suanzi::Config::make_shared();
+  SZ_RETCODE ret = config->load(cfg_file);
+  if (ret != SZ_RETCODE_OK) {
+    return -1;
+  }
 
-  auto face_service =
-      std::make_shared<FaceService>(db, detector, extractor, storePath);
+  auto detector =
+      std::make_shared<FaceDetector>(config->quface.model_file_path);
+  auto extractor =
+      std::make_shared<FaceExtractor>(config->quface.model_file_path);
+  auto db = std::make_shared<FaceDatabase>(config->quface.db_name);
+
+  auto face_service = std::make_shared<FaceService>(db, detector, extractor,
+                                                    config->image_store_path);
   auto face_server = std::make_shared<FaceServer>(face_service);
   auto http_server = std::make_shared<HTTPServer>();
   face_server->add_event_source(http_server);
 
-  std::thread t([&](){ http_server->run(8010); });
+  std::thread t([&]() { http_server->run(config->server_port); });
   t.detach();
 
   qRegisterMetaType<PersonDisplay>("PersonDisplay");
@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
 
   QApplication app(argc, argv);
 
-  VideoPlayer player;
+  VideoPlayer player(db, detector, extractor, config);
   player.show();
 
   return app.exec();

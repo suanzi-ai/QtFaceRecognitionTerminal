@@ -1,8 +1,7 @@
 #pragma once
 
 #include <nlohmann/json.hpp>
-#include <quface/db.hpp>
-#include <quface/face.hpp>
+#include "quface_common.hpp"
 
 namespace suanzi {
 using json = nlohmann::json;
@@ -21,10 +20,6 @@ void from_json(const json &j, PersonImageInfo &p);
 class FaceService {
  public:
   typedef std::shared_ptr<FaceService> ptr;
-
-  typedef std::shared_ptr<suanzi::FaceDetector> FaceDetectorPtr;
-  typedef std::shared_ptr<suanzi::FaceExtractor> FaceExtractorPtr;
-  typedef std::shared_ptr<suanzi::FaceDatabase> FaceDatabasePtr;
 
   FaceService(FaceDatabasePtr db, FaceDetectorPtr detector,
               FaceExtractorPtr extractor, const std::string &image_store_dir,

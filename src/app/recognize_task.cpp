@@ -10,13 +10,12 @@
 
 using namespace suanzi;
 
-RecognizeTask::RecognizeTask(QThread *thread, QObject *parent) {
-  // TODO: global configuration
-  face_extractor_ = new suanzi::FaceExtractor("facemodel.bin");
-  face_database_ = new suanzi::FaceDatabase("quface");
-  person_service_ =
-      new PersonService("http://localhost:8008", "/user/go-app/upload/");
-
+RecognizeTask::RecognizeTask(FaceDatabasePtr db, FaceExtractorPtr extractor,
+                             PersonService::ptr person_service, QThread *thread,
+                             QObject *parent)
+    : face_database_(db),
+      face_extractor_(extractor),
+      person_service_(person_service) {
   if (thread == nullptr) {
     static QThread new_thread;
     moveToThread(&new_thread);
@@ -27,11 +26,7 @@ RecognizeTask::RecognizeTask(QThread *thread, QObject *parent) {
   }
 }
 
-RecognizeTask::~RecognizeTask() {
-  delete face_extractor_;
-  delete face_database_;
-  delete person_service_;
-}
+RecognizeTask::~RecognizeTask() {}
 
 void RecognizeTask::rx_frame(PingPangBuffer<ImagePackage> *buffer,
                              DetectionFloat detection) {
