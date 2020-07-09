@@ -15,13 +15,13 @@
 #include "vpss.h"
 
 namespace suanzi {
-namespace chrono = std::chrono;
 
 class CameraReader : QThread {
   Q_OBJECT
  public:
   CameraReader(int cameralIndex, QObject *parent = nullptr);
   ~CameraReader();
+  void start_sample();
 
  private:
   void run();
@@ -54,7 +54,6 @@ class CameraReader : QThread {
   const int VO_H = 1280;
 
   bool b_tx_ok_;
-  chrono::system_clock::time_point last_rx_;
 };
 
 }  // namespace suanzi

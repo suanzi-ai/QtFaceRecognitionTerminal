@@ -32,7 +32,6 @@ DetectTask::~DetectTask() {}
 void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
   // SZ_LOG_DEBUG("rx_frame");
   ImagePackage *pang = buffer->get_pang();
-
   // 256x256  7ms
   std::vector<suanzi::FaceDetection> detections;
   SZ_RETCODE ret = face_detector_->detect((const SVP_IMAGE_S *)pang->img_bgr_small->pImplData,

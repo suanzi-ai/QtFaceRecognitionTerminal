@@ -21,7 +21,6 @@ CameraReader::CameraReader(int cameralIndex, QObject *parent) {
   static Vo vo_bgr(0, VO_INTF_MIPI, VO_W, VO_H);
   static Vi_Vpss_Vo vi_vpss_vo(pvi_vpss_bgr_, &vo_bgr);
   b_tx_ok_ = true;
-  start();
 }
 
 CameraReader::~CameraReader() {
@@ -30,8 +29,11 @@ CameraReader::~CameraReader() {
   delete pvi_vpss_bgr_;
 }
 
+void CameraReader::start_sample() {
+  start();
+}
+
 void CameraReader::rx_finish() {
-  last_rx_ = chrono::system_clock::now();
   b_tx_ok_ = true;
 }
 
@@ -55,42 +57,34 @@ void CameraReader::run() {
                                                &image_package2);
   int frame_idx = 0;
   bool b_data_ready = false;
-  last_rx_ = chrono::system_clock::now();
-
   while (1) {
-    if (!b_tx_ok_) {
-      auto now = chrono::system_clock::now();
-      auto duration =
-          chrono::duration_cast<chrono::milliseconds>(now - last_rx_).count();
-      if (duration > 1000) {
-        SZ_LOG_WARN("rx_finish timeout of {}ms", duration);
-        last_rx_ = chrono::system_clock::now();
-        b_tx_ok_ = true;
-      }
-    }
 
     ImagePackage *pPing = pingpang_buffer.get_ping();
     if (pvpss_bgr_->getYuvFrame(pPing->img_bgr_small, 2)) {
       while (!pvpss_bgr_->getYuvFrame(pPing->img_bgr_large, 1)) {
-        QThread::usleep(10 * 1000);
+        QThread::usleep(1000);
       }
-      pPing->frame_idx = frame_idx++;
-
+      
       if (b_tx_ok_) {
+        pPing->frame_idx = frame_idx++;
         b_tx_ok_ = false;
-        // SZ_LOG_DEBUG("tx_frame");
+        b_data_ready = false;
+        //SZ_LOG_DEBUG("tx_frame");
         emit tx_frame(&pingpang_buffer);
+      } else {
+        b_data_ready = true;
       }
     } else {
       if (b_data_ready && b_tx_ok_) {
         b_tx_ok_ = false;
         b_data_ready = false;
         // SZ_LOG_DEBUG("tx_frame");
+        pPing->frame_idx = frame_idx++;
         emit tx_frame(&pingpang_buffer);
-        // printf("tx threadId=%x  %x %d\n", QThread::currentThreadId(), pPing,
+        //printf("tx threadId=%x  %x %d\n", QThread::currentThreadId(), pPing,
         //        pPing->frame_idx);
       }
-      QThread::usleep(10 * 1000);
+      QThread::usleep(1000);
     }
   }
 }

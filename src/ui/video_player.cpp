@@ -57,7 +57,7 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
   connect((const QObject *)recognize_task_, SIGNAL(tx_display(PersonDisplay)),
           (const QObject *)recognize_tip_widget_,
           SLOT(rx_display(PersonDisplay)));
-
+  camera_reader_1_->start_sample();
   QTimer::singleShot(1, this, SLOT(init_widgets()));
 }
 
