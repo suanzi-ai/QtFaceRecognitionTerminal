@@ -3,3 +3,4 @@
 build/
 deps/
 resources/
+user.env

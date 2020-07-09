@@ -4,20 +4,33 @@ set -e
 
 export LC_ALL=C
 
-if [[ $QT_SDK_HOME ]]; then
-    echo -e "-- Found QT_SDK_HOME=$QT_SDK_HOME"
-else
-    echo -e "-- Please specify the QT SDK Home:"
-    echo -e "--    'export QT_SDK_HOME=path/to/qtsdk'"
+ENV_FILE="user.env"
+
+if [ ! -f "$ENV_FILE" ]; then
+    echo -e "-- Please copy $ENV_FILE.sample to $ENV_FILE and modify it"
     exit 1
 fi
 
-build_type="Release"
-cmake_generator="Unix Makefiles"
+. $ENV_FILE
+
+if [[ $USER_QT_SDK_HOME ]]; then
+    echo -e "-- Found USER_QT_SDK_HOME=$USER_QT_SDK_HOME"
+else
+    echo -e "-- Please specify the QT SDK Home:"
+    echo -e "--    'export USER_QT_SDK_HOME=path/to/qtsdk'"
+    exit 1
+fi
+
+build_type=${USER_BUILD_TYPE:-"Release"}
+cmake_generator=${USER_CMAKE_GENERATOR:-"Unix Makefiles"}
 
 source_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 build_root_dir="$source_dir/build"
 clean_3rd="no"
+
+if [[ $USER_BUILD_DIR ]]; then
+    build_root_dir=$USER_BUILD_DIR
+fi
 
 for i in "$@"; do
     case $i in
@@ -69,9 +82,11 @@ cmake $source_dir -G "$cmake_generator" \
     -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
     -DCMAKE_INSTALL_PREFIX=$install_dir \
     -DHISI_SDK_PLATFORM=rp-dv300 \
-    -DDOWNLOAD_DEPENDENCY=ON \
+    -DDOWNLOAD_DEPENDENCY=OFF \
     -DPROJECT_DEPENDENCY_DIR=$dep_dir \
-    -DQT_SDK_PREFIX=$QT_SDK_HOME \
+    -DQT_SDK_PREFIX=$USER_QT_SDK_HOME \
+    -DTHIRD_PARTY_PREFIX=$USER_THIRD_PARTY_PREFIX \
+    -DQUFACE_SDK_PREFIX=$USER_QUFACE_SDK_PREFIX \
     -DCMAKE_TOOLCHAIN_FILE=$source_dir/cmake/himix200.toolchain.cmake \
     -DCMAKE_BUILD_TYPE=$build_type
 
@@ -79,8 +94,13 @@ cmake --build . -- -j 4
 cmake --build . --target install
 popd
 
-echo -e "\n#####################################################\n"
-echo -e "请将下面的文件夹内容拷贝至开发板后，手动运行程序即可: "
-echo -e "\t $install_dir"
-ls -lh $install_dir
-echo -e "\n#####################################################\n"
+if [[ $USER_SCP_COPY_TO ]]; then
+    echo "Copy to $USER_SCP_COPY_TO"
+    scp $build_dir/main $USER_SCP_COPY_TO
+else
+    echo -e "\n#####################################################\n"
+    echo -e "请将下面的文件夹内容拷贝至开发板后，手动运行程序即可: "
+    echo -e "\t $install_dir"
+    ls -lh $install_dir
+    echo -e "\n#####################################################\n"
+fi
