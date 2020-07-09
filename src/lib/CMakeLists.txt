@@ -7,4 +7,11 @@ target_include_directories(
   PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/lib>
   PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/lib/io>)
 
-target_link_libraries(lib PUBLIC QuFaceSDK::face QuFaceSDK::database Qt5::Widgets)
+target_link_libraries(
+  lib
+  PUBLIC spdlog::spdlog
+  PUBLIC ${HiSiSDK_LIBS}
+  PUBLIC ${OpenCV_LIBS}
+  PUBLIC QuFaceSDK::face
+  PUBLIC QuFaceSDK::database
+  PUBLIC Qt5::Widgets)

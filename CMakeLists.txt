@@ -117,6 +117,12 @@ message(STATUS "Found Qt5 ${Qt5_VERSION}")
 
 find_package(httplib)
 
+if(NOT QuFaceSDK_LOADED_DEPS)
+  find_package(HiSiSDK REQUIRED HINTS ${QuFaceSDK_HISI_SDK_FIND_HINTS})
+  find_package(OpenCV 3 REQUIRED HINTS /usr/local/opt/opencv@3)
+  find_package(spdlog REQUIRED)
+endif()
+
 add_subdirectory(src/app)
 add_subdirectory(src/lib)
 add_subdirectory(src/ui)
