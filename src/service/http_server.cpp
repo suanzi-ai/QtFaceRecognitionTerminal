@@ -63,7 +63,7 @@ void HTTPServer::run(uint16_t port, const std::string &host) {
 
   server_->Post(R"(^/db/(.+))", handler);
 
-  server_->Post("/-/reload", [&](const Request& req, Response& res) {
+  server_->Post("/config", [&](const Request& req, Response& res) {
     try {
       auto j = json::parse(req.body);
       j.get_to(*config_);
@@ -74,6 +74,11 @@ void HTTPServer::run(uint16_t port, const std::string &host) {
       json data = {{"ok", false, "message", exc.what()}};
       res.set_content(data.dump(), "application/json");
     }
+  });
+
+  server_->Get("/config", [&](const Request& req, Response& res) {
+    json body(*config_);
+    res.set_content(body.dump(), "application/json");
   });
 
   server_->listen(host.c_str(), port);

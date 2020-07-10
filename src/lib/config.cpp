@@ -7,7 +7,7 @@ using namespace suanzi;
     config.at(key).get_to(value);        \
   }
 
-#define SAVE_JSON_TO(config, key, value) j[key] = value;
+#define SAVE_JSON_TO(config, key, value) config[key] = value;
 
 void suanzi::to_json(json &j, const AppConfig &c) {
   SAVE_JSON_TO(j, "server_port", c.server_port);
@@ -208,15 +208,24 @@ SZ_RETCODE Config::load() {
 
   config.get_to(*this);
 
+  std::ifstream override(config_override_file_);
+  if (override.is_open()) {
+    SZ_LOG_INFO("Override config from {}", config_override_file_);
+    json override_config;
+    i >> override_config;
+
+    override_config.get_to(*this);
+  }
+
   return SZ_RETCODE_OK;
 }
 
 SZ_RETCODE Config::save() {
   json config = json(*this);
 
-  std::ofstream o(config_file_);
+  std::ofstream o(config_override_file_);
   if (!o.is_open()) {
-    SZ_LOG_WARN("Open {} failed, can't save", config_file_);
+    SZ_LOG_WARN("Open {} failed, can't save", config_override_file_);
     return SZ_RETCODE_FAILED;
   }
 

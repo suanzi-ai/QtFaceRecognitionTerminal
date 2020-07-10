@@ -9,11 +9,9 @@ using namespace suanzi;
 
 int main(int argc, char* argv[]) {
   std::string cfg_file = "config.json";
-  if (argc > 1) {
-    cfg_file = argv[1];
-  }
+  std::string cfg_override_file = "config.override.json";
 
-  auto config = suanzi::Config::make_shared(cfg_file);
+  auto config = suanzi::Config::make_shared(cfg_file, cfg_override_file);
   SZ_RETCODE ret = config->load();
   if (ret != SZ_RETCODE_OK) {
     return -1;

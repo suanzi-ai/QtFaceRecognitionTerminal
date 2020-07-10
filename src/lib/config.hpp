@@ -87,7 +87,9 @@ class Config {
     return std::make_shared<Config>(std::forward<Args>(args)...);
   }
 
-  Config(const std::string &config_file) : config_file_(config_file) {
+  Config(const std::string &config_file,
+         const std::string &config_override_file)
+      : config_file_(config_file), config_override_file_(config_override_file) {
     load_defaults();
   }
 
@@ -107,6 +109,7 @@ class Config {
 
  private:
   std::string config_file_;
+  std::string config_override_file_;
 };
 
 void from_json(const json &j, Config &c);
