@@ -8,10 +8,17 @@
 
 #include "logger.hpp"
 
-#define LOAD_JSON_TO(config, key, value) \
-  if (config.contains(key)) {            \
-    config.at(key).get_to(value);        \
-  }
+namespace suanzi {
+using json = nlohmann::json;
+
+typedef struct {
+  SZ_UINT16 server_port;
+  std::string image_store_path;
+  std::string person_service_base_url;
+} AppConfig;
+
+void to_json(json &j, const AppConfig &c);
+void from_json(const json &j, AppConfig &c);
 
 typedef struct {
   std::string product_key;
@@ -22,6 +29,9 @@ typedef struct {
   std::string model_file_path;
   std::string license_filename;
 } QufaceConfig;
+
+void to_json(json &j, const QufaceConfig &c);
+void from_json(const json &j, QufaceConfig &c);
 
 typedef struct {
   int index;
@@ -35,10 +45,16 @@ typedef struct {
   int target_area_height_percent;
 } CameraConfig;
 
+void to_json(json &j, const CameraConfig &c);
+void from_json(const json &j, CameraConfig &c);
+
 typedef struct {
   SZ_FLOAT threshold;
   SZ_UINT32 min_face_size;
 } DetectConfig;
+
+void to_json(json &j, const DetectConfig &c);
+void from_json(const json &j, DetectConfig &c);
 
 typedef struct {
   SZ_INT32 history_size;
@@ -48,6 +64,9 @@ typedef struct {
   SZ_INT32 max_lost_age;
 } ExtractConfig;
 
+void to_json(json &j, const ExtractConfig &c);
+void from_json(const json &j, ExtractConfig &c);
+
 typedef struct {
   int queue_size;
   int min_alive;
@@ -55,7 +74,9 @@ typedef struct {
   int max_no_face;
 } LivenessConfig;
 
-namespace suanzi {
+void to_json(json &j, const LivenessConfig &c);
+void from_json(const json &j, LivenessConfig &c);
+
 class Config {
  public:
   typedef std::shared_ptr<Config> ptr;
@@ -65,159 +86,31 @@ class Config {
     return std::make_shared<Config>(std::forward<Args>(args)...);
   }
 
-  SZ_RETCODE load(const std::string &filename) {
-    std::ifstream i(filename);
-    if (!i.is_open()) {
-      SZ_LOG_WARN("{} not present, will using defaults", filename);
-      return SZ_RETCODE_OK;
-    }
-
-    nlohmann::json config;
-    i >> config;
-
-    if (config.contains("app")) {
-      auto _a = config["app"];
-      LOAD_JSON_TO(_a, "server_port", server_port);
-      LOAD_JSON_TO(_a, "image_store_path", image_store_path);
-      LOAD_JSON_TO(_a, "person_service_base_url", person_service_base_url);
-      LOAD_JSON_TO(_a, "unknown_avatar_image_path", unknown_avatar_image_path);
-    }
-
-    if (config.contains("quface")) {
-      auto _q = config["quface"];
-      LOAD_JSON_TO(_q, "product_key", quface.product_key);
-      LOAD_JSON_TO(_q, "device_name", quface.device_name);
-      LOAD_JSON_TO(_q, "device_secret", quface.device_secret);
-      LOAD_JSON_TO(_q, "client_id", quface.client_id);
-      LOAD_JSON_TO(_q, "db_name", quface.db_name);
-      LOAD_JSON_TO(_q, "model_file_path", quface.model_file_path);
-      LOAD_JSON_TO(_q, "license_filename", quface.license_filename);
-    }
-
-    if (config.contains("cameras")) {
-      auto _c = config["cameras"];
-
-      if (_c.contains("normal")) {
-        auto _n = _c["normal"];
-        LOAD_JSON_TO(_n, "index", normal.index);
-        LOAD_JSON_TO(_n, "rotate", normal.rotate);
-        LOAD_JSON_TO(_n, "flip", normal.flip);
-        LOAD_JSON_TO(_n, "min_face_height", normal.min_face_height);
-        LOAD_JSON_TO(_n, "min_face_width", normal.min_face_width);
-        LOAD_JSON_TO(_n, "max_window_height", normal.max_window_height);
-        LOAD_JSON_TO(_n, "max_window_width", normal.max_window_width);
-        LOAD_JSON_TO(_n, "target_area_width_percent",
-                     normal.target_area_width_percent);
-        LOAD_JSON_TO(_n, "target_area_height_percent",
-                     normal.target_area_height_percent);
-      }
-
-      if (_c.contains("infrared")) {
-        auto _i = _c["infrared"];
-        LOAD_JSON_TO(_i, "index", infrared.index);
-        LOAD_JSON_TO(_i, "rotate", infrared.rotate);
-        LOAD_JSON_TO(_i, "flip", infrared.flip);
-        LOAD_JSON_TO(_i, "min_face_height", infrared.min_face_height);
-        LOAD_JSON_TO(_i, "min_face_width", infrared.min_face_width);
-        LOAD_JSON_TO(_i, "max_window_height", infrared.max_window_height);
-        LOAD_JSON_TO(_i, "max_window_width", infrared.max_window_width);
-        LOAD_JSON_TO(_i, "target_area_width_percent",
-                     infrared.target_area_width_percent);
-        LOAD_JSON_TO(_i, "target_area_height_percent",
-                     infrared.target_area_height_percent);
-      }
-    }
-
-    if (config.contains("liveness")) {
-      auto _l = config["liveness"];
-      LOAD_JSON_TO(_l, "queue_size", liveness.queue_size);
-      LOAD_JSON_TO(_l, "min_alive", liveness.min_alive);
-      LOAD_JSON_TO(_l, "continuous_max_missed", liveness.continuous_max_missed);
-      LOAD_JSON_TO(_l, "max_no_face", liveness.max_no_face);
-    }
-
-    if (config.contains("detect")) {
-      auto _d = config["detect"];
-      LOAD_JSON_TO(_d, "threshold", detect.threshold);
-      LOAD_JSON_TO(_d, "min_face_size", detect.min_face_size);
-    }
-
-    if (config.contains("extract")) {
-      auto _e = config["extract"];
-      LOAD_JSON_TO(_e, "history_size", extract.history_size);
-      LOAD_JSON_TO(_e, "min_recognize_count", extract.min_recognize_count);
-      LOAD_JSON_TO(_e, "min_recognize_score", extract.min_recognize_score);
-      LOAD_JSON_TO(_e, "min_accumulate_score", extract.min_accumulate_score);
-      LOAD_JSON_TO(_e, "max_lost_age", extract.max_lost_age);
-    }
-
-    return SZ_RETCODE_OK;
+  Config(const std::string &config_file) : config_file_(config_file) {
+    load_defaults();
   }
 
-  bool has_license_info() {
-    return quface.product_key.size() > 0 && quface.device_name.size() > 0 &&
-           quface.device_secret.size() > 0;
-  }
+  SZ_RETCODE load_defaults();
+  SZ_RETCODE load();
+  SZ_RETCODE save();
+  void load_json(const json &config);
 
-  SZ_UINT16 server_port = 8010;
-  std::string image_store_path = "/user/go-app/upload/";
-  std::string person_service_base_url = "http://localhost:8008";
-  std::string unknown_avatar_image_path = "avatar_unknown.jpg";
+ public:
+  AppConfig app;
+  QufaceConfig quface;
+  CameraConfig normal;
+  CameraConfig infrared;
+  DetectConfig detect;
+  ExtractConfig extract;
+  LivenessConfig liveness;
 
-  QufaceConfig quface = {
-      .product_key = "",
-      .device_name = "",
-      .device_secret = "",
-      .client_id = "quface_qt",
-      .db_name = "quface",
-      .model_file_path = "facemodel.bin",
-      .license_filename = "license.json",
-  };
-
-  CameraConfig normal = {
-      .index = 1,
-      .rotate = 0,
-      .flip = -2,
-      .min_face_height = 100,
-      .min_face_width = 100,
-      .max_window_height = 800,
-      .max_window_width = 600,
-      .target_area_width_percent = 60,
-      .target_area_height_percent = 60,
-  };
-
-  CameraConfig infrared = {
-      .index = 1,
-      .rotate = 0,
-      .flip = -2,
-      .min_face_height = 100,
-      .min_face_width = 100,
-      .max_window_height = 800,
-      .max_window_width = 600,
-      .target_area_width_percent = 60,
-      .target_area_height_percent = 60,
-  };
-
-  DetectConfig detect = {
-    .threshold = 0.4f,
-    .min_face_size = 40,
-  };
-
-  ExtractConfig extract = {
-      .history_size = 15,
-      .min_recognize_count = 10,
-      .min_recognize_score = .75f,
-      .min_accumulate_score = 7.0f,
-      .max_lost_age = 20,
-  };
-
-  LivenessConfig liveness = {
-      .queue_size = 16,
-      .min_alive = 7,
-      .continuous_max_missed = 3,
-      .max_no_face = 3,
-  };
+ private:
+  std::string config_file_;
 };
+
+void from_json(const json &j, Config &c);
+void to_json(json &j, const Config &c);
+
 }  // namespace suanzi
 
 #endif

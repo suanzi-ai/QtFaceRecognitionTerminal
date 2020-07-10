@@ -28,7 +28,7 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
   // camera_reader_0_ = new CameraReader(0, this);
 
   auto person_service = PersonService::make_shared(
-      config->person_service_base_url, config->image_store_path);
+      config->app.person_service_base_url, config->app.image_store_path);
 
   detect_task_ = new DetectTask(detector, config, nullptr, this);
   recognize_task_ =
