@@ -32,7 +32,7 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
 
   detect_task_ = new DetectTask(detector, nullptr, this);
   recognize_task_ =
-      new RecognizeTask(db, extractor, person_service, nullptr, this);
+      new RecognizeTask(db, extractor, person_service, config, nullptr, this);
 
   connect((const QObject *)camera_reader_1_,
           SIGNAL(tx_frame(PingPangBuffer<ImagePackage> *)),

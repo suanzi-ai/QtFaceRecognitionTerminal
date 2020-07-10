@@ -11,11 +11,13 @@
 using namespace suanzi;
 
 RecognizeTask::RecognizeTask(FaceDatabasePtr db, FaceExtractorPtr extractor,
-                             PersonService::ptr person_service, QThread *thread,
+                             PersonService::ptr person_service,
+                             Config::ptr config, QThread *thread,
                              QObject *parent)
     : face_database_(db),
       face_extractor_(extractor),
-      person_service_(person_service) {
+      person_service_(person_service),
+      config_(config) {
   if (thread == nullptr) {
     static QThread new_thread;
     moveToThread(&new_thread);
@@ -93,7 +95,7 @@ void RecognizeTask::report(SZ_UINT32 face_id, ImagePackage *img) {
 void RecognizeTask::query_success(const suanzi::QueryResult &person_info,
                                   ImagePackage *img) {
   history_.push_back(person_info);
-  if (history_.size() >= HISTORY_SIZE) {
+  if (history_.size() >= config_->extract.history_size) {
     SZ_UINT32 face_id = 0;
 
     if (sequence_query(history_, face_id)) {
@@ -119,7 +121,7 @@ void RecognizeTask::query_success(const suanzi::QueryResult &person_info,
 
 void RecognizeTask::query_empty_database() {
   static int empty_age = 0;
-  if (++empty_age >= HISTORY_SIZE) {
+  if (++empty_age >= config_->extract.history_size) {
     SZ_LOG_INFO("recognized: unknown (empty database)");
     tx_display({"", "访客", "avatar_unknown.jpg"});
 
@@ -130,7 +132,7 @@ void RecognizeTask::query_empty_database() {
 
 void RecognizeTask::query_no_face() {
   static int lost_age = 0;
-  if (++lost_age >= MAX_LOST_AGE) {
+  if (++lost_age >= config_->extract.max_lost_age) {
     history_.clear();
     tx_display({});
     lost_age = 0;
@@ -173,9 +175,9 @@ bool RecognizeTask::sequence_query(std::vector<suanzi::QueryResult> history,
   SZ_LOG_DEBUG("id={}, count={}, max_score={}, accumulate_score={}",
                max_person_id, max_count, max_person_score,
                person_accumulate_score[max_person_id]);
-  if (max_count >= MIN_RECOGNIZE_COUNT &&
-      max_person_accumulate_score >= MIN_ACCUMULATE_SCORE &&
-      max_person_score >= MIN_RECOGNIZE_SCORE) {
+  if (max_count >= config_->extract.min_recognize_count &&
+      max_person_accumulate_score >= config_->extract.min_accumulate_score &&
+      max_person_score >= config_->extract.min_recognize_score) {
     face_id = max_person_id;
     return true;
   } else {

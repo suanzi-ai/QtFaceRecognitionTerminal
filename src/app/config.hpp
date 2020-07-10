@@ -36,10 +36,9 @@ typedef struct {
 } CameraConfig;
 
 typedef struct {
-  SZ_INT32 min_history_size;
-  SZ_INT32 max_history_size;
-  SZ_INT32 min_recognized_count;
-  SZ_FLOAT min_recognized_score;
+  SZ_INT32 history_size;
+  SZ_INT32 min_recognize_count;
+  SZ_FLOAT min_recognize_score;
   SZ_FLOAT min_accumulate_score;
   SZ_INT32 max_lost_age;
 } ExtractConfig;
@@ -134,10 +133,9 @@ class Config {
 
     if (config.contains("extract")) {
       auto _e = config["extract"];
-      LOAD_JSON_TO(_e, "min_history_size", extract.min_history_size);
-      LOAD_JSON_TO(_e, "max_history_size", extract.max_history_size);
-      LOAD_JSON_TO(_e, "min_recognized_count", extract.min_recognized_count);
-      LOAD_JSON_TO(_e, "min_recognized_score", extract.min_recognized_score);
+      LOAD_JSON_TO(_e, "history_size", extract.history_size);
+      LOAD_JSON_TO(_e, "min_recognize_count", extract.min_recognize_count);
+      LOAD_JSON_TO(_e, "min_recognize_score", extract.min_recognize_score);
       LOAD_JSON_TO(_e, "min_accumulate_score", extract.min_accumulate_score);
       LOAD_JSON_TO(_e, "max_lost_age", extract.max_lost_age);
     }
@@ -190,12 +188,11 @@ class Config {
   };
 
   ExtractConfig extract = {
-      .min_history_size = 3,
-      .max_history_size = 16,
-      .min_recognized_count = 3,
-      .min_recognized_score = .5f,
-      .min_accumulate_score = 2.7f,
-      .max_lost_age = 10,
+      .history_size = 15,
+      .min_recognize_count = 10,
+      .min_recognize_score = .75f,
+      .min_accumulate_score = 7.0f,
+      .max_lost_age = 20,
   };
 
   LivenessConfig liveness = {
