@@ -11,6 +11,7 @@
 #include "detect_tip_widget.hpp"
 #include "detection_float.h"
 #include "image_package.h"
+#include "recognize_data.hpp"
 #include "pingpang_buffer.h"
 #include "recognize_task.hpp"
 #include "recognize_tip_widget.hpp"

@@ -30,16 +30,14 @@ RecognizeTask::RecognizeTask(FaceDatabasePtr db, FaceExtractorPtr extractor,
 
 RecognizeTask::~RecognizeTask() {}
 
-void RecognizeTask::rx_frame(PingPangBuffer<ImagePackage> *buffer,
-                             DetectionFloat detection) {
-  ImagePackage *pang = buffer->get_pang();
-
-  if (detection.b_valid) {
+void RecognizeTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
+  RecognizeData *pang = buffer->get_pang();
+  if (pang->detection.b_valid) {
     // crop in large image
     int width = pang->img_bgr_large->width;
     int height = pang->img_bgr_large->height;
     suanzi::FaceDetection face_detection =
-        to_detection(detection, width, height);
+        to_detection(pang->detection, width, height);
 
     // extract: 25ms
     suanzi::FaceFeature feature;
@@ -55,13 +53,15 @@ void RecognizeTask::rx_frame(PingPangBuffer<ImagePackage> *buffer,
     } else if (SZ_RETCODE_EMPTY_DATABASE == ret) {
       query_empty_database();
     }
-  } else {
-    query_no_face();
   }
-
+  buffer->switch_buffer();
   emit tx_finish();
 }
 
+void RecognizeTask::rx_no_frame() {
+	query_no_face();
+}
+							 
 suanzi::FaceDetection RecognizeTask::to_detection(
     DetectionFloat detection_ratio, int width, int height) {
   suanzi::FaceDetection face_detection;
@@ -80,7 +80,7 @@ suanzi::FaceDetection RecognizeTask::to_detection(
   return face_detection;
 }
 
-void RecognizeTask::report(SZ_UINT32 face_id, ImagePackage *img) {
+/*void RecognizeTask::report(SZ_UINT32 face_id, ImagePackage *img) {
   std::vector<SZ_UINT8> image_buffer;
   if (img->get_jpeg_buffer(img->img_bgr_small, image_buffer)) {
     SZ_RETCODE ret = person_service_->report_face_record(face_id, image_buffer);
@@ -90,10 +90,10 @@ void RecognizeTask::report(SZ_UINT32 face_id, ImagePackage *img) {
   } else {
     SZ_LOG_ERROR("Decode image failed");
   }
-}
+}*/
 
 void RecognizeTask::query_success(const suanzi::QueryResult &person_info,
-                                  ImagePackage *img) {
+                                  RecognizeData *img) {
   history_.push_back(person_info);
   if (history_.size() >= config_->extract.history_size) {
     SZ_UINT32 face_id = 0;
@@ -111,7 +111,7 @@ void RecognizeTask::query_success(const suanzi::QueryResult &person_info,
     }
 
     if (last_face_id_ != face_id) {
-      report(face_id, img);
+      //report(face_id, img);
       last_face_id_ = face_id;
     }
 

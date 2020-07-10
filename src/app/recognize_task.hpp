@@ -5,7 +5,7 @@
 
 #include "config.hpp"
 #include "detection_float.h"
-#include "image_package.h"
+#include "recognize_data.hpp"
 #include "person.hpp"
 #include "person_service.hpp"
 #include "pingpang_buffer.h"
@@ -22,7 +22,8 @@ class RecognizeTask : QObject {
   ~RecognizeTask();
 
  private slots:
-  void rx_frame(PingPangBuffer<ImagePackage> *buffer, DetectionFloat detection);
+  void rx_frame(PingPangBuffer<RecognizeData> *buffer);
+  void rx_no_frame();
 
  signals:
   void tx_display(PersonDisplay person);
@@ -32,8 +33,8 @@ class RecognizeTask : QObject {
   suanzi::FaceDetection to_detection(DetectionFloat detection_ratio, int width,
                                      int height);
 
-  void report(SZ_UINT32 face_id, ImagePackage *img);
-  void query_success(const suanzi::QueryResult &person_info, ImagePackage *img);
+  //void report(SZ_UINT32 face_id, ImagePackage *img);
+  void query_success(const suanzi::QueryResult &person_info, RecognizeData *img);
   void query_empty_database();
   void query_no_face();
 

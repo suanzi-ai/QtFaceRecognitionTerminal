@@ -7,6 +7,7 @@
 #include "config.hpp"
 #include "detection_float.h"
 #include "image_package.h"
+#include "recognize_data.hpp"
 #include "pingpang_buffer.h"
 #include "quface_common.hpp"
 
@@ -19,6 +20,11 @@ class DetectTask : QObject {
              QThread *thread = nullptr, QObject *parent = nullptr);
   ~DetectTask();
 
+
+ private:
+ 	void copy_buffer(ImagePackage *pang, DetectionFloat &detection);
+
+
  private slots:
   void rx_frame(PingPangBuffer<ImagePackage> *buffer);
   void rx_finish();
@@ -30,17 +36,21 @@ class DetectTask : QObject {
   void tx_display(DetectionFloat detection);
 
   // for recognition
-  void tx_recognize(PingPangBuffer<ImagePackage> *buffer,
-                    DetectionFloat detection);
+  void tx_recognize(PingPangBuffer<RecognizeData> *buffer);
+  void tx_no_frame();
 
  private:
   DetectionFloat select_face(std::vector<suanzi::FaceDetection> &detections,
                              int width, int height);
 
   bool b_tx_ok_;
+  bool b_data_ready_;
 
   FaceDetectorPtr face_detector_;
   Config::ptr config_;
+  RecognizeData *recognize_data1_;
+  RecognizeData *recognize_data2_;
+  PingPangBuffer<RecognizeData> *pingpang_buffer_;
 };
 
 }  // namespace suanzi
