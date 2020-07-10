@@ -12,9 +12,9 @@
 
 using namespace suanzi;
 
-DetectTask::DetectTask(FaceDetectorPtr detector, QThread *thread,
-                       QObject *parent)
-    : face_detector_(detector) {
+DetectTask::DetectTask(FaceDetectorPtr detector, Config::ptr config,
+                       QThread *thread, QObject *parent)
+    : face_detector_(detector), config_(config) {
   b_tx_ok_ = true;
 
   if (thread == nullptr) {
@@ -34,8 +34,9 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
   ImagePackage *pang = buffer->get_pang();
   // 256x256  7ms
   std::vector<suanzi::FaceDetection> detections;
-  SZ_RETCODE ret = face_detector_->detect((const SVP_IMAGE_S *)pang->img_bgr_small->pImplData,
-                         detections);
+  SZ_RETCODE ret = face_detector_->detect(
+      (const SVP_IMAGE_S *)pang->img_bgr_small->pImplData, detections,
+      config_->detect.threshold, config_->detect.min_face_size);
   buffer->switch_buffer();
   // SZ_LOG_DEBUG("tx_finish");
   emit tx_finish();

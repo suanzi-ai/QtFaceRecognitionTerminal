@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QRect>
 
+#include "config.hpp"
 #include "detection_float.h"
 #include "image_package.h"
 #include "pingpang_buffer.h"
@@ -14,8 +15,8 @@ namespace suanzi {
 class DetectTask : QObject {
   Q_OBJECT
  public:
-  DetectTask(FaceDetectorPtr detector, QThread *thread = nullptr,
-             QObject *parent = nullptr);
+  DetectTask(FaceDetectorPtr detector, Config::ptr config,
+             QThread *thread = nullptr, QObject *parent = nullptr);
   ~DetectTask();
 
  private slots:
@@ -39,6 +40,7 @@ class DetectTask : QObject {
   bool b_tx_ok_;
 
   FaceDetectorPtr face_detector_;
+  Config::ptr config_;
 };
 
 }  // namespace suanzi

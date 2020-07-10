@@ -36,6 +36,11 @@ typedef struct {
 } CameraConfig;
 
 typedef struct {
+  SZ_FLOAT threshold;
+  SZ_UINT32 min_face_size;
+} DetectConfig;
+
+typedef struct {
   SZ_INT32 history_size;
   SZ_INT32 min_recognize_count;
   SZ_FLOAT min_recognize_score;
@@ -131,6 +136,12 @@ class Config {
       LOAD_JSON_TO(_l, "max_no_face", liveness.max_no_face);
     }
 
+    if (config.contains("detect")) {
+      auto _d = config["detect"];
+      LOAD_JSON_TO(_d, "threshold", detect.threshold);
+      LOAD_JSON_TO(_d, "min_face_size", detect.min_face_size);
+    }
+
     if (config.contains("extract")) {
       auto _e = config["extract"];
       LOAD_JSON_TO(_e, "history_size", extract.history_size);
@@ -185,6 +196,11 @@ class Config {
       .max_window_width = 600,
       .target_area_width_percent = 60,
       .target_area_height_percent = 60,
+  };
+
+  DetectConfig detect = {
+    .threshold = 0.4f,
+    .min_face_size = 40,
   };
 
   ExtractConfig extract = {

@@ -30,7 +30,7 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
   auto person_service = PersonService::make_shared(
       config->person_service_base_url, config->image_store_path);
 
-  detect_task_ = new DetectTask(detector, nullptr, this);
+  detect_task_ = new DetectTask(detector, config, nullptr, this);
   recognize_task_ =
       new RecognizeTask(db, extractor, person_service, config, nullptr, this);
 
