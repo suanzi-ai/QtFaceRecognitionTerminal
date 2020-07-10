@@ -2,7 +2,7 @@
 
 using namespace suanzi;
 
-HTTPServer::HTTPServer() {
+HTTPServer::HTTPServer(Config::ptr config) : config_(config) {
   server_ = std::make_shared<Server>();
 
   server_->set_logger([](const Request& req, const Response& res) {
@@ -18,7 +18,7 @@ HTTPServer::HTTPServer() {
   });
 }
 
-void HTTPServer::run(uint16_t port) {
+void HTTPServer::run(uint16_t port, const std::string &host) {
   SZ_LOG_INFO("Http server license on port {}", port);
 
   auto handler = [&](const Request& req, Response& res) {
@@ -63,5 +63,18 @@ void HTTPServer::run(uint16_t port) {
 
   server_->Post(R"(^/db/(.+))", handler);
 
-  server_->listen("0.0.0.0", port);
+  server_->Post("/-/reload", [&](const Request& req, Response& res) {
+    try {
+      auto j = json::parse(req.body);
+      j.get_to(*config_);
+      json data = {{"ok", false, "message", "ok"}};
+      res.set_content(data.dump(), "application/json");
+    } catch (const std::exception& exc) {
+      SZ_LOG_ERROR("Message err: {}", exc.what());
+      json data = {{"ok", false, "message", exc.what()}};
+      res.set_content(data.dump(), "application/json");
+    }
+  });
+
+  server_->listen(host.c_str(), port);
 }

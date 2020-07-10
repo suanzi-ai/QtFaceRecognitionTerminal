@@ -28,10 +28,12 @@ int main(int argc, char* argv[]) {
   auto face_service = std::make_shared<FaceService>(
       db, detector, extractor, config->app.image_store_path);
   auto face_server = std::make_shared<FaceServer>(face_service);
-  auto http_server = std::make_shared<HTTPServer>();
+  auto http_server = std::make_shared<HTTPServer>(config);
   face_server->add_event_source(http_server);
 
-  std::thread t([&]() { http_server->run(config->app.server_port); });
+  std::thread t([&]() {
+    http_server->run(config->app.server_port, config->app.server_host);
+  });
   t.detach();
 
   qRegisterMetaType<PersonDisplay>("PersonDisplay");

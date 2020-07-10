@@ -13,6 +13,7 @@ using json = nlohmann::json;
 
 typedef struct {
   SZ_UINT16 server_port;
+  std::string server_host;
   std::string image_store_path;
   std::string person_service_base_url;
 } AppConfig;

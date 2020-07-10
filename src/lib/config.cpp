@@ -11,12 +11,14 @@ using namespace suanzi;
 
 void suanzi::to_json(json &j, const AppConfig &c) {
   SAVE_JSON_TO(j, "server_port", c.server_port);
+  SAVE_JSON_TO(j, "server_host", c.server_host);
   SAVE_JSON_TO(j, "image_store_path", c.image_store_path);
   SAVE_JSON_TO(j, "person_service_base_url", c.person_service_base_url);
 }
 
 void suanzi::from_json(const json &j, AppConfig &c) {
   LOAD_JSON_TO(j, "server_port", c.server_port);
+  LOAD_JSON_TO(j, "server_host", c.server_host);
   LOAD_JSON_TO(j, "image_store_path", c.image_store_path);
   LOAD_JSON_TO(j, "person_service_base_url", c.person_service_base_url);
 }
@@ -134,6 +136,7 @@ void suanzi::to_json(json &j, const Config &c) {
 SZ_RETCODE Config::load_defaults() {
   app = {
       .server_port = 8010,
+      .server_host = "0.0.0.0",
       .image_store_path = "/user/go-app/upload/",
       .person_service_base_url = "http://localhost:8008",
   };
