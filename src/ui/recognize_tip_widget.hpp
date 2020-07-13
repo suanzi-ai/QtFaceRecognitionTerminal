@@ -1,6 +1,7 @@
 #ifndef RECOGNIZETIPWIDGET_H
 #define RECOGNIZETIPWIDGET_H
 
+#include <QBitmap>
 #include <QImage>
 #include <QWidget>
 
@@ -22,10 +23,9 @@ class RecognizeTipWidget : public QWidget {
   void rx_display(PersonDisplay person);
   void hide_self();
 
-  QPixmap rectangle_to_round(QPixmap &input_image);
-
  private:
   PersonDisplay person_;
+  QBitmap mask_;
 };
 
 }  // namespace suanzi

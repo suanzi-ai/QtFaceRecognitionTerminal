@@ -1,6 +1,5 @@
 #include "recognize_tip_widget.hpp"
 
-#include <QBitmap>
 #include <QDateTime>
 #include <QDebug>
 #include <QPaintEvent>
@@ -8,12 +7,22 @@
 
 #include <iostream>
 
+#include "logger.hpp"
+
 using namespace suanzi;
 
-RecognizeTipWidget::RecognizeTipWidget(QWidget *parent) : QWidget(parent) {
+RecognizeTipWidget::RecognizeTipWidget(QWidget *parent)
+    : QWidget(parent), mask_(150, 150) {
   QPalette palette = this->palette();
   palette.setColor(QPalette::Background, Qt::transparent);
   setPalette(palette);
+
+  QPainter painter(&mask_);
+  painter.setRenderHint(QPainter::Antialiasing);
+  painter.setRenderHint(QPainter::SmoothPixmapTransform);
+  painter.fillRect(mask_.rect(), Qt::white);
+  painter.setBrush(QColor(0, 0, 0));
+  painter.drawRoundedRect(mask_.rect(), 150 / 2, 150 / 2);
 }
 
 RecognizeTipWidget::~RecognizeTipWidget() {}
@@ -56,11 +65,12 @@ void RecognizeTipWidget::paintEvent(QPaintEvent *event) {
     painter.drawText(48, 200, date);
 
     // draw avatar
-    QPixmap avatar(person_.avatar_path.c_str());
-    if (person_.avatar_path.length() > 0)
-      painter.drawPixmap(
-          QRect(400, 65, 150, 150),
-          rectangle_to_round(avatar), QRect());
+    if (person_.avatar_path.length() > 0) {
+      QPixmap avatar(person_.avatar_path.c_str());
+      avatar = avatar.scaled(mask_.size());
+      avatar.setMask(mask_);
+      painter.drawPixmap(QRect(400, 65, 150, 150), avatar, QRect());
+    }
 
     // draw person info
     font.setPixelSize(45);
@@ -74,21 +84,4 @@ void RecognizeTipWidget::paintEvent(QPaintEvent *event) {
       painter.drawText(580, 200, QString(("ID: " + person_.id).c_str()));
     }
   }
-}
-
-QPixmap RecognizeTipWidget::rectangle_to_round(QPixmap &input_image) {
-  if (input_image.isNull()) {
-    return QPixmap();
-  }
-  QSize size(input_image.size());
-  QBitmap mask(input_image.size());
-  QPainter painter(&mask);
-  painter.setRenderHint(QPainter::Antialiasing);
-  painter.setRenderHint(QPainter::SmoothPixmapTransform);
-  painter.fillRect(mask.rect(), Qt::white);
-  painter.setBrush(QColor(0, 0, 0));
-  painter.drawRoundedRect(mask.rect(), size.width() / 2, size.height() / 2);
-  QPixmap image = input_image;
-  image.setMask(mask);
-  return image;
 }
