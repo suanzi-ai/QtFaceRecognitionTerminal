@@ -65,12 +65,18 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
   }
 
   // if face detected
+  int width = pang->img_bgr_small->width;
+  int height = pang->img_bgr_small->height;
+  bool valid_face = false;
+  DetectionFloat largest_face;
   if (ret == SZ_RETCODE_OK && detections.size() > 0) {
-    int width = pang->img_bgr_small->width;
-    int height = pang->img_bgr_small->height;
-    DetectionFloat largest_face = select_face(detections, width, height);
+    largest_face = select_face(detections, width, height);
+    valid_face = largest_face.b_valid;
+    largest_face.b_valid = true;
     emit tx_display(largest_face);
+  }
 
+  if (valid_face) {
     copy_buffer(pang, largest_face);
 
     // send detection if recognized finished
@@ -118,7 +124,16 @@ DetectionFloat DetectTask::select_face(
   detection_bgr.y = rect.y * 1.0 / height;
   detection_bgr.width = rect.width * 1.0 / width;
   detection_bgr.height = rect.height * 0.8 / height;  // remove neck
-  detection_bgr.b_valid = true;
+  if (isnan(detections[max_id].yaw) ||
+      detections[max_id].yaw > config_->detect.max_yaw ||
+      detections[max_id].yaw < config_->detect.min_yaw ||
+      isnan(detections[max_id].pitch) ||
+      detections[max_id].pitch > config_->detect.max_pitch ||
+      detections[max_id].pitch < config_->detect.min_pitch)
+    detection_bgr.b_valid = false;
+  else
+    detection_bgr.b_valid = true;
+
   for (int i = 0; i < 5; i++) {
     detection_bgr.landmark[i][0] =
         detections[max_id].landmarks.point[i].x / width;

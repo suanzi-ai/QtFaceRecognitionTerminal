@@ -70,11 +70,19 @@ void suanzi::from_json(const json &j, CameraConfig &c) {
 void suanzi::to_json(json &j, const DetectConfig &c) {
   SAVE_JSON_TO(j, "threshold", c.threshold);
   SAVE_JSON_TO(j, "min_face_size", c.min_face_size);
+  SAVE_JSON_TO(j, "max_yaw", c.max_yaw);
+  SAVE_JSON_TO(j, "min_yaw", c.min_yaw);
+  SAVE_JSON_TO(j, "max_pitch", c.max_pitch);
+  SAVE_JSON_TO(j, "min_pitch", c.min_pitch);
 }
 
 void suanzi::from_json(const json &j, DetectConfig &c) {
   LOAD_JSON_TO(j, "threshold", c.threshold);
   LOAD_JSON_TO(j, "min_face_size", c.min_face_size);
+  LOAD_JSON_TO(j, "max_yaw", c.max_yaw);
+  LOAD_JSON_TO(j, "min_yaw", c.min_yaw);
+  LOAD_JSON_TO(j, "max_pitch", c.max_pitch);
+  LOAD_JSON_TO(j, "min_pitch", c.min_pitch);
 }
 
 void suanzi::to_json(json &j, const ExtractConfig &c) {
@@ -182,6 +190,10 @@ SZ_RETCODE Config::load_defaults() {
   detect = {
       .threshold = 0.4f,
       .min_face_size = 40,
+      .max_yaw = 25,
+      .min_yaw = -25,
+      .max_pitch = 20,
+      .min_pitch = -10,
   };
 
   extract = {

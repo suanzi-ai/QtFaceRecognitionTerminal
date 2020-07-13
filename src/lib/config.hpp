@@ -52,6 +52,10 @@ void from_json(const json &j, CameraConfig &c);
 typedef struct {
   SZ_FLOAT threshold;
   SZ_UINT32 min_face_size;
+  SZ_FLOAT max_yaw;
+  SZ_FLOAT min_yaw;
+  SZ_FLOAT max_pitch;
+  SZ_FLOAT min_pitch;
 } DetectConfig;
 
 void to_json(json &j, const DetectConfig &c);
