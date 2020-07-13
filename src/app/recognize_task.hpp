@@ -19,8 +19,10 @@ class RecognizeTask : QObject {
   Q_OBJECT
  public:
   RecognizeTask(FaceDatabasePtr db, FaceExtractorPtr extractor,
-                PersonService::ptr person_service, Config::ptr config,
-                QThread *thread = nullptr, QObject *parent = nullptr);
+                PersonService::ptr person_service,
+                MemoryPool<ImageBuffer, sizeof(ImageBuffer) * 5> *mem_pool,
+                Config::ptr config, QThread *thread = nullptr,
+                QObject *parent = nullptr);
   ~RecognizeTask();
 
  private slots:
@@ -36,16 +38,16 @@ class RecognizeTask : QObject {
   suanzi::FaceDetection to_detection(DetectionFloat detection_ratio, int width,
                                      int height);
 
-  // void report(SZ_UINT32 face_id, ImagePackage *img);
   void query_success(const suanzi::QueryResult &person_info,
                      RecognizeData *img);
-  void query_empty_database();
+  void query_empty_database(RecognizeData *img);
   void query_no_face();
 
   bool sequence_query(std::vector<suanzi::QueryResult> history,
                       SZ_UINT32 &face_id);
 
   bool if_duplicated(SZ_UINT32 face_id);
+  void report(SZ_UINT32 face_id, RecognizeData *img);
 
   FaceExtractorPtr face_extractor_;
   FaceDatabasePtr face_database_;
@@ -55,7 +57,7 @@ class RecognizeTask : QObject {
   std::vector<suanzi::QueryResult> history_;
   std::map<SZ_UINT32, std::chrono::steady_clock::time_point> query_clock_;
 
-  MemoryPool<ImageBuffer, sizeof(ImageBuffer) * 5> mem_pool_;
+  MemoryPool<ImageBuffer, sizeof(ImageBuffer) * 5> *mem_pool_;
 };
 
 }  // namespace suanzi

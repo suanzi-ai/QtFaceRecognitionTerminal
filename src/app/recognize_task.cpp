@@ -10,13 +10,15 @@
 
 using namespace suanzi;
 
-RecognizeTask::RecognizeTask(FaceDatabasePtr db, FaceExtractorPtr extractor,
-                             PersonService::ptr person_service,
-                             Config::ptr config, QThread *thread,
-                             QObject *parent)
+RecognizeTask::RecognizeTask(
+    FaceDatabasePtr db, FaceExtractorPtr extractor,
+    PersonService::ptr person_service,
+    MemoryPool<ImageBuffer, sizeof(ImageBuffer) * 5> *mem_pool,
+    Config::ptr config, QThread *thread, QObject *parent)
     : face_database_(db),
       face_extractor_(extractor),
       person_service_(person_service),
+      mem_pool_(mem_pool),
       config_(config) {
   if (thread == nullptr) {
     static QThread new_thread;
@@ -51,7 +53,7 @@ void RecognizeTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
     if (SZ_RETCODE_OK == ret) {
       query_success(results[0], pang);
     } else if (SZ_RETCODE_EMPTY_DATABASE == ret) {
-      query_empty_database();
+      query_empty_database(pang);
     }
   }
   buffer->switch_buffer();
@@ -78,18 +80,6 @@ suanzi::FaceDetection RecognizeTask::to_detection(
   return face_detection;
 }
 
-/*void RecognizeTask::report(SZ_UINT32 face_id, ImagePackage *img) {
-  std::vector<SZ_UINT8> image_buffer;
-  if (img->get_jpeg_buffer(img->img_bgr_small, image_buffer)) {
-    SZ_RETCODE ret = person_service_->report_face_record(face_id, image_buffer);
-    if (ret != SZ_RETCODE_OK) {
-      SZ_LOG_ERROR("Report face record error");
-    }
-  } else {
-    SZ_LOG_ERROR("Decode image failed");
-  }
-}*/
-
 void RecognizeTask::query_success(const suanzi::QueryResult &person_info,
                                   RecognizeData *img) {
   history_.push_back(person_info);
@@ -103,30 +93,27 @@ void RecognizeTask::query_success(const suanzi::QueryResult &person_info,
         SZ_LOG_INFO("recognized: id = {}, name = {}", person.id, person.name);
         tx_display({person.number, person.name, person.face_path});
 
-        if (!if_duplicated(face_id)) {
-          ImageBuffer *pBuffer = mem_pool_.allocate(1);
-          memcpy(pBuffer->data, img->img_bgr_small->pData,
-                 sizeof(pBuffer->data));
-          emit tx_record(face_id, pBuffer);
-        }
+        if (!if_duplicated(person.id)) report(person.id, img);
+        else SZ_LOG_INFO("duplicated: id = {}", person.id);
       }
     } else {
       SZ_LOG_INFO("recognized: unknown");
       tx_display({"", "访客", ":asserts/avatar_unknown.jpg"});
 
-      // TODO: upload unknown record
+      report(0, img);
     }
 
     history_.clear();
   }
 }
 
-void RecognizeTask::query_empty_database() {
+void RecognizeTask::query_empty_database(RecognizeData *img) {
   static int empty_age = 0;
   if (++empty_age >= config_->extract.history_size) {
     SZ_LOG_INFO("recognized: unknown (empty database)");
     tx_display({"", "访客", ":asserts/avatar_unknown.jpg"});
-    // TODO: upload unknown record
+
+    report(0, img);
 
     history_.clear();
     empty_age = 0;
@@ -191,9 +178,9 @@ bool RecognizeTask::sequence_query(std::vector<suanzi::QueryResult> history,
 bool RecognizeTask::if_duplicated(SZ_UINT32 face_id) {
   bool ret = false;
 
+  auto current_query_clock = std::chrono::steady_clock::now();
   if (query_clock_.find(face_id) != query_clock_.end()) {
     auto last_query_clock = query_clock_[face_id];
-    auto current_query_clock = std::chrono::steady_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::seconds>(
                         current_query_clock - last_query_clock)
                         .count();
@@ -203,6 +190,30 @@ bool RecognizeTask::if_duplicated(SZ_UINT32 face_id) {
       return false;
     } else
       return true;
-  } else
+  } else {
+    query_clock_[face_id] = current_query_clock;
     return false;
+  }
+}
+
+void RecognizeTask::report(SZ_UINT32 face_id, RecognizeData *img) {
+  int width = img->img_bgr_small->width;
+  int height = img->img_bgr_small->height;
+
+  // TODO: imagebuffer size as global config;
+  assert(width == 224);
+  assert(height == 320);
+
+  // TODO: move image convert to record_task
+  MmzImage *dest_img = new MmzImage(width, height, SZ_IMAGETYPE_BGR_PACKAGE);
+
+  if (Ive::getInstance()->yuv2RgbPacked(dest_img, img->img_bgr_small, true)) {
+    ImageBuffer *buffer = mem_pool_->allocate(1);
+    memcpy(buffer->data, dest_img->pData, sizeof(buffer->data));
+
+    emit tx_record(face_id, buffer);
+  } else
+    SZ_LOG_ERROR("IVE yuv2RgbPacked failed");
+
+  delete dest_img;
 }

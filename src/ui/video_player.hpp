@@ -11,10 +11,12 @@
 #include "detect_tip_widget.hpp"
 #include "detection_float.h"
 #include "image_package.h"
+#include "memory_pool.hpp"
 #include "recognize_data.hpp"
 #include "pingpang_buffer.h"
 #include "recognize_task.hpp"
 #include "recognize_tip_widget.hpp"
+#include "record_task.hpp"
 
 namespace suanzi {
 
@@ -47,10 +49,14 @@ class VideoPlayer : public QWidget {
   DetectTask *detect_task_;
   RecognizeTask *recognize_task_;
 
+  RecordTask *record_task_;
+
   suanzi::Config::ptr config_;
   FaceDatabasePtr db_;
   FaceDetectorPtr detector_;
   FaceExtractorPtr extractor_;
+
+  MemoryPool<ImageBuffer, sizeof(ImageBuffer) * 5> mem_pool_;
 };
 
 }  // namespace suanzi

@@ -31,8 +31,11 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
       config->app.person_service_base_url, config->app.image_store_path);
 
   detect_task_ = new DetectTask(detector, config, nullptr, this);
+  
   recognize_task_ =
-      new RecognizeTask(db, extractor, person_service, config, nullptr, this);
+      new RecognizeTask(db, extractor, person_service, &mem_pool_, config, nullptr, this);
+  record_task_ = 
+      new RecordTask(person_service, &mem_pool_);
 
   connect((const QObject *)camera_reader_1_,
           SIGNAL(tx_frame(PingPangBuffer<ImagePackage> *)),
@@ -62,6 +65,10 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
   connect((const QObject *)recognize_task_, SIGNAL(tx_display(PersonDisplay)),
           (const QObject *)recognize_tip_widget_,
           SLOT(rx_display(PersonDisplay)));
+
+  connect((const QObject *)recognize_task_, SIGNAL(tx_record(int, ImageBuffer *)),
+          (const QObject *)record_task_, SLOT(rx_record(int, ImageBuffer *)));
+
   camera_reader_1_->start_sample();
   QTimer::singleShot(1, this, SLOT(init_widgets()));
 }
