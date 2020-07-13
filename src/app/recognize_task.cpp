@@ -58,10 +58,8 @@ void RecognizeTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
   emit tx_finish();
 }
 
-void RecognizeTask::rx_no_frame() {
-	query_no_face();
-}
-							 
+void RecognizeTask::rx_no_frame() { query_no_face(); }
+
 suanzi::FaceDetection RecognizeTask::to_detection(
     DetectionFloat detection_ratio, int width, int height) {
   suanzi::FaceDetection face_detection;
@@ -104,18 +102,19 @@ void RecognizeTask::query_success(const suanzi::QueryResult &person_info,
       if (ret == SZ_RETCODE_OK) {
         SZ_LOG_INFO("recognized: id = {}, name = {}", person.id, person.name);
         tx_display({person.number, person.name, person.face_path});
+
+        if (!if_duplicated(face_id)) {
+          ImageBuffer *pBuffer = mem_pool_.allocate(1);
+          memcpy(pBuffer->data, img->img_bgr_small->pData,
+                 sizeof(pBuffer->data));
+          emit tx_record(face_id, pBuffer);
+        }
       }
     } else {
       SZ_LOG_INFO("recognized: unknown");
       tx_display({"", "访客", ":asserts/avatar_unknown.jpg"});
-    }
 
-    if (last_face_id_ != face_id) {
-      //report(face_id, img);
-      last_face_id_ = face_id;
-	  ImageBuffer *pBuffer = mem_pool_.allocate(1);
-	  memcpy(pBuffer->data, img->img_bgr_small->pData, sizeof(pBuffer->data));
-	  emit tx_record(face_id, pBuffer);
+      // TODO: upload unknown record
     }
 
     history_.clear();
@@ -127,6 +126,7 @@ void RecognizeTask::query_empty_database() {
   if (++empty_age >= config_->extract.history_size) {
     SZ_LOG_INFO("recognized: unknown (empty database)");
     tx_display({"", "访客", ":asserts/avatar_unknown.jpg"});
+    // TODO: upload unknown record
 
     history_.clear();
     empty_age = 0;
@@ -186,4 +186,23 @@ bool RecognizeTask::sequence_query(std::vector<suanzi::QueryResult> history,
   } else {
     return false;
   }
+}
+
+bool RecognizeTask::if_duplicated(SZ_UINT32 face_id) {
+  bool ret = false;
+
+  if (query_clock_.find(face_id) != query_clock_.end()) {
+    auto last_query_clock = query_clock_[face_id];
+    auto current_query_clock = std::chrono::steady_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::seconds>(
+                        current_query_clock - last_query_clock)
+                        .count();
+
+    if (duration > config_->extract.min_interval_between_same_records) {
+      query_clock_[face_id] = current_query_clock;
+      return false;
+    } else
+      return true;
+  } else
+    return false;
 }

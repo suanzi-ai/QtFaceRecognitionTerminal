@@ -3,17 +3,18 @@
 
 #include <QObject>
 
+#include <chrono>
+
 #include "config.hpp"
 #include "detection_float.h"
-#include "recognize_data.hpp"
+#include "memory_pool.hpp"
 #include "person.hpp"
 #include "person_service.hpp"
 #include "pingpang_buffer.h"
 #include "quface_common.hpp"
-#include "memory_pool.hpp"
+#include "recognize_data.hpp"
 
 namespace suanzi {
-
 class RecognizeTask : QObject {
   Q_OBJECT
  public:
@@ -35,13 +36,16 @@ class RecognizeTask : QObject {
   suanzi::FaceDetection to_detection(DetectionFloat detection_ratio, int width,
                                      int height);
 
-  //void report(SZ_UINT32 face_id, ImagePackage *img);
-  void query_success(const suanzi::QueryResult &person_info, RecognizeData *img);
+  // void report(SZ_UINT32 face_id, ImagePackage *img);
+  void query_success(const suanzi::QueryResult &person_info,
+                     RecognizeData *img);
   void query_empty_database();
   void query_no_face();
 
   bool sequence_query(std::vector<suanzi::QueryResult> history,
                       SZ_UINT32 &face_id);
+
+  bool if_duplicated(SZ_UINT32 face_id);
 
   FaceExtractorPtr face_extractor_;
   FaceDatabasePtr face_database_;
@@ -49,7 +53,7 @@ class RecognizeTask : QObject {
   Config::ptr config_;
 
   std::vector<suanzi::QueryResult> history_;
-  SZ_UINT32 last_face_id_ = 0;
+  std::map<SZ_UINT32, std::chrono::steady_clock::time_point> query_clock_;
 
   MemoryPool<ImageBuffer, sizeof(ImageBuffer) * 5> mem_pool_;
 };

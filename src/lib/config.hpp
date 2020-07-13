@@ -63,6 +63,7 @@ typedef struct {
   SZ_FLOAT min_recognize_score;
   SZ_FLOAT min_accumulate_score;
   SZ_INT32 max_lost_age;
+  SZ_INT32 min_interval_between_same_records;
 } ExtractConfig;
 
 void to_json(json &j, const ExtractConfig &c);
