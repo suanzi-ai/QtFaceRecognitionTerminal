@@ -103,7 +103,7 @@ void RecognizeTask::query_success(const suanzi::QueryResult &person_info,
       SZ_RETCODE ret = person_service_->get_person(face_id, person);
       if (ret == SZ_RETCODE_OK) {
         SZ_LOG_INFO("recognized: id = {}, name = {}", person.id, person.name);
-        tx_display({std::to_string(face_id), person.name, person.face_path});
+        tx_display({person.number, person.name, person.face_path});
       }
     } else {
       SZ_LOG_INFO("recognized: unknown");
@@ -123,7 +123,7 @@ void RecognizeTask::query_empty_database() {
   static int empty_age = 0;
   if (++empty_age >= config_->extract.history_size) {
     SZ_LOG_INFO("recognized: unknown (empty database)");
-    tx_display({"", "访客", "avatar_unknown.jpg"});
+    tx_display({"", "访客", ":asserts/avatar_unknown.jpg"});
 
     history_.clear();
     empty_age = 0;
