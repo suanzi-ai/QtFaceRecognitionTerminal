@@ -113,6 +113,9 @@ void RecognizeTask::query_success(const suanzi::QueryResult &person_info,
     if (last_face_id_ != face_id) {
       //report(face_id, img);
       last_face_id_ = face_id;
+	  ImageBuffer *pBuffer = mem_pool_.allocate(1);
+	  memcpy(pBuffer->data, img->img_bgr_small->pData, sizeof(pBuffer->data));
+	  emit tx_record(face_id, pBuffer);
     }
 
     history_.clear();

@@ -10,6 +10,7 @@
 #include "person_service.hpp"
 #include "pingpang_buffer.h"
 #include "quface_common.hpp"
+#include "memory_pool.hpp"
 
 namespace suanzi {
 
@@ -28,6 +29,7 @@ class RecognizeTask : QObject {
  signals:
   void tx_display(PersonDisplay person);
   void tx_finish();
+  void tx_record(int face_id, ImageBuffer *image_buffer);
 
  private:
   suanzi::FaceDetection to_detection(DetectionFloat detection_ratio, int width,
@@ -48,6 +50,8 @@ class RecognizeTask : QObject {
 
   std::vector<suanzi::QueryResult> history_;
   SZ_UINT32 last_face_id_ = 0;
+
+  MemoryPool<ImageBuffer, sizeof(ImageBuffer) * 5> mem_pool_;
 };
 
 }  // namespace suanzi
