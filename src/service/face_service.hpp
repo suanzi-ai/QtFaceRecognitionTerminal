@@ -38,6 +38,8 @@ class FaceService {
   json db_get_all(const json &body);
 
  private:
+  static constexpr size_t MAX_DATABASE_SIZE = 25000;
+
   SZ_RETCODE read_buffer(const PersonImageInfo &face,
                          std::vector<SZ_BYTE> &imgBuf);
   std::string get_image_file_name(SZ_UINT32 faceId);

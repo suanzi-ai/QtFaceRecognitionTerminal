@@ -160,6 +160,17 @@ SZ_RETCODE FaceService::read_buffer(const PersonImageInfo &face,
 
 json FaceService::db_add(const json &body) {
   try {
+
+    SZ_UINT32 db_size;
+    db_->size(db_size);
+    if (db_size >= MAX_DATABASE_SIZE) {
+      return {
+          {"ok", false},
+          {"message", "max database size(2.5w) exceeds"},
+          {"code", "MAX_DATABASE_SIZE_EXCEEDS"},
+      };
+    }
+
     auto face = body["person"].get<PersonImageInfo>();
     SZ_LOG_DEBUG("db.add id: {}", face.id);
 
@@ -230,6 +241,17 @@ json FaceService::db_add_many(const json &body) {
     std::vector<SZ_BYTE> imgBuf;
 
     for (auto &face : faceArrary) {
+
+      SZ_UINT32 db_size;
+      db_->size(db_size);
+      if (db_size >= MAX_DATABASE_SIZE) {
+        return {
+            {"ok", false},
+            {"message", "max database size(2.5w) exceeds"},
+            {"code", "MAX_DATABASE_SIZE_EXCEEDS"},
+        };
+      }
+
       SZ_LOG_DEBUG("[Add many] id = {}", face.id);
 
       ret = read_buffer(face, imgBuf);
