@@ -59,7 +59,8 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
   // 256x256  7ms
   std::vector<suanzi::FaceDetection> detections;
   SZ_RETCODE ret = face_detector_->detect(
-      (const SVP_IMAGE_S *)pang->img_bgr_small->pImplData, detections);
+      (const SVP_IMAGE_S *)pang->img_bgr_small->pImplData, detections,
+      config_->detect.threshold, config_->detect.min_face_size);
   if (ret != SZ_RETCODE_OK) {
     SZ_LOG_ERROR("Detect error ret={}", ret);
   }
