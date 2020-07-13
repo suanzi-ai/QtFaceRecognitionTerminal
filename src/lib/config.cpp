@@ -142,7 +142,7 @@ SZ_RETCODE Config::load_defaults() {
       .server_port = 8010,
       .server_host = "0.0.0.0",
       .image_store_path = "/user/go-app/upload/",
-      .person_service_base_url = "http://localhost:8008",
+      .person_service_base_url = "http://127.0.0.1:8008",
   };
 
   quface = {
