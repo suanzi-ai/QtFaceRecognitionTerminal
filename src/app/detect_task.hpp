@@ -7,9 +7,9 @@
 #include "config.hpp"
 #include "detection_float.h"
 #include "image_package.h"
-#include "recognize_data.hpp"
 #include "pingpang_buffer.h"
 #include "quface_common.hpp"
+#include "recognize_data.hpp"
 
 namespace suanzi {
 
@@ -20,10 +20,8 @@ class DetectTask : QObject {
              QThread *thread = nullptr, QObject *parent = nullptr);
   ~DetectTask();
 
-
  private:
- 	void copy_buffer(ImagePackage *pang, DetectionFloat &detection);
-
+  void copy_buffer(ImagePackage *pang, DetectionFloat &detection);
 
  private slots:
   void rx_frame(PingPangBuffer<ImagePackage> *buffer);

@@ -17,10 +17,10 @@ DetectTask::DetectTask(FaceDetectorPtr detector, Config::ptr config,
     : face_detector_(detector), config_(config) {
   b_tx_ok_ = true;
   b_data_ready_ = false;
-  recognize_data1_ = nullptr;                   
+  recognize_data1_ = nullptr;
   recognize_data2_ = nullptr;
   pingpang_buffer_ = nullptr;
-	
+
   if (thread == nullptr) {
     static QThread new_thread;
     moveToThread(&new_thread);
@@ -32,26 +32,25 @@ DetectTask::DetectTask(FaceDetectorPtr detector, Config::ptr config,
 }
 
 DetectTask::~DetectTask() {
-	if (recognize_data1_ != nullptr)
-		delete recognize_data1_;
-	if (recognize_data2_ != nullptr)
-		delete recognize_data2_;
-	if (pingpang_buffer_ != nullptr)
-  		delete pingpang_buffer_;
+  if (recognize_data1_ != nullptr) delete recognize_data1_;
+  if (recognize_data2_ != nullptr) delete recognize_data2_;
+  if (pingpang_buffer_ != nullptr) delete pingpang_buffer_;
 }
 
-
 void DetectTask::copy_buffer(ImagePackage *pang, DetectionFloat &detection) {
-	if (pingpang_buffer_ == nullptr) {
-		  recognize_data1_ = new RecognizeData({pang->img_bgr_large->width, pang->img_bgr_large->height},
-		  	{pang->img_bgr_small->width, pang->img_bgr_small->height});
-		  recognize_data2_ = new RecognizeData({pang->img_bgr_large->width, pang->img_bgr_large->height},
-		  	{pang->img_bgr_small->width, pang->img_bgr_small->height});
-		  pingpang_buffer_ = new PingPangBuffer<RecognizeData>(recognize_data1_, recognize_data2_);
-	 }
-	 RecognizeData *ping = pingpang_buffer_->get_ping();
-	 pang->copy_to(*ping);
-	 ping->detection = detection;
+  if (pingpang_buffer_ == nullptr) {
+    recognize_data1_ = new RecognizeData(
+        {pang->img_bgr_large->width, pang->img_bgr_large->height},
+        {pang->img_bgr_small->width, pang->img_bgr_small->height});
+    recognize_data2_ = new RecognizeData(
+        {pang->img_bgr_large->width, pang->img_bgr_large->height},
+        {pang->img_bgr_small->width, pang->img_bgr_small->height});
+    pingpang_buffer_ =
+        new PingPangBuffer<RecognizeData>(recognize_data1_, recognize_data2_);
+  }
+  RecognizeData *ping = pingpang_buffer_->get_ping();
+  pang->copy_to(*ping);
+  ping->detection = detection;
 }
 
 void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
@@ -59,8 +58,8 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
   ImagePackage *pang = buffer->get_pang();
   // 256x256  7ms
   std::vector<suanzi::FaceDetection> detections;
-  SZ_RETCODE ret = face_detector_->detect((const SVP_IMAGE_S *)pang->img_bgr_small->pImplData,
-                         detections);
+  SZ_RETCODE ret = face_detector_->detect(
+      (const SVP_IMAGE_S *)pang->img_bgr_small->pImplData, detections);
   if (ret != SZ_RETCODE_OK) {
     SZ_LOG_ERROR("Detect error ret={}", ret);
   }
@@ -71,28 +70,28 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
     int height = pang->img_bgr_small->height;
     DetectionFloat largest_face = select_face(detections, width, height);
     emit tx_display(largest_face);
-	
+
     copy_buffer(pang, largest_face);
 
-	// send detection if recognized finished
+    // send detection if recognized finished
     if (b_tx_ok_) {
-      b_tx_ok_ = false; 
-	  b_data_ready_ = false;  
+      b_tx_ok_ = false;
+      b_data_ready_ = false;
       emit tx_recognize(pingpang_buffer_);
     } else {
-	  b_data_ready_ = true;
-	}	
+      b_data_ready_ = true;
+    }
   } else {
     DetectionFloat no_face;
     no_face.b_valid = false;
     emit tx_display(no_face);
     if (b_tx_ok_ && b_data_ready_) {
-	  b_tx_ok_ = false; 
-	  b_data_ready_ = false;  
-	  emit tx_recognize(pingpang_buffer_);
-	} else {
-	    emit tx_no_frame();
-	}
+      b_tx_ok_ = false;
+      b_data_ready_ = false;
+      emit tx_recognize(pingpang_buffer_);
+    } else {
+      emit tx_no_frame();
+    }
   }
   buffer->switch_buffer();
   // SZ_LOG_DEBUG("tx_finish");
