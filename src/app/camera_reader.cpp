@@ -26,7 +26,7 @@ CameraReader::CameraReader(QObject *parent) {
                   CH_ROTATES_NIR, sizeof(VPSS_CH_SIZES_NIR) / sizeof(Size));
 
   static Vo vo_bgr(0, VO_INTF_MIPI, VO_W, VO_H);
-  static Vi_Vpss_Vo vi_vpss_vo(pvi_vpss_bgr_, &vo_bgr);
+  static Vi_Vpss_Vo vi_vpss_vo(pvi_vpss_bgr_, pvi_vpss_nir_, &vo_bgr);
   b_tx_ok_ = true;
 }
 
