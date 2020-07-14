@@ -62,9 +62,9 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
   connect((const QObject *)recognize_task_, SIGNAL(tx_finish()),
           (const QObject *)detect_task_, SLOT(rx_finish()));
 
-  connect((const QObject *)recognize_task_, SIGNAL(tx_display(PersonDisplay)),
+  connect((const QObject *)recognize_task_, SIGNAL(tx_display(PersonData)),
           (const QObject *)recognize_tip_widget_,
-          SLOT(rx_display(PersonDisplay)));
+          SLOT(rx_display(PersonData)));
 
   connect((const QObject *)recognize_task_, SIGNAL(tx_record(int, ImageBuffer *)),
           (const QObject *)record_task_, SLOT(rx_record(int, ImageBuffer *)));

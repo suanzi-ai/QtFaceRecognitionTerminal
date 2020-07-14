@@ -27,17 +27,17 @@ RecognizeTipWidget::RecognizeTipWidget(QWidget *parent)
 
 RecognizeTipWidget::~RecognizeTipWidget() {}
 
-void RecognizeTipWidget::rx_display(PersonDisplay person) {
+void RecognizeTipWidget::rx_display(PersonData person) {
   person_ = person;
 
   hide();
-  if (!person_.to_clear) show();
+  if (person_.status != "clear") show();
 }
 
 void RecognizeTipWidget::hide_self() { hide(); }
 
 void RecognizeTipWidget::paintEvent(QPaintEvent *event) {
-  if (!person_.to_clear) {
+  if (person_.status != "clear") {
     QPainter painter(this);
     const QRect RECOGNIZE_TIP_BOX = {0, 0, 800, 280};
 
@@ -65,8 +65,8 @@ void RecognizeTipWidget::paintEvent(QPaintEvent *event) {
     painter.drawText(48, 200, date);
 
     // draw avatar
-    if (person_.avatar_path.length() > 0) {
-      QPixmap avatar(person_.avatar_path.c_str());
+    if (person_.face_path.length() > 0) {
+      QPixmap avatar(person_.face_path.c_str());
       avatar = avatar.scaled(mask_.size());
       avatar.setMask(mask_);
       painter.drawPixmap(QRect(400, 65, 150, 150), avatar, QRect());
@@ -78,10 +78,10 @@ void RecognizeTipWidget::paintEvent(QPaintEvent *event) {
     painter.setPen(Qt::white);
     painter.drawText(580, 130, person_.name.c_str());
 
-    if (person_.id.length() > 0) {
+    if (person_.number.length() > 0) {
       font.setPixelSize(30);
       painter.setFont(font);
-      painter.drawText(580, 200, QString(("ID: " + person_.id).c_str()));
+      painter.drawText(580, 200, QString(("工号: " + person_.number).c_str()));
     }
   }
 }

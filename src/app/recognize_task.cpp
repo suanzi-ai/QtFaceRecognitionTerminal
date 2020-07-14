@@ -86,19 +86,22 @@ void RecognizeTask::query_success(const suanzi::QueryResult &person_info,
   if (history_.size() >= config_->extract.history_size) {
     SZ_UINT32 face_id = 0;
 
+    suanzi::PersonData person;
     if (sequence_query(history_, face_id)) {
-      suanzi::PersonData person;
       SZ_RETCODE ret = person_service_->get_person(face_id, person);
       if (ret == SZ_RETCODE_OK) {
         SZ_LOG_INFO("recognized: id = {}, name = {}", person.id, person.name);
-        tx_display({person.number, person.name, person.face_path});
+        tx_display(person);
 
         if (!if_duplicated(person.id)) report(person.id, img);
         else SZ_LOG_INFO("duplicated: id = {}", person.id);
       }
     } else {
       SZ_LOG_INFO("recognized: unknown");
-      tx_display({"", "访客", ":asserts/avatar_unknown.jpg"});
+      person.number = "";
+      person.name = "访客";
+      person.face_path = ":asserts/avatar_unknown.jpg";
+      tx_display(person);
 
       report(0, img);
     }
@@ -110,8 +113,11 @@ void RecognizeTask::query_success(const suanzi::QueryResult &person_info,
 void RecognizeTask::query_empty_database(RecognizeData *img) {
   static int empty_age = 0;
   if (++empty_age >= config_->extract.history_size) {
-    SZ_LOG_INFO("recognized: unknown (empty database)");
-    tx_display({"", "访客", ":asserts/avatar_unknown.jpg"});
+    suanzi::PersonData person;
+    person.number = "";
+    person.name = "访客";
+    person.face_path = ":asserts/avatar_unknown.jpg";
+    tx_display(person);
 
     report(0, img);
 
@@ -123,8 +129,11 @@ void RecognizeTask::query_empty_database(RecognizeData *img) {
 void RecognizeTask::query_no_face() {
   static int lost_age = 0;
   if (++lost_age >= config_->extract.max_lost_age) {
+    suanzi::PersonData person;
+    person.status = "clear";
+    tx_display(person);
+
     history_.clear();
-    tx_display({});
     lost_age = 0;
   }
 }

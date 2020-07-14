@@ -8,7 +8,6 @@
 #include "config.hpp"
 #include "detection_float.h"
 #include "memory_pool.hpp"
-#include "person.hpp"
 #include "person_service.hpp"
 #include "pingpang_buffer.h"
 #include "quface_common.hpp"
@@ -30,7 +29,7 @@ class RecognizeTask : QObject {
   void rx_no_frame();
 
  signals:
-  void tx_display(PersonDisplay person);
+  void tx_display(PersonData person);
   void tx_finish();
   void tx_record(int face_id, ImageBuffer *image_buffer);
 

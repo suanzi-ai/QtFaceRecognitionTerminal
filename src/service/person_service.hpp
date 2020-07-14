@@ -1,8 +1,10 @@
 #pragma once
 
-#include <httplib.h>
+#include <QMetaType>
 
+#include <httplib.h>
 #include <nlohmann/json.hpp>
+
 #include <quface/common.hpp>
 
 #include "logger.hpp"
@@ -32,6 +34,7 @@ enum PersonStatus {
   Blacklist,
   Stranger,
   Fake,
+  Clear
 };
 
 class PersonService {
@@ -121,6 +124,9 @@ class PersonService {
       case Fake:
         return "fake";
         break;
+      case Clear:
+        return "clear";
+        break;
       default:
         return "";
         break;
@@ -132,3 +138,6 @@ class PersonService {
   std::string image_store_path_;
 };
 }  // namespace suanzi
+
+
+Q_DECLARE_METATYPE(suanzi::PersonData);
