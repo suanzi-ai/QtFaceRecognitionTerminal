@@ -21,8 +21,8 @@ class DetectTask : QObject {
   ~DetectTask();
 
  private:
-  void copy_buffer(ImagePackage *pang, DetectionRadio &bgr_detection,
-                   DetectionRadio &nir_detection);
+  void copy_buffer(ImagePackage *pang, DetectionRatio &bgr_detection,
+                   DetectionRatio &nir_detection);
 
  private slots:
   void rx_frame(PingPangBuffer<ImagePackage> *buffer);
@@ -32,14 +32,14 @@ class DetectTask : QObject {
   void tx_finish();
 
   // for display
-  void tx_display(DetectionRadio detection);
+  void tx_display(DetectionRatio detection);
 
   // for recognition
   void tx_frame(PingPangBuffer<RecognizeData> *buffer);
   void tx_no_frame();
 
  private:
-  DetectionRadio select_face(std::vector<suanzi::FaceDetection> &detections,
+  DetectionRatio select_face(std::vector<suanzi::FaceDetection> &detections,
                              int width, int height);
 
   bool b_tx_ok_;

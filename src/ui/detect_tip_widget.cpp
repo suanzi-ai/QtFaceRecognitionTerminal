@@ -61,7 +61,7 @@ void DetectTipWidget::paint(QPainter *painter) {
   }
 }
 
-void DetectTipWidget::rx_display(DetectionRadio detection) {
+void DetectTipWidget::rx_display(DetectionRatio detection) {
   // TODO: add global configuration
   const int w = 800 - 1;
   const int h = 1280 - 1;

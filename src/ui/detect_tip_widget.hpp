@@ -21,7 +21,7 @@ class DetectTipWidget : public QWidget {
   void paint(QPainter *painter);
 
  private slots:
-  void rx_display(DetectionRadio detection);
+  void rx_display(DetectionRatio detection);
 
  private:
   static constexpr int MAX_RECT_COUNT = 10;

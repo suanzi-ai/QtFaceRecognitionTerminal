@@ -4,7 +4,7 @@
 #include <QMetaType>
 #include <quface_common.hpp>
 
-struct DetectionRadio {
+struct DetectionRatio {
   float x;
   float y;
   float width;
@@ -31,6 +31,6 @@ struct DetectionRadio {
   }
 };
 
-Q_DECLARE_METATYPE(DetectionRadio);
+Q_DECLARE_METATYPE(DetectionRatio);
 
 #endif
