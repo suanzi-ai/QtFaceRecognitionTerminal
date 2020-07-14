@@ -33,7 +33,7 @@ void AntiSpoofingTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
         is_live);
     if (ret == SZ_RETCODE_OK) {
       history_.push_back(is_live);
-      if (history_.size() >= config_->liveness.history_size) {
+      while (history_.size() >= config_->liveness.history_size) {
         history_.erase(history_.begin());
       }
       pang->is_alive = is_person_alive();
