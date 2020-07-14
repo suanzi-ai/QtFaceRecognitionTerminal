@@ -93,6 +93,7 @@ void suanzi::to_json(json &j, const ExtractConfig &c) {
   SAVE_JSON_TO(j, "max_lost_age", c.max_lost_age);
   SAVE_JSON_TO(j, "min_interval_between_same_records",
                c.min_interval_between_same_records);
+  SAVE_JSON_TO(j, "show_black_list", c.show_black_list);
 }
 
 void suanzi::from_json(const json &j, ExtractConfig &c) {
@@ -103,6 +104,7 @@ void suanzi::from_json(const json &j, ExtractConfig &c) {
   LOAD_JSON_TO(j, "max_lost_age", c.max_lost_age);
   LOAD_JSON_TO(j, "min_interval_between_same_records",
                c.min_interval_between_same_records);
+  LOAD_JSON_TO(j, "show_black_list", c.show_black_list);
 }
 
 void suanzi::to_json(json &j, const LivenessConfig &c) {
@@ -203,6 +205,7 @@ SZ_RETCODE Config::load_defaults() {
       .min_accumulate_score = 7.0f,
       .max_lost_age = 20,
       .min_interval_between_same_records = 60,
+      .show_black_list = 1
   };
 
   liveness = {

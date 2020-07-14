@@ -91,6 +91,12 @@ void RecognizeTask::query_success(const suanzi::QueryResult &person_info,
       SZ_RETCODE ret = person_service_->get_person(face_id, person);
       if (ret == SZ_RETCODE_OK) {
         SZ_LOG_INFO("recognized: id = {}, name = {}", person.id, person.name);
+        if (config_->extract.show_black_list && person.status == "blacklist") {
+          person.number = "";
+          person.name = "异常";
+          person.face_path = ":asserts/avatar_unknown.jpg";
+        }
+
         tx_display(person);
 
         if (!if_duplicated(person.id)) report(person.id, img);
