@@ -101,7 +101,7 @@ void suanzi::from_json(const json &j, ExtractConfig &c) {
   LOAD_JSON_TO(j, "min_recognize_score", c.min_recognize_score);
   LOAD_JSON_TO(j, "min_accumulate_score", c.min_accumulate_score);
   LOAD_JSON_TO(j, "max_lost_age", c.max_lost_age);
-  LOAD_JSON_TO(j, "max_lomin_interval_between_same_recordsst_age",
+  LOAD_JSON_TO(j, "min_interval_between_same_records",
                c.min_interval_between_same_records);
 }
 
