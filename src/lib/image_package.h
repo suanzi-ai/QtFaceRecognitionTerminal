@@ -9,7 +9,6 @@
 #include "ive.h"
 #include "logger.hpp"
 #include "quface/common.hpp"
-#include "recognize_data.hpp"
 
 namespace suanzi {
 
@@ -45,24 +44,11 @@ class ImagePackage {
     if (img_nir_large) delete img_nir_large;
   }
 
-
-  void copy_to(RecognizeData &recognize_data) {
-	img_bgr_large->copy_to(*recognize_data.img_bgr_large);
-	img_bgr_small->copy_to(*recognize_data.img_bgr_small);
-  }
-  
-
-  void bgrPacked2BgrPlanar(char *pDst, const char *pSrc, int width,
-                           int height) {
-    int len = width * height;
-    char *pb = pDst;
-    char *pg = pb + len;
-    char *pr = pg + len;
-    for (int i = 0; i < len; i++) {
-      pb[i] = pSrc[i * 3];
-      pg[i] = pSrc[i * 3 + 1];
-      pr[i] = pSrc[i * 3 + 2];
-    }
+  void copy_to(ImagePackage &pkg) {
+    img_bgr_large->copy_to(*pkg.img_bgr_large);
+    img_bgr_small->copy_to(*pkg.img_bgr_small);
+    img_nir_large->copy_to(*pkg.img_nir_large);
+    img_nir_small->copy_to(*pkg.img_nir_small);
   }
 
   bool get_jpeg_buffer(const MmzImage *src_img, std::vector<SZ_BYTE> &buffer) {

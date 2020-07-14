@@ -19,7 +19,7 @@ namespace suanzi {
 class CameraReader : QThread {
   Q_OBJECT
  public:
-  CameraReader(int cameralIndex, QObject *parent = nullptr);
+  CameraReader(QObject *parent = nullptr);
   ~CameraReader();
   void start_sample();
 
@@ -36,6 +36,10 @@ class CameraReader : QThread {
   Vi *pvi_bgr_;
   Vpss *pvpss_bgr_;
   Vi_Vpss *pvi_vpss_bgr_;
+
+  Vi *pvi_nir_;
+  Vpss *pvpss_nir_;
+  Vi_Vpss *pvi_vpss_nir_;
 
   const int DEV_IDX_BRG = 1;
   const int PIPE_IDX_BRG = 2;

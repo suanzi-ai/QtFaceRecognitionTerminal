@@ -75,9 +75,9 @@ void to_json(json &j, const ExtractConfig &c);
 void from_json(const json &j, ExtractConfig &c);
 
 typedef struct {
-  int queue_size;
-  int min_alive;
-  int continuous_max_missed;
+  int history_size;
+  int min_alive_count;
+  int continuous_max_lost_count;
   int max_no_face;
 } LivenessConfig;
 

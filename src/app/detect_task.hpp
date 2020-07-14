@@ -21,7 +21,8 @@ class DetectTask : QObject {
   ~DetectTask();
 
  private:
-  void copy_buffer(ImagePackage *pang, DetectionFloat &detection);
+  void copy_buffer(ImagePackage *pang, DetectionFloat &bgr_detection,
+                   DetectionFloat &nir_detection);
 
  private slots:
   void rx_frame(PingPangBuffer<ImagePackage> *buffer);
@@ -34,7 +35,7 @@ class DetectTask : QObject {
   void tx_display(DetectionFloat detection);
 
   // for recognition
-  void tx_recognize(PingPangBuffer<RecognizeData> *buffer);
+  void tx_frame(PingPangBuffer<RecognizeData> *buffer);
   void tx_no_frame();
 
  private:

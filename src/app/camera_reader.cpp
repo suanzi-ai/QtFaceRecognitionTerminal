@@ -10,13 +10,20 @@
 
 using namespace suanzi;
 
-CameraReader::CameraReader(int cameralIndex, QObject *parent) {
+CameraReader::CameraReader(QObject *parent) {
   pvi_bgr_ = new Vi(DEV_IDX_BRG, PIPE_IDX_BRG, SONY_IMX307_MIPI_2M_30FPS_12BIT);
   pvpss_bgr_ = new Vpss(DEV_IDX_BRG, VPSS_CH_SIZES_BGR[0].width,
                         VPSS_CH_SIZES_BGR[0].height);
   pvi_vpss_bgr_ =
       new Vi_Vpss(pvi_bgr_, pvpss_bgr_, VPSS_CH_SIZES_BGR, CH_INDEXES_BGR,
                   CH_ROTATES_BGR, sizeof(VPSS_CH_SIZES_BGR) / sizeof(Size));
+
+  pvi_nir_ = new Vi(DEV_IDX_NIR, PIPE_IDX_NIR, SONY_IMX307_MIPI_2M_30FPS_12BIT);
+  pvpss_nir_ = new Vpss(DEV_IDX_NIR, VPSS_CH_SIZES_BGR[0].width,
+                        VPSS_CH_SIZES_BGR[0].height);
+  pvi_vpss_nir_ =
+      new Vi_Vpss(pvi_nir_, pvpss_nir_, VPSS_CH_SIZES_NIR, CH_INDEXES_NIR,
+                  CH_ROTATES_NIR, sizeof(VPSS_CH_SIZES_NIR) / sizeof(Size));
 
   static Vo vo_bgr(0, VO_INTF_MIPI, VO_W, VO_H);
   static Vi_Vpss_Vo vi_vpss_vo(pvi_vpss_bgr_, &vo_bgr);
@@ -27,15 +34,14 @@ CameraReader::~CameraReader() {
   delete pvi_bgr_;
   delete pvpss_bgr_;
   delete pvi_vpss_bgr_;
+  delete pvi_nir_;
+  delete pvpss_nir_;
+  delete pvi_vpss_nir_;
 }
 
-void CameraReader::start_sample() {
-  start();
-}
+void CameraReader::start_sample() { start(); }
 
-void CameraReader::rx_finish() {
-  b_tx_ok_ = true;
-}
+void CameraReader::rx_finish() { b_tx_ok_ = true; }
 
 void CameraReader::run() {
   Size size_bgr_1 = VPSS_CH_SIZES_BGR[1];
@@ -58,18 +64,19 @@ void CameraReader::run() {
   int frame_idx = 0;
   bool b_data_ready = false;
   while (1) {
-
     ImagePackage *pPing = pingpang_buffer.get_ping();
-    if (pvpss_bgr_->getYuvFrame(pPing->img_bgr_small, 2)) {
-      while (!pvpss_bgr_->getYuvFrame(pPing->img_bgr_large, 1)) {
+    if (pvpss_bgr_->getYuvFrame(pPing->img_bgr_small, 2) &&
+        pvpss_nir_->getYuvFrame(pPing->img_nir_small, 1)) {
+      while (!pvpss_bgr_->getYuvFrame(pPing->img_bgr_large, 1) &&
+             pvpss_nir_->getYuvFrame(pPing->img_nir_large, 0)) {
         QThread::usleep(1000);
       }
-      
+
       if (b_tx_ok_) {
         pPing->frame_idx = frame_idx++;
         b_tx_ok_ = false;
         b_data_ready = false;
-        //SZ_LOG_DEBUG("tx_frame");
+        // SZ_LOG_DEBUG("tx_frame");
         emit tx_frame(&pingpang_buffer);
       } else {
         b_data_ready = true;
@@ -81,7 +88,7 @@ void CameraReader::run() {
         // SZ_LOG_DEBUG("tx_frame");
         pPing->frame_idx = frame_idx++;
         emit tx_frame(&pingpang_buffer);
-        //printf("tx threadId=%x  %x %d\n", QThread::currentThreadId(), pPing,
+        // printf("tx threadId=%x  %x %d\n", QThread::currentThreadId(), pPing,
         //        pPing->frame_idx);
       }
       QThread::usleep(1000);
