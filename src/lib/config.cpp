@@ -192,8 +192,8 @@ SZ_RETCODE Config::load_defaults() {
       .min_face_size = 40,
       .max_yaw = 25,
       .min_yaw = -25,
-      .max_pitch = 20,
-      .min_pitch = -10,
+      .max_pitch = 90, // disable max pitch
+      .min_pitch = -90, // disable min pitch
   };
 
   extract = {
