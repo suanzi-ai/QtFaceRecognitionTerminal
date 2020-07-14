@@ -16,7 +16,7 @@ LoggerConfig Logger::config_ = {
     "debug",  // log_level
 #endif
     "stdout",           // log_std
-    "logs/quface/log",  // log_file
+    "",  // log_file logs/quface.log
     10 * 1024 * 1024,   // log_file_max_size
     5                   // log_file_max_count
 };

@@ -4,12 +4,12 @@
 #include <QMetaType>
 #include <quface_common.hpp>
 
-struct DetectionFloat {
+struct DetectionRadio {
   float x;
   float y;
   float width;
   float height;
-  float landmark[5][2];
+  float landmark[SZ_LANDMARK_NUM][2];
   bool b_valid;
   int frame_idx;
 
@@ -20,7 +20,7 @@ struct DetectionFloat {
     face_detection.bbox.width = width * width;
     face_detection.bbox.height = height * height;
 
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < SZ_LANDMARK_NUM; i++) {
       face_detection.landmarks.point[i].x =
           landmark[i][0] * width;
       face_detection.landmarks.point[i].y =
@@ -31,6 +31,6 @@ struct DetectionFloat {
   }
 };
 
-Q_DECLARE_METATYPE(DetectionFloat);
+Q_DECLARE_METATYPE(DetectionRadio);
 
 #endif

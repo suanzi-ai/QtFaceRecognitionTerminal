@@ -34,7 +34,7 @@ class RecognizeTask : QObject {
   void tx_record(int face_id, ImageBuffer *image_buffer);
 
  private:
-  suanzi::FaceDetection to_detection(DetectionFloat detection_ratio, int width,
+  suanzi::FaceDetection to_detection(DetectionRadio detection_ratio, int width,
                                      int height);
 
   void query_success(const suanzi::QueryResult &person_info,

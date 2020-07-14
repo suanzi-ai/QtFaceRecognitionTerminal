@@ -75,6 +75,7 @@ void to_json(json &j, const ExtractConfig &c);
 void from_json(const json &j, ExtractConfig &c);
 
 typedef struct {
+  bool enable;
   int history_size;
   int min_alive_count;
   int continuous_max_lost_count;

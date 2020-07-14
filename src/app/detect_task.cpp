@@ -37,8 +37,8 @@ DetectTask::~DetectTask() {
   if (pingpang_buffer_ != nullptr) delete pingpang_buffer_;
 }
 
-void DetectTask::copy_buffer(ImagePackage *pang, DetectionFloat &bgr_detection,
-                             DetectionFloat &nir_detection) {
+void DetectTask::copy_buffer(ImagePackage *pang, DetectionRadio &bgr_detection,
+                             DetectionRadio &nir_detection) {
   if (pingpang_buffer_ == nullptr) {
     recognize_data1_ =
         new RecognizeData({(SZ_UINT32)pang->img_bgr_large->width,
@@ -91,8 +91,8 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
   int width = pang->img_bgr_small->width;
   int height = pang->img_bgr_small->height;
   bool valid_face = false;
-  DetectionFloat largest_bgr_face;
-  DetectionFloat largest_nir_face;
+  DetectionRadio largest_bgr_face;
+  DetectionRadio largest_nir_face;
 
   if (bgr_detections.size() > 0 && nir_detections.size() > 0) {
     valid_face = false;
@@ -116,7 +116,7 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
       b_data_ready_ = true;
     }
   } else {
-    DetectionFloat no_face;
+    DetectionRadio no_face;
     no_face.b_valid = false;
     emit tx_display(no_face);
     if (b_tx_ok_ && b_data_ready_) {
@@ -134,7 +134,7 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
 
 void DetectTask::rx_finish() { b_tx_ok_ = true; }
 
-DetectionFloat DetectTask::select_face(
+DetectionRadio DetectTask::select_face(
     std::vector<suanzi::FaceDetection> &detections, int width, int height) {
   int max_id = 0;
   float max_area = detections[0].bbox.width * detections[0].bbox.height;
@@ -146,7 +146,7 @@ DetectionFloat DetectTask::select_face(
     }
   }
 
-  DetectionFloat detection;
+  DetectionRadio detection;
   auto rect = detections[max_id].bbox;
   detection.x = rect.x * 1.0 / width;
   detection.y = rect.y * 1.0 / height;

@@ -16,8 +16,8 @@ namespace suanzi {
 
 class RecognizeData : public ImagePackage {
  public:
-  DetectionFloat bgr_detection;
-  DetectionFloat nir_detection;
+  DetectionRadio bgr_detection;
+  DetectionRadio nir_detection;
   bool is_alive;
 
   RecognizeData() {}

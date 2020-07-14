@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
   t.detach();
 
   qRegisterMetaType<PersonData>("PersonData");
-  qRegisterMetaType<DetectionFloat>("DetectionFloat");
+  qRegisterMetaType<DetectionRadio>("DetectionRadio");
 
   QApplication app(argc, argv);
 

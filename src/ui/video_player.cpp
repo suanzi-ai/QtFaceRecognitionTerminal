@@ -43,9 +43,9 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
   connect((const QObject *)detect_task_, SIGNAL(tx_finish()),
           (const QObject *)camera_reader_, SLOT(rx_finish()));
 
-  connect((const QObject *)detect_task_, SIGNAL(tx_display(DetectionFloat)),
+  connect((const QObject *)detect_task_, SIGNAL(tx_display(DetectionRadio)),
           (const QObject *)detect_tip_widget_,
-          SLOT(rx_display(DetectionFloat)));
+          SLOT(rx_display(DetectionRadio)));
 
   connect((const QObject *)detect_task_,
           SIGNAL(tx_frame(PingPangBuffer<RecognizeData> *)),
