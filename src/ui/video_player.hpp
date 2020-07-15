@@ -39,7 +39,8 @@ class VideoPlayer : public QWidget {
   // TODO: gloabal configuration
   const QRect RECOGNIZE_TIP_BOX = {0, 1000, 800, 280};
 
-  DetectTipWidget *detect_tip_widget_;
+  DetectTipWidget *detect_tip_widget_bgr_;
+  DetectTipWidget *detect_tip_widget_nir_;
   RecognizeTipWidget *recognize_tip_widget_;
 
   CameraReader *camera_reader_;

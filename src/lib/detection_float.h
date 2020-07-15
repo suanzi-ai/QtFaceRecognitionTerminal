@@ -13,18 +13,18 @@ struct DetectionRatio {
   bool b_valid;
   int frame_idx;
 
-  suanzi::FaceDetection to_detection(int width, int height) {
+  suanzi::FaceDetection to_detection(int _width, int _height) {
     suanzi::FaceDetection face_detection;
-    face_detection.bbox.x = x * width;
-    face_detection.bbox.y = y * height;
-    face_detection.bbox.width = width * width;
-    face_detection.bbox.height = height * height;
+    face_detection.bbox.x = x * _width;
+    face_detection.bbox.y = y * _height;
+    face_detection.bbox.width = width * _width;
+    face_detection.bbox.height = height * _height;
 
     for (int i = 0; i < SZ_LANDMARK_NUM; i++) {
       face_detection.landmarks.point[i].x =
-          landmark[i][0] * width;
+          landmark[i][0] * _width;
       face_detection.landmarks.point[i].y =
-          landmark[i][1] * height;
+          landmark[i][1] * _height;
     }
 
     return face_detection;

@@ -19,8 +19,8 @@ CameraReader::CameraReader(QObject *parent) {
                   CH_ROTATES_BGR, sizeof(VPSS_CH_SIZES_BGR) / sizeof(Size));
 
   pvi_nir_ = new Vi(DEV_IDX_NIR, PIPE_IDX_NIR, SONY_IMX307_MIPI_2M_30FPS_12BIT);
-  pvpss_nir_ = new Vpss(DEV_IDX_NIR, VPSS_CH_SIZES_BGR[0].width,
-                        VPSS_CH_SIZES_BGR[0].height);
+  pvpss_nir_ = new Vpss(DEV_IDX_NIR, VPSS_CH_SIZES_NIR[0].width,
+                        VPSS_CH_SIZES_NIR[0].height);
   pvi_vpss_nir_ =
       new Vi_Vpss(pvi_nir_, pvpss_nir_, VPSS_CH_SIZES_NIR, CH_INDEXES_NIR,
                   CH_ROTATES_NIR, sizeof(VPSS_CH_SIZES_NIR) / sizeof(Size));
@@ -46,19 +46,28 @@ void CameraReader::rx_finish() { b_tx_ok_ = true; }
 void CameraReader::run() {
   Size size_bgr_1 = VPSS_CH_SIZES_BGR[1];
   Size size_bgr_2 = VPSS_CH_SIZES_BGR[2];
-  if (CH_INDEXES_BGR[1]) {
+  if (CH_ROTATES_BGR[1]) {
     size_bgr_1.height = VPSS_CH_SIZES_BGR[1].width;
     size_bgr_1.width = VPSS_CH_SIZES_BGR[1].height;
   }
-  if (CH_INDEXES_BGR[2]) {
+  if (CH_ROTATES_BGR[2]) {
     size_bgr_2.height = VPSS_CH_SIZES_BGR[2].width;
     size_bgr_2.width = VPSS_CH_SIZES_BGR[2].height;
   }
 
-  ImagePackage image_package1(size_bgr_1, size_bgr_2, VPSS_CH_SIZES_NIR[0],
-                              VPSS_CH_SIZES_NIR[1]);
-  ImagePackage image_package2(size_bgr_1, size_bgr_2, VPSS_CH_SIZES_NIR[0],
-                              VPSS_CH_SIZES_NIR[1]);
+  Size size_nir_1 = VPSS_CH_SIZES_NIR[1];
+  Size size_nir_2 = VPSS_CH_SIZES_NIR[2];
+  if (CH_ROTATES_NIR[1]) {
+    size_nir_1.height = VPSS_CH_SIZES_NIR[1].width;
+    size_nir_1.width = VPSS_CH_SIZES_NIR[1].height;
+  }
+  if (CH_ROTATES_NIR[2]) {
+    size_nir_2.height = VPSS_CH_SIZES_NIR[2].width;
+    size_nir_2.width = VPSS_CH_SIZES_NIR[2].height;
+  }
+
+  ImagePackage image_package1(size_bgr_1, size_bgr_2, size_nir_1, size_nir_2);
+  ImagePackage image_package2(size_bgr_1, size_bgr_2, size_nir_1, size_nir_2);
   PingPangBuffer<ImagePackage> pingpang_buffer(&image_package1,
                                                &image_package2);
   int frame_idx = 0;
@@ -66,9 +75,9 @@ void CameraReader::run() {
   while (1) {
     ImagePackage *pPing = pingpang_buffer.get_ping();
     if (pvpss_bgr_->getYuvFrame(pPing->img_bgr_small, 2) &&
-        pvpss_nir_->getYuvFrame(pPing->img_nir_small, 1)) {
+        pvpss_nir_->getYuvFrame(pPing->img_nir_small, 2)) {
       while (!pvpss_bgr_->getYuvFrame(pPing->img_bgr_large, 1) &&
-             pvpss_nir_->getYuvFrame(pPing->img_nir_large, 0)) {
+             pvpss_nir_->getYuvFrame(pPing->img_nir_large, 1)) {
         QThread::usleep(1000);
       }
 

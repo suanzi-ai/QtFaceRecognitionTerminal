@@ -32,7 +32,8 @@ class DetectTask : QObject {
   void tx_finish();
 
   // for display
-  void tx_display(DetectionRatio detection);
+  void tx_bgr_display(DetectionRatio detection);
+  void tx_nir_display(DetectionRatio detection);
 
   // for recognition
   void tx_frame(PingPangBuffer<RecognizeData> *buffer);

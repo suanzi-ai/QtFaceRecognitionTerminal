@@ -3,20 +3,20 @@
 
 #include <QObject>
 
+#include "config.hpp"
 #include "detection_float.h"
 #include "image_package.h"
 #include "pingpang_buffer.h"
 #include "quface_common.hpp"
 #include "recognize_data.hpp"
-#include "config.hpp"
 
 namespace suanzi {
 
 class AntiSpoofingTask : QObject {
   Q_OBJECT
  public:
-  AntiSpoofingTask(FaceAntiSpoofingPtr anti_spoofing, QThread *thread = nullptr,
-                QObject *parent = nullptr);
+  AntiSpoofingTask(FaceAntiSpoofingPtr anti_spoofing, Config::ptr config,
+                   QThread* thread = nullptr, QObject* parent = nullptr);
   ~AntiSpoofingTask();
 
   bool is_person_alive();

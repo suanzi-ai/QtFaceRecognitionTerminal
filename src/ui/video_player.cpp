@@ -17,8 +17,12 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
   pal.setColor(QPalette::Foreground, Qt::green);
   setPalette(pal);
 
-  detect_tip_widget_ = new DetectTipWidget(this);
-  detect_tip_widget_->hide();
+  detect_tip_widget_bgr_ = new DetectTipWidget(0, 0, 800, 1280, this);
+  detect_tip_widget_bgr_->hide();
+
+  detect_tip_widget_nir_ = new DetectTipWidget(600, 0, 200, 320, this);
+  detect_tip_widget_nir_->hide();
+
   recognize_tip_widget_ = new RecognizeTipWidget(nullptr);
   recognize_tip_widget_->hide();
 
@@ -33,7 +37,8 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
   recognize_task_ = new RecognizeTask(db, extractor, person_service, &mem_pool_,
                                       config, nullptr, this);
   record_task_ = new RecordTask(person_service, &mem_pool_);
-  anti_spoofing_task_ = new AntiSpoofingTask(anti_spoofing, nullptr, this);
+  anti_spoofing_task_ =
+      new AntiSpoofingTask(anti_spoofing, config, nullptr, this);
 
   connect((const QObject *)camera_reader_,
           SIGNAL(tx_frame(PingPangBuffer<ImagePackage> *)),
@@ -43,8 +48,12 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
   connect((const QObject *)detect_task_, SIGNAL(tx_finish()),
           (const QObject *)camera_reader_, SLOT(rx_finish()));
 
-  connect((const QObject *)detect_task_, SIGNAL(tx_display(DetectionRatio)),
-          (const QObject *)detect_tip_widget_,
+  connect((const QObject *)detect_task_, SIGNAL(tx_bgr_display(DetectionRatio)),
+          (const QObject *)detect_tip_widget_bgr_,
+          SLOT(rx_display(DetectionRatio)));
+
+  connect((const QObject *)detect_task_, SIGNAL(tx_nir_display(DetectionRatio)),
+          (const QObject *)detect_tip_widget_nir_,
           SLOT(rx_display(DetectionRatio)));
 
   connect((const QObject *)detect_task_,
@@ -70,8 +79,7 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
           (const QObject *)anti_spoofing_task_, SLOT(rx_finish()));
 
   connect((const QObject *)recognize_task_, SIGNAL(tx_display(PersonData)),
-          (const QObject *)recognize_tip_widget_,
-          SLOT(rx_display(PersonData)));
+          (const QObject *)recognize_tip_widget_, SLOT(rx_display(PersonData)));
 
   connect((const QObject *)recognize_task_,
           SIGNAL(tx_record(int, ImageBuffer *)), (const QObject *)record_task_,
@@ -86,7 +94,8 @@ VideoPlayer::~VideoPlayer() {}
 
 void VideoPlayer::paintEvent(QPaintEvent *event) {
   QPainter painter(this);
-  detect_tip_widget_->paint(&painter);
+  detect_tip_widget_bgr_->paint(&painter);
+  detect_tip_widget_nir_->paint(&painter);
 }
 
 void VideoPlayer::init_widgets() {
