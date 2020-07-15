@@ -6,7 +6,13 @@
 
 using namespace suanzi;
 
-DetectTipWidget::DetectTipWidget(QWidget *parent) : QWidget(parent) {
+DetectTipWidget::DetectTipWidget(int win_x, int win_y, int win_width,
+                                 int win_height, QWidget *parent)
+    : win_x_(win_x),
+      win_y_(win_y),
+      win_width_(win_width),
+      win_height_(win_height),
+      QWidget(parent) {
   QPalette palette = this->palette();
   palette.setColor(QPalette::Background, Qt::transparent);
   setPalette(palette);
@@ -61,17 +67,18 @@ void DetectTipWidget::paint(QPainter *painter) {
   }
 }
 
-void DetectTipWidget::rx_display(DetectionFloat detection) {
-  // TODO: add global configuration
-  const int w = 800 - 1;
-  const int h = 1280 - 1;
+void DetectTipWidget::rx_display(DetectionRatio detection) {
+  int box_x = win_x_ + 1;
+  int box_y = win_y_ + 1;
+  int box_w = win_width_ - 1;
+  int box_h = win_height_ - 1;
 
   is_updated_ = detection.b_valid;
   if (is_updated_) {
     // resize to square
-    float center_x = (detection.x + .5f * detection.width) * w;
-    float center_Y = (detection.y + .5f * detection.height) * h;
-    float size = .5f * (detection.width * w + detection.height * h);
+    float center_x = box_x + (detection.x + .5f * detection.width) * box_w;
+    float center_Y = box_y + (detection.y + .5f * detection.height) * box_h;
+    float size = .5f * (detection.width * box_w + detection.height * box_h);
 
     QRect next_rect(center_x - .5f * size, center_Y - .5f * size, size, size);
     rects_.push_back(next_rect);

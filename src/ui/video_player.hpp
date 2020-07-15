@@ -4,7 +4,7 @@
 #include <QScopedPointer>
 #include <QWidget>
 
-#include "antispoof_task.hpp"
+#include "anti_spoofing_task.hpp"
 #include "camera_reader.hpp"
 #include "config.hpp"
 #include "detect_task.hpp"
@@ -39,13 +39,13 @@ class VideoPlayer : public QWidget {
   // TODO: gloabal configuration
   const QRect RECOGNIZE_TIP_BOX = {0, 1000, 800, 280};
 
-  DetectTipWidget *detect_tip_widget_;
+  DetectTipWidget *detect_tip_widget_bgr_;
+  DetectTipWidget *detect_tip_widget_nir_;
   RecognizeTipWidget *recognize_tip_widget_;
 
-  CameraReader *camera_reader_0_;
-  CameraReader *camera_reader_1_;
+  CameraReader *camera_reader_;
 
-  AntispoofTask *antispoof_task_;
+  AntiSpoofingTask *anti_spoofing_task_;
   DetectTask *detect_task_;
   RecognizeTask *recognize_task_;
 

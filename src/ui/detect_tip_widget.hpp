@@ -15,13 +15,14 @@ class DetectTipWidget : public QWidget {
   Q_OBJECT
 
  public:
-  DetectTipWidget(QWidget *parent = nullptr);
+  DetectTipWidget(int win_x, int win_y, int win_width, int win_height,
+                  QWidget *parent = nullptr);
   ~DetectTipWidget() override;
 
   void paint(QPainter *painter);
 
  private slots:
-  void rx_display(DetectionFloat detection);
+  void rx_display(DetectionRatio detection);
 
  private:
   static constexpr int MAX_RECT_COUNT = 10;
@@ -30,6 +31,10 @@ class DetectTipWidget : public QWidget {
   std::vector<QRect> rects_;
 
   bool is_updated_;
+  int win_x_;
+  int win_y_;
+  int win_width_;
+  int win_height_;
 };
 
 }  // namespace suanzi

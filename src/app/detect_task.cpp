@@ -37,65 +37,114 @@ DetectTask::~DetectTask() {
   if (pingpang_buffer_ != nullptr) delete pingpang_buffer_;
 }
 
-void DetectTask::copy_buffer(ImagePackage *pang, DetectionFloat &detection) {
+void DetectTask::copy_buffer(ImagePackage *pang, DetectionRatio &bgr_detection,
+                             DetectionRatio &nir_detection) {
   if (pingpang_buffer_ == nullptr) {
-    recognize_data1_ = new RecognizeData(
-        {pang->img_bgr_large->width, pang->img_bgr_large->height},
-        {pang->img_bgr_small->width, pang->img_bgr_small->height});
-    recognize_data2_ = new RecognizeData(
-        {pang->img_bgr_large->width, pang->img_bgr_large->height},
-        {pang->img_bgr_small->width, pang->img_bgr_small->height});
+    recognize_data1_ =
+        new RecognizeData({(SZ_UINT32)pang->img_bgr_large->width,
+                           (SZ_UINT32)pang->img_bgr_large->height},
+                          {(SZ_UINT32)pang->img_bgr_small->width,
+                           (SZ_UINT32)pang->img_bgr_small->height},
+                          {(SZ_UINT32)pang->img_nir_large->width,
+                           (SZ_UINT32)pang->img_nir_large->height},
+                          {(SZ_UINT32)pang->img_nir_small->width,
+                           (SZ_UINT32)pang->img_nir_small->height});
+    recognize_data2_ =
+        new RecognizeData({(SZ_UINT32)pang->img_bgr_large->width,
+                           (SZ_UINT32)pang->img_bgr_large->height},
+                          {(SZ_UINT32)pang->img_bgr_small->width,
+                           (SZ_UINT32)pang->img_bgr_small->height},
+                          {(SZ_UINT32)pang->img_nir_large->width,
+                           (SZ_UINT32)pang->img_nir_large->height},
+                          {(SZ_UINT32)pang->img_nir_small->width,
+                           (SZ_UINT32)pang->img_nir_small->height});
     pingpang_buffer_ =
         new PingPangBuffer<RecognizeData>(recognize_data1_, recognize_data2_);
   }
   RecognizeData *ping = pingpang_buffer_->get_ping();
   pang->copy_to(*ping);
-  ping->detection = detection;
+  ping->bgr_detection = bgr_detection;
+  ping->nir_detection = nir_detection;
 }
 
 void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
   // SZ_LOG_DEBUG("rx_frame");
   ImagePackage *pang = buffer->get_pang();
+  SZ_RETCODE ret;
+
   // 256x256  7ms
-  std::vector<suanzi::FaceDetection> detections;
-  SZ_RETCODE ret = face_detector_->detect(
-      (const SVP_IMAGE_S *)pang->img_bgr_small->pImplData, detections,
+  std::vector<suanzi::FaceDetection> bgr_detections;
+  ret = face_detector_->detect(
+      (const SVP_IMAGE_S *)pang->img_bgr_small->pImplData, bgr_detections,
       config_->detect.threshold, config_->detect.min_face_size);
   if (ret != SZ_RETCODE_OK) {
-    SZ_LOG_ERROR("Detect error ret={}", ret);
+    SZ_LOG_ERROR("Detect bgr error ret={}", ret);
   }
 
-  // if face detected
-  int width = pang->img_bgr_small->width;
-  int height = pang->img_bgr_small->height;
-  bool valid_face = false;
-  DetectionFloat largest_face;
-  if (ret == SZ_RETCODE_OK && detections.size() > 0) {
-    largest_face = select_face(detections, width, height);
-    valid_face = largest_face.b_valid;
-    largest_face.b_valid = true;
-    emit tx_display(largest_face);
+  bool valid_face = true;
+
+  int width;
+  int height;
+  DetectionRatio largest_bgr_face;
+  DetectionRatio largest_nir_face;
+
+  if (bgr_detections.size() > 0) {
+    width = pang->img_bgr_small->width;
+    height = pang->img_bgr_small->height;
+    // SZ_LOG_DEBUG("bgr_detections w={},h={}", width, height);
+    largest_bgr_face = select_face(bgr_detections, width, height);
+    emit tx_bgr_display(largest_bgr_face);
+  } else {
+    valid_face = false;
+    DetectionRatio no_face;
+    no_face.b_valid = false;
+    emit tx_bgr_display(no_face);
+  }
+
+  if (config_->liveness.enable) {
+    std::vector<suanzi::FaceDetection> nir_detections;
+    ret = face_detector_->detect(
+        (const SVP_IMAGE_S *)pang->img_nir_small->pImplData, nir_detections);
+    if (ret != SZ_RETCODE_OK) {
+      SZ_LOG_ERROR("Detect nir error ret={}", ret);
+    }
+
+    if (nir_detections.size() > 0) {
+      width = pang->img_nir_small->width;
+      height = pang->img_nir_small->height;
+      // SZ_LOG_DEBUG("nir_detections w={},h={}", width, height);
+      largest_nir_face = select_face(nir_detections, width, height);
+      emit tx_nir_display(largest_nir_face);
+    } else {
+      valid_face = false;
+      DetectionRatio no_face;
+      no_face.b_valid = false;
+      emit tx_nir_display(no_face);
+    }
   }
 
   if (valid_face) {
-    copy_buffer(pang, largest_face);
-
-    // send detection if recognized finished
+    // SZ_LOG_DEBUG("bgr_detections x={},y={},w={},h={}", largest_bgr_face.x,
+    //              largest_bgr_face.y, largest_bgr_face.width,
+    //              largest_bgr_face.height);
+    // SZ_LOG_DEBUG("nir_detections x={},y={},w={},h={}", largest_nir_face.x,
+    //              largest_nir_face.y, largest_nir_face.width,
+    //              largest_nir_face.height);
+    // SZ_LOG_DEBUG("Faces bgr={}, nir={}", bgr_detections.size(),
+    //              nir_detections.size());
+    copy_buffer(pang, largest_bgr_face, largest_nir_face);
     if (b_tx_ok_) {
       b_tx_ok_ = false;
       b_data_ready_ = false;
-      emit tx_recognize(pingpang_buffer_);
+      emit tx_frame(pingpang_buffer_);
     } else {
       b_data_ready_ = true;
     }
   } else {
-    DetectionFloat no_face;
-    no_face.b_valid = false;
-    emit tx_display(no_face);
     if (b_tx_ok_ && b_data_ready_) {
       b_tx_ok_ = false;
       b_data_ready_ = false;
-      emit tx_recognize(pingpang_buffer_);
+      emit tx_frame(pingpang_buffer_);
     } else {
       emit tx_no_frame();
     }
@@ -107,7 +156,7 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
 
 void DetectTask::rx_finish() { b_tx_ok_ = true; }
 
-DetectionFloat DetectTask::select_face(
+DetectionRatio DetectTask::select_face(
     std::vector<suanzi::FaceDetection> &detections, int width, int height) {
   int max_id = 0;
   float max_area = detections[0].bbox.width * detections[0].bbox.height;
@@ -119,28 +168,27 @@ DetectionFloat DetectTask::select_face(
     }
   }
 
-  DetectionFloat detection_bgr;
+  DetectionRatio detection;
   auto rect = detections[max_id].bbox;
-  detection_bgr.x = rect.x * 1.0 / width;
-  detection_bgr.y = rect.y * 1.0 / height;
-  detection_bgr.width = rect.width * 1.0 / width;
-  detection_bgr.height = rect.height * 0.8 / height;  // remove neck
+  detection.x = rect.x * 1.0 / width;
+  detection.y = rect.y * 1.0 / height;
+  detection.width = rect.width * 1.0 / width;
+  detection.height = rect.height * 0.8 / height;  // remove neck
+#if 0
   if (isnan(detections[max_id].yaw) ||
       detections[max_id].yaw > config_->detect.max_yaw ||
       detections[max_id].yaw < config_->detect.min_yaw ||
       isnan(detections[max_id].pitch) ||
       detections[max_id].pitch > config_->detect.max_pitch ||
       detections[max_id].pitch < config_->detect.min_pitch)
-    detection_bgr.b_valid = false;
+    detection.b_valid = false;
   else
-    detection_bgr.b_valid = true;
-
+#endif
+  detection.b_valid = true;
   for (int i = 0; i < 5; i++) {
-    detection_bgr.landmark[i][0] =
-        detections[max_id].landmarks.point[i].x / width;
-    detection_bgr.landmark[i][1] =
-        detections[max_id].landmarks.point[i].y / height;
+    detection.landmark[i][0] = detections[max_id].landmarks.point[i].x / width;
+    detection.landmark[i][1] = detections[max_id].landmarks.point[i].y / height;
   }
 
-  return detection_bgr;
+  return detection;
 }

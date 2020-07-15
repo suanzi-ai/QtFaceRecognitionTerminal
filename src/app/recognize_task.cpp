@@ -34,12 +34,12 @@ RecognizeTask::~RecognizeTask() {}
 
 void RecognizeTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
   RecognizeData *pang = buffer->get_pang();
-  if (pang->detection.b_valid) {
+  if (pang->bgr_detection.b_valid && (pang->is_alive || !config_->liveness.enable)) {
     // crop in large image
     int width = pang->img_bgr_large->width;
     int height = pang->img_bgr_large->height;
     suanzi::FaceDetection face_detection =
-        to_detection(pang->detection, width, height);
+        pang->bgr_detection.to_detection(width, height);
 
     // extract: 25ms
     suanzi::FaceFeature feature;
@@ -62,24 +62,6 @@ void RecognizeTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
 
 void RecognizeTask::rx_no_frame() { query_no_face(); }
 
-suanzi::FaceDetection RecognizeTask::to_detection(
-    DetectionFloat detection_ratio, int width, int height) {
-  suanzi::FaceDetection face_detection;
-  face_detection.bbox.x = detection_ratio.x * width;
-  face_detection.bbox.y = detection_ratio.y * height;
-  face_detection.bbox.width = detection_ratio.width * width;
-  face_detection.bbox.height = detection_ratio.height * height;
-
-  for (int i = 0; i < 5; i++) {
-    face_detection.landmarks.point[i].x =
-        detection_ratio.landmark[i][0] * width;
-    face_detection.landmarks.point[i].y =
-        detection_ratio.landmark[i][1] * height;
-  }
-
-  return face_detection;
-}
-
 void RecognizeTask::query_success(const suanzi::QueryResult &person_info,
                                   RecognizeData *img) {
   history_.push_back(person_info);
@@ -99,8 +81,10 @@ void RecognizeTask::query_success(const suanzi::QueryResult &person_info,
 
         tx_display(person);
 
-        if (!if_duplicated(person.id)) report(person.id, img);
-        else SZ_LOG_INFO("duplicated: id = {}", person.id);
+        if (!if_duplicated(person.id))
+          report(person.id, img);
+        else
+          SZ_LOG_INFO("duplicated: id = {}", person.id);
       }
     } else {
       SZ_LOG_INFO("recognized: unknown");

@@ -6,6 +6,7 @@
 #include <QThread>
 #include <chrono>
 
+#include "config.hpp"
 #include "image_package.h"
 #include "pingpang_buffer.h"
 #include "vi.h"
@@ -19,12 +20,13 @@ namespace suanzi {
 class CameraReader : QThread {
   Q_OBJECT
  public:
-  CameraReader(int cameralIndex, QObject *parent = nullptr);
+  CameraReader(Config::ptr config, QObject *parent = nullptr);
   ~CameraReader();
   void start_sample();
 
  private:
   void run();
+  bool capture_frame(ImagePackage *pkg);
 
  private slots:
   void rx_finish();
@@ -37,23 +39,29 @@ class CameraReader : QThread {
   Vpss *pvpss_bgr_;
   Vi_Vpss *pvi_vpss_bgr_;
 
+  Vi *pvi_nir_;
+  Vpss *pvpss_nir_;
+  Vi_Vpss *pvi_vpss_nir_;
+
   const int DEV_IDX_BRG = 1;
   const int PIPE_IDX_BRG = 2;
   const int DEV_IDX_NIR = 0;
   const int PIPE_IDX_NIR = 0;
 
   const Size VPSS_CH_SIZES_BGR[3] = {
-      {1920, 1080}, {1080, 704}, {320, 224}};                    // larger small
-  const Size VPSS_CH_SIZES_NIR[2] = {{1920, 1080}, {320, 224}};  // larger small
+      {1920, 1080}, {1080, 704}, {320, 224}};  // larger small
+  const Size VPSS_CH_SIZES_NIR[3] = {
+      {1920, 1080}, {1080, 704}, {320, 224}};  // larger small
   const int CH_INDEXES_BGR[3] = {0, 1, 2};
   const bool CH_ROTATES_BGR[3] = {false, true, true};
-  const int CH_INDEXES_NIR[2] = {0, 1};
-  const bool CH_ROTATES_NIR[2] = {false, false};
+  const int CH_INDEXES_NIR[3] = {0, 1, 2};
+  const bool CH_ROTATES_NIR[3] = {false, true, true};
 
   const int VO_W = 800;
   const int VO_H = 1280;
 
   bool b_tx_ok_;
+  Config::ptr config_;
 };
 
 }  // namespace suanzi

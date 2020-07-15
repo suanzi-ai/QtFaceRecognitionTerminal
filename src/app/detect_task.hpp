@@ -21,7 +21,8 @@ class DetectTask : QObject {
   ~DetectTask();
 
  private:
-  void copy_buffer(ImagePackage *pang, DetectionFloat &detection);
+  void copy_buffer(ImagePackage *pang, DetectionRatio &bgr_detection,
+                   DetectionRatio &nir_detection);
 
  private slots:
   void rx_frame(PingPangBuffer<ImagePackage> *buffer);
@@ -31,14 +32,15 @@ class DetectTask : QObject {
   void tx_finish();
 
   // for display
-  void tx_display(DetectionFloat detection);
+  void tx_bgr_display(DetectionRatio detection);
+  void tx_nir_display(DetectionRatio detection);
 
   // for recognition
-  void tx_recognize(PingPangBuffer<RecognizeData> *buffer);
+  void tx_frame(PingPangBuffer<RecognizeData> *buffer);
   void tx_no_frame();
 
  private:
-  DetectionFloat select_face(std::vector<suanzi::FaceDetection> &detections,
+  DetectionRatio select_face(std::vector<suanzi::FaceDetection> &detections,
                              int width, int height);
 
   bool b_tx_ok_;

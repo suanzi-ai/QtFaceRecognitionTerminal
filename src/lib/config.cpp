@@ -108,17 +108,17 @@ void suanzi::from_json(const json &j, ExtractConfig &c) {
 }
 
 void suanzi::to_json(json &j, const LivenessConfig &c) {
-  SAVE_JSON_TO(j, "queue_size", c.queue_size);
-  SAVE_JSON_TO(j, "min_alive", c.min_alive);
-  SAVE_JSON_TO(j, "continuous_max_missed", c.continuous_max_missed);
-  SAVE_JSON_TO(j, "max_no_face", c.max_no_face);
+  SAVE_JSON_TO(j, "enable", c.enable);
+  SAVE_JSON_TO(j, "history_size", c.history_size);
+  SAVE_JSON_TO(j, "min_alive_count", c.min_alive_count);
+  SAVE_JSON_TO(j, "continuous_max_lost_count", c.continuous_max_lost_count);
 }
 
 void suanzi::from_json(const json &j, LivenessConfig &c) {
-  LOAD_JSON_TO(j, "queue_size", c.queue_size);
-  LOAD_JSON_TO(j, "min_alive", c.min_alive);
-  LOAD_JSON_TO(j, "continuous_max_missed", c.continuous_max_missed);
-  LOAD_JSON_TO(j, "max_no_face", c.max_no_face);
+  LOAD_JSON_TO(j, "enable", c.enable);
+  LOAD_JSON_TO(j, "history_size", c.history_size);
+  LOAD_JSON_TO(j, "min_alive_count", c.min_alive_count);
+  LOAD_JSON_TO(j, "continuous_max_lost_count", c.continuous_max_lost_count);
 }
 
 void suanzi::from_json(const json &j, Config &c) {
@@ -209,10 +209,10 @@ SZ_RETCODE Config::load_defaults() {
   };
 
   liveness = {
-      .queue_size = 16,
-      .min_alive = 7,
-      .continuous_max_missed = 3,
-      .max_no_face = 3,
+      .enable = false,
+      .history_size = 16,
+      .min_alive_count = 7,
+      .continuous_max_lost_count = 3,
   };
 }
 
