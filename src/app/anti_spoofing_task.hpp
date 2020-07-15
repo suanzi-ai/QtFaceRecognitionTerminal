@@ -24,6 +24,7 @@ class AntiSpoofingTask : QObject {
  private slots:
   void rx_frame(PingPangBuffer<RecognizeData>* buffer);
   void rx_no_frame();
+  void rx_finish();
 
  signals:
   void tx_finish();

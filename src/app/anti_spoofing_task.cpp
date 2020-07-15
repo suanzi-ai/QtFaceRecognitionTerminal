@@ -19,6 +19,8 @@ AntiSpoofingTask::AntiSpoofingTask(FaceAntiSpoofingPtr anti_spoofing,
 
 AntiSpoofingTask::~AntiSpoofingTask() {}
 
+void AntiSpoofingTask::rx_finish() { b_tx_ok_ = true; }
+
 void AntiSpoofingTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
   RecognizeData *pang = buffer->get_pang();
   if (pang->nir_detection.b_valid) {
