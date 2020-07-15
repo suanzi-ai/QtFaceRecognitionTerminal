@@ -151,15 +151,15 @@ SZ_RETCODE Config::load_defaults() {
   app = {
       .server_port = 8010,
       .server_host = "0.0.0.0",
-      .image_store_path = "/user/go-app/upload/",
-      .person_service_base_url = "http://127.0.0.1:8008",
+      .image_store_path = "/user/quface-app/var/db/upload/",
+      .person_service_base_url = "http://127.0.0.1",
   };
 
   quface = {
       .product_key = "",
       .device_name = "",
       .device_secret = "",
-      .client_id = "quface_qt",
+      .client_id = "face-service",
       .db_name = "quface",
       .model_file_path = "facemodel.bin",
       .license_filename = "license.json",
@@ -194,19 +194,17 @@ SZ_RETCODE Config::load_defaults() {
       .min_face_size = 40,
       .max_yaw = 25,
       .min_yaw = -25,
-      .max_pitch = 90, // disable max pitch
-      .min_pitch = -90, // disable min pitch
+      .max_pitch = 90,   // disable max pitch
+      .min_pitch = -90,  // disable min pitch
   };
 
-  extract = {
-      .history_size = 15,
-      .min_recognize_count = 10,
-      .min_recognize_score = .75f,
-      .min_accumulate_score = 7.0f,
-      .max_lost_age = 20,
-      .min_interval_between_same_records = 60,
-      .show_black_list = 1
-  };
+  extract = {.history_size = 15,
+             .min_recognize_count = 10,
+             .min_recognize_score = .75f,
+             .min_accumulate_score = 7.0f,
+             .max_lost_age = 20,
+             .min_interval_between_same_records = 60,
+             .show_black_list = 1};
 
   liveness = {
       .enable = false,
@@ -217,24 +215,28 @@ SZ_RETCODE Config::load_defaults() {
 }
 
 SZ_RETCODE Config::load() {
-  std::ifstream i(config_file_);
-  if (!i.is_open()) {
-    SZ_LOG_WARN("{} not present, will using defaults", config_file_);
-    return SZ_RETCODE_OK;
-  }
+  try {
+    std::ifstream i(config_file_);
+    if (!i.is_open()) {
+      SZ_LOG_WARN("{} not present, will using defaults", config_file_);
+      return SZ_RETCODE_OK;
+    }
 
-  json config;
-  i >> config;
+    json config;
+    i >> config;
 
-  config.get_to(*this);
+    config.get_to(*this);
 
-  std::ifstream override(config_override_file_);
-  if (override.is_open()) {
-    SZ_LOG_INFO("Override config from {}", config_override_file_);
-    json override_config;
-    i >> override_config;
+    std::ifstream override(config_override_file_);
+    if (override.is_open()) {
+      SZ_LOG_INFO("Override config from {}", config_override_file_);
+      json override_config;
+      i >> override_config;
 
-    override_config.get_to(*this);
+      override_config.get_to(*this);
+    }
+  } catch (std::exception &exc) {
+    SZ_LOG_ERROR("Load error, will using defaults: {}", exc.what());
   }
 
   return SZ_RETCODE_OK;

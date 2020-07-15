@@ -10,6 +10,18 @@ using namespace suanzi;
 int main(int argc, char* argv[]) {
   std::string cfg_file = "config.json";
   std::string cfg_override_file = "config.override.json";
+  for (int i = 1; i < argc; i++) {
+    auto arg = std::string(argv[i]);
+    if (i < argc - 1) {
+      if (arg == "-c" || arg == "--config") {
+        i++;
+        cfg_file = argv[i];
+      } else if (arg == "-cc" || arg == "--override-config") {
+        i++;
+        cfg_override_file = argv[i];
+      }
+    }
+  }
 
   auto config = suanzi::Config::make_shared(cfg_file, cfg_override_file);
   SZ_RETCODE ret = config->load();
