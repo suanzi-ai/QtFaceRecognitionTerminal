@@ -24,6 +24,13 @@ void AntiSpoofingTask::rx_finish() { b_tx_ok_ = true; }
 
 void AntiSpoofingTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
   // SZ_LOG_DEBUG("rx_frame");
+  if (!config_->liveness.enable) {
+    emit tx_frame(buffer);
+    buffer->switch_buffer();
+    emit tx_finish();
+    return;
+  }
+
   RecognizeData *pang = buffer->get_pang();
   if (pang->nir_detection.b_valid) {
     int width = pang->img_nir_large->width;

@@ -26,7 +26,7 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
   recognize_tip_widget_ = new RecognizeTipWidget(nullptr);
   recognize_tip_widget_->hide();
 
-  camera_reader_ = new CameraReader(this);
+  camera_reader_ = new CameraReader(config, this);
 
   auto person_service = PersonService::make_shared(
       config->app.person_service_base_url, config->app.image_store_path);

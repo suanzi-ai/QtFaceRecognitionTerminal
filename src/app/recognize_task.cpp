@@ -34,7 +34,7 @@ RecognizeTask::~RecognizeTask() {}
 
 void RecognizeTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
   RecognizeData *pang = buffer->get_pang();
-  if (pang->bgr_detection.b_valid && pang->is_alive) {
+  if (pang->bgr_detection.b_valid && (pang->is_alive || !config_->liveness.enable)) {
     // crop in large image
     int width = pang->img_bgr_large->width;
     int height = pang->img_bgr_large->height;

@@ -6,6 +6,7 @@
 #include <QThread>
 #include <chrono>
 
+#include "config.hpp"
 #include "image_package.h"
 #include "pingpang_buffer.h"
 #include "vi.h"
@@ -19,12 +20,13 @@ namespace suanzi {
 class CameraReader : QThread {
   Q_OBJECT
  public:
-  CameraReader(QObject *parent = nullptr);
+  CameraReader(Config::ptr config, QObject *parent = nullptr);
   ~CameraReader();
   void start_sample();
 
  private:
   void run();
+  bool capture_frame(ImagePackage *pkg);
 
  private slots:
   void rx_finish();
@@ -59,6 +61,7 @@ class CameraReader : QThread {
   const int VO_H = 1280;
 
   bool b_tx_ok_;
+  Config::ptr config_;
 };
 
 }  // namespace suanzi

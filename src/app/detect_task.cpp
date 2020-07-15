@@ -81,16 +81,10 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
     SZ_LOG_ERROR("Detect bgr error ret={}", ret);
   }
 
-  std::vector<suanzi::FaceDetection> nir_detections;
-  ret = face_detector_->detect(
-      (const SVP_IMAGE_S *)pang->img_nir_small->pImplData, nir_detections);
-  if (ret != SZ_RETCODE_OK) {
-    SZ_LOG_ERROR("Detect nir error ret={}", ret);
-  }
+  bool valid_face = true;
 
   int width;
   int height;
-  bool valid_face = bgr_detections.size() > 0 && nir_detections.size() > 0;
   DetectionRatio largest_bgr_face;
   DetectionRatio largest_nir_face;
 
@@ -101,21 +95,32 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
     largest_bgr_face = select_face(bgr_detections, width, height);
     emit tx_bgr_display(largest_bgr_face);
   } else {
+    valid_face = false;
     DetectionRatio no_face;
     no_face.b_valid = false;
     emit tx_bgr_display(no_face);
   }
 
-  if (nir_detections.size() > 0) {
-    width = pang->img_nir_small->width;
-    height = pang->img_nir_small->height;
-    // SZ_LOG_DEBUG("nir_detections w={},h={}", width, height);
-    largest_nir_face = select_face(nir_detections, width, height);
-    emit tx_nir_display(largest_nir_face);
-  } else {
-    DetectionRatio no_face;
-    no_face.b_valid = false;
-    emit tx_nir_display(no_face);
+  if (config_->liveness.enable) {
+    std::vector<suanzi::FaceDetection> nir_detections;
+    ret = face_detector_->detect(
+        (const SVP_IMAGE_S *)pang->img_nir_small->pImplData, nir_detections);
+    if (ret != SZ_RETCODE_OK) {
+      SZ_LOG_ERROR("Detect nir error ret={}", ret);
+    }
+
+    if (nir_detections.size() > 0) {
+      width = pang->img_nir_small->width;
+      height = pang->img_nir_small->height;
+      // SZ_LOG_DEBUG("nir_detections w={},h={}", width, height);
+      largest_nir_face = select_face(nir_detections, width, height);
+      emit tx_nir_display(largest_nir_face);
+    } else {
+      valid_face = false;
+      DetectionRatio no_face;
+      no_face.b_valid = false;
+      emit tx_nir_display(no_face);
+    }
   }
 
   if (valid_face) {

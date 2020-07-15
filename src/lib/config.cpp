@@ -209,7 +209,7 @@ SZ_RETCODE Config::load_defaults() {
   };
 
   liveness = {
-      .enable = true,
+      .enable = false,
       .history_size = 16,
       .min_alive_count = 7,
       .continuous_max_lost_count = 3,
