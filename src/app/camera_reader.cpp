@@ -10,8 +10,7 @@
 
 using namespace suanzi;
 
-CameraReader::CameraReader(Config::ptr config, QObject *parent)
-    : config_(config) {
+CameraReader::CameraReader(QObject *parent) {
   pvi_bgr_ = new Vi(DEV_IDX_BRG, PIPE_IDX_BRG, SONY_IMX307_MIPI_2M_30FPS_12BIT);
   pvpss_bgr_ = new Vpss(DEV_IDX_BRG, VPSS_CH_SIZES_BGR[0].width,
                         VPSS_CH_SIZES_BGR[0].height);
@@ -20,7 +19,7 @@ CameraReader::CameraReader(Config::ptr config, QObject *parent)
                   CH_ROTATES_BGR, sizeof(VPSS_CH_SIZES_BGR) / sizeof(Size));
 
   static Vo vo_bgr(0, VO_INTF_MIPI, VO_W, VO_H);
-  if (config_->liveness.enable) {
+  if (Config::is_liveness_enable()) {
     pvi_nir_ =
         new Vi(DEV_IDX_NIR, PIPE_IDX_NIR, SONY_IMX307_MIPI_2M_30FPS_12BIT);
     pvpss_nir_ = new Vpss(DEV_IDX_NIR, VPSS_CH_SIZES_NIR[0].width,
@@ -55,7 +54,7 @@ bool CameraReader::capture_frame(ImagePackage *pkg) {
     QThread::usleep(10);
   }
 
-  if (config_->liveness.enable) {
+  if (Config::is_liveness_enable()) {
     if (!pvpss_nir_->getYuvFrame(pkg->img_nir_small, 2)) return false;
     while (!pvpss_nir_->getYuvFrame(pkg->img_nir_large, 1)) {
       QThread::usleep(10);

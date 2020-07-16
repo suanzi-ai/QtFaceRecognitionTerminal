@@ -12,6 +12,17 @@ namespace suanzi {
 using json = nlohmann::json;
 
 typedef struct {
+  std::string blacklist_policy;
+  std::string detect_level;
+  std::string extract_level;
+  std::string liveness_level;
+  SZ_UINT16 duplication_interval;
+} UserConfig;
+
+void to_json(json &j, const UserConfig &c);
+void from_json(const json &j, UserConfig &c);
+
+typedef struct {
   SZ_UINT16 server_port;
   std::string server_host;
   std::string image_store_path;
@@ -88,33 +99,45 @@ void from_json(const json &j, LivenessConfig &c);
 class Config {
  public:
   typedef std::shared_ptr<Config> ptr;
+  static Config::ptr get_instance();
 
-  template <typename... Args>
-  static ptr make_shared(Args &&... args) {
-    return std::make_shared<Config>(std::forward<Args>(args)...);
-  }
+  Config() { load_defaults(); }
 
-  Config(const std::string &config_file,
-         const std::string &config_override_file)
-      : config_file_(config_file), config_override_file_(config_override_file) {
-    load_defaults();
-  }
-
-  SZ_RETCODE load_defaults();
-  SZ_RETCODE load();
+  SZ_RETCODE load_from_file(const std::string &config_file,
+                            const std::string &config_override_file);
+  SZ_RETCODE load_from_json(const json &j);
+  SZ_RETCODE reload();
   SZ_RETCODE save();
-  void load_json(const json &config);
+
+  static const DetectConfig &get_detect();
+  static const ExtractConfig &get_extract();
+  static const LivenessConfig &get_liveness();
+  static bool is_liveness_enable();
+
+  friend void from_json(const json &j, Config &c);
+  friend void to_json(json &j, const Config &c);
+
+ private:
+  void load_defaults();
 
  public:
+  UserConfig user;
   AppConfig app;
   QufaceConfig quface;
   CameraConfig normal;
   CameraConfig infrared;
-  DetectConfig detect;
-  ExtractConfig extract;
-  LivenessConfig liveness;
 
  private:
+  static Config instance_;
+
+  std::map<std::string, DetectConfig> detect_levels;
+  std::map<std::string, ExtractConfig> extract_levels;
+  std::map<std::string, LivenessConfig> liveness_levels;
+
+  DetectConfig default_detect_;
+  ExtractConfig default_extract_;
+  LivenessConfig default_liveness_;
+
   std::string config_file_;
   std::string config_override_file_;
 };

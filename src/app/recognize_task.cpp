@@ -13,13 +13,12 @@ using namespace suanzi;
 RecognizeTask::RecognizeTask(
     FaceDatabasePtr db, FaceExtractorPtr extractor,
     PersonService::ptr person_service,
-    MemoryPool<ImageBuffer, sizeof(ImageBuffer) * 5> *mem_pool,
-    Config::ptr config, QThread *thread, QObject *parent)
+    MemoryPool<ImageBuffer, sizeof(ImageBuffer) * 5> *mem_pool, QThread *thread,
+    QObject *parent)
     : face_database_(db),
       face_extractor_(extractor),
       person_service_(person_service),
-      mem_pool_(mem_pool),
-      config_(config) {
+      mem_pool_(mem_pool) {
   if (thread == nullptr) {
     static QThread new_thread;
     moveToThread(&new_thread);
@@ -33,8 +32,9 @@ RecognizeTask::RecognizeTask(
 RecognizeTask::~RecognizeTask() {}
 
 void RecognizeTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
+  auto liveness_enable = Config::is_liveness_enable();
   RecognizeData *pang = buffer->get_pang();
-  if (pang->bgr_detection.b_valid && (pang->is_alive || !config_->liveness.enable)) {
+  if (pang->bgr_detection.b_valid && (pang->is_alive || !liveness_enable)) {
     // crop in large image
     int width = pang->img_bgr_large->width;
     int height = pang->img_bgr_large->height;
@@ -64,8 +64,9 @@ void RecognizeTask::rx_no_frame() { query_no_face(); }
 
 void RecognizeTask::query_success(const suanzi::QueryResult &person_info,
                                   RecognizeData *img) {
+  auto cfg = Config::get_extract();
   history_.push_back(person_info);
-  if (history_.size() >= config_->extract.history_size) {
+  if (history_.size() >= cfg.history_size) {
     SZ_UINT32 face_id = 0;
 
     suanzi::PersonData person;
@@ -73,7 +74,7 @@ void RecognizeTask::query_success(const suanzi::QueryResult &person_info,
       SZ_RETCODE ret = person_service_->get_person(face_id, person);
       if (ret == SZ_RETCODE_OK) {
         SZ_LOG_INFO("recognized: id = {}, name = {}", person.id, person.name);
-        if (config_->extract.show_black_list && person.status == "blacklist") {
+        if (cfg.show_black_list && person.status == "blacklist") {
           person.number = "";
           person.name = "异常";
           person.face_path = ":asserts/avatar_unknown.jpg";
@@ -101,8 +102,9 @@ void RecognizeTask::query_success(const suanzi::QueryResult &person_info,
 }
 
 void RecognizeTask::query_empty_database(RecognizeData *img) {
+  auto cfg = Config::get_extract();
   static int empty_age = 0;
-  if (++empty_age >= config_->extract.history_size) {
+  if (++empty_age >= cfg.history_size) {
     suanzi::PersonData person;
     person.number = "";
     person.name = "访客";
@@ -117,8 +119,9 @@ void RecognizeTask::query_empty_database(RecognizeData *img) {
 }
 
 void RecognizeTask::query_no_face() {
+  auto cfg = Config::get_extract();
   static int lost_age = 0;
-  if (++lost_age >= config_->extract.max_lost_age) {
+  if (++lost_age >= cfg.max_lost_age) {
     suanzi::PersonData person;
     person.status = "clear";
     tx_display(person);
@@ -130,6 +133,7 @@ void RecognizeTask::query_no_face() {
 
 bool RecognizeTask::sequence_query(std::vector<suanzi::QueryResult> history,
                                    SZ_UINT32 &face_id) {
+  auto cfg = Config::get_extract();
   std::map<SZ_UINT32, int> person_counts;
   std::map<SZ_UINT32, float> person_accumulate_score;
   std::map<SZ_UINT32, float> person_max_score;
@@ -164,9 +168,9 @@ bool RecognizeTask::sequence_query(std::vector<suanzi::QueryResult> history,
   SZ_LOG_DEBUG("id={}, count={}, max_score={}, accumulate_score={}",
                max_person_id, max_count, max_person_score,
                person_accumulate_score[max_person_id]);
-  if (max_count >= config_->extract.min_recognize_count &&
-      max_person_accumulate_score >= config_->extract.min_accumulate_score &&
-      max_person_score >= config_->extract.min_recognize_score) {
+  if (max_count >= cfg.min_recognize_count &&
+      max_person_accumulate_score >= cfg.min_accumulate_score &&
+      max_person_score >= cfg.min_recognize_score) {
     face_id = max_person_id;
     return true;
   } else {
@@ -175,6 +179,7 @@ bool RecognizeTask::sequence_query(std::vector<suanzi::QueryResult> history,
 }
 
 bool RecognizeTask::if_duplicated(SZ_UINT32 face_id) {
+  auto cfg = Config::get_extract();
   bool ret = false;
 
   auto current_query_clock = std::chrono::steady_clock::now();
@@ -184,7 +189,7 @@ bool RecognizeTask::if_duplicated(SZ_UINT32 face_id) {
                         current_query_clock - last_query_clock)
                         .count();
 
-    if (duration > config_->extract.min_interval_between_same_records) {
+    if (duration > cfg.min_interval_between_same_records) {
       query_clock_[face_id] = current_query_clock;
       return false;
     } else

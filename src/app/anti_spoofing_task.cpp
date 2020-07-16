@@ -5,9 +5,8 @@
 using namespace suanzi;
 
 AntiSpoofingTask::AntiSpoofingTask(FaceAntiSpoofingPtr anti_spoofing,
-                                   Config::ptr config, QThread *thread,
-                                   QObject *parent)
-    : anti_spoofing_(anti_spoofing), config_(config) {
+                                   QThread *thread, QObject *parent)
+    : anti_spoofing_(anti_spoofing) {
   if (thread == nullptr) {
     static QThread new_thread;
     moveToThread(&new_thread);
@@ -23,8 +22,9 @@ AntiSpoofingTask::~AntiSpoofingTask() {}
 void AntiSpoofingTask::rx_finish() { b_tx_ok_ = true; }
 
 void AntiSpoofingTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
+  auto cfg = Config::get_liveness();
   // SZ_LOG_DEBUG("rx_frame");
-  if (!config_->liveness.enable) {
+  if (!cfg.enable) {
     emit tx_frame(buffer);
     buffer->switch_buffer();
     emit tx_finish();
@@ -48,7 +48,7 @@ void AntiSpoofingTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
         is_live);
     if (ret == SZ_RETCODE_OK) {
       history_.push_back(is_live);
-      while (history_.size() >= config_->liveness.history_size) {
+      while (history_.size() >= cfg.history_size) {
         history_.erase(history_.begin());
       }
       pang->is_alive = is_person_alive();
@@ -80,7 +80,9 @@ void AntiSpoofingTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
 void AntiSpoofingTask::rx_no_frame() { emit tx_no_frame(); }
 
 bool AntiSpoofingTask::is_person_alive() {
-  if (history_.size() < config_->liveness.min_alive_count) {
+  auto cfg = Config::get_liveness();
+
+  if (history_.size() < cfg.min_alive_count) {
     return false;
   }
 
@@ -103,6 +105,6 @@ bool AntiSpoofingTask::is_person_alive() {
   SZ_LOG_DEBUG("liveness count = {}, lost = {}", liveness_count,
                max_liveness_lost_count);
 
-  return liveness_count >= config_->liveness.min_alive_count &&
-         max_liveness_lost_count <= config_->liveness.continuous_max_lost_count;
+  return liveness_count >= cfg.min_alive_count &&
+         max_liveness_lost_count <= cfg.continuous_max_lost_count;
 }

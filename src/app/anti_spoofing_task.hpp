@@ -15,8 +15,8 @@ namespace suanzi {
 class AntiSpoofingTask : QObject {
   Q_OBJECT
  public:
-  AntiSpoofingTask(FaceAntiSpoofingPtr anti_spoofing, Config::ptr config,
-                   QThread* thread = nullptr, QObject* parent = nullptr);
+  AntiSpoofingTask(FaceAntiSpoofingPtr anti_spoofing, QThread* thread = nullptr,
+                   QObject* parent = nullptr);
   ~AntiSpoofingTask();
 
   bool is_person_alive();
@@ -33,7 +33,6 @@ class AntiSpoofingTask : QObject {
 
  private:
   FaceAntiSpoofingPtr anti_spoofing_;
-  Config::ptr config_;
 
   std::vector<SZ_BOOL> history_;
 

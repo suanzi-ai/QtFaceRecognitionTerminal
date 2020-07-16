@@ -12,9 +12,9 @@
 
 using namespace suanzi;
 
-DetectTask::DetectTask(FaceDetectorPtr detector, Config::ptr config,
-                       QThread *thread, QObject *parent)
-    : face_detector_(detector), config_(config) {
+DetectTask::DetectTask(FaceDetectorPtr detector, QThread *thread,
+                       QObject *parent)
+    : face_detector_(detector) {
   b_tx_ok_ = true;
   b_data_ready_ = false;
   recognize_data1_ = nullptr;
@@ -68,6 +68,8 @@ void DetectTask::copy_buffer(ImagePackage *pang, DetectionRatio &bgr_detection,
 }
 
 void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
+  auto cfg = Config::get_detect();
+
   // SZ_LOG_DEBUG("rx_frame");
   ImagePackage *pang = buffer->get_pang();
   SZ_RETCODE ret;
@@ -76,7 +78,7 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
   std::vector<suanzi::FaceDetection> bgr_detections;
   ret = face_detector_->detect(
       (const SVP_IMAGE_S *)pang->img_bgr_small->pImplData, bgr_detections,
-      config_->detect.threshold, config_->detect.min_face_size);
+      cfg.threshold, cfg.min_face_size);
   if (ret != SZ_RETCODE_OK) {
     SZ_LOG_ERROR("Detect bgr error ret={}", ret);
   }
@@ -101,7 +103,7 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
     emit tx_bgr_display(no_face);
   }
 
-  if (config_->liveness.enable) {
+  if (Config::is_liveness_enable()) {
     std::vector<suanzi::FaceDetection> nir_detections;
     ret = face_detector_->detect(
         (const SVP_IMAGE_S *)pang->img_nir_small->pImplData, nir_detections);

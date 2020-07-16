@@ -16,8 +16,8 @@ namespace suanzi {
 class DetectTask : QObject {
   Q_OBJECT
  public:
-  DetectTask(FaceDetectorPtr detector, Config::ptr config,
-             QThread *thread = nullptr, QObject *parent = nullptr);
+  DetectTask(FaceDetectorPtr detector, QThread *thread = nullptr,
+             QObject *parent = nullptr);
   ~DetectTask();
 
  private:
@@ -47,7 +47,6 @@ class DetectTask : QObject {
   bool b_data_ready_;
 
   FaceDetectorPtr face_detector_;
-  Config::ptr config_;
   RecognizeData *recognize_data1_;
   RecognizeData *recognize_data2_;
   PingPangBuffer<RecognizeData> *pingpang_buffer_;

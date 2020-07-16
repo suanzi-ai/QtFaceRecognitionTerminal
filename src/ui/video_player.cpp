@@ -26,19 +26,18 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
   recognize_tip_widget_ = new RecognizeTipWidget(nullptr);
   recognize_tip_widget_->hide();
 
-  camera_reader_ = new CameraReader(config, this);
+  camera_reader_ = new CameraReader(this);
 
   auto person_service = PersonService::make_shared(
       config->app.person_service_base_url, config->app.image_store_path);
   auto anti_spoofing =
       std::make_shared<FaceAntiSpoofing>(config->quface.model_file_path);
 
-  detect_task_ = new DetectTask(detector, config, nullptr, this);
+  detect_task_ = new DetectTask(detector, nullptr, this);
   recognize_task_ = new RecognizeTask(db, extractor, person_service, &mem_pool_,
-                                      config, nullptr, this);
+                                      nullptr, this);
   record_task_ = new RecordTask(person_service, &mem_pool_);
-  anti_spoofing_task_ =
-      new AntiSpoofingTask(anti_spoofing, config, nullptr, this);
+  anti_spoofing_task_ = new AntiSpoofingTask(anti_spoofing, nullptr, this);
 
   connect((const QObject *)camera_reader_,
           SIGNAL(tx_frame(PingPangBuffer<ImagePackage> *)),

@@ -23,8 +23,8 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  auto config = suanzi::Config::make_shared(cfg_file, cfg_override_file);
-  SZ_RETCODE ret = config->load();
+  auto config = suanzi::Config::get_instance();
+  SZ_RETCODE ret = config->load_from_file(cfg_file, cfg_override_file);
   if (ret != SZ_RETCODE_OK) {
     return -1;
   }

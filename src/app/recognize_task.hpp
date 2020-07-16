@@ -2,7 +2,6 @@
 #define RECOGNIZE_TASK_H
 
 #include <QObject>
-
 #include <chrono>
 
 #include "config.hpp"
@@ -20,8 +19,7 @@ class RecognizeTask : QObject {
   RecognizeTask(FaceDatabasePtr db, FaceExtractorPtr extractor,
                 PersonService::ptr person_service,
                 MemoryPool<ImageBuffer, sizeof(ImageBuffer) * 5> *mem_pool,
-                Config::ptr config, QThread *thread = nullptr,
-                QObject *parent = nullptr);
+                QThread *thread = nullptr, QObject *parent = nullptr);
   ~RecognizeTask();
 
  private slots:
@@ -51,7 +49,6 @@ class RecognizeTask : QObject {
   FaceExtractorPtr face_extractor_;
   FaceDatabasePtr face_database_;
   PersonService::ptr person_service_;
-  Config::ptr config_;
 
   std::vector<suanzi::QueryResult> history_;
   std::map<SZ_UINT32, std::chrono::steady_clock::time_point> query_clock_;

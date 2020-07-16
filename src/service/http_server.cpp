@@ -18,7 +18,7 @@ HTTPServer::HTTPServer(Config::ptr config) : config_(config) {
   });
 }
 
-void HTTPServer::run(uint16_t port, const std::string &host) {
+void HTTPServer::run(uint16_t port, const std::string& host) {
   SZ_LOG_INFO("Http server license on port {}", port);
 
   auto handler = [&](const Request& req, Response& res) {
@@ -45,7 +45,7 @@ void HTTPServer::run(uint16_t port, const std::string &host) {
     try {
       body = json::parse(bodyStr);
     } catch (const std::exception& exc) {
-      json data = {{"ok", false, "message", exc.what()}};
+      json data = {{"ok", false}, {"message", exc.what()}};
       res.set_content(data.dump(), "application/json");
       return;
     }
@@ -66,12 +66,17 @@ void HTTPServer::run(uint16_t port, const std::string &host) {
   server_->Post("/config", [&](const Request& req, Response& res) {
     try {
       auto j = json::parse(req.body);
-      j.get_to(*config_);
-      json data = {{"ok", false, "message", "ok"}};
+      SZ_RETCODE ret = config_->load_from_json(j);
+      if (ret != SZ_RETCODE_OK) {
+        json data = {{"ok", false}, {"message", std::to_string(ret)}};
+        res.set_content(data.dump(), "application/json");
+        return;
+      }
+      json data = {{"ok", true}, {"message", "ok"}};
       res.set_content(data.dump(), "application/json");
     } catch (const std::exception& exc) {
       SZ_LOG_ERROR("Message err: {}", exc.what());
-      json data = {{"ok", false, "message", exc.what()}};
+      json data = {{"ok", false}, {"message", exc.what()}};
       res.set_content(data.dump(), "application/json");
     }
   });

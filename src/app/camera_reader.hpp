@@ -20,7 +20,7 @@ namespace suanzi {
 class CameraReader : QThread {
   Q_OBJECT
  public:
-  CameraReader(Config::ptr config, QObject *parent = nullptr);
+  CameraReader(QObject *parent = nullptr);
   ~CameraReader();
   void start_sample();
 
@@ -61,7 +61,6 @@ class CameraReader : QThread {
   const int VO_H = 1280;
 
   bool b_tx_ok_;
-  Config::ptr config_;
 };
 
 }  // namespace suanzi

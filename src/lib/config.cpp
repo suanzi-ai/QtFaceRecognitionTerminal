@@ -9,6 +9,22 @@ using namespace suanzi;
 
 #define SAVE_JSON_TO(config, key, value) config[key] = value;
 
+void suanzi::to_json(json &j, const UserConfig &c) {
+  SAVE_JSON_TO(j, "blacklist_policy", c.blacklist_policy);
+  SAVE_JSON_TO(j, "detect_level", c.detect_level);
+  SAVE_JSON_TO(j, "extract_level", c.extract_level);
+  SAVE_JSON_TO(j, "liveness_level", c.liveness_level);
+  SAVE_JSON_TO(j, "duplication_interval", c.duplication_interval);
+}
+
+void suanzi::from_json(const json &j, UserConfig &c) {
+  LOAD_JSON_TO(j, "blacklist_policy", c.blacklist_policy);
+  LOAD_JSON_TO(j, "detect_level", c.detect_level);
+  LOAD_JSON_TO(j, "extract_level", c.extract_level);
+  LOAD_JSON_TO(j, "liveness_level", c.liveness_level);
+  LOAD_JSON_TO(j, "duplication_interval", c.duplication_interval);
+}
+
 void suanzi::to_json(json &j, const AppConfig &c) {
   SAVE_JSON_TO(j, "server_port", c.server_port);
   SAVE_JSON_TO(j, "server_host", c.server_host);
@@ -124,37 +140,57 @@ void suanzi::from_json(const json &j, LivenessConfig &c) {
 }
 
 void suanzi::from_json(const json &j, Config &c) {
+  LOAD_JSON_TO(j, "user", c.user);
   LOAD_JSON_TO(j, "app", c.app);
   LOAD_JSON_TO(j, "quface", c.quface);
-  LOAD_JSON_TO(j, "detect", c.detect);
-  LOAD_JSON_TO(j, "extract", c.extract);
-  LOAD_JSON_TO(j, "liveness", c.liveness);
 
   if (j.contains("cameras")) {
     LOAD_JSON_TO(j.at("cameras"), "normal", c.normal);
     LOAD_JSON_TO(j.at("cameras"), "infrared", c.infrared);
   }
+
+  if (j.contains("advance")) {
+    LOAD_JSON_TO(j.at("advance"), "detect_levels", c.detect_levels);
+    LOAD_JSON_TO(j.at("advance"), "extract_levels", c.extract_levels);
+    LOAD_JSON_TO(j.at("advance"), "liveness_levels", c.extract_levels);
+  }
 }
 
 void suanzi::to_json(json &j, const Config &c) {
+  SAVE_JSON_TO(j, "user", c.user);
   SAVE_JSON_TO(j, "app", c.app);
   SAVE_JSON_TO(j, "quface", c.quface);
-  SAVE_JSON_TO(j, "detect", c.detect);
-  SAVE_JSON_TO(j, "extract", c.extract);
-  SAVE_JSON_TO(j, "liveness", c.liveness);
 
   json cameras;
   SAVE_JSON_TO(cameras, "normal", c.normal);
   SAVE_JSON_TO(cameras, "infrared", c.infrared);
   SAVE_JSON_TO(j, "cameras", cameras);
+
+  json advance;
+  SAVE_JSON_TO(advance, "detect_levels", c.detect_levels);
+  SAVE_JSON_TO(advance, "extract_levels", c.extract_levels);
+  SAVE_JSON_TO(advance, "liveness_levels", c.liveness_levels);
+  SAVE_JSON_TO(j, "advance", advance);
 }
 
-SZ_RETCODE Config::load_defaults() {
+Config Config::instance_;
+
+Config::ptr Config::get_instance() { return Config::ptr(&instance_); }
+
+void Config::load_defaults() {
   app = {
       .server_port = 8010,
       .server_host = "0.0.0.0",
       .image_store_path = "/user/quface-app/var/db/upload/",
       .person_service_base_url = "http://127.0.0.1",
+  };
+
+  user = {
+      .blacklist_policy = "alarm",
+      .detect_level = "medium",
+      .extract_level = "medium",
+      .liveness_level = "medium",
+      .duplication_interval = 60,
   };
 
   quface = {
@@ -191,7 +227,7 @@ SZ_RETCODE Config::load_defaults() {
       .target_area_height_percent = 60,
   };
 
-  detect = {
+  default_detect_ = {
       .threshold = 0.4f,
       .min_face_size = 40,
       .max_yaw = 25,
@@ -200,23 +236,34 @@ SZ_RETCODE Config::load_defaults() {
       .min_pitch = -90,  // disable min pitch
   };
 
-  extract = {.history_size = 15,
-             .min_recognize_count = 10,
-             .min_recognize_score = .75f,
-             .min_accumulate_score = 7.0f,
-             .max_lost_age = 20,
-             .min_interval_between_same_records = 60,
-             .show_black_list = 1};
+  default_extract_ = {
+      .history_size = 15,
+      .min_recognize_count = 10,
+      .min_recognize_score = .75f,
+      .min_accumulate_score = 7.0f,
+      .max_lost_age = 20,
+      .min_interval_between_same_records = 60,
+      .show_black_list = 1,
+  };
 
-  liveness = {
-      .enable = false,
+  default_liveness_ = {
+      .enable = true,
       .history_size = 16,
       .min_alive_count = 7,
       .continuous_max_lost_count = 3,
   };
 }
 
-SZ_RETCODE Config::load() {
+SZ_RETCODE Config::load_from_file(const std::string &config_file,
+                                  const std::string &config_override_file) {
+  config_file_ = config_file;
+  config_override_file_ = config_override_file;
+  reload();
+}
+
+SZ_RETCODE Config::load_from_json(const json &j) { j.get_to(*this); }
+
+SZ_RETCODE Config::reload() {
   try {
     std::ifstream i(config_file_);
     if (!i.is_open()) {
@@ -257,3 +304,30 @@ SZ_RETCODE Config::save() {
 
   return SZ_RETCODE_OK;
 }
+
+const DetectConfig &Config::get_detect() {
+  auto &i = instance_;
+  if (i.detect_levels.find(i.user.detect_level) != i.detect_levels.end()) {
+    return i.detect_levels[i.user.detect_level];
+  }
+  return i.default_detect_;
+}
+
+const ExtractConfig &Config::get_extract() {
+  auto &i = instance_;
+  if (i.extract_levels.find(i.user.extract_level) != i.extract_levels.end()) {
+    return i.extract_levels[i.user.extract_level];
+  }
+  return i.default_extract_;
+}
+
+const LivenessConfig &Config::get_liveness() {
+  auto &i = instance_;
+  if (i.liveness_levels.find(i.user.liveness_level) !=
+      i.liveness_levels.end()) {
+    return i.liveness_levels[i.user.liveness_level];
+  }
+  return i.default_liveness_;
+}
+
+bool Config::is_liveness_enable() { return Config::get_liveness().enable; }
