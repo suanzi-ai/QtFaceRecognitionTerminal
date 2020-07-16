@@ -149,10 +149,10 @@ void suanzi::from_json(const json &j, Config &c) {
     LOAD_JSON_TO(j.at("cameras"), "infrared", c.infrared);
   }
 
-  if (j.contains("advance")) {
-    LOAD_JSON_TO(j.at("advance"), "detect_levels", c.detect_levels);
-    LOAD_JSON_TO(j.at("advance"), "extract_levels", c.extract_levels);
-    LOAD_JSON_TO(j.at("advance"), "liveness_levels", c.extract_levels);
+  if (j.contains("pro")) {
+    LOAD_JSON_TO(j.at("pro"), "detect_levels", c.detect_levels);
+    LOAD_JSON_TO(j.at("pro"), "extract_levels", c.extract_levels);
+    LOAD_JSON_TO(j.at("pro"), "liveness_levels", c.extract_levels);
   }
 }
 
@@ -166,11 +166,11 @@ void suanzi::to_json(json &j, const Config &c) {
   SAVE_JSON_TO(cameras, "infrared", c.infrared);
   SAVE_JSON_TO(j, "cameras", cameras);
 
-  json advance;
-  SAVE_JSON_TO(advance, "detect_levels", c.detect_levels);
-  SAVE_JSON_TO(advance, "extract_levels", c.extract_levels);
-  SAVE_JSON_TO(advance, "liveness_levels", c.liveness_levels);
-  SAVE_JSON_TO(j, "advance", advance);
+  json pro;
+  SAVE_JSON_TO(pro, "detect_levels", c.detect_levels);
+  SAVE_JSON_TO(pro, "extract_levels", c.extract_levels);
+  SAVE_JSON_TO(pro, "liveness_levels", c.liveness_levels);
+  SAVE_JSON_TO(j, "pro", pro);
 }
 
 Config Config::instance_;
@@ -251,6 +251,24 @@ void Config::load_defaults() {
       .history_size = 16,
       .min_alive_count = 7,
       .continuous_max_lost_count = 3,
+  };
+
+  detect_levels = {
+    {"high", default_detect_},
+    {"medium", default_detect_},
+    {"low", default_detect_},
+  };
+
+  extract_levels = {
+    {"high", default_extract_},
+    {"medium", default_extract_},
+    {"low", default_extract_},
+  };
+
+  liveness_levels = {
+    {"high", default_liveness_},
+    {"medium", default_liveness_},
+    {"low", default_liveness_},
   };
 }
 
