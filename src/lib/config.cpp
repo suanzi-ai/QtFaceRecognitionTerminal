@@ -323,6 +323,25 @@ SZ_RETCODE Config::save() {
   return SZ_RETCODE_OK;
 }
 
+SZ_RETCODE Config::reset() {
+  json config = json(*this);
+
+  SZ_LOG_INFO("Clear everything in {} ...", config_override_file_);
+  std::ofstream o(config_override_file_);
+  if (!o.is_open()) {
+    SZ_LOG_WARN("Open {} failed, can't save", config_override_file_);
+    return SZ_RETCODE_FAILED;
+  }
+
+  o << "{}";
+
+  SZ_LOG_INFO("Load defaults ...");
+  load_defaults();
+
+  SZ_LOG_INFO("Load from files ...");
+  return reload();
+}
+
 const UserConfig &Config::get_user() {
   return instance_.user;
 }

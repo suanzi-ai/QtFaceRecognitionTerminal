@@ -97,5 +97,18 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
     res.set_content(body.dump(), "application/json");
   });
 
+  server_->Post("/config/-/reset", [&](const Request& req, Response& res) {
+    SZ_RETCODE ret = config_->reset();
+    if (ret != SZ_RETCODE_OK) {
+      json data = {{"ok", false},
+                   {"message", "save error " + std::to_string(ret)}};
+      res.set_content(data.dump(), "application/json");
+      return;
+    }
+
+    json data = {{"ok", true}, {"message", "ok"}};
+    res.set_content(data.dump(), "application/json");
+  });
+
   server_->listen(host.c_str(), port);
 }

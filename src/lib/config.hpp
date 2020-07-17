@@ -106,6 +106,7 @@ class Config {
   SZ_RETCODE load_from_json(const json &j);
   SZ_RETCODE reload();
   SZ_RETCODE save();
+  SZ_RETCODE reset();
 
   static const UserConfig &get_user();
   static const DetectConfig &get_detect();
