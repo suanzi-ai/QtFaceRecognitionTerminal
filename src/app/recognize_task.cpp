@@ -65,6 +65,7 @@ void RecognizeTask::rx_no_frame() { query_no_face(); }
 void RecognizeTask::query_success(const suanzi::QueryResult &person_info,
                                   RecognizeData *img) {
   auto cfg = Config::get_extract();
+  auto user_cfg = Config::get_user();
   history_.push_back(person_info);
   if (history_.size() >= cfg.history_size) {
     SZ_UINT32 face_id = 0;
@@ -74,10 +75,17 @@ void RecognizeTask::query_success(const suanzi::QueryResult &person_info,
       SZ_RETCODE ret = person_service_->get_person(face_id, person);
       if (ret == SZ_RETCODE_OK) {
         SZ_LOG_INFO("recognized: id = {}, name = {}", person.id, person.name);
-        if (cfg.show_black_list && person.status == "blacklist") {
-          person.number = "";
-          person.name = "异常";
-          person.face_path = ":asserts/avatar_unknown.jpg";
+        if (person.status == "blacklist") {
+          if (user_cfg.blacklist_policy == "alert") {
+            // TODO: Alert sound
+            person.number = "";
+            person.name = "异常";
+            person.face_path = ":asserts/avatar_unknown.jpg";
+          } else if (user_cfg.blacklist_policy == "stranger") {
+            person.number = "";
+            person.name = "访客";
+            person.face_path = ":asserts/avatar_unknown.jpg";
+          }
         }
 
         tx_display(person);
@@ -179,7 +187,7 @@ bool RecognizeTask::sequence_query(std::vector<suanzi::QueryResult> history,
 }
 
 bool RecognizeTask::if_duplicated(SZ_UINT32 face_id) {
-  auto cfg = Config::get_extract();
+  auto cfg = Config::get_user();
   bool ret = false;
 
   auto current_query_clock = std::chrono::steady_clock::now();
@@ -189,7 +197,7 @@ bool RecognizeTask::if_duplicated(SZ_UINT32 face_id) {
                         current_query_clock - last_query_clock)
                         .count();
 
-    if (duration > cfg.min_interval_between_same_records) {
+    if (duration > cfg.duplication_interval) {
       query_clock_[face_id] = current_query_clock;
       return false;
     } else

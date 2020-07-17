@@ -78,8 +78,6 @@ typedef struct {
   SZ_FLOAT min_recognize_score;
   SZ_FLOAT min_accumulate_score;
   SZ_INT32 max_lost_age;
-  SZ_INT32 min_interval_between_same_records;
-  SZ_INT32 show_black_list;
 } ExtractConfig;
 
 void to_json(json &j, const ExtractConfig &c);
@@ -109,6 +107,7 @@ class Config {
   SZ_RETCODE reload();
   SZ_RETCODE save();
 
+  static const UserConfig &get_user();
   static const DetectConfig &get_detect();
   static const ExtractConfig &get_extract();
   static const LivenessConfig &get_liveness();
