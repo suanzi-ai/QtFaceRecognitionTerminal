@@ -65,13 +65,24 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
 
   server_->Post("/config", [&](const Request& req, Response& res) {
     try {
+      SZ_RETCODE ret;
       auto j = json::parse(req.body);
-      SZ_RETCODE ret = config_->load_from_json(j);
+      ret = config_->load_from_json(j);
       if (ret != SZ_RETCODE_OK) {
-        json data = {{"ok", false}, {"message", std::to_string(ret)}};
+        json data = {{"ok", false},
+                     {"message", "load error " + std::to_string(ret)}};
         res.set_content(data.dump(), "application/json");
         return;
       }
+
+      ret = config_->save();
+      if (ret != SZ_RETCODE_OK) {
+        json data = {{"ok", false},
+                     {"message", "save error " + std::to_string(ret)}};
+        res.set_content(data.dump(), "application/json");
+        return;
+      }
+
       json data = {{"ok", true}, {"message", "ok"}};
       res.set_content(data.dump(), "application/json");
     } catch (const std::exception& exc) {

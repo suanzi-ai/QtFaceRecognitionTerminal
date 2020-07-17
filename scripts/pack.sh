@@ -13,4 +13,4 @@ cp scripts/start-upgrade.sh $tmp_dir/
 
 cp $face_terminal $tmp_dir/bin/face-terminal
 
-tar -C $tmp_dir -cvzf build/app.tgz .
+tar -C $tmp_dir -cvzf build/face-terminal.tgz .

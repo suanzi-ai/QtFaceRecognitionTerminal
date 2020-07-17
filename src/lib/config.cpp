@@ -180,7 +180,7 @@ Config::ptr Config::get_instance() { return Config::ptr(&instance_); }
 void Config::load_defaults() {
   app = {
       .server_port = 8010,
-      .server_host = "0.0.0.0",
+      .server_host = "127.0.0.1",
       .image_store_path = "/user/quface-app/var/db/upload/",
       .person_service_base_url = "http://127.0.0.1",
   };
@@ -254,21 +254,21 @@ void Config::load_defaults() {
   };
 
   detect_levels = {
-    {"high", default_detect_},
-    {"medium", default_detect_},
-    {"low", default_detect_},
+      {"high", default_detect_},
+      {"medium", default_detect_},
+      {"low", default_detect_},
   };
 
   extract_levels = {
-    {"high", default_extract_},
-    {"medium", default_extract_},
-    {"low", default_extract_},
+      {"high", default_extract_},
+      {"medium", default_extract_},
+      {"low", default_extract_},
   };
 
   liveness_levels = {
-    {"high", default_liveness_},
-    {"medium", default_liveness_},
-    {"low", default_liveness_},
+      {"high", default_liveness_},
+      {"medium", default_liveness_},
+      {"low", default_liveness_},
   };
 }
 
@@ -279,7 +279,15 @@ SZ_RETCODE Config::load_from_file(const std::string &config_file,
   reload();
 }
 
-SZ_RETCODE Config::load_from_json(const json &j) { j.get_to(*this); }
+SZ_RETCODE Config::load_from_json(const json &j) {
+  try {
+    j.get_to(*this);
+  } catch (const std::exception &exc) {
+    SZ_LOG_ERROR("load_from_json: {}", exc.what());
+    return SZ_RETCODE_FAILED;
+  }
+  return SZ_RETCODE_OK;
+}
 
 SZ_RETCODE Config::reload() {
   try {
@@ -318,7 +326,7 @@ SZ_RETCODE Config::save() {
     return SZ_RETCODE_FAILED;
   }
 
-  o << config.dump();
+  o << config.dump(2);
 
   return SZ_RETCODE_OK;
 }
