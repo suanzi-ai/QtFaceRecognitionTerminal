@@ -8,7 +8,7 @@
 #include "detection_float.h"
 #include "memory_pool.hpp"
 #include "person_service.hpp"
-#include "pingpang_buffer.h"
+#include "pingpang_buffer.hpp"
 #include "quface_common.hpp"
 #include "recognize_data.hpp"
 

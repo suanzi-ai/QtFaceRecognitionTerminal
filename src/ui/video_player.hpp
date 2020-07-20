@@ -13,7 +13,7 @@
 #include "image_package.h"
 #include "memory_pool.hpp"
 #include "recognize_data.hpp"
-#include "pingpang_buffer.h"
+#include "pingpang_buffer.hpp"
 #include "recognize_task.hpp"
 #include "recognize_tip_widget.hpp"
 #include "record_task.hpp"

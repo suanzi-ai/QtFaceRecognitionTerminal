@@ -8,7 +8,7 @@
 
 #include "config.hpp"
 #include "image_package.h"
-#include "pingpang_buffer.h"
+#include "pingpang_buffer.hpp"
 #include "vi.h"
 #include "vi_vpss.h"
 #include "vi_vpss_vo.h"

@@ -7,7 +7,7 @@
 
 #include "detection_float.h"
 #include "image_package.h"
-#include "pingpang_buffer.h"
+#include "pingpang_buffer.hpp"
 
 namespace suanzi {
 
