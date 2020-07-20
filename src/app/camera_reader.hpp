@@ -57,8 +57,11 @@ class CameraReader : QThread {
   const int CH_INDEXES_NIR[3] = {0, 1, 2};
   const bool CH_ROTATES_NIR[3] = {false, true, true};
 
-  const int VO_W = 800;
-  const int VO_H = 1280;
+  //const int VO_W = 800;
+  //const int VO_H = 1280;
+
+  const int VO_W = 480;
+  const int VO_H = 854;
 
   bool b_tx_ok_;
 };
