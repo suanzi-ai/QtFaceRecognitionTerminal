@@ -19,15 +19,14 @@ namespace suanzi {
 
 class CameraReader : QThread {
   Q_OBJECT
+
  public:
   CameraReader(QObject *parent = nullptr);
   ~CameraReader();
+
   void start_sample();
 
  private:
-  void run();
-  bool capture_frame(ImagePackage *pkg);
-
  private slots:
   void rx_finish();
 
@@ -35,14 +34,6 @@ class CameraReader : QThread {
   void tx_frame(PingPangBuffer<ImagePackage> *buffer);
 
  private:
-  Vi *pvi_bgr_;
-  Vpss *pvpss_bgr_;
-  Vi_Vpss *pvi_vpss_bgr_;
-
-  Vi *pvi_nir_;
-  Vpss *pvpss_nir_;
-  Vi_Vpss *pvi_vpss_nir_;
-
   const int DEV_IDX_BRG = 1;
   const int PIPE_IDX_BRG = 2;
   const int DEV_IDX_NIR = 0;
@@ -57,13 +48,24 @@ class CameraReader : QThread {
   const int CH_INDEXES_NIR[3] = {0, 1, 2};
   const bool CH_ROTATES_NIR[3] = {false, true, true};
 
-  //const int VO_W = 800;
-  //const int VO_H = 1280;
-
+#if LCD_INCH_8
+  const int VO_W = 800;
+  const int VO_H = 1280;
+#else  // LCD_INCH_5
   const int VO_W = 480;
   const int VO_H = 854;
+#endif
 
-  bool b_tx_ok_;
+  void run();
+  bool capture_frame(ImagePackage *pkg);
+
+  bool rx_finished_;
+
+  Vi *vi_bgr_, *vi_nir_;
+  Vpss *vpss_bgr_, *vpss_nir_;
+  Vi_Vpss *vi_vpss_bgr_, *vi_vpss_nir_;
+
+  PingPangBuffer<ImagePackage> *pingpang_buffer_;
 };
 
 }  // namespace suanzi
