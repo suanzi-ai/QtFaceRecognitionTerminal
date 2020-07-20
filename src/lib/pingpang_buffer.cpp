@@ -1,6 +1,6 @@
 #include "pingpang_buffer.hpp"
 
-#include "image_package.h"
+#include "image_package.hpp"
 #include "recognize_data.hpp"
 
 using namespace suanzi;

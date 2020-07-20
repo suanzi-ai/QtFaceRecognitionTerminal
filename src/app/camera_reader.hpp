@@ -7,7 +7,7 @@
 #include <chrono>
 
 #include "config.hpp"
-#include "image_package.h"
+#include "image_package.hpp"
 #include "pingpang_buffer.hpp"
 #include "vi.h"
 #include "vi_vpss.h"

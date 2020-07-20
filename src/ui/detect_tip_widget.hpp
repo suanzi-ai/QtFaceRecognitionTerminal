@@ -6,7 +6,7 @@
 #include <QWidget>
 
 #include "detection_float.h"
-#include "image_package.h"
+#include "image_package.hpp"
 #include "pingpang_buffer.hpp"
 
 namespace suanzi {

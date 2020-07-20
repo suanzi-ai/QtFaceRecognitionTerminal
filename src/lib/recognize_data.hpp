@@ -7,7 +7,7 @@
 #include <opencv2/opencv.hpp>
 
 #include "detection_float.h"
-#include "image_package.h"
+#include "image_package.hpp"
 #include "ive.h"
 #include "logger.hpp"
 #include "quface/common.hpp"
