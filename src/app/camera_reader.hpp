@@ -65,6 +65,7 @@ class CameraReader : QThread {
   Vpss *vpss_bgr_, *vpss_nir_;
   Vi_Vpss *vi_vpss_bgr_, *vi_vpss_nir_;
 
+  ImagePackage *buffer_ping_, *buffer_pang_;
   PingPangBuffer<ImagePackage> *pingpang_buffer_;
 };
 

@@ -56,10 +56,10 @@ CameraReader::CameraReader(QObject *parent) {
     size_nir_2.width = VPSS_CH_SIZES_NIR[2].height;
   }
 
-  ImagePackage image_package1(size_bgr_1, size_bgr_2, size_nir_1, size_nir_2);
-  ImagePackage image_package2(size_bgr_1, size_bgr_2, size_nir_1, size_nir_2);
+  buffer_ping_ = new ImagePackage(size_bgr_1, size_bgr_2, size_nir_1, size_nir_2);
+  buffer_pang_ = new ImagePackage(size_bgr_1, size_bgr_2, size_nir_1, size_nir_2);
   pingpang_buffer_ =
-      new PingPangBuffer<ImagePackage>(&image_package1, &image_package2);
+      new PingPangBuffer<ImagePackage>(buffer_ping_, buffer_pang_);
 
   rx_finished_ = true;
 }
@@ -73,6 +73,8 @@ CameraReader::~CameraReader() {
   if (vpss_nir_) delete vpss_nir_;
   if (vi_vpss_nir_) delete vi_vpss_nir_;
 
+  if (buffer_ping_) delete buffer_ping_;
+  if (buffer_pang_) delete buffer_pang_;
   if (pingpang_buffer_) delete pingpang_buffer_;
 }
 
