@@ -23,7 +23,9 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
       new DetectTipWidget(0, 0, app.window_width, app.window_height, this);
   detect_tip_widget_bgr_->hide();
 
-  detect_tip_widget_nir_ = new DetectTipWidget(600, 0, 200, 320, this);
+  detect_tip_widget_nir_ = new DetectTipWidget(
+      app.window_width - app.window_width * 25 / 100, 0,
+      app.window_width * 25 / 100, app.window_height * 25 / 100, this);
   detect_tip_widget_nir_->hide();
 
   recognize_tip_widget_ = new RecognizeTipWidget(nullptr);

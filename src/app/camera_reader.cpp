@@ -12,7 +12,7 @@ using namespace suanzi;
 CameraReader::CameraReader(QObject *parent) {
   auto app = Config::get_app();
   // Initialize VI_VPSS for BGR
-  vi_bgr_ = new Vi(DEV_IDX_BRG, PIPE_IDX_BRG, SONY_IMX307_MIPI_2M_30FPS_12BIT);
+  vi_bgr_ = new Vi(DEV_IDX_BRG, PIPE_IDX_BRG, SONY_IMX307_MIPI_2M_30FPS_12BIT, HI_TRUE);
   vpss_bgr_ = new Vpss(DEV_IDX_BRG, VPSS_CH_SIZES_BGR[0].width,
                        VPSS_CH_SIZES_BGR[0].height);
   vi_vpss_bgr_ =
