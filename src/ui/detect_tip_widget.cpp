@@ -54,6 +54,8 @@ void DetectTipWidget::paint(QPainter *painter) {
     float top_y = sum_y / count;
     float bottom_x = top_x + width;
     float bottom_y = top_y + height;
+    // SZ_LOG_DEBUG("top_x={},top_y={},bottom_x={},bottom_y={},w={},h={}", top_x,
+    //              top_y, bottom_x, bottom_y, width, height);
 
     painter->setPen(QPen(QColor(0, 0, 255, 128), 5));
     painter->drawLine(top_x, top_y, top_x + width / 5, top_y);
@@ -79,6 +81,8 @@ void DetectTipWidget::rx_display(DetectionRatio detection) {
     float center_x = box_x + (detection.x + .5f * detection.width) * box_w;
     float center_Y = box_y + (detection.y + .5f * detection.height) * box_h;
     float size = .5f * (detection.width * box_w + detection.height * box_h);
+    // SZ_LOG_DEBUG("x={},y={},w={},h={},c_x={},c_y={}", box_x, box_y, box_w,
+    //              box_h, center_x, center_Y);
 
     QRect next_rect(center_x - .5f * size, center_Y - .5f * size, size, size);
     rects_.push_back(next_rect);

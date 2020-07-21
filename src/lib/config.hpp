@@ -23,6 +23,9 @@ void to_json(json &j, const UserConfig &c);
 void from_json(const json &j, UserConfig &c);
 
 typedef struct {
+  int window_width;
+  int window_height;
+  int recognize_tip_top_percent;
   SZ_UINT16 server_port;
   std::string server_host;
   std::string image_store_path;
@@ -109,6 +112,8 @@ class Config {
   SZ_RETCODE reset();
 
   static const UserConfig &get_user();
+  static const AppConfig &get_app();
+  static const QufaceConfig &get_quface();
   static const DetectConfig &get_detect();
   static const ExtractConfig &get_extract();
   static const LivenessConfig &get_liveness();

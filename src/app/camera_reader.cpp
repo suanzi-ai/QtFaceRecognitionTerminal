@@ -10,6 +10,7 @@
 using namespace suanzi;
 
 CameraReader::CameraReader(QObject *parent) {
+  auto app = Config::get_app();
   // Initialize VI_VPSS for BGR
   vi_bgr_ = new Vi(DEV_IDX_BRG, PIPE_IDX_BRG, SONY_IMX307_MIPI_2M_30FPS_12BIT);
   vpss_bgr_ = new Vpss(DEV_IDX_BRG, VPSS_CH_SIZES_BGR[0].width,
@@ -19,7 +20,8 @@ CameraReader::CameraReader(QObject *parent) {
                   CH_ROTATES_BGR, sizeof(VPSS_CH_SIZES_BGR) / sizeof(Size));
 
   // Initialize VI_VPSS for NIR
-  static Vo vo_bgr(0, VO_INTF_MIPI, VO_W, VO_H);
+  static Vo vo_bgr(0, VO_INTF_MIPI, app.window_width, app.window_height,
+                   ROTATION_E::ROTATION_90);
   if (Config::is_liveness_enable()) {
     vi_nir_ =
         new Vi(DEV_IDX_NIR, PIPE_IDX_NIR, SONY_IMX307_MIPI_2M_30FPS_12BIT);

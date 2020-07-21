@@ -9,15 +9,18 @@
 using namespace suanzi;
 
 VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
-                         FaceExtractorPtr extractor, Config::ptr config,
-                         QWidget *parent)
-    : config_(config), QWidget(parent) {
+                         FaceExtractorPtr extractor, QWidget *parent)
+    : QWidget(parent) {
   QPalette pal = palette();
   pal.setColor(QPalette::Background, Qt::transparent);
   pal.setColor(QPalette::Foreground, Qt::green);
   setPalette(pal);
 
-  detect_tip_widget_bgr_ = new DetectTipWidget(0, 0, 800, 1280, this);
+  auto app = Config::get_app();
+  auto quface = Config::get_quface();
+
+  detect_tip_widget_bgr_ =
+      new DetectTipWidget(0, 0, app.window_width, app.window_height, this);
   detect_tip_widget_bgr_->hide();
 
   detect_tip_widget_nir_ = new DetectTipWidget(600, 0, 200, 320, this);
@@ -28,10 +31,10 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
 
   camera_reader_ = new CameraReader(this);
 
-  auto person_service = PersonService::make_shared(
-      config->app.person_service_base_url, config->app.image_store_path);
+  auto person_service = PersonService::make_shared(app.person_service_base_url,
+                                                   app.image_store_path);
   auto anti_spoofing =
-      std::make_shared<FaceAntiSpoofing>(config->quface.model_file_path);
+      std::make_shared<FaceAntiSpoofing>(quface.model_file_path);
 
   detect_task_ = new DetectTask(detector, nullptr, this);
   recognize_task_ = new RecognizeTask(db, extractor, person_service, &mem_pool_,
@@ -98,8 +101,14 @@ void VideoPlayer::paintEvent(QPaintEvent *event) {
 }
 
 void VideoPlayer::init_widgets() {
-  recognize_tip_widget_->setFixedSize(RECOGNIZE_TIP_BOX.width(),
-                                      RECOGNIZE_TIP_BOX.height());
-  recognize_tip_widget_->move(RECOGNIZE_TIP_BOX.x(), RECOGNIZE_TIP_BOX.y());
+  auto app = Config::get_app();
+
+  int x = 0;
+  int y = app.window_height * app.recognize_tip_top_percent / 100;
+  int w = app.window_width;
+  int h = app.window_height - y;
+
+  recognize_tip_widget_->setFixedSize(w, h);
+  recognize_tip_widget_->move(x, y);
   recognize_tip_widget_->show();
 }

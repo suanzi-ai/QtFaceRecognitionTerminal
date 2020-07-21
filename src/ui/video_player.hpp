@@ -12,8 +12,8 @@
 #include "detection_float.h"
 #include "image_package.hpp"
 #include "memory_pool.hpp"
-#include "recognize_data.hpp"
 #include "pingpang_buffer.hpp"
+#include "recognize_data.hpp"
 #include "recognize_task.hpp"
 #include "recognize_tip_widget.hpp"
 #include "record_task.hpp"
@@ -25,8 +25,7 @@ class VideoPlayer : public QWidget {
 
  public:
   VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
-              FaceExtractorPtr extractor, Config::ptr config,
-              QWidget *parent = nullptr);
+              FaceExtractorPtr extractor, QWidget *parent = nullptr);
   ~VideoPlayer();
 
  protected:
@@ -36,9 +35,6 @@ class VideoPlayer : public QWidget {
   void init_widgets();
 
  private:
-  // TODO: gloabal configuration
-  const QRect RECOGNIZE_TIP_BOX = {0, 1000, 800, 280};
-
   DetectTipWidget *detect_tip_widget_bgr_;
   DetectTipWidget *detect_tip_widget_nir_;
   RecognizeTipWidget *recognize_tip_widget_;
@@ -51,7 +47,6 @@ class VideoPlayer : public QWidget {
 
   RecordTask *record_task_;
 
-  suanzi::Config::ptr config_;
   FaceDatabasePtr db_;
   FaceDetectorPtr detector_;
   FaceExtractorPtr extractor_;

@@ -26,6 +26,9 @@ void suanzi::from_json(const json &j, UserConfig &c) {
 }
 
 void suanzi::to_json(json &j, const AppConfig &c) {
+  SAVE_JSON_TO(j, "window_width", c.window_width);
+  SAVE_JSON_TO(j, "window_height", c.window_height);
+  SAVE_JSON_TO(j, "recognize_tip_top_percent", c.recognize_tip_top_percent);
   SAVE_JSON_TO(j, "server_port", c.server_port);
   SAVE_JSON_TO(j, "server_host", c.server_host);
   SAVE_JSON_TO(j, "image_store_path", c.image_store_path);
@@ -33,6 +36,9 @@ void suanzi::to_json(json &j, const AppConfig &c) {
 }
 
 void suanzi::from_json(const json &j, AppConfig &c) {
+  LOAD_JSON_TO(j, "window_width", c.window_width);
+  LOAD_JSON_TO(j, "window_height", c.window_height);
+  LOAD_JSON_TO(j, "recognize_tip_top_percent", c.recognize_tip_top_percent);
   LOAD_JSON_TO(j, "server_port", c.server_port);
   LOAD_JSON_TO(j, "server_host", c.server_host);
   LOAD_JSON_TO(j, "image_store_path", c.image_store_path);
@@ -173,6 +179,11 @@ Config::ptr Config::get_instance() { return Config::ptr(&instance_); }
 
 void Config::load_defaults() {
   app = {
+      // .window_width = 800,
+      // .window_height = 1280,
+      .window_width = 480,
+      .window_height = 854,
+      .recognize_tip_top_percent = 78,
       .server_port = 8010,
       .server_host = "127.0.0.1",
       .image_store_path = "/user/quface-app/var/db/upload/",
@@ -342,9 +353,11 @@ SZ_RETCODE Config::reset() {
   return reload();
 }
 
-const UserConfig &Config::get_user() {
-  return instance_.user;
-}
+const UserConfig &Config::get_user() { return instance_.user; }
+
+const AppConfig &Config::get_app() { return instance_.app; }
+
+const QufaceConfig &Config::get_quface() { return instance_.quface; }
 
 const DetectConfig &Config::get_detect() {
   auto &i = instance_;

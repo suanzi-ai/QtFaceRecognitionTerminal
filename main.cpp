@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
 
   QApplication app(argc, argv);
 
-  VideoPlayer player(db, detector, extractor, config);
+  VideoPlayer player(db, detector, extractor);
   player.show();
 
   return app.exec();

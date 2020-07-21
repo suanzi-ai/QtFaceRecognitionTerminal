@@ -44,17 +44,17 @@ class CameraReader : QThread {
   const Size VPSS_CH_SIZES_NIR[3] = {
       {1920, 1080}, {1080, 704}, {320, 224}};  // larger small
   const int CH_INDEXES_BGR[3] = {0, 1, 2};
-  const bool CH_ROTATES_BGR[3] = {false, true, true};
+  const ROTATION_E CH_ROTATES_BGR[3] = {
+      ROTATION_E::ROTATION_0,
+      ROTATION_E::ROTATION_90,
+      ROTATION_E::ROTATION_90,
+  };
   const int CH_INDEXES_NIR[3] = {0, 1, 2};
-  const bool CH_ROTATES_NIR[3] = {false, true, true};
-
-#if LCD_INCH_8
-  const int VO_W = 800;
-  const int VO_H = 1280;
-#else  // LCD_INCH_5
-  const int VO_W = 480;
-  const int VO_H = 854;
-#endif
+  const ROTATION_E CH_ROTATES_NIR[3] = {
+      ROTATION_E::ROTATION_0,
+      ROTATION_E::ROTATION_90,
+      ROTATION_E::ROTATION_90,
+  };
 
   void run();
   bool capture_frame(ImagePackage *pkg);
