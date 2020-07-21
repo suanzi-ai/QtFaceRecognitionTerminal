@@ -37,10 +37,27 @@ void AntiSpoofingTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
     int height = pang->img_nir_large->height;
     FaceDetection face_detection =
         pang->nir_detection.to_detection(width, height);
-    // SZ_LOG_DEBUG("image w={},h={}", width, height);
+    SZ_LOG_DEBUG("image w={},h={}", width, height);
     // SZ_LOG_DEBUG("face_detection x={},y={},w={},h={}", face_detection.bbox.x,
     //              face_detection.bbox.y, face_detection.bbox.width,
     //              face_detection.bbox.height);
+
+    //  save nir images for training
+
+    if (pang->frame_idx % 10 == 0) {
+      int width = pang->img_nir_large->width;
+      int height = pang->img_nir_large->width;
+      MmzImage *dest_img =
+          new MmzImage(width, height, SZ_IMAGETYPE_BGR_PACKAGE);
+
+      if (Ive::getInstance()->yuv2RgbPacked(dest_img, pang->img_nir_large,
+                                            true)) {
+        cv::Mat big_nir(height, width, CV_8UC3, dest_img->pData);
+        cv::imwrite("nir_images/" + std::to_string(pang->frame_idx) + ".jpg",
+                    big_nir);
+      }
+      delete dest_img;
+    }
 
     SZ_BOOL is_live = false;
     SZ_RETCODE ret = anti_spoofing_->validate(
