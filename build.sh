@@ -79,6 +79,7 @@ fi
 mkdir -p $build_dir || true
 pushd $build_dir
 cmake $source_dir -G "$cmake_generator" \
+    -DLCD_SCREEN_TYPE="LCD_5INCH_480x854" \
     -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
     -DCMAKE_INSTALL_PREFIX=$install_dir \
     -DHISI_SDK_PLATFORM=rp-dv300 \

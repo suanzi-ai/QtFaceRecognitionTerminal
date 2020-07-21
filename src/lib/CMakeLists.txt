@@ -15,3 +15,5 @@ target_link_libraries(
   PUBLIC QuFaceSDK::face
   PUBLIC QuFaceSDK::database
   PUBLIC Qt5::Widgets)
+
+target_compile_definitions(lib PUBLIC -D${LCD_SCREEN_TYPE})
