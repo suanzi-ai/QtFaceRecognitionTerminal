@@ -8,6 +8,13 @@
 
 #include "logger.hpp"
 
+#define LOAD_JSON_TO(config, key, value) \
+  if (config.contains(key)) {            \
+    config.at(key).get_to(value);        \
+  }
+
+#define SAVE_JSON_TO(config, key, value) config[key] = value;
+
 namespace suanzi {
 using json = nlohmann::json;
 
@@ -97,6 +104,38 @@ typedef struct {
 void to_json(json &j, const LivenessConfig &c);
 void from_json(const json &j, LivenessConfig &c);
 
+template <typename T>
+struct Levels {
+  T high;
+  T medium;
+  T low;
+  T &get(const std::string &level) {
+    if (level == "high") {
+      return high;
+    } else if (level == "medium") {
+      return medium;
+    } else if (level == "low") {
+      return low;
+    }
+    return medium;
+  }
+};
+
+template <typename T>
+void to_json(json &j, const Levels<T> &c) {
+  SAVE_JSON_TO(j, "high", c.high);
+  SAVE_JSON_TO(j, "medium", c.medium);
+  SAVE_JSON_TO(j, "low", c.low);
+}
+
+template <typename T>
+void from_json(const json &j, Levels<T> &c) {
+  LOAD_JSON_TO(j, "high", c.high);
+  LOAD_JSON_TO(j, "medium", c.medium);
+  LOAD_JSON_TO(j, "low", c.low);
+}
+
+
 class Config {
  public:
   typedef std::shared_ptr<Config> ptr;
@@ -135,13 +174,9 @@ class Config {
  private:
   static Config instance_;
 
-  std::map<std::string, DetectConfig> detect_levels;
-  std::map<std::string, ExtractConfig> extract_levels;
-  std::map<std::string, LivenessConfig> liveness_levels;
-
-  DetectConfig default_detect_;
-  ExtractConfig default_extract_;
-  LivenessConfig default_liveness_;
+  Levels<DetectConfig> detect_levels_;
+  Levels<ExtractConfig> extract_levels_;
+  Levels<LivenessConfig> liveness_levels_;
 
   std::string config_file_;
   std::string config_override_file_;

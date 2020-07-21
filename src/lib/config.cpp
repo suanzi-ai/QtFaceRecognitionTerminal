@@ -2,13 +2,6 @@
 
 using namespace suanzi;
 
-#define LOAD_JSON_TO(config, key, value) \
-  if (config.contains(key)) {            \
-    config.at(key).get_to(value);        \
-  }
-
-#define SAVE_JSON_TO(config, key, value) config[key] = value;
-
 void suanzi::to_json(json &j, const UserConfig &c) {
   SAVE_JSON_TO(j, "blacklist_policy", c.blacklist_policy);
   SAVE_JSON_TO(j, "detect_level", c.detect_level);
@@ -150,9 +143,9 @@ void suanzi::from_json(const json &j, Config &c) {
   }
 
   if (j.contains("pro")) {
-    LOAD_JSON_TO(j.at("pro"), "detect_levels", c.detect_levels);
-    LOAD_JSON_TO(j.at("pro"), "extract_levels", c.extract_levels);
-    LOAD_JSON_TO(j.at("pro"), "liveness_levels", c.extract_levels);
+    LOAD_JSON_TO(j.at("pro"), "detect_levels", c.detect_levels_);
+    LOAD_JSON_TO(j.at("pro"), "extract_levels", c.extract_levels_);
+    LOAD_JSON_TO(j.at("pro"), "liveness_levels", c.liveness_levels_);
   }
 }
 
@@ -167,9 +160,9 @@ void suanzi::to_json(json &j, const Config &c) {
   SAVE_JSON_TO(j, "cameras", cameras);
 
   json pro;
-  SAVE_JSON_TO(pro, "detect_levels", c.detect_levels);
-  SAVE_JSON_TO(pro, "extract_levels", c.extract_levels);
-  SAVE_JSON_TO(pro, "liveness_levels", c.liveness_levels);
+  SAVE_JSON_TO(pro, "detect_levels", c.detect_levels_);
+  SAVE_JSON_TO(pro, "extract_levels", c.extract_levels_);
+  SAVE_JSON_TO(pro, "liveness_levels", c.liveness_levels_);
   SAVE_JSON_TO(j, "pro", pro);
 }
 
@@ -232,46 +225,85 @@ void Config::load_defaults() {
       .target_area_height_percent = 60,
   };
 
-  default_detect_ = {
-      .threshold = 0.4f,
-      .min_face_size = 40,
-      .max_yaw = 25,
-      .min_yaw = -25,
-      .max_pitch = 90,   // disable max pitch
-      .min_pitch = -90,  // disable min pitch
+  detect_levels_ = {
+      .high =
+          {
+              .threshold = 0.4f,
+              .min_face_size = 40,
+              .max_yaw = 25,
+              .min_yaw = -25,
+              .max_pitch = 90,   // disable max pitch
+              .min_pitch = -90,  // disable min pitch
+          },
+      .medium =
+          {
+              .threshold = 0.4f,
+              .min_face_size = 40,
+              .max_yaw = 25,
+              .min_yaw = -25,
+              .max_pitch = 90,   // disable max pitch
+              .min_pitch = -90,  // disable min pitch
+          },
+      .low =
+          {
+              .threshold = 0.4f,
+              .min_face_size = 40,
+              .max_yaw = 25,
+              .min_yaw = -25,
+              .max_pitch = 90,   // disable max pitch
+              .min_pitch = -90,  // disable min pitch
+          },
   };
 
-  default_extract_ = {
-      .history_size = 15,
-      .min_recognize_count = 10,
-      .min_recognize_score = .75f,
-      .min_accumulate_score = 7.0f,
-      .max_lost_age = 20,
+  extract_levels_ = {
+      .high =
+          {
+              .history_size = 15,
+              .min_recognize_count = 10,
+              .min_recognize_score = .75f,
+              .min_accumulate_score = 7.0f,
+              .max_lost_age = 20,
+          },
+      .medium =
+          {
+              .history_size = 15,
+              .min_recognize_count = 10,
+              .min_recognize_score = .75f,
+              .min_accumulate_score = 7.0f,
+              .max_lost_age = 20,
+          },
+      .low =
+          {
+              .history_size = 15,
+              .min_recognize_count = 10,
+              .min_recognize_score = .75f,
+              .min_accumulate_score = 7.0f,
+              .max_lost_age = 20,
+          },
   };
 
-  default_liveness_ = {
-      .enable = false,
-      .history_size = 16,
-      .min_alive_count = 7,
-      .continuous_max_lost_count = 3,
-  };
-
-  detect_levels = {
-      {"high", default_detect_},
-      {"medium", default_detect_},
-      {"low", default_detect_},
-  };
-
-  extract_levels = {
-      {"high", default_extract_},
-      {"medium", default_extract_},
-      {"low", default_extract_},
-  };
-
-  liveness_levels = {
-      {"high", default_liveness_},
-      {"medium", default_liveness_},
-      {"low", default_liveness_},
+  liveness_levels_ = {
+      .high =
+          {
+              .enable = false,
+              .history_size = 16,
+              .min_alive_count = 7,
+              .continuous_max_lost_count = 3,
+          },
+      .medium =
+          {
+              .enable = false,
+              .history_size = 16,
+              .min_alive_count = 7,
+              .continuous_max_lost_count = 3,
+          },
+      .low =
+          {
+              .enable = false,
+              .history_size = 16,
+              .min_alive_count = 7,
+              .continuous_max_lost_count = 3,
+          },
   };
 }
 
@@ -294,22 +326,22 @@ SZ_RETCODE Config::load_from_json(const json &j) {
 
 SZ_RETCODE Config::reload() {
   try {
-    std::ifstream i(config_file_);
-    if (!i.is_open()) {
+    std::ifstream config_fd(config_file_);
+    if (!config_fd.is_open()) {
       SZ_LOG_WARN("{} not present, will using defaults", config_file_);
       return SZ_RETCODE_OK;
     }
 
     json config;
-    i >> config;
+    config_fd >> config;
 
     config.get_to(*this);
 
-    std::ifstream override(config_override_file_);
-    if (override.is_open()) {
+    std::ifstream override_fd(config_override_file_);
+    if (override_fd.is_open()) {
       SZ_LOG_INFO("Override config from {}", config_override_file_);
       json override_config;
-      i >> override_config;
+      override_fd >> override_config;
 
       override_config.get_to(*this);
     }
@@ -361,27 +393,17 @@ const QufaceConfig &Config::get_quface() { return instance_.quface; }
 
 const DetectConfig &Config::get_detect() {
   auto &i = instance_;
-  if (i.detect_levels.find(i.user.detect_level) != i.detect_levels.end()) {
-    return i.detect_levels[i.user.detect_level];
-  }
-  return i.default_detect_;
+  return i.detect_levels_.get(i.user.detect_level);
 }
 
 const ExtractConfig &Config::get_extract() {
   auto &i = instance_;
-  if (i.extract_levels.find(i.user.extract_level) != i.extract_levels.end()) {
-    return i.extract_levels[i.user.extract_level];
-  }
-  return i.default_extract_;
+  return i.extract_levels_.get(i.user.extract_level);
 }
 
 const LivenessConfig &Config::get_liveness() {
   auto &i = instance_;
-  if (i.liveness_levels.find(i.user.liveness_level) !=
-      i.liveness_levels.end()) {
-    return i.liveness_levels[i.user.liveness_level];
-  }
-  return i.default_liveness_;
+  return i.liveness_levels_.get(i.user.liveness_level);
 }
 
 bool Config::is_liveness_enable() { return Config::get_liveness().enable; }
