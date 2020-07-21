@@ -172,15 +172,18 @@ Config::ptr Config::get_instance() { return Config::ptr(&instance_); }
 
 void Config::load_defaults() {
   app = {
-      // .window_width = 800,
-      // .window_height = 1280,
-      .window_width = 480,
-      .window_height = 854,
-      .recognize_tip_top_percent = 78,
-      .server_port = 8010,
-      .server_host = "127.0.0.1",
-      .image_store_path = "/user/quface-app/var/db/upload/",
-      .person_service_base_url = "http://127.0.0.1",
+#if defined(LCD_8INCH_800x1280)
+    .window_width = 800,
+    .window_height = 1280,
+#else
+    .window_width = 480,
+    .window_height = 854,
+#endif
+    .recognize_tip_top_percent = 78,
+    .server_port = 8010,
+    .server_host = "127.0.0.1",
+    .image_store_path = "/user/quface-app/var/db/upload/",
+    .person_service_base_url = "http://127.0.0.1",
   };
 
   user = {

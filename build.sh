@@ -32,6 +32,8 @@ if [[ $USER_BUILD_DIR ]]; then
     build_root_dir=$USER_BUILD_DIR
 fi
 
+lcd_screen_type=${USER_LCD_SCREEN_TYPE:-"LCD_8INCH_800x1280"}
+
 for i in "$@"; do
     case $i in
     -d=* | --build-dir=*)
@@ -79,7 +81,7 @@ fi
 mkdir -p $build_dir || true
 pushd $build_dir
 cmake $source_dir -G "$cmake_generator" \
-    -DLCD_SCREEN_TYPE="LCD_5INCH_480x854" \
+    -DLCD_SCREEN_TYPE=$lcd_screen_type \
     -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
     -DCMAKE_INSTALL_PREFIX=$install_dir \
     -DHISI_SDK_PLATFORM=rp-dv300 \
