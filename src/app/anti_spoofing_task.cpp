@@ -35,29 +35,40 @@ void AntiSpoofingTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
   if (pang->nir_detection.b_valid) {
     int width = pang->img_nir_large->width;
     int height = pang->img_nir_large->height;
+    memset(pang->img_nir_large->pData + width * height, 0x80,
+           width * height / 2);
     FaceDetection face_detection =
         pang->nir_detection.to_detection(width, height);
-    SZ_LOG_DEBUG("image w={},h={}", width, height);
-    // SZ_LOG_DEBUG("face_detection x={},y={},w={},h={}", face_detection.bbox.x,
+    // SZ_LOG_DEBUG("image w={},h={}, frame={}", width, height,
+    // pang->frame_idx); SZ_LOG_DEBUG("face_detection x={},y={},w={},h={}",
+    // face_detection.bbox.x,
     //              face_detection.bbox.y, face_detection.bbox.width,
     //              face_detection.bbox.height);
 
     //  save nir images for training
-
-    if (pang->frame_idx % 10 == 0) {
-      int width = pang->img_nir_large->width;
-      int height = pang->img_nir_large->width;
+#if 0
+    if (pang->frame_idx % 5 == 0) {
       MmzImage *dest_img =
           new MmzImage(width, height, SZ_IMAGETYPE_BGR_PACKAGE);
 
       if (Ive::getInstance()->yuv2RgbPacked(dest_img, pang->img_nir_large,
                                             true)) {
+        SZ_LOG_DEBUG("image w={},h={}, frame={}", width, height,
+                     pang->frame_idx);
+
         cv::Mat big_nir(height, width, CV_8UC3, dest_img->pData);
-        cv::imwrite("nir_images/" + std::to_string(pang->frame_idx) + ".jpg",
-                    big_nir);
+        cv::imwrite(
+            "nir_images/" + std::to_string(pang->frame_idx) + ".jpg",
+            big_nir({face_detection.bbox.x, face_detection.bbox.y,
+                     face_detection.bbox.width, face_detection.bbox.height})
+                .clone());
+
+        // cv::imwrite("nir_images/" + std::to_string(pang->frame_idx) + ".jpg",
+        //             big_nir);
       }
       delete dest_img;
     }
+#endif
 
     SZ_BOOL is_live = false;
     SZ_RETCODE ret = anti_spoofing_->validate(

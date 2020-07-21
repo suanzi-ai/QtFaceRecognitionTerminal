@@ -65,6 +65,7 @@ void DetectTask::copy_buffer(ImagePackage *pang, DetectionRatio &bgr_detection,
   pang->copy_to(*ping);
   ping->bgr_detection = bgr_detection;
   ping->nir_detection = nir_detection;
+  ping->frame_idx = pang->frame_idx;
 }
 
 void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
