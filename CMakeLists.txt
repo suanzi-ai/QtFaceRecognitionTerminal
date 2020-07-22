@@ -17,9 +17,18 @@ if(CCACHE_PROGRAM)
   set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
 endif()
 
+include(cmake/GetGitRevisionDescription.cmake)
+get_git_head_revision(GIT_REFSPEC GIT_SHA1)
+git_get_exact_tag(GIT_TAG --always --tags)
+git_describe(GIT_DESCRIBE --always --tags)
+
+if(GIT_DESCRIBE MATCHES "^v([0-9]+)\\.([0-9]+)\\.([0-9]+)")
+  set(PROJECT_VERSION "${CMAKE_MATCH_1}.${CMAKE_MATCH_2}.${CMAKE_MATCH_3}")
+endif()
+
 project(
   FaceRecognitionTerminal
-  VERSION 0.1.0
+  VERSION ${PROJECT_VERSION}
   DESCRIPTION "FaceRecognitionTerminal")
 
 set(CMAKE_CXX_STANDARD 11)
@@ -122,6 +131,10 @@ if(NOT QuFaceSDK_LOADED_DEPS)
   find_package(OpenCV 3 REQUIRED HINTS /usr/local/opt/opencv@3)
   find_package(spdlog REQUIRED)
 endif()
+
+configure_file("${PROJECT_SOURCE_DIR}/src/static_config.hpp.in"
+               "${PROJECT_BINARY_DIR}/include/static_config.hpp")
+include_directories(${PROJECT_BINARY_DIR}/include)
 
 add_subdirectory(src/app)
 add_subdirectory(src/lib)

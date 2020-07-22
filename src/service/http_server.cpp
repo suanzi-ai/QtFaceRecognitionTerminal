@@ -1,5 +1,7 @@
 #include "http_server.hpp"
 
+#include "static_config.hpp"
+
 using namespace suanzi;
 
 HTTPServer::HTTPServer(Config::ptr config) : config_(config) {
@@ -62,6 +64,14 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
   };
 
   server_->Post(R"(^/db/(.+))", handler);
+
+  server_->Get("/version", [&](const Request& req, Response& res) {
+    json body = {
+      {"version", GIT_DESCRIBE},
+      {"quface_sdk_version", QuFaceSDK_VERSION},
+    };
+    res.set_content(body.dump(), "application/json");
+  });
 
   server_->Post("/config", [&](const Request& req, Response& res) {
     try {
