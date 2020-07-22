@@ -76,7 +76,7 @@ void AntiSpoofingTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
         is_live);
     if (ret == SZ_RETCODE_OK) {
       history_.push_back(is_live);
-      while (history_.size() >= cfg.history_size) {
+      while (history_.size() > cfg.history_size) {
         history_.erase(history_.begin());
       }
       pang->is_alive = is_person_alive();
@@ -105,7 +105,12 @@ void AntiSpoofingTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
   emit tx_finish();
 }
 
-void AntiSpoofingTask::rx_no_frame() { emit tx_no_frame(); }
+void AntiSpoofingTask::rx_no_frame() {
+  if (history_.size() > 0) {
+    history_.erase(history_.begin());
+  }
+  emit tx_no_frame();
+}
 
 bool AntiSpoofingTask::is_person_alive() {
   auto cfg = Config::get_liveness();

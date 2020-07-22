@@ -120,14 +120,12 @@ void suanzi::to_json(json &j, const LivenessConfig &c) {
   SAVE_JSON_TO(j, "history_size", c.history_size);
   SAVE_JSON_TO(j, "min_alive_count", c.min_alive_count);
   SAVE_JSON_TO(j, "continuous_max_lost_count", c.continuous_max_lost_count);
-  SAVE_JSON_TO(j, "max_no_face", c.max_no_face);
 }
 
 void suanzi::from_json(const json &j, LivenessConfig &c) {
   LOAD_JSON_TO(j, "history_size", c.history_size);
   LOAD_JSON_TO(j, "min_alive_count", c.min_alive_count);
   LOAD_JSON_TO(j, "continuous_max_lost_count", c.continuous_max_lost_count);
-  LOAD_JSON_TO(j, "max_no_face", c.max_no_face);
 }
 
 void suanzi::from_json(const json &j, Config &c) {
@@ -287,15 +285,15 @@ void Config::load_defaults() {
           },
       .medium =
           {
-              .history_size = 16,
-              .min_alive_count = 7,
+              .history_size = 12,
+              .min_alive_count = 5,
               .continuous_max_lost_count = 3,
           },
       .low =
           {
-              .history_size = 16,
-              .min_alive_count = 7,
-              .continuous_max_lost_count = 3,
+              .history_size = 8,
+              .min_alive_count = 3,
+              .continuous_max_lost_count = 2,
           },
   };
 }

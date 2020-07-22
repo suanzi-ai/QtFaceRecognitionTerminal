@@ -97,7 +97,6 @@ typedef struct {
   int history_size;
   int min_alive_count;
   int continuous_max_lost_count;
-  int max_no_face;
 } LivenessConfig;
 
 void to_json(json &j, const LivenessConfig &c);
