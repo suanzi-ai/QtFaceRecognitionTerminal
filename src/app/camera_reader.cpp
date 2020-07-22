@@ -27,15 +27,15 @@ CameraReader::CameraReader(QObject *parent) {
                   CH_ROTATES_BGR, sizeof(VPSS_CH_SIZES_BGR) / sizeof(Size));
 
   // Initialize VI_VPSS for NIR
+  vi_nir_ = new Vi(DEV_IDX_NIR, PIPE_IDX_NIR, SONY_IMX307_MIPI_2M_30FPS_12BIT,
+                   NIR_FLIP);
+  vpss_nir_ = new Vpss(DEV_IDX_NIR, VPSS_CH_SIZES_NIR[0].width,
+                       VPSS_CH_SIZES_NIR[0].height);
+  vi_vpss_nir_ =
+      new Vi_Vpss(vi_nir_, vpss_nir_, VPSS_CH_SIZES_NIR, CH_INDEXES_NIR,
+                  CH_ROTATES_NIR, sizeof(VPSS_CH_SIZES_NIR) / sizeof(Size));
   static Vo vo_bgr(0, VO_INTF_MIPI, lcd_screen_type_, ROTATION_E::ROTATION_90);
-  if (Config::is_liveness_enable()) {
-    vi_nir_ = new Vi(DEV_IDX_NIR, PIPE_IDX_NIR, SONY_IMX307_MIPI_2M_30FPS_12BIT,
-                     NIR_FLIP);
-    vpss_nir_ = new Vpss(DEV_IDX_NIR, VPSS_CH_SIZES_NIR[0].width,
-                         VPSS_CH_SIZES_NIR[0].height);
-    vi_vpss_nir_ =
-        new Vi_Vpss(vi_nir_, vpss_nir_, VPSS_CH_SIZES_NIR, CH_INDEXES_NIR,
-                    CH_ROTATES_NIR, sizeof(VPSS_CH_SIZES_NIR) / sizeof(Size));
+  if (app.show_infrared_window) {
     static Vi_Vpss_Vo vi_vpss_vo(vi_vpss_bgr_, vi_vpss_nir_, &vo_bgr);
   } else {
     static Vi_Vpss_Vo vi_vpss_vo(vi_vpss_bgr_, &vo_bgr);
@@ -145,7 +145,7 @@ bool CameraReader::capture_frame(ImagePackage *pkg) {
     QThread::usleep(10);
   }
 
-  if (Config::is_liveness_enable()) {
+  if (Config::enable_anti_spoofing()) {
     if (!vpss_nir_->getYuvFrame(pkg->img_nir_small, 2)) return false;
     while (!vpss_nir_->getYuvFrame(pkg->img_nir_large, 1)) {
       QThread::usleep(10);

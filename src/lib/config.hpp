@@ -35,6 +35,8 @@ typedef struct {
   std::string server_host;
   std::string image_store_path;
   std::string person_service_base_url;
+  bool enable_anti_spoofing;
+  bool show_infrared_window;
 } AppConfig;
 
 void to_json(json &j, const AppConfig &c);
@@ -92,7 +94,6 @@ void to_json(json &j, const ExtractConfig &c);
 void from_json(const json &j, ExtractConfig &c);
 
 typedef struct {
-  bool enable;
   int history_size;
   int min_alive_count;
   int continuous_max_lost_count;
@@ -154,7 +155,7 @@ class Config {
   static const DetectConfig &get_detect();
   static const ExtractConfig &get_extract();
   static const LivenessConfig &get_liveness();
-  static bool is_liveness_enable();
+  static bool enable_anti_spoofing();
 
   friend void from_json(const json &j, Config &c);
   friend void to_json(json &j, const Config &c);

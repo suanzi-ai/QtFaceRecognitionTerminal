@@ -32,7 +32,7 @@ RecognizeTask::RecognizeTask(
 RecognizeTask::~RecognizeTask() {}
 
 void RecognizeTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
-  auto liveness_enable = Config::is_liveness_enable();
+  auto liveness_enable = Config::enable_anti_spoofing();
   RecognizeData *pang = buffer->get_pang();
   if (pang->bgr_detection.b_valid && (pang->is_alive || !liveness_enable)) {
     // crop in large image

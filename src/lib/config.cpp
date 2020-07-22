@@ -24,6 +24,8 @@ void suanzi::to_json(json &j, const AppConfig &c) {
   SAVE_JSON_TO(j, "server_host", c.server_host);
   SAVE_JSON_TO(j, "image_store_path", c.image_store_path);
   SAVE_JSON_TO(j, "person_service_base_url", c.person_service_base_url);
+  SAVE_JSON_TO(j, "enable_anti_spoofing", c.enable_anti_spoofing);
+  SAVE_JSON_TO(j, "show_infrared_window", c.show_infrared_window);
 }
 
 void suanzi::from_json(const json &j, AppConfig &c) {
@@ -32,6 +34,8 @@ void suanzi::from_json(const json &j, AppConfig &c) {
   LOAD_JSON_TO(j, "server_host", c.server_host);
   LOAD_JSON_TO(j, "image_store_path", c.image_store_path);
   LOAD_JSON_TO(j, "person_service_base_url", c.person_service_base_url);
+  LOAD_JSON_TO(j, "enable_anti_spoofing", c.enable_anti_spoofing);
+  LOAD_JSON_TO(j, "show_infrared_window", c.show_infrared_window);
 }
 
 void suanzi::to_json(json &j, const QufaceConfig &c) {
@@ -113,7 +117,6 @@ void suanzi::from_json(const json &j, ExtractConfig &c) {
 }
 
 void suanzi::to_json(json &j, const LivenessConfig &c) {
-  SAVE_JSON_TO(j, "enable", c.enable);
   SAVE_JSON_TO(j, "history_size", c.history_size);
   SAVE_JSON_TO(j, "min_alive_count", c.min_alive_count);
   SAVE_JSON_TO(j, "continuous_max_lost_count", c.continuous_max_lost_count);
@@ -121,7 +124,6 @@ void suanzi::to_json(json &j, const LivenessConfig &c) {
 }
 
 void suanzi::from_json(const json &j, LivenessConfig &c) {
-  LOAD_JSON_TO(j, "enable", c.enable);
   LOAD_JSON_TO(j, "history_size", c.history_size);
   LOAD_JSON_TO(j, "min_alive_count", c.min_alive_count);
   LOAD_JSON_TO(j, "continuous_max_lost_count", c.continuous_max_lost_count);
@@ -168,11 +170,13 @@ Config::ptr Config::get_instance() { return Config::ptr(&instance_); }
 
 void Config::load_defaults() {
   app = {
-    .recognize_tip_top_percent = 78,
-    .server_port = 8010,
-    .server_host = "127.0.0.1",
-    .image_store_path = "/user/quface-app/var/db/upload/",
-    .person_service_base_url = "http://127.0.0.1",
+      .recognize_tip_top_percent = 78,
+      .server_port = 8010,
+      .server_host = "127.0.0.1",
+      .image_store_path = "/user/quface-app/var/db/upload/",
+      .person_service_base_url = "http://127.0.0.1",
+      .enable_anti_spoofing = false,
+      .show_infrared_window = false,
   };
 
   user = {
@@ -277,21 +281,18 @@ void Config::load_defaults() {
   liveness_levels_ = {
       .high =
           {
-              .enable = false,
               .history_size = 16,
               .min_alive_count = 7,
               .continuous_max_lost_count = 3,
           },
       .medium =
           {
-              .enable = false,
               .history_size = 16,
               .min_alive_count = 7,
               .continuous_max_lost_count = 3,
           },
       .low =
           {
-              .enable = false,
               .history_size = 16,
               .min_alive_count = 7,
               .continuous_max_lost_count = 3,
@@ -398,4 +399,4 @@ const LivenessConfig &Config::get_liveness() {
   return i.liveness_levels_.get(i.user.liveness_level);
 }
 
-bool Config::is_liveness_enable() { return Config::get_liveness().enable; }
+bool Config::enable_anti_spoofing() { return instance_.app.enable_anti_spoofing; }

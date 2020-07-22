@@ -24,7 +24,7 @@ void AntiSpoofingTask::rx_finish() { b_tx_ok_ = true; }
 void AntiSpoofingTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
   auto cfg = Config::get_liveness();
   // SZ_LOG_DEBUG("rx_frame");
-  if (!cfg.enable) {
+  if (!Config::enable_anti_spoofing()) {
     emit tx_frame(buffer);
     buffer->switch_buffer();
     emit tx_finish();

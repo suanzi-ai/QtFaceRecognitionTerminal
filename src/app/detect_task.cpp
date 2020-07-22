@@ -104,7 +104,7 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
     emit tx_bgr_display(no_face);
   }
 
-  if (Config::is_liveness_enable()) {
+  if (Config::enable_anti_spoofing()) {
     std::vector<suanzi::FaceDetection> nir_detections;
     ret = face_detector_->detect(
         (const SVP_IMAGE_S *)pang->img_nir_small->pImplData, nir_detections);
