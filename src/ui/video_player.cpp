@@ -19,19 +19,26 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
   auto app = Config::get_app();
   auto quface = Config::get_quface();
 
+  camera_reader_ = new CameraReader(this);
+
+  int screen_width, screen_height;
+  if (!camera_reader_->get_screen_size(screen_width, screen_height)) {
+    SZ_LOG_ERROR("Get screen size error");
+  } else {
+    SZ_LOG_INFO("Get screen w={}, h={}", screen_width, screen_height);
+  }
+
   detect_tip_widget_bgr_ =
-      new DetectTipWidget(0, 0, app.window_width, app.window_height, this);
+      new DetectTipWidget(0, 0, screen_width, screen_height, this);
   detect_tip_widget_bgr_->hide();
 
   detect_tip_widget_nir_ = new DetectTipWidget(
-      app.window_width - app.window_width * 25 / 100, 0,
-      app.window_width * 25 / 100, app.window_height * 25 / 100, this);
+      screen_width - screen_width * 25 / 100, 0, screen_width * 25 / 100,
+      screen_height * 25 / 100, this);
   detect_tip_widget_nir_->hide();
 
   recognize_tip_widget_ = new RecognizeTipWidget(nullptr);
   recognize_tip_widget_->hide();
-
-  camera_reader_ = new CameraReader(this);
 
   auto person_service = PersonService::make_shared(app.person_service_base_url,
                                                    app.image_store_path);
@@ -105,10 +112,13 @@ void VideoPlayer::paintEvent(QPaintEvent *event) {
 void VideoPlayer::init_widgets() {
   auto app = Config::get_app();
 
+  int screen_width, screen_height;
+  camera_reader_->get_screen_size(screen_width, screen_height);
+
   int x = 0;
-  int y = app.window_height * app.recognize_tip_top_percent / 100;
-  int w = app.window_width;
-  int h = app.window_height - y;
+  int y = screen_height * app.recognize_tip_top_percent / 100;
+  int w = screen_width;
+  int h = screen_height - y;
 
   recognize_tip_widget_->setFixedSize(w, h);
   recognize_tip_widget_->move(x, y);

@@ -30,8 +30,6 @@ void to_json(json &j, const UserConfig &c);
 void from_json(const json &j, UserConfig &c);
 
 typedef struct {
-  int window_width;
-  int window_height;
   int recognize_tip_top_percent;
   SZ_UINT16 server_port;
   std::string server_host;

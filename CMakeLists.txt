@@ -32,19 +32,6 @@ set(CMAKE_AUTOUIC ON)
 
 option(DOWNLOAD_DEPENDENCY "Download 3rd party dependencies from remote" ON)
 
-set(LCD_SCREEN_TYPE
-    "LCD_5INCH_480x854"
-    CACHE STRING "LCD screen type")
-
-set(LCD_SCREEN_TYPE_LIST
-    "LCD_8INCH_800x1280;LCD_5INCH_480x854;LCD_5INCH_720x1280")
-if(NOT LCD_SCREEN_TYPE IN_LIST LCD_SCREEN_TYPE_LIST)
-  message(
-    FATAL_ERROR "${LCD_SCREEN_TYPE} is not contains in ${LCD_SCREEN_TYPE_LIST}")
-endif()
-
-message(STATUS "Set LCD_SCREEN_TYPE to: ${LCD_SCREEN_TYPE}")
-
 set(PROJECT_DEPENDENCY_DIR
     "${PROJECT_SOURCE_DIR}/deps"
     CACHE STRING "Project dependencies dir")

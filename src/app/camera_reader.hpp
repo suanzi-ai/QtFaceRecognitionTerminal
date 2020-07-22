@@ -26,6 +26,9 @@ class CameraReader : QThread {
 
   void start_sample();
 
+  bool load_screen_type();
+  bool get_screen_size(int &width, int &height);
+
  private:
  private slots:
   void rx_finish();
@@ -34,6 +37,8 @@ class CameraReader : QThread {
   void tx_frame(PingPangBuffer<ImagePackage> *buffer);
 
  private:
+  const HI_BOOL BGR_FLIP = HI_TRUE;
+  const HI_BOOL NIR_FLIP = HI_TRUE;
   const int DEV_IDX_BRG = 1;
   const int PIPE_IDX_BRG = 2;
   const int DEV_IDX_NIR = 0;
@@ -67,6 +72,8 @@ class CameraReader : QThread {
 
   ImagePackage *buffer_ping_, *buffer_pang_;
   PingPangBuffer<ImagePackage> *pingpang_buffer_;
+
+  LCD_SCREEN_TYPE lcd_screen_type_ = SML_LCD_MIPI_8INCH_800X1280;
 };
 
 }  // namespace suanzi

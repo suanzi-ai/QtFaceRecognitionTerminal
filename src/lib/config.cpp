@@ -19,8 +19,6 @@ void suanzi::from_json(const json &j, UserConfig &c) {
 }
 
 void suanzi::to_json(json &j, const AppConfig &c) {
-  SAVE_JSON_TO(j, "window_width", c.window_width);
-  SAVE_JSON_TO(j, "window_height", c.window_height);
   SAVE_JSON_TO(j, "recognize_tip_top_percent", c.recognize_tip_top_percent);
   SAVE_JSON_TO(j, "server_port", c.server_port);
   SAVE_JSON_TO(j, "server_host", c.server_host);
@@ -29,8 +27,6 @@ void suanzi::to_json(json &j, const AppConfig &c) {
 }
 
 void suanzi::from_json(const json &j, AppConfig &c) {
-  LOAD_JSON_TO(j, "window_width", c.window_width);
-  LOAD_JSON_TO(j, "window_height", c.window_height);
   LOAD_JSON_TO(j, "recognize_tip_top_percent", c.recognize_tip_top_percent);
   LOAD_JSON_TO(j, "server_port", c.server_port);
   LOAD_JSON_TO(j, "server_host", c.server_host);
@@ -172,13 +168,6 @@ Config::ptr Config::get_instance() { return Config::ptr(&instance_); }
 
 void Config::load_defaults() {
   app = {
-#if defined(LCD_8INCH_800x1280)
-    .window_width = 800,
-    .window_height = 1280,
-#else
-    .window_width = 480,
-    .window_height = 854,
-#endif
     .recognize_tip_top_percent = 78,
     .server_port = 8010,
     .server_host = "127.0.0.1",
