@@ -37,4 +37,5 @@ template <class T>
 void PingPangBuffer<T>::switch_buffer() { switch_ = !switch_; }
 
 template class PingPangBuffer<ImagePackage>;
+template class PingPangBuffer<DetectionData>;
 template class PingPangBuffer<RecognizeData>;

@@ -10,15 +10,43 @@
 
 using namespace suanzi;
 
-RecognizeTask::RecognizeTask(
-    FaceDatabasePtr db, FaceExtractorPtr extractor,
-    PersonService::ptr person_service,
-    MemoryPool<ImageBuffer, sizeof(ImageBuffer) * 5> *mem_pool, QThread *thread,
-    QObject *parent)
+RecognizeTask::RecognizeTask(FaceDatabasePtr db, FaceExtractorPtr extractor,
+                             FaceAntiSpoofingPtr anti_spoofing, QThread *thread,
+                             QObject *parent)
     : face_database_(db),
       face_extractor_(extractor),
-      person_service_(person_service),
-      mem_pool_(mem_pool) {
+      anti_spoofing_(anti_spoofing) {
+  // Initialize PINGPANG buffer
+  Size size_bgr_1 = VPSS_CH_SIZES_BGR[1];
+  Size size_bgr_2 = VPSS_CH_SIZES_BGR[2];
+  if (CH_ROTATES_BGR[1]) {
+    size_bgr_1.height = VPSS_CH_SIZES_BGR[1].width;
+    size_bgr_1.width = VPSS_CH_SIZES_BGR[1].height;
+  }
+  if (CH_ROTATES_BGR[2]) {
+    size_bgr_2.height = VPSS_CH_SIZES_BGR[2].width;
+    size_bgr_2.width = VPSS_CH_SIZES_BGR[2].height;
+  }
+
+  Size size_nir_1 = VPSS_CH_SIZES_NIR[1];
+  Size size_nir_2 = VPSS_CH_SIZES_NIR[2];
+  if (CH_ROTATES_NIR[1]) {
+    size_nir_1.height = VPSS_CH_SIZES_NIR[1].width;
+    size_nir_1.width = VPSS_CH_SIZES_NIR[1].height;
+  }
+  if (CH_ROTATES_NIR[2]) {
+    size_nir_2.height = VPSS_CH_SIZES_NIR[2].width;
+    size_nir_2.width = VPSS_CH_SIZES_NIR[2].height;
+  }
+
+  buffer_ping_ =
+      new RecognizeData(size_bgr_1, size_bgr_2, size_nir_1, size_nir_2);
+  buffer_pang_ =
+      new RecognizeData(size_bgr_1, size_bgr_2, size_nir_1, size_nir_2);
+  pingpang_buffer_ =
+      new PingPangBuffer<RecognizeData>(buffer_ping_, buffer_pang_);
+
+  // Create thread
   if (thread == nullptr) {
     static QThread new_thread;
     moveToThread(&new_thread);
@@ -27,205 +55,92 @@ RecognizeTask::RecognizeTask(
     moveToThread(thread);
     thread->start();
   }
+
+  rx_finished_ = true;
 }
 
-RecognizeTask::~RecognizeTask() {}
+RecognizeTask::~RecognizeTask() {
+  if (buffer_ping_) delete buffer_ping_;
+  if (buffer_pang_) delete buffer_pang_;
+  if (pingpang_buffer_) delete pingpang_buffer_;
+}
 
-void RecognizeTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
-  auto liveness_enable = Config::enable_anti_spoofing();
-  RecognizeData *pang = buffer->get_pang();
-  if (pang->bgr_detection.b_valid && (pang->is_alive || !liveness_enable)) {
-    // crop in large image
-    int width = pang->img_bgr_large->width;
-    int height = pang->img_bgr_large->height;
-    suanzi::FaceDetection face_detection =
-        pang->bgr_detection.to_detection(width, height);
-
-    // extract: 25ms
-    suanzi::FaceFeature feature;
-    face_extractor_->extract(
-        (const SVP_IMAGE_S *)pang->img_bgr_large->pImplData, face_detection,
-        feature);
-
-    // push query result to history
-    std::vector<suanzi::QueryResult> results;
-    SZ_RETCODE ret = face_database_->query(feature, 1, results);
-    if (SZ_RETCODE_OK == ret) {
-      query_success(results[0], pang);
-    } else if (SZ_RETCODE_EMPTY_DATABASE == ret) {
-      query_empty_database(pang);
-    }
-  }
+void RecognizeTask::rx_frame(PingPangBuffer<DetectionData> *buffer) {
+  // copy from input to output
   buffer->switch_buffer();
+  DetectionData *input = buffer->get_pang();
+  RecognizeData *output = pingpang_buffer_->get_ping();
+  input->copy_to(*output);
+
+  output->bgr_face_detected_ = input->bgr_face_detected_;
+  output->nir_face_detected_ = input->nir_face_detected_;
+  output->bgr_detection_ = input->bgr_detection_;
+  output->nir_detection_ = input->nir_detection_;
+
+  if (input->bgr_face_valid()) {
+    if (!Config::enable_anti_spoofing())
+      output->is_live = true;
+    else
+      output->is_live = is_live(input);
+
+    extract_and_query(input, output->person_feature, output->person_info);
+    emit tx_frame(pingpang_buffer_);
+  }
+
   emit tx_finish();
 }
 
-void RecognizeTask::rx_no_frame() { query_no_face(); }
+void RecognizeTask::rx_finish() { rx_finished_ = true; }
 
-void RecognizeTask::query_success(const suanzi::QueryResult &person_info,
-                                  RecognizeData *img) {
-  auto cfg = Config::get_extract();
-  auto user_cfg = Config::get_user();
-  history_.push_back(person_info);
-  if (history_.size() >= cfg.history_size) {
-    SZ_UINT32 face_id = 0;
+bool RecognizeTask::is_live(DetectionData *detection) {
+  if (detection->nir_face_valid()) {
+    int width = detection->img_nir_large->width;
+    int height = detection->img_nir_large->height;
 
-    suanzi::PersonData person;
-    if (sequence_query(history_, face_id)) {
-      SZ_RETCODE ret = person_service_->get_person(face_id, person);
-      if (ret == SZ_RETCODE_OK) {
-        SZ_LOG_INFO("recognized: id = {}, name = {}", person.id, person.name);
-        if (person.status == "blacklist") {
-          if (user_cfg.blacklist_policy == "alert") {
-            // TODO: Alert sound
-            person.number = "";
-            person.name = "异常";
-            person.face_path = ":asserts/avatar_unknown.jpg";
-          } else if (user_cfg.blacklist_policy == "stranger") {
-            person.number = "";
-            person.name = "访客";
-            person.face_path = ":asserts/avatar_unknown.jpg";
-          }
-        }
+    FaceDetection face_detection =
+        detection->nir_detection_.scale(width, height);
 
-        tx_display(person);
+    // set channel U,V to zeros, remain Y
+    memset(detection->img_nir_large->pData + width * height, 0x80,
+           width * height / 2);
 
-        if (!if_duplicated(person.id))
-          report(person.id, img);
-        else
-          SZ_LOG_INFO("duplicated: id = {}", person.id);
-      }
-    } else {
-      SZ_LOG_INFO("recognized: unknown");
-      person.number = "";
-      person.name = "访客";
-      person.face_path = ":asserts/avatar_unknown.jpg";
-      tx_display(person);
-
-      report(0, img);
-    }
-
-    history_.clear();
-  }
-}
-
-void RecognizeTask::query_empty_database(RecognizeData *img) {
-  auto cfg = Config::get_extract();
-  static int empty_age = 0;
-  if (++empty_age >= cfg.history_size) {
-    suanzi::PersonData person;
-    person.number = "";
-    person.name = "访客";
-    person.face_path = ":asserts/avatar_unknown.jpg";
-    tx_display(person);
-
-    report(0, img);
-
-    history_.clear();
-    empty_age = 0;
-  }
-}
-
-void RecognizeTask::query_no_face() {
-  auto cfg = Config::get_extract();
-  static int lost_age = 0;
-  if (++lost_age >= cfg.max_lost_age) {
-    suanzi::PersonData person;
-    person.status = "clear";
-    tx_display(person);
-
-    history_.clear();
-    lost_age = 0;
-  }
-}
-
-bool RecognizeTask::sequence_query(std::vector<suanzi::QueryResult> history,
-                                   SZ_UINT32 &face_id) {
-  auto cfg = Config::get_extract();
-  std::map<SZ_UINT32, int> person_counts;
-  std::map<SZ_UINT32, float> person_accumulate_score;
-  std::map<SZ_UINT32, float> person_max_score;
-
-  // initialize map
-  for (auto &person : history) {
-    person_counts[person.face_id] = 0;
-    person_accumulate_score[person.face_id] = 0.f;
-    person_max_score[person.face_id] = 0.f;
-  }
-
-  // accumulate id and score
-  for (auto &person : history) {
-    person_counts[person.face_id] += 1;
-    person_accumulate_score[person.face_id] += person.score;
-    person_max_score[person.face_id] =
-        std::max(person.score, person_max_score[person.face_id]);
-  }
-
-  // person id with max counts
-  auto max_person = std::max_element(
-      person_counts.begin(), person_counts.end(),
-      [](const std::pair<int, int> &i, const std::pair<int, int> &j) {
-        return i.second < j.second;
-      });
-
-  SZ_UINT32 max_person_id = max_person->first;
-  int max_count = max_person->second;
-  float max_person_accumulate_score = person_accumulate_score[max_person_id];
-  float max_person_score = person_max_score[max_person_id];
-
-  SZ_LOG_DEBUG("id={}, count={}, max_score={}, accumulate_score={}",
-               max_person_id, max_count, max_person_score,
-               person_accumulate_score[max_person_id]);
-  if (max_count >= cfg.min_recognize_count &&
-      max_person_accumulate_score >= cfg.min_accumulate_score &&
-      max_person_score >= cfg.min_recognize_score) {
-    face_id = max_person_id;
-    return true;
-  } else {
-    return false;
-  }
-}
-
-bool RecognizeTask::if_duplicated(SZ_UINT32 face_id) {
-  auto cfg = Config::get_user();
-  bool ret = false;
-
-  auto current_query_clock = std::chrono::steady_clock::now();
-  if (query_clock_.find(face_id) != query_clock_.end()) {
-    auto last_query_clock = query_clock_[face_id];
-    auto duration = std::chrono::duration_cast<std::chrono::seconds>(
-                        current_query_clock - last_query_clock)
-                        .count();
-
-    if (duration > cfg.duplication_interval) {
-      query_clock_[face_id] = current_query_clock;
+    SZ_BOOL ret;
+    if (SZ_RETCODE_OK !=
+        anti_spoofing_->validate(
+            (const SVP_IMAGE_S *)detection->img_nir_large->pImplData,
+            face_detection, ret))
       return false;
-    } else
-      return true;
-  } else {
-    query_clock_[face_id] = current_query_clock;
+    else
+      return ret == SZ_TRUE;
+
+  } else
     return false;
-  }
 }
 
-void RecognizeTask::report(SZ_UINT32 face_id, RecognizeData *img) {
-  int width = img->img_bgr_small->width;
-  int height = img->img_bgr_small->height;
+void RecognizeTask::extract_and_query(DetectionData *detection,
+                                      FaceFeature &feature,
+                                      QueryResult &person_info) {
+  int width = detection->img_bgr_large->width;
+  int height = detection->img_bgr_large->height;
+  suanzi::FaceDetection face_detection =
+      detection->bgr_detection_.scale(width, height);
 
-  // TODO: imagebuffer size as global config;
-  assert(width == 224);
-  assert(height == 320);
+  // extract: 25ms
+  face_extractor_->extract(
+      (const SVP_IMAGE_S *)detection->img_bgr_large->pImplData, face_detection,
+      feature);
 
-  // TODO: move image convert to record_task
-  MmzImage *dest_img = new MmzImage(width, height, SZ_IMAGETYPE_BGR_PACKAGE);
+  // query
+  static std::vector<suanzi::QueryResult> results;
+  results.clear();
 
-  if (Ive::getInstance()->yuv2RgbPacked(dest_img, img->img_bgr_small, true)) {
-    ImageBuffer *buffer = mem_pool_->allocate(1);
-    memcpy(buffer->data, dest_img->pData, sizeof(buffer->data));
-
-    emit tx_record(face_id, buffer);
-  } else
-    SZ_LOG_ERROR("IVE yuv2RgbPacked failed");
-
-  delete dest_img;
+  SZ_RETCODE ret = face_database_->query(feature, 1, results);
+  if (SZ_RETCODE_OK == ret) {
+    person_info.score = results[0].score;
+    person_info.face_id = results[0].face_id;
+  } else {
+    // SZ_RETCODE_EMPTY_DATABASE == ret
+    person_info.score = 0;
+    person_info.face_id = 0;
+  }
 }

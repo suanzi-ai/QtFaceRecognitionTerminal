@@ -27,69 +27,66 @@ RecognizeTipWidget::RecognizeTipWidget(QWidget *parent) : QWidget(parent) {
 
 RecognizeTipWidget::~RecognizeTipWidget() {}
 
-void RecognizeTipWidget::rx_display(PersonData person) {
+void RecognizeTipWidget::rx_display(PersonData person, bool if_duplicated) {
   person_ = person;
-
   hide();
-  if (person_.status != "clear") show();
+  show();
 }
 
-void RecognizeTipWidget::hide_self() { hide(); }
+void RecognizeTipWidget::rx_reset() { hide(); }
 
 void RecognizeTipWidget::paintEvent(QPaintEvent *event) {
-  if (person_.status != "clear") {
-    QPainter painter(this);
-    const int w = width();
-    const int h = height();
+  QPainter painter(this);
+  const int w = width();
+  const int h = height();
 
-    const QRect RECOGNIZE_TIP_BOX = {0, 0, w, h};
+  const QRect RECOGNIZE_TIP_BOX = {0, 0, w, h};
 
-    // draw background
-    painter.fillRect(RECOGNIZE_TIP_BOX, QColor(0, 0, 10, 150));
+  // draw background
+  painter.fillRect(RECOGNIZE_TIP_BOX, QColor(0, 0, 10, 150));
 
-    // draw border and seperator
-    painter.setPen(QPen(QColor(0, 0, 255, 128), 5));
-    painter.drawRect(RECOGNIZE_TIP_BOX);
-    painter.drawLine(w * 40 / 100, 50, w * 40 / 100, h - 50);
+  // draw border and seperator
+  painter.setPen(QPen(QColor(0, 0, 255, 128), 5));
+  painter.drawRect(RECOGNIZE_TIP_BOX);
+  painter.drawLine(w * 40 / 100, 50, w * 40 / 100, h - 50);
 
-    // draw datetime
-    QDateTime now = QDateTime::currentDateTime().toUTC().addSecs(8 * 3600);
-    QString time = now.toString("hh : mm");
-    QString date = now.toString("yyyy年MM月dd日");
+  // draw datetime
+  QDateTime now = QDateTime::currentDateTime().toUTC().addSecs(8 * 3600);
+  QString time = now.toString("hh : mm");
+  QString date = now.toString("yyyy年MM月dd日");
 
-    int base_font_size = h * 5 / 100;
+  int base_font_size = h * 5 / 100;
 
-    QFont font = painter.font();
-    font.setPixelSize(base_font_size * 5);
-    painter.setFont(font);
-    painter.setPen(Qt::white);
-    painter.drawText(w * 8.25 / 100, h * 50 / 100, time);
+  QFont font = painter.font();
+  font.setPixelSize(base_font_size * 5);
+  painter.setFont(font);
+  painter.setPen(Qt::white);
+  painter.drawText(w * 8.25 / 100, h * 50 / 100, time);
 
+  font.setPixelSize(base_font_size * 2);
+  painter.setFont(font);
+  painter.drawText(w * 6 / 100, h * 70 / 100, date);
+
+  // draw avatar
+  if (person_.face_path.length() > 0) {
+    QPixmap avatar(person_.face_path.c_str());
+    avatar = avatar.scaled(mask_.size());
+    avatar.setMask(mask_);
+    painter.drawPixmap(
+        QRect(w * 50 / 100, h * 23.2 / 100, w * 18.75 / 100, h * 53.57 / 100),
+        avatar, QRect());
+  }
+
+  // draw person info
+  font.setPixelSize(base_font_size * 3);
+  painter.setFont(font);
+  painter.setPen(Qt::white);
+  painter.drawText(w * 72.5 / 100, h * 46.42 / 100, person_.name.c_str());
+
+  if (person_.number.length() > 0) {
     font.setPixelSize(base_font_size * 2);
     painter.setFont(font);
-    painter.drawText(w * 6 / 100, h * 70 / 100, date);
-
-    // draw avatar
-    if (person_.face_path.length() > 0) {
-      QPixmap avatar(person_.face_path.c_str());
-      avatar = avatar.scaled(mask_.size());
-      avatar.setMask(mask_);
-      painter.drawPixmap(
-          QRect(w * 50 / 100, h * 23.2 / 100, w * 18.75 / 100, h * 53.57 / 100),
-          avatar, QRect());
-    }
-
-    // draw person info
-    font.setPixelSize(base_font_size * 3);
-    painter.setFont(font);
-    painter.setPen(Qt::white);
-    painter.drawText(w * 72.5 / 100, h * 46.42 / 100, person_.name.c_str());
-
-    if (person_.number.length() > 0) {
-      font.setPixelSize(base_font_size * 2);
-      painter.setFont(font);
-      painter.drawText(w * 72.5 / 100, h * 71.43 / 100,
-                       QString(("工号: " + person_.number).c_str()));
-    }
+    painter.drawText(w * 72.5 / 100, h * 71.43 / 100,
+                     QString(("工号: " + person_.number).c_str()));
   }
 }

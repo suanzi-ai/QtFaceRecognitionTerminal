@@ -1,37 +1,24 @@
 #ifndef RECOGNIZE_DATA_H
 #define RECOGNIZE_DATA_H
 
-#include <mmzimage.h>
-
 #include <QMetaType>
-#include <opencv2/opencv.hpp>
 
-#include "detection_float.h"
-#include "image_package.hpp"
-#include "ive.h"
-#include "logger.hpp"
-#include "quface/common.hpp"
+#include "detection_data.hpp"
+#include "quface_common.hpp"
 
 namespace suanzi {
 
-class RecognizeData : public ImagePackage {
+class RecognizeData : public DetectionData {
  public:
-  DetectionRatio bgr_detection;
-  DetectionRatio nir_detection;
-  bool is_alive;
-
-  RecognizeData() {}
-
+  RecognizeData();
   RecognizeData(Size size_bgr_large, Size size_bgr_small, Size size_nir_large,
-                Size size_nir_small)
-      : ImagePackage(size_bgr_large, size_bgr_small, size_nir_large,
-                     size_nir_small) {
-    bgr_detection.b_valid = false;
-    nir_detection.b_valid = false;
-    is_alive = false;
-  }
+                Size size_nir_small);
 
-  ~RecognizeData() {}
+  ~RecognizeData();
+
+  bool is_live;
+  QueryResult person_info;
+  FaceFeature person_feature;
 };
 
 }  // namespace suanzi

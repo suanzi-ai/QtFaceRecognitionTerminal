@@ -20,8 +20,8 @@ class RecognizeTipWidget : public QWidget {
   void paintEvent(QPaintEvent *event);
 
  private slots:
-  void rx_display(PersonData person);
-  void hide_self();
+  void rx_display(PersonData person, bool if_duplicated);
+  void rx_reset();
 
  private:
   PersonData person_;

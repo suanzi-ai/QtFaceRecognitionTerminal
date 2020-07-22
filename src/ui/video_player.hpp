@@ -1,22 +1,20 @@
 #ifndef VIDEOPLAYER_H
 #define VIDEOPLAYER_H
 
-#include <QScopedPointer>
 #include <QWidget>
 
-#include "anti_spoofing_task.hpp"
 #include "camera_reader.hpp"
 #include "config.hpp"
 #include "detect_task.hpp"
 #include "detect_tip_widget.hpp"
-#include "detection_float.h"
+#include "face_timer.hpp"
 #include "image_package.hpp"
-#include "memory_pool.hpp"
 #include "pingpang_buffer.hpp"
 #include "recognize_data.hpp"
 #include "recognize_task.hpp"
 #include "recognize_tip_widget.hpp"
 #include "record_task.hpp"
+#include "upload_task.hpp"
 
 namespace suanzi {
 
@@ -25,7 +23,8 @@ class VideoPlayer : public QWidget {
 
  public:
   VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
-              FaceExtractorPtr extractor, QWidget *parent = nullptr);
+              FaceExtractorPtr extractor, FaceAntiSpoofingPtr anti_spoofing,
+              PersonService::ptr person_service, QWidget *parent = nullptr);
   ~VideoPlayer();
 
  protected:
@@ -41,17 +40,12 @@ class VideoPlayer : public QWidget {
 
   CameraReader *camera_reader_;
 
-  AntiSpoofingTask *anti_spoofing_task_;
   DetectTask *detect_task_;
   RecognizeTask *recognize_task_;
-
   RecordTask *record_task_;
+  FaceTimer *face_timer_;
 
-  FaceDatabasePtr db_;
-  FaceDetectorPtr detector_;
-  FaceExtractorPtr extractor_;
-
-  MemoryPool<ImageBuffer, sizeof(ImageBuffer) * 5> mem_pool_;
+  UploadTask *upload_task_;
 };
 
 }  // namespace suanzi

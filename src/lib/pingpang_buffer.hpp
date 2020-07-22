@@ -5,6 +5,9 @@
 #include <QThread>
 
 #include "mmzimage.h"
+#include "image_package.hpp"
+#include "detection_data.hpp"
+#include "recognize_data.hpp"
 
 namespace suanzi {
 
@@ -27,6 +30,8 @@ class PingPangBuffer {
 
 }
 
-Q_DECLARE_METATYPE(suanzi::PingPangBuffer<MmzImage>);
+Q_DECLARE_METATYPE(suanzi::PingPangBuffer<suanzi::ImagePackage>);
+Q_DECLARE_METATYPE(suanzi::PingPangBuffer<suanzi::DetectionData>);
+Q_DECLARE_METATYPE(suanzi::PingPangBuffer<suanzi::RecognizeData>);
 
 #endif

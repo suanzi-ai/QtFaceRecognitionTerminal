@@ -12,12 +12,11 @@ DetectTipWidget::DetectTipWidget(int win_x, int win_y, int win_width,
       win_y_(win_y),
       win_width_(win_width),
       win_height_(win_height),
+      lost_age_(0),
       QWidget(parent) {
   QPalette palette = this->palette();
   palette.setColor(QPalette::Background, Qt::transparent);
   setPalette(palette);
-
-  is_updated_ = false;
 }
 
 DetectTipWidget::~DetectTipWidget() {}
@@ -69,14 +68,13 @@ void DetectTipWidget::paint(QPainter *painter) {
   }
 }
 
-void DetectTipWidget::rx_display(DetectionRatio detection) {
+void DetectTipWidget::rx_display(DetectionRatio detection, bool to_clear) {
   int box_x = win_x_ + 1;
   int box_y = win_y_ + 1;
   int box_w = win_width_ - 1;
   int box_h = win_height_ - 1;
 
-  is_updated_ = detection.b_valid;
-  if (is_updated_) {
+  if (!to_clear) {
     // resize to square
     float center_x = box_x + (detection.x + .5f * detection.width) * box_w;
     float center_Y = box_y + (detection.y + .5f * detection.height) * box_h;
@@ -89,10 +87,9 @@ void DetectTipWidget::rx_display(DetectionRatio detection) {
     if (rects_.size() > MAX_RECT_COUNT) rects_.erase(rects_.begin());
 
   } else {
-    static int lost_age = 0;
-    if (++lost_age > MAX_LOST_AGE) {
+    if (++lost_age_ > MAX_LOST_AGE) {
       rects_.clear();
-      lost_age = 0;
+      lost_age_ = 0;
     }
   }
 

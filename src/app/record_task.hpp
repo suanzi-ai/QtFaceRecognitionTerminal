@@ -3,26 +3,51 @@
 
 #include <QObject>
 
-#include "memory_pool.hpp"
-#include "mmzimage.h"
+#include <chrono>
+
 #include "person_service.hpp"
+#include "pingpang_buffer.hpp"
+#include "quface_common.hpp"
+#include "recognize_data.hpp"
 
 namespace suanzi {
 
 class RecordTask : QObject {
   Q_OBJECT
  public:
-  RecordTask(PersonService::ptr person_service,
-             MemoryPool<ImageBuffer, sizeof(ImageBuffer) * 5> *mem_pool,
+  RecordTask(PersonService::ptr person_service, QThread *thread = nullptr,
              QObject *parent = nullptr);
+
   ~RecordTask();
 
  private slots:
-  void rx_record(int face_id, ImageBuffer *buffer);
+  void rx_frame(PingPangBuffer<RecognizeData> *buffer);
+  void rx_reset();
+
+ signals:
+  void tx_finish();
+
+  // for display
+  void tx_display(PersonData person, bool if_duplicated);
 
  private:
-  suanzi::PersonService::ptr person_service_;
-  MemoryPool<ImageBuffer, sizeof(ImageBuffer) * 5> *mem_pool_;
+  bool sequence_query(const std::vector<QueryResult> &history,
+                      SZ_UINT32 &face_id);
+  bool sequence_antispoof(const std::vector<bool> &history);
+
+  bool if_duplicated(const SZ_UINT32 &face_id);
+  bool if_duplicated(const FaceFeature &feature);
+
+  PersonService::ptr person_service_;
+
+  FaceDatabasePtr unknown_database_;
+
+  std::vector<QueryResult> person_history_;
+  std::map<SZ_UINT32, std::chrono::steady_clock::time_point> query_clock_;
+
+  std::vector<bool> live_history_;
+  std::map<SZ_UINT32, std::chrono::steady_clock::time_point>
+      unknown_query_clock_;
 };
 
 }  // namespace suanzi

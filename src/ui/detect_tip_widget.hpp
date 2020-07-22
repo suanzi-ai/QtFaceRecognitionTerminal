@@ -5,7 +5,7 @@
 #include <QPainter>
 #include <QWidget>
 
-#include "detection_float.h"
+#include "detection_data.hpp"
 #include "image_package.hpp"
 #include "pingpang_buffer.hpp"
 
@@ -22,7 +22,7 @@ class DetectTipWidget : public QWidget {
   void paint(QPainter *painter);
 
  private slots:
-  void rx_display(DetectionRatio detection);
+  void rx_display(DetectionRatio detection, bool to_clear);
 
  private:
   static constexpr int MAX_RECT_COUNT = 10;
@@ -35,6 +35,8 @@ class DetectTipWidget : public QWidget {
   int win_y_;
   int win_width_;
   int win_height_;
+
+  int lost_age_;
 };
 
 }  // namespace suanzi

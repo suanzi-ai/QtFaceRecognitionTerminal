@@ -4,6 +4,7 @@
 
 #include <httplib.h>
 #include <nlohmann/json.hpp>
+#include <opencv2/opencv.hpp>
 
 #include <quface/common.hpp>
 
@@ -23,19 +24,14 @@ struct PersonData {
   std::string status;
   std::string face_url;
   std::string face_path;
+  cv::Mat face_snapshot;
 };
 
 void to_json(json &j, const PersonData &p);
 
 void from_json(const json &j, PersonData &p);
 
-enum PersonStatus {
-  Normal,
-  Blacklist,
-  Stranger,
-  Fake,
-  Clear
-};
+enum PersonStatus { Normal, Blacklist, Stranger, Fake, Clear };
 
 class PersonService {
  public:
@@ -138,6 +134,5 @@ class PersonService {
   std::string image_store_path_;
 };
 }  // namespace suanzi
-
 
 Q_DECLARE_METATYPE(suanzi::PersonData);

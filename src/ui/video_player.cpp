@@ -6,11 +6,16 @@
 #include <QPushButton>
 #include <QTimer>
 
+#include "config.hpp"
+
 using namespace suanzi;
 
 VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
-                         FaceExtractorPtr extractor, QWidget *parent)
+                         FaceExtractorPtr extractor,
+                         FaceAntiSpoofingPtr anti_spoofing,
+                         PersonService::ptr person_service, QWidget *parent)
     : QWidget(parent) {
+  // Initialize QT widget
   QPalette pal = palette();
   pal.setColor(QPalette::Background, Qt::transparent);
   pal.setColor(QPalette::Foreground, Qt::green);
@@ -40,61 +45,77 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
   recognize_tip_widget_ = new RecognizeTipWidget(nullptr);
   recognize_tip_widget_->hide();
 
-  auto person_service = PersonService::make_shared(app.person_service_base_url,
-                                                   app.image_store_path);
-  auto anti_spoofing =
-      std::make_shared<FaceAntiSpoofing>(quface.model_file_path);
+  // Initialize QThreads
+  camera_reader_ = new CameraReader(this);
 
   detect_task_ = new DetectTask(detector, nullptr, this);
-  recognize_task_ = new RecognizeTask(db, extractor, person_service, &mem_pool_,
-                                      nullptr, this);
-  record_task_ = new RecordTask(person_service, &mem_pool_);
-  anti_spoofing_task_ = new AntiSpoofingTask(anti_spoofing, nullptr, this);
+  recognize_task_ =
+      new RecognizeTask(db, extractor, anti_spoofing, nullptr, this);
+  record_task_ = new RecordTask(person_service, nullptr, this);
+  face_timer_ = new FaceTimer(nullptr, this);
 
+  // IO Tasks
+  upload_task_ = new UploadTask(person_service, nullptr, this);
+
+  // Connect camera_reader to detect_task
   connect((const QObject *)camera_reader_,
           SIGNAL(tx_frame(PingPangBuffer<ImagePackage> *)),
           (const QObject *)detect_task_,
           SLOT(rx_frame(PingPangBuffer<ImagePackage> *)));
-
   connect((const QObject *)detect_task_, SIGNAL(tx_finish()),
           (const QObject *)camera_reader_, SLOT(rx_finish()));
 
-  connect((const QObject *)detect_task_, SIGNAL(tx_bgr_display(DetectionRatio)),
-          (const QObject *)detect_tip_widget_bgr_,
-          SLOT(rx_display(DetectionRatio)));
-
-  connect((const QObject *)detect_task_, SIGNAL(tx_nir_display(DetectionRatio)),
-          (const QObject *)detect_tip_widget_nir_,
-          SLOT(rx_display(DetectionRatio)));
-
+  // Connect detect_task to recognize_task
   connect((const QObject *)detect_task_,
-          SIGNAL(tx_frame(PingPangBuffer<RecognizeData> *)),
-          (const QObject *)anti_spoofing_task_,
-          SLOT(rx_frame(PingPangBuffer<RecognizeData> *)));
-
-  connect((const QObject *)detect_task_, SIGNAL(tx_no_frame()),
-          (const QObject *)anti_spoofing_task_, SLOT(rx_no_frame()));
-
-  connect((const QObject *)anti_spoofing_task_, SIGNAL(tx_finish()),
+          SIGNAL(tx_frame(PingPangBuffer<DetectionData> *)),
+          (const QObject *)recognize_task_,
+          SLOT(rx_frame(PingPangBuffer<DetectionData> *)));
+  connect((const QObject *)recognize_task_, SIGNAL(tx_finish()),
           (const QObject *)detect_task_, SLOT(rx_finish()));
 
-  connect((const QObject *)anti_spoofing_task_,
-          SIGNAL(tx_frame(PingPangBuffer<RecognizeData> *)),
-          (const QObject *)recognize_task_,
-          SLOT(rx_frame(PingPangBuffer<RecognizeData> *)));
-
-  connect((const QObject *)anti_spoofing_task_, SIGNAL(tx_no_frame()),
-          (const QObject *)recognize_task_, SLOT(rx_no_frame()));
-
-  connect((const QObject *)recognize_task_, SIGNAL(tx_finish()),
-          (const QObject *)anti_spoofing_task_, SLOT(rx_finish()));
-
-  connect((const QObject *)recognize_task_, SIGNAL(tx_display(PersonData)),
-          (const QObject *)recognize_tip_widget_, SLOT(rx_display(PersonData)));
-
+  // Connect recognize_task to record_task
   connect((const QObject *)recognize_task_,
-          SIGNAL(tx_record(int, ImageBuffer *)), (const QObject *)record_task_,
-          SLOT(rx_record(int, ImageBuffer *)));
+          SIGNAL(tx_frame(PingPangBuffer<RecognizeData> *)),
+          (const QObject *)record_task_,
+          SLOT(rx_frame(PingPangBuffer<RecognizeData> *)));
+  connect((const QObject *)record_task_, SIGNAL(tx_finish()),
+          (const QObject *)recognize_task_, SLOT(rx_finish()));
+
+  // Connect detect_task to face_timer
+  connect((const QObject *)detect_task_,
+          SIGNAL(tx_frame(PingPangBuffer<DetectionData> *)),
+          (const QObject *)face_timer_,
+          SLOT(rx_frame(PingPangBuffer<DetectionData> *)));
+
+  // Connect face_timer to record_task
+  connect((const QObject *)face_timer_, SIGNAL(tx_face_disappear(int)),
+          (const QObject *)record_task_, SLOT(rx_reset()));
+
+  // Connect detect_task to detect_tip_widget
+  connect((const QObject *)detect_task_,
+          SIGNAL(tx_bgr_display(DetectionRatio, bool)),
+          (const QObject *)detect_tip_widget_bgr_,
+          SLOT(rx_display(DetectionRatio, bool)));
+  if (Config::is_liveness_enable()) {
+    connect((const QObject *)detect_task_,
+            SIGNAL(tx_nir_display(DetectionRatio, bool)),
+            (const QObject *)detect_tip_widget_nir_,
+            SLOT(rx_display(DetectionRatio, bool)));
+  }
+
+  // Connect record_task to recognize_tip_widget
+  connect((const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool)),
+          (const QObject *)recognize_tip_widget_,
+          SLOT(rx_display(PersonData, bool)));
+  
+  // Connect record_task to upload_task_
+  connect((const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool)),
+          (const QObject *)upload_task_,
+          SLOT(rx_upload(PersonData, bool)));
+
+  // Connect face_timer to recognize_tip_widget
+  connect((const QObject *)face_timer_, SIGNAL(tx_face_disappear(int)),
+          (const QObject *)recognize_tip_widget_, SLOT(rx_reset()));
 
   camera_reader_->start_sample();
 
@@ -122,5 +143,4 @@ void VideoPlayer::init_widgets() {
 
   recognize_tip_widget_->setFixedSize(w, h);
   recognize_tip_widget_->move(x, y);
-  recognize_tip_widget_->show();
 }

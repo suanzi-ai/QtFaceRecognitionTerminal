@@ -5,11 +5,10 @@
 #include <QRect>
 
 #include "config.hpp"
-#include "detection_float.h"
+#include "detection_data.hpp"
 #include "image_package.hpp"
 #include "pingpang_buffer.hpp"
 #include "quface_common.hpp"
-#include "recognize_data.hpp"
 
 namespace suanzi {
 
@@ -20,10 +19,6 @@ class DetectTask : QObject {
              QObject *parent = nullptr);
   ~DetectTask();
 
- private:
-  void copy_buffer(ImagePackage *pang, DetectionRatio &bgr_detection,
-                   DetectionRatio &nir_detection);
-
  private slots:
   void rx_frame(PingPangBuffer<ImagePackage> *buffer);
   void rx_finish();
@@ -32,24 +27,31 @@ class DetectTask : QObject {
   void tx_finish();
 
   // for display
-  void tx_bgr_display(DetectionRatio detection);
-  void tx_nir_display(DetectionRatio detection);
+  void tx_bgr_display(DetectionRatio detection, bool to_clear);
+  void tx_nir_display(DetectionRatio detection, bool to_clear);
 
   // for recognition
-  void tx_frame(PingPangBuffer<RecognizeData> *buffer);
-  void tx_no_frame();
+  void tx_frame(PingPangBuffer<DetectionData> *buffer);
 
  private:
-  DetectionRatio select_face(std::vector<suanzi::FaceDetection> &detections,
-                             int width, int height);
+  // nyy
+  const Size VPSS_CH_SIZES_BGR[3] = {
+      {1920, 1080}, {1080, 704}, {320, 224}};  // larger small
+  const Size VPSS_CH_SIZES_NIR[3] = {
+      {1920, 1080}, {1080, 704}, {320, 224}};  // larger small
+  const int CH_INDEXES_BGR[3] = {0, 1, 2};
+  const bool CH_ROTATES_BGR[3] = {false, true, true};
+  const int CH_INDEXES_NIR[3] = {0, 1, 2};
+  const bool CH_ROTATES_NIR[3] = {false, true, true};
 
-  bool b_tx_ok_;
-  bool b_data_ready_;
+  bool detect_and_select(const MmzImage *image, DetectionRatio &detection);
+
+  bool rx_finished_;
 
   FaceDetectorPtr face_detector_;
-  RecognizeData *recognize_data1_;
-  RecognizeData *recognize_data2_;
-  PingPangBuffer<RecognizeData> *pingpang_buffer_;
+
+  DetectionData *buffer_ping_, *buffer_pang_;
+  PingPangBuffer<DetectionData> *pingpang_buffer_;
 };
 
 }  // namespace suanzi

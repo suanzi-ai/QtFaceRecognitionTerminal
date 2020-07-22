@@ -158,10 +158,15 @@ bool CameraReader::capture_frame(ImagePackage *pkg) {
 }
 
 void CameraReader::run() {
-  while (true) {
-    ImagePackage *ping = pingpang_buffer_->get_ping();
+  while (!capture_frame(pingpang_buffer_->get_pang()))
+    ;
+  while (!capture_frame(pingpang_buffer_->get_ping()))
+    ;
 
-    if (capture_frame(ping) && rx_finished_) {
+  while (true) {
+    ImagePackage *output = pingpang_buffer_->get_ping();
+
+    if (capture_frame(output) && rx_finished_) {
       rx_finished_ = false;
       emit tx_frame(pingpang_buffer_);
     } else {

@@ -2,12 +2,9 @@
 #define RECOGNIZE_TASK_H
 
 #include <QObject>
-#include <chrono>
 
 #include "config.hpp"
-#include "detection_float.h"
-#include "memory_pool.hpp"
-#include "person_service.hpp"
+#include "detection_data.hpp"
 #include "pingpang_buffer.hpp"
 #include "quface_common.hpp"
 #include "recognize_data.hpp"
@@ -17,43 +14,43 @@ class RecognizeTask : QObject {
   Q_OBJECT
  public:
   RecognizeTask(FaceDatabasePtr db, FaceExtractorPtr extractor,
-                PersonService::ptr person_service,
-                MemoryPool<ImageBuffer, sizeof(ImageBuffer) * 5> *mem_pool,
-                QThread *thread = nullptr, QObject *parent = nullptr);
+                FaceAntiSpoofingPtr anti_spoofing, QThread *thread = nullptr,
+                QObject *parent = nullptr);
   ~RecognizeTask();
 
  private slots:
-  void rx_frame(PingPangBuffer<RecognizeData> *buffer);
-  void rx_no_frame();
+  void rx_frame(PingPangBuffer<DetectionData> *buffer);
+  void rx_finish();
 
  signals:
-  void tx_display(PersonData person);
   void tx_finish();
-  void tx_record(int face_id, ImageBuffer *image_buffer);
+
+  // for output
+  void tx_frame(PingPangBuffer<RecognizeData> *buffer);
 
  private:
-  suanzi::FaceDetection to_detection(DetectionRatio detection_ratio, int width,
-                                     int height);
+  bool is_live(DetectionData *detection);
+  void extract_and_query(DetectionData *detection, FaceFeature &feature,
+                         QueryResult &person_info);
 
-  void query_success(const suanzi::QueryResult &person_info,
-                     RecognizeData *img);
-  void query_empty_database(RecognizeData *img);
-  void query_no_face();
+  // nyy
+  const Size VPSS_CH_SIZES_BGR[3] = {
+      {1920, 1080}, {1080, 704}, {320, 224}};  // larger small
+  const Size VPSS_CH_SIZES_NIR[3] = {
+      {1920, 1080}, {1080, 704}, {320, 224}};  // larger small
+  const int CH_INDEXES_BGR[3] = {0, 1, 2};
+  const bool CH_ROTATES_BGR[3] = {false, true, true};
+  const int CH_INDEXES_NIR[3] = {0, 1, 2};
+  const bool CH_ROTATES_NIR[3] = {false, true, true};
 
-  bool sequence_query(std::vector<suanzi::QueryResult> history,
-                      SZ_UINT32 &face_id);
+  bool rx_finished_;
 
-  bool if_duplicated(SZ_UINT32 face_id);
-  void report(SZ_UINT32 face_id, RecognizeData *img);
-
-  FaceExtractorPtr face_extractor_;
   FaceDatabasePtr face_database_;
-  PersonService::ptr person_service_;
+  FaceExtractorPtr face_extractor_;
+  FaceAntiSpoofingPtr anti_spoofing_;
 
-  std::vector<suanzi::QueryResult> history_;
-  std::map<SZ_UINT32, std::chrono::steady_clock::time_point> query_clock_;
-
-  MemoryPool<ImageBuffer, sizeof(ImageBuffer) * 5> *mem_pool_;
+  RecognizeData *buffer_ping_, *buffer_pang_;
+  PingPangBuffer<RecognizeData> *pingpang_buffer_;
 };
 
 }  // namespace suanzi
