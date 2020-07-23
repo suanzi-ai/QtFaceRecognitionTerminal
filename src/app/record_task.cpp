@@ -1,9 +1,8 @@
 #include "record_task.hpp"
 
+#include <QThread>
 #include <chrono>
 #include <string>
-
-#include <QThread>
 
 #include "config.hpp"
 #include "ive.h"
@@ -42,11 +41,11 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
   RecognizeData *input = buffer->get_pang();
 
   live_history_.push_back(input->is_live);
-  if (live_history_.size() > Config::get_liveness().history_size)
+  while (live_history_.size() > Config::get_liveness().history_size)
     live_history_.erase(live_history_.begin());
 
   person_history_.push_back(input->person_info);
-  if (person_history_.size() > Config::get_extract().history_size)
+  while (person_history_.size() > Config::get_extract().history_size)
     person_history_.erase(person_history_.begin());
 
   if (live_history_.size() == Config::get_liveness().history_size &&
