@@ -77,8 +77,26 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
     }
 
     // decide fake or live
-    if (!sequence_antispoof(live_history_))
+    if (!sequence_antispoof(live_history_)) {
+      if (Config::get_user().blacklist_policy == "alarm") {
+        person.name = "异常";
+      } else {  // stranger
+        person.name = "访客";
+      }
+      person.id = 0;
+      person.face_path = ":asserts/avatar_unknown.jpg";
       person.status = person_service_->get_status(PersonStatus::Fake);
+    }
+
+    if (person.status == person_service_->get_status(PersonStatus::Blacklist)) {
+      if (Config::get_user().blacklist_policy == "alarm") {
+        person.name = "异常";
+      } else {  // stranger
+        person.name = "访客";
+      }
+      person.id = 0;
+      person.face_path = ":asserts/avatar_unknown.jpg";
+    }
 
     // decide duplicate
     bool duplicated_;

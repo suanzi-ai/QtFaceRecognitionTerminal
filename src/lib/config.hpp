@@ -20,6 +20,7 @@ using json = nlohmann::json;
 
 typedef struct {
   std::string blacklist_policy;
+  std::string liveness_policy;
   std::string detect_level;
   std::string extract_level;
   std::string liveness_level;

@@ -12,6 +12,7 @@ void suanzi::to_json(json &j, const UserConfig &c) {
 
 void suanzi::from_json(const json &j, UserConfig &c) {
   LOAD_JSON_TO(j, "blacklist_policy", c.blacklist_policy);
+  LOAD_JSON_TO(j, "liveness_policy", c.liveness_policy);
   LOAD_JSON_TO(j, "detect_level", c.detect_level);
   LOAD_JSON_TO(j, "extract_level", c.extract_level);
   LOAD_JSON_TO(j, "liveness_level", c.liveness_level);
@@ -179,6 +180,7 @@ void Config::load_defaults() {
 
   user = {
       .blacklist_policy = "alarm",
+      .liveness_policy = "alarm",
       .detect_level = "medium",
       .extract_level = "medium",
       .liveness_level = "medium",
