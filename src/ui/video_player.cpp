@@ -45,6 +45,9 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
   recognize_tip_widget_ = new RecognizeTipWidget(nullptr);
   recognize_tip_widget_->hide();
 
+  screen_saver_ = new ScreenSaverWidget(screen_width, screen_height, nullptr);
+  screen_saver_->hide();
+
   // Initialize QThreads
   camera_reader_ = new CameraReader(this);
 
@@ -116,6 +119,12 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
   // Connect face_timer to recognize_tip_widget
   connect((const QObject *)face_timer_, SIGNAL(tx_face_disappear(int)),
           (const QObject *)recognize_tip_widget_, SLOT(rx_reset()));
+
+  // Connect face_timer to screen_saver
+  connect((const QObject *)face_timer_, SIGNAL(tx_face_disappear(int)),
+          (const QObject *)screen_saver_, SLOT(rx_display(int)));
+  connect((const QObject *)face_timer_, SIGNAL(tx_face_appear(int)),
+          (const QObject *)screen_saver_, SLOT(rx_hide()));
 
   camera_reader_->start_sample();
 

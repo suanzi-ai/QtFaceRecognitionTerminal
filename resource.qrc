@@ -2,4 +2,7 @@
 <qresource>
     <file>asserts/avatar_unknown.jpg</file>
 </qresource>
+<qresource>
+    <file>asserts/background.jpg</file>
+</qresource>
 </RCC>

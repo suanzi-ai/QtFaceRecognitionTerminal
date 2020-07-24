@@ -3,18 +3,21 @@
 
 #include <QWidget>
 
-#include "camera_reader.hpp"
 #include "config.hpp"
-#include "detect_task.hpp"
-#include "detect_tip_widget.hpp"
-#include "face_timer.hpp"
 #include "image_package.hpp"
 #include "pingpang_buffer.hpp"
 #include "recognize_data.hpp"
+
+#include "camera_reader.hpp"
+#include "detect_task.hpp"
+#include "face_timer.hpp"
 #include "recognize_task.hpp"
-#include "recognize_tip_widget.hpp"
 #include "record_task.hpp"
 #include "upload_task.hpp"
+
+#include "detect_tip_widget.hpp"
+#include "recognize_tip_widget.hpp"
+#include "screen_saver_widget.hpp"
 
 namespace suanzi {
 
@@ -37,6 +40,7 @@ class VideoPlayer : public QWidget {
   DetectTipWidget *detect_tip_widget_bgr_;
   DetectTipWidget *detect_tip_widget_nir_;
   RecognizeTipWidget *recognize_tip_widget_;
+  ScreenSaverWidget *screen_saver_;
 
   CameraReader *camera_reader_;
 
