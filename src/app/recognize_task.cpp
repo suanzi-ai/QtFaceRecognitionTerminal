@@ -84,7 +84,12 @@ void RecognizeTask::rx_frame(PingPangBuffer<DetectionData> *buffer) {
       output->is_live = is_live(input);
 
     extract_and_query(input, output->person_feature, output->person_info);
-    emit tx_frame(pingpang_buffer_);
+    if (rx_finished_) {
+      rx_finished_ = false;
+      emit tx_frame(pingpang_buffer_);
+    } else {
+      QThread::usleep(10);
+    }
   }
 
   emit tx_finish();

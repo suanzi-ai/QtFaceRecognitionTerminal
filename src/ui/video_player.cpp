@@ -96,7 +96,7 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
           SIGNAL(tx_bgr_display(DetectionRatio, bool)),
           (const QObject *)detect_tip_widget_bgr_,
           SLOT(rx_display(DetectionRatio, bool)));
-  if (Config::is_liveness_enable()) {
+  if (Config::enable_anti_spoofing()) {
     connect((const QObject *)detect_task_,
             SIGNAL(tx_nir_display(DetectionRatio, bool)),
             (const QObject *)detect_tip_widget_nir_,
