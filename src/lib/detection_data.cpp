@@ -26,8 +26,16 @@ bool DetectionData::nir_face_detected() { return nir_face_detected_; }
 bool DetectionData::bgr_face_valid() {
   if (bgr_face_detected()) {
     auto cfg = Config::get_detect();
-    return cfg.min_yaw < bgr_detection_.yaw < cfg.max_yaw &&
-           cfg.min_pitch < bgr_detection_.pitch < cfg.max_pitch;
+    bool pose_valid =
+        !isnanf(bgr_detection_.yaw) && !isnanf(bgr_detection_.pitch) &&
+        cfg.min_yaw < bgr_detection_.yaw && bgr_detection_.yaw < cfg.max_yaw &&
+        cfg.min_pitch < bgr_detection_.pitch &&
+        bgr_detection_.pitch < cfg.max_pitch;
+
+    bool position_valid = bgr_detection_.x > 0.15 && bgr_detection_.y > 0.15 &&
+                          bgr_detection_.x + bgr_detection_.width < 0.85 &&
+                          bgr_detection_.y + bgr_detection_.height < 0.85;
+    return pose_valid && position_valid;
   }
   return false;
 }

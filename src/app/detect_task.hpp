@@ -15,8 +15,8 @@ namespace suanzi {
 class DetectTask : QObject {
   Q_OBJECT
  public:
-  DetectTask(FaceDetectorPtr detector, FacePoseEstimatorPtr pose_estimator, QThread *thread = nullptr,
-             QObject *parent = nullptr);
+  DetectTask(FaceDetectorPtr detector, FacePoseEstimatorPtr pose_estimator,
+             QThread *thread = nullptr, QObject *parent = nullptr);
   ~DetectTask();
 
  private slots:

@@ -70,12 +70,12 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
           (const QObject *)camera_reader_, SLOT(rx_finish()));
 
   // Connect detect_task to recognize_task
-//   connect((const QObject *)detect_task_,
-//           SIGNAL(tx_frame(PingPangBuffer<DetectionData> *)),
-//           (const QObject *)recognize_task_,
-//           SLOT(rx_frame(PingPangBuffer<DetectionData> *)));
-//   connect((const QObject *)recognize_task_, SIGNAL(tx_finish()),
-//           (const QObject *)detect_task_, SLOT(rx_finish()));
+  connect((const QObject *)detect_task_,
+          SIGNAL(tx_frame(PingPangBuffer<DetectionData> *)),
+          (const QObject *)recognize_task_,
+          SLOT(rx_frame(PingPangBuffer<DetectionData> *)));
+  connect((const QObject *)recognize_task_, SIGNAL(tx_finish()),
+          (const QObject *)detect_task_, SLOT(rx_finish()));
 
   // Connect recognize_task to record_task
   connect((const QObject *)recognize_task_,

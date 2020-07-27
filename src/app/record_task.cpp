@@ -166,6 +166,7 @@ bool RecordTask::sequence_antispoof(const std::vector<bool> &history) {
     if (is_live) count++;
   }
 
+  SZ_LOG_DEBUG("live count={}", count);
   return count >= Config::get_liveness().min_alive_count;
 }
 

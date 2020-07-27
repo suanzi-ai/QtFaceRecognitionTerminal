@@ -24,7 +24,7 @@ FaceTimer::~FaceTimer() {}
 void FaceTimer::rx_frame(PingPangBuffer<DetectionData> *buffer) {
   DetectionData *input = buffer->get_pang();
 
-  if (!input->bgr_face_detected() && !input->nir_face_detected()) {
+  if (!input->bgr_face_valid() && !input->nir_face_detected()) {
     disappear_counter_++;
     if (disappear_counter_ == Config::get_extract().max_lost_age)
       disappear_begin_ = std::chrono::steady_clock::now();
