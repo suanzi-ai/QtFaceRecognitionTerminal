@@ -12,9 +12,10 @@
 
 using namespace suanzi;
 
-DetectTask::DetectTask(FaceDetectorPtr detector, QThread *thread,
+DetectTask::DetectTask(FaceDetectorPtr detector,
+                       FacePoseEstimatorPtr pose_estimator, QThread *thread,
                        QObject *parent)
-    : face_detector_(detector) {
+    : face_detector_(detector), pose_estimator_(pose_estimator) {
   // Initialize PINGPANG buffer
   Size size_bgr_1 = VPSS_CH_SIZES_BGR[1];
   Size size_bgr_2 = VPSS_CH_SIZES_BGR[2];
@@ -101,6 +102,7 @@ bool DetectTask::detect_and_select(const MmzImage *image,
 
   // detect faces: 256x256  7ms
   static std::vector<suanzi::FaceDetection> detections;
+  suanzi::FacePose pose;
   detections.clear();
 
   SZ_RETCODE ret =
@@ -124,6 +126,13 @@ bool DetectTask::detect_and_select(const MmzImage *image,
     }
   }
 
+  ret = pose_estimator_->estimate((const SVP_IMAGE_S *)image->pImplData,
+                                  detections[max_id], pose);
+  if (ret != SZ_RETCODE_OK) {
+    SZ_LOG_ERROR("Pose estimating error. Low quality", ret);
+    return false;
+  }
+
   // return ratio of bbox
   auto rect = detections[max_id].bbox;
   detection.x = rect.x * 1.0 / image->width;
@@ -134,15 +143,15 @@ bool DetectTask::detect_and_select(const MmzImage *image,
   // return landmarks
   for (int i = 0; i < SZ_LANDMARK_NUM; i++) {
     detection.landmark[i][0] =
-        detections[max_id].landmarks.point[i].x / image->width;
+        pose.landmarks.point[i].x / image->width;
     detection.landmark[i][1] =
-        detections[max_id].landmarks.point[i].y / image->height;
+        pose.landmarks.point[i].y / image->height;
   }
 
   // return head pose
-  detection.yaw = detections[max_id].yaw;
-  detection.pitch = detections[max_id].pitch;
-  detection.roll = detections[max_id].roll;
+  detection.yaw = pose.yaw;
+  detection.pitch = pose.pitch;
+  detection.roll = pose.roll;
 
   return true;
 }

@@ -33,6 +33,8 @@ int main(int argc, char* argv[]) {
       std::make_shared<FaceDetector>(config->quface.model_file_path);
   auto extractor =
       std::make_shared<FaceExtractor>(config->quface.model_file_path);
+  auto pose_estimator =
+      std::make_shared<FacePoseEstimator>(config->quface.model_file_path);
   auto anti_spoof =
       std::make_shared<FaceAntiSpoofing>(config->quface.model_file_path);
   auto db = std::make_shared<FaceDatabase>(config->quface.db_name);
@@ -40,7 +42,7 @@ int main(int argc, char* argv[]) {
   auto person_service = PersonService::make_shared(
       config->app.person_service_base_url, config->app.image_store_path);
   auto face_service = std::make_shared<FaceService>(
-      db, detector, extractor, config->app.image_store_path);
+      db, detector, pose_estimator, extractor, config->app.image_store_path);
   auto face_server = std::make_shared<FaceServer>(face_service);
   auto http_server = std::make_shared<HTTPServer>(config);
   face_server->add_event_source(http_server);
@@ -55,7 +57,8 @@ int main(int argc, char* argv[]) {
 
   QApplication app(argc, argv);
 
-  VideoPlayer player(db, detector, extractor, anti_spoof, person_service);
+  VideoPlayer player(db, detector, pose_estimator, extractor, anti_spoof,
+                     person_service);
   player.show();
 
   return app.exec();

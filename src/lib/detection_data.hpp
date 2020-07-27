@@ -18,7 +18,7 @@ struct DetectionRatio {
   float pitch;
   float roll;
 
-  FaceDetection scale(int x_scale, int y_scale) {
+  void scale(int x_scale, int y_scale, FaceDetection &detection, FacePose &pose) {
     suanzi::FaceDetection face_detection;
     face_detection.bbox.x = x * x_scale;
     face_detection.bbox.y = y * y_scale;
@@ -26,13 +26,14 @@ struct DetectionRatio {
     face_detection.bbox.height = height * y_scale;
 
     for (int i = 0; i < SZ_LANDMARK_NUM; i++) {
-      face_detection.landmarks.point[i].x =
+      pose.landmarks.point[i].x =
           landmark[i][0] * x_scale;
-      face_detection.landmarks.point[i].y =
+      pose.landmarks.point[i].y =
           landmark[i][1] * y_scale;
     }
-
-    return face_detection;
+    pose.yaw = yaw;
+    pose.pitch = pitch;
+    pose.roll = roll;
   }
 };
 

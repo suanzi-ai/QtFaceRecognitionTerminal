@@ -53,7 +53,8 @@ void DetectTipWidget::paint(QPainter *painter) {
     float top_y = sum_y / count;
     float bottom_x = top_x + width;
     float bottom_y = top_y + height;
-    // SZ_LOG_DEBUG("top_x={},top_y={},bottom_x={},bottom_y={},w={},h={}", top_x,
+    // SZ_LOG_DEBUG("top_x={},top_y={},bottom_x={},bottom_y={},w={},h={}",
+    // top_x,
     //              top_y, bottom_x, bottom_y, width, height);
 
     painter->setPen(QPen(QColor(0, 0, 255, 128), 5));
@@ -65,6 +66,12 @@ void DetectTipWidget::paint(QPainter *painter) {
     painter->drawLine(bottom_x, top_y, bottom_x - width / 5, top_y);
     painter->drawLine(bottom_x, bottom_y, bottom_x, bottom_y - height / 5);
     painter->drawLine(bottom_x, bottom_y, bottom_x - width / 5, bottom_y);
+
+#ifdef DEBUG
+    painter->setPen(Qt::white);
+    painter->drawPoints(landmarks_);
+    painter->drawText(top_x, top_y - 20, pose_);
+#endif
   }
 }
 
@@ -76,6 +83,14 @@ void DetectTipWidget::rx_display(DetectionRatio detection, bool to_clear) {
 
   if (!to_clear) {
     // resize to square
+    landmarks_.clear();
+    for (int i = 0; i < SZ_LANDMARK_NUM; i++)
+      landmarks_.push_back(
+          {detection.landmark[i][0] * box_w, detection.landmark[i][1] * box_h});
+
+    pose_ = "Yaw: " + QString::number(detection.yaw, 'f', 1) +
+            " Pitch: " + QString::number(detection.pitch, 'f', 1);
+
     float center_x = box_x + (detection.x + .5f * detection.width) * box_w;
     float center_Y = box_y + (detection.y + .5f * detection.height) * box_h;
     float size = .5f * (detection.width * box_w + detection.height * box_h);

@@ -11,6 +11,7 @@
 using namespace suanzi;
 
 VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
+                         FacePoseEstimatorPtr pose_estimator,
                          FaceExtractorPtr extractor,
                          FaceAntiSpoofingPtr anti_spoofing,
                          PersonService::ptr person_service, QWidget *parent)
@@ -51,7 +52,7 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
   // Initialize QThreads
   camera_reader_ = new CameraReader(this);
 
-  detect_task_ = new DetectTask(detector, nullptr, this);
+  detect_task_ = new DetectTask(detector, pose_estimator, nullptr, this);
   recognize_task_ =
       new RecognizeTask(db, extractor, anti_spoofing, nullptr, this);
   record_task_ = new RecordTask(person_service, nullptr, this);
@@ -69,12 +70,12 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
           (const QObject *)camera_reader_, SLOT(rx_finish()));
 
   // Connect detect_task to recognize_task
-  connect((const QObject *)detect_task_,
-          SIGNAL(tx_frame(PingPangBuffer<DetectionData> *)),
-          (const QObject *)recognize_task_,
-          SLOT(rx_frame(PingPangBuffer<DetectionData> *)));
-  connect((const QObject *)recognize_task_, SIGNAL(tx_finish()),
-          (const QObject *)detect_task_, SLOT(rx_finish()));
+//   connect((const QObject *)detect_task_,
+//           SIGNAL(tx_frame(PingPangBuffer<DetectionData> *)),
+//           (const QObject *)recognize_task_,
+//           SLOT(rx_frame(PingPangBuffer<DetectionData> *)));
+//   connect((const QObject *)recognize_task_, SIGNAL(tx_finish()),
+//           (const QObject *)detect_task_, SLOT(rx_finish()));
 
   // Connect recognize_task to record_task
   connect((const QObject *)recognize_task_,
@@ -110,11 +111,10 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
   connect((const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool)),
           (const QObject *)recognize_tip_widget_,
           SLOT(rx_display(PersonData, bool)));
-  
+
   // Connect record_task to upload_task_
   connect((const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool)),
-          (const QObject *)upload_task_,
-          SLOT(rx_upload(PersonData, bool)));
+          (const QObject *)upload_task_, SLOT(rx_upload(PersonData, bool)));
 
   // Connect face_timer to recognize_tip_widget
   connect((const QObject *)face_timer_, SIGNAL(tx_face_disappear(int)),

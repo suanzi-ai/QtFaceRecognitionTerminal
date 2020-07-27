@@ -132,6 +132,12 @@ if(NOT QuFaceSDK_LOADED_DEPS)
   find_package(spdlog REQUIRED)
 endif()
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+add_definitions(-DDEBUG)
+endif()
+
+message(STATUS "Set log level ${SZ_LOG_LEVEL}")
+
 configure_file("${PROJECT_SOURCE_DIR}/src/static_config.hpp.in"
                "${PROJECT_BINARY_DIR}/include/static_config.hpp")
 include_directories(${PROJECT_BINARY_DIR}/include)

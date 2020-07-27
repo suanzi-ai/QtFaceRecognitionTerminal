@@ -26,7 +26,8 @@ class VideoPlayer : public QWidget {
 
  public:
   VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
-              FaceExtractorPtr extractor, FaceAntiSpoofingPtr anti_spoofing,
+              FacePoseEstimatorPtr pose_estimator, FaceExtractorPtr extractor,
+              FaceAntiSpoofingPtr anti_spoofing,
               PersonService::ptr person_service, QWidget *parent = nullptr);
   ~VideoPlayer();
 

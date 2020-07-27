@@ -102,8 +102,9 @@ bool RecognizeTask::is_live(DetectionData *detection) {
     int width = detection->img_nir_large->width;
     int height = detection->img_nir_large->height;
 
-    FaceDetection face_detection =
-        detection->nir_detection_.scale(width, height);
+    suanzi::FaceDetection face_detection;
+    suanzi::FacePose pose;
+    detection->nir_detection_.scale(width, height, face_detection, pose);
 
     // set channel U,V to zeros, remain Y
     memset(detection->img_nir_large->pData + width * height, 0x80,
@@ -127,13 +128,15 @@ void RecognizeTask::extract_and_query(DetectionData *detection,
                                       QueryResult &person_info) {
   int width = detection->img_bgr_large->width;
   int height = detection->img_bgr_large->height;
-  suanzi::FaceDetection face_detection =
-      detection->bgr_detection_.scale(width, height);
+
+  suanzi::FaceDetection face_detection;
+  suanzi::FacePose pose;
+  detection->bgr_detection_.scale(width, height, face_detection, pose);
 
   // extract: 25ms
   face_extractor_->extract(
       (const SVP_IMAGE_S *)detection->img_bgr_large->pImplData, face_detection,
-      feature);
+      pose, feature);
 
   // query
   static std::vector<suanzi::QueryResult> results;

@@ -15,7 +15,7 @@ namespace suanzi {
 class DetectTask : QObject {
   Q_OBJECT
  public:
-  DetectTask(FaceDetectorPtr detector, QThread *thread = nullptr,
+  DetectTask(FaceDetectorPtr detector, FacePoseEstimatorPtr pose_estimator, QThread *thread = nullptr,
              QObject *parent = nullptr);
   ~DetectTask();
 
@@ -49,6 +49,7 @@ class DetectTask : QObject {
   bool rx_finished_;
 
   FaceDetectorPtr face_detector_;
+  FacePoseEstimatorPtr pose_estimator_;
 
   DetectionData *buffer_ping_, *buffer_pang_;
   PingPangBuffer<DetectionData> *pingpang_buffer_;

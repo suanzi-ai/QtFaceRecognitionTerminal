@@ -85,6 +85,7 @@ SZ_RETCODE FaceService::extract_image_feature(
 
   SZ_RETCODE ret;
   std::vector<FaceDetection> detections;
+  FacePose pose;
 
   size_t size = width * height * 3;
   SZ_BYTE *bgr = new SZ_BYTE[size];
@@ -109,7 +110,13 @@ SZ_RETCODE FaceService::extract_image_feature(
       break;
     }
 
-    ret = extractor_->extract(bgr, width, height, detections[0], feature);
+    ret = pose_estimator_->estimate(bgr, width, height, detections[0], pose);
+    if (ret != SZ_RETCODE_OK) {
+      SZ_LOG_ERROR("estimator.estimate failed! low face quality");
+      break;
+    }
+
+    ret = extractor_->extract(bgr, width, height, detections[0], pose, feature);
     if (ret != SZ_RETCODE_OK) {
       SZ_LOG_ERROR("extractor.extractFeature failed!");
       break;

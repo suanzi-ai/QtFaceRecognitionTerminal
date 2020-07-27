@@ -29,6 +29,8 @@ class DetectTipWidget : public QWidget {
   static constexpr int MAX_LOST_AGE = 5;
 
   std::vector<QRect> rects_;
+  QPolygon landmarks_;
+  QString pose_;
 
   bool is_updated_;
   int win_x_;
