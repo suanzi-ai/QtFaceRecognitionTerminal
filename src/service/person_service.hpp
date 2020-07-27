@@ -106,7 +106,7 @@ class PersonService {
     return SZ_RETCODE_OK;
   }
 
-  std::string get_status(PersonStatus s) {
+  static std::string get_status(PersonStatus s) {
     switch (s) {
       case Normal:
         return "normal";

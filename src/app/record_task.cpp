@@ -78,18 +78,8 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
     }
 
     // decide fake or live
-    if (!sequence_antispoof(live_history_)) {
-      person.id = 0;
-      person.name = "异常";
-      person.face_path = ":asserts/avatar_unknown.jpg";
+    if (!sequence_antispoof(live_history_))
       person.status = person_service_->get_status(PersonStatus::Fake);
-    }
-
-    if (person.status == person_service_->get_status(PersonStatus::Blacklist)) {
-      person.id = 0;
-      person.name = "异常";
-      person.face_path = ":asserts/avatar_unknown.jpg";
-    }
 
     // decide duplicate
     bool duplicated_;
@@ -100,7 +90,7 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
 
     // output
     rx_reset();
-    SZ_LOG_INFO("record: person_number={}, status={}", person.number,
+    SZ_LOG_INFO("record: staff_number={}, status={}", person.number,
                 person.status);
     emit tx_display(person, duplicated_);
   }

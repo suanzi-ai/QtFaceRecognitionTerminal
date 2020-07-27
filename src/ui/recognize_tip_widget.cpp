@@ -7,6 +7,7 @@
 #include <iostream>
 
 #include "logger.hpp"
+#include "config.hpp"
 
 using namespace suanzi;
 
@@ -68,25 +69,48 @@ void RecognizeTipWidget::paintEvent(QPaintEvent *event) {
   painter.drawText(w * 6 / 100, h * 70 / 100, date);
 
   // draw avatar
-  if (person_.face_path.length() > 0) {
-    QPixmap avatar(person_.face_path.c_str());
-    avatar = avatar.scaled(mask_.size());
-    avatar.setMask(mask_);
-    painter.drawPixmap(
-        QRect(w * 50 / 100, h * 23.2 / 100, w * 18.75 / 100, h * 53.57 / 100),
-        avatar, QRect());
+  QString name, staff_number, avatar_path;
+  auto cfg = Config::get_user();
+  if (person_.status == PersonService::get_status(PersonStatus::Stranger)) {
+    name = "访客";
+    staff_number = "";
+    avatar_path = ":asserts/avatar_unknown.jpg";
   }
+  if (person_.status == PersonService::get_status(PersonStatus::Fake)) {
+    name = "活体异常";
+    staff_number = "";
+    avatar_path = ":asserts/avatar_unknown.jpg";
+  }
+  if (person_.status == PersonService::get_status(PersonStatus::Blacklist)) {
+    if (Config::get_user().blacklist_policy == "alarm")
+      name = "黑名单";
+    else
+      name = "访客";
+    staff_number = "";
+    avatar_path = ":asserts/avatar_unknown.jpg";
+  }
+  if (person_.status == PersonService::get_status(PersonStatus::Normal)) {
+    name = person_.name.c_str();
+    staff_number = ("工号: " + person_.number).c_str();
+    avatar_path = person_.face_path.c_str();
+  }
+
+  QPixmap avatar(avatar_path);
+  avatar = avatar.scaled(mask_.size());
+  avatar.setMask(mask_);
+  painter.drawPixmap(
+      QRect(w * 50 / 100, h * 23.2 / 100, w * 18.75 / 100, h * 53.57 / 100),
+      avatar, QRect());
 
   // draw person info
   font.setPixelSize(base_font_size * 3);
   painter.setFont(font);
   painter.setPen(Qt::white);
-  painter.drawText(w * 72.5 / 100, h * 46.42 / 100, person_.name.c_str());
+  painter.drawText(w * 72.5 / 100, h * 46.42 / 100, name);
 
-  if (person_.number.length() > 0) {
+  if (staff_number.length() > 0) {
     font.setPixelSize(base_font_size * 2);
     painter.setFont(font);
-    painter.drawText(w * 72.5 / 100, h * 71.43 / 100,
-                     QString(("工号: " + person_.number).c_str()));
+    painter.drawText(w * 72.5 / 100, h * 71.43 / 100, staff_number);
   }
 }
