@@ -3,6 +3,7 @@
 
 #include <QBitmap>
 #include <QImage>
+#include <QTimer>
 #include <QWidget>
 
 #include "person_service.hpp"
@@ -26,6 +27,8 @@ class RecognizeTipWidget : public QWidget {
  private:
   PersonData person_;
   QBitmap mask_;
+
+  QTimer timer_;
 };
 
 }  // namespace suanzi

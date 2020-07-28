@@ -4,10 +4,10 @@
 #include <QDebug>
 #include <QPaintEvent>
 #include <QPainter>
-#include <iostream>
+#include <QTimer>
 
-#include "logger.hpp"
 #include "config.hpp"
+#include "logger.hpp"
 
 using namespace suanzi;
 
@@ -24,6 +24,11 @@ RecognizeTipWidget::RecognizeTipWidget(QWidget *parent) : QWidget(parent) {
   painter.fillRect(mask_.rect(), Qt::white);
   painter.setBrush(QColor(0, 0, 0));
   painter.drawRoundedRect(mask_.rect(), wh / 2, wh / 2);
+
+  timer_.setInterval(1000);
+  timer_.setSingleShot(true);
+  connect((const QObject *)&timer_, SIGNAL(timeout()), (const QObject *)this,
+          SLOT(rx_reset()));
 }
 
 RecognizeTipWidget::~RecognizeTipWidget() {}
@@ -32,6 +37,9 @@ void RecognizeTipWidget::rx_display(PersonData person, bool if_duplicated) {
   person_ = person;
   hide();
   show();
+
+  timer_.stop();
+  timer_.start();
 }
 
 void RecognizeTipWidget::rx_reset() { hide(); }

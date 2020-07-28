@@ -117,8 +117,8 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
           (const QObject *)upload_task_, SLOT(rx_upload(PersonData, bool)));
 
   // Connect face_timer to recognize_tip_widget
-  connect((const QObject *)face_timer_, SIGNAL(tx_face_disappear(int)),
-          (const QObject *)recognize_tip_widget_, SLOT(rx_reset()));
+//   connect((const QObject *)face_timer_, SIGNAL(tx_face_disappear(int)),
+//           (const QObject *)recognize_tip_widget_, SLOT(rx_reset()));
 
   // Connect face_timer to screen_saver
   connect((const QObject *)face_timer_, SIGNAL(tx_face_disappear(int)),
