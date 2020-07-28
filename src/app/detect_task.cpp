@@ -129,7 +129,7 @@ bool DetectTask::detect_and_select(const MmzImage *image,
   ret = pose_estimator_->estimate((const SVP_IMAGE_S *)image->pImplData,
                                   detections[max_id], pose);
   if (ret != SZ_RETCODE_OK) {
-    SZ_LOG_ERROR("Pose estimating error. Low quality", ret);
+    // SZ_LOG_ERROR("Pose estimating error. Low quality", ret);
     return false;
   }
 
