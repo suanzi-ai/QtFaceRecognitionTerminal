@@ -40,7 +40,6 @@ bool DetectionData::bgr_face_valid() {
   return false;
 }
 
-// nyy
 bool DetectionData::nir_face_valid() {
   if (bgr_face_detected() && nir_face_detected()) {
     float x1 = bgr_detection_.x, x2 = nir_detection_.x;
@@ -54,7 +53,16 @@ bool DetectionData::nir_face_valid() {
     float overlay_w = std::min(x1 + w1, x2 + w2) - std::max(x1, x2);
     float overlay_h = std::min(y1 + h1, y2 + h2) - std::max(y1, y2);
     float iou = overlay_w * overlay_h / (w1 * h1 + w2 * h2) * 2;
-    return iou > 0.45;
+
+    bool ret = x1 > x2 && y1 < y2 && iou > 0.3 && w1 / w2 > 0.5 &&
+               w1 / w2 < 1.5 && h1 / h2 > 0.5 && h1 / h2 < 1.5;
+    if (!ret) {
+      SZ_LOG_DEBUG("bgr=[{:.2f}, {:.2f}, {:.2f}, {:.2f}]", x1, y1, w1, h1);
+      SZ_LOG_DEBUG("nir=[{:.2f}, {:.2f}, {:.2f}, {:.2f}]", x2, y2, w2, h2);
+      SZ_LOG_DEBUG("iou = {:.2f}", iou);
+      SZ_LOG_DEBUG("w1 / w1 = {:.2f}, h1 / h2 = {:.2f}", w1 / w2, h1 / h2);
+    }
+    return ret;
   }
   return false;
 }

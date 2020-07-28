@@ -27,8 +27,8 @@ class DetectTask : QObject {
   void tx_finish();
 
   // for display
-  void tx_bgr_display(DetectionRatio detection, bool to_clear);
-  void tx_nir_display(DetectionRatio detection, bool to_clear);
+  void tx_bgr_display(DetectionRatio detection, bool to_clear, bool show_pose);
+  void tx_nir_display(DetectionRatio detection, bool to_clear, bool show_pose);
 
   // for recognition
   void tx_frame(PingPangBuffer<DetectionData> *buffer);
@@ -44,7 +44,8 @@ class DetectTask : QObject {
   const int CH_INDEXES_NIR[3] = {0, 1, 2};
   const bool CH_ROTATES_NIR[3] = {false, true, true};
 
-  bool detect_and_select(const MmzImage *image, DetectionRatio &detection);
+  bool detect_and_select(const MmzImage *image, DetectionRatio &detection,
+                         bool is_bgr);
 
   bool rx_finished_;
 

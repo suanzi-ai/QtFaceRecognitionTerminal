@@ -74,13 +74,15 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
   input->copy_to(*output);
 
   output->bgr_face_detected_ =
-      detect_and_select(input->img_bgr_small, output->bgr_detection_);
-  emit tx_bgr_display(output->bgr_detection_, !output->bgr_face_detected_);
+      detect_and_select(input->img_bgr_small, output->bgr_detection_, true);
+  emit tx_bgr_display(output->bgr_detection_, !output->bgr_face_detected_,
+                      true);
 
   if (Config::enable_anti_spoofing()) {
     output->nir_face_detected_ =
-        detect_and_select(input->img_nir_small, output->nir_detection_);
-    emit tx_nir_display(output->nir_detection_, !output->nir_face_detected_);
+        detect_and_select(input->img_nir_small, output->nir_detection_, false);
+    emit tx_nir_display(output->nir_detection_, !output->nir_face_detected_,
+                        false);
   } else
     output->nir_face_detected_ = false;
 
@@ -97,7 +99,8 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
 void DetectTask::rx_finish() { rx_finished_ = true; }
 
 bool DetectTask::detect_and_select(const MmzImage *image,
-                                   DetectionRatio &detection) {
+                                   DetectionRatio &detection,
+                                   bool is_bgr) {
   auto cfg = Config::get_detect();
 
   // detect faces: 256x256  7ms
@@ -105,9 +108,11 @@ bool DetectTask::detect_and_select(const MmzImage *image,
   suanzi::FacePose pose;
   detections.clear();
 
+  int min_face_size = cfg.min_face_size;
+  if (!is_bgr) min_face_size *= 0.8;
   SZ_RETCODE ret =
       face_detector_->detect((const SVP_IMAGE_S *)image->pImplData, detections,
-                             cfg.threshold, cfg.min_face_size);
+                             cfg.threshold, min_face_size);
 
   if (ret != SZ_RETCODE_OK) {
     SZ_LOG_ERROR("Detect error ret={}", ret);

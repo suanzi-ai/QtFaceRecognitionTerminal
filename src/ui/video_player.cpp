@@ -97,14 +97,14 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
 
   // Connect detect_task to detect_tip_widget
   connect((const QObject *)detect_task_,
-          SIGNAL(tx_bgr_display(DetectionRatio, bool)),
+          SIGNAL(tx_bgr_display(DetectionRatio, bool, bool)),
           (const QObject *)detect_tip_widget_bgr_,
-          SLOT(rx_display(DetectionRatio, bool)));
+          SLOT(rx_display(DetectionRatio, bool, bool)));
   if (Config::enable_anti_spoofing()) {
     connect((const QObject *)detect_task_,
-            SIGNAL(tx_nir_display(DetectionRatio, bool)),
+            SIGNAL(tx_nir_display(DetectionRatio, bool, bool)),
             (const QObject *)detect_tip_widget_nir_,
-            SLOT(rx_display(DetectionRatio, bool)));
+            SLOT(rx_display(DetectionRatio, bool, bool)));
   }
 
   // Connect record_task to recognize_tip_widget
