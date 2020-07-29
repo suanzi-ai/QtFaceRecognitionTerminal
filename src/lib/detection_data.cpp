@@ -32,9 +32,9 @@ bool DetectionData::bgr_face_valid() {
         cfg.min_pitch < bgr_detection_.pitch &&
         bgr_detection_.pitch < cfg.max_pitch;
 
-    bool position_valid = bgr_detection_.x > 0.15 && bgr_detection_.y > 0.15 &&
-                          bgr_detection_.x + bgr_detection_.width < 0.85 &&
-                          bgr_detection_.y + bgr_detection_.height < 0.85;
+    bool position_valid = bgr_detection_.x > 0.1 && bgr_detection_.y > 0.05 &&
+                          bgr_detection_.x + bgr_detection_.width < 0.9 &&
+                          bgr_detection_.y + bgr_detection_.height < 0.95;
     return pose_valid && position_valid;
   }
   return false;
