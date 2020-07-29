@@ -54,13 +54,17 @@ bool DetectionData::nir_face_valid() {
     float overlay_h = std::min(y1 + h1, y2 + h2) - std::max(y1, y2);
     float iou = overlay_w * overlay_h / (w1 * h1 + w2 * h2) * 2;
 
-    bool ret = x1 > x2 && y1 < y2 && iou > 0.3 && w1 / w2 > 0.5 &&
-               w1 / w2 < 1.5 && h1 / h2 > 0.5 && h1 / h2 < 1.5;
+    auto cfg = Config::get_liveness();
+    bool ret = iou > cfg.min_iou_between_bgr &&
+               w1 / w2 >= cfg.min_width_ratio_between_bgr &&
+               w1 / w2 <= cfg.max_width_ratio_between_bgr &&
+               h1 / h2 >= cfg.min_height_ratio_between_bgr &&
+               h1 / h2 <= cfg.max_height_ratio_between_bgr;
     if (!ret) {
       SZ_LOG_DEBUG("bgr=[{:.2f}, {:.2f}, {:.2f}, {:.2f}]", x1, y1, w1, h1);
       SZ_LOG_DEBUG("nir=[{:.2f}, {:.2f}, {:.2f}, {:.2f}]", x2, y2, w2, h2);
-      SZ_LOG_DEBUG("iou = {:.2f}", iou);
-      SZ_LOG_DEBUG("w1 / w1 = {:.2f}, h1 / h2 = {:.2f}", w1 / w2, h1 / h2);
+      SZ_LOG_DEBUG("iou = {:.2f}, w1 / w1 = {:.2f}, h1 / h2 = {:.2f}", iou,
+                   w1 / w2, h1 / h2);
     }
     return ret;
   }

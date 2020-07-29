@@ -95,9 +95,14 @@ void to_json(json &j, const ExtractConfig &c);
 void from_json(const json &j, ExtractConfig &c);
 
 typedef struct {
-  int history_size;
-  int min_alive_count;
-  int continuous_max_lost_count;
+  SZ_INT32 history_size;
+  SZ_INT32 min_alive_count;
+  SZ_INT32 continuous_max_lost_count;
+  SZ_FLOAT min_iou_between_bgr;
+  SZ_FLOAT min_width_ratio_between_bgr;
+  SZ_FLOAT max_width_ratio_between_bgr; 
+  SZ_FLOAT min_height_ratio_between_bgr;
+  SZ_FLOAT max_height_ratio_between_bgr; 
 } LivenessConfig;
 
 void to_json(json &j, const LivenessConfig &c);

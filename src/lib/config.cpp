@@ -122,12 +122,26 @@ void suanzi::to_json(json &j, const LivenessConfig &c) {
   SAVE_JSON_TO(j, "history_size", c.history_size);
   SAVE_JSON_TO(j, "min_alive_count", c.min_alive_count);
   SAVE_JSON_TO(j, "continuous_max_lost_count", c.continuous_max_lost_count);
+  SAVE_JSON_TO(j, "min_iou_between_bgr", c.min_iou_between_bgr);
+  SAVE_JSON_TO(j, "min_width_ratio_between_bgr", c.min_width_ratio_between_bgr);
+  SAVE_JSON_TO(j, "max_width_ratio_between_bgr", c.max_width_ratio_between_bgr);
+  SAVE_JSON_TO(j, "min_height_ratio_between_bgr",
+               c.min_height_ratio_between_bgr);
+  SAVE_JSON_TO(j, "max_height_ratio_between_bgr",
+               c.max_height_ratio_between_bgr);
 }
 
 void suanzi::from_json(const json &j, LivenessConfig &c) {
   LOAD_JSON_TO(j, "history_size", c.history_size);
   LOAD_JSON_TO(j, "min_alive_count", c.min_alive_count);
   LOAD_JSON_TO(j, "continuous_max_lost_count", c.continuous_max_lost_count);
+  LOAD_JSON_TO(j, "min_iou_between_bgr", c.min_iou_between_bgr);
+  LOAD_JSON_TO(j, "min_width_ratio_between_bgr", c.min_width_ratio_between_bgr);
+  LOAD_JSON_TO(j, "max_width_ratio_between_bgr", c.max_width_ratio_between_bgr);
+  LOAD_JSON_TO(j, "min_height_ratio_between_bgr",
+               c.min_height_ratio_between_bgr);
+  LOAD_JSON_TO(j, "max_height_ratio_between_bgr",
+               c.max_height_ratio_between_bgr);
 }
 
 void suanzi::from_json(const json &j, Config &c) {
@@ -285,18 +299,33 @@ void Config::load_defaults() {
               .history_size = 16,
               .min_alive_count = 7,
               .continuous_max_lost_count = 3,
+              .min_iou_between_bgr = 0.5,
+              .min_width_ratio_between_bgr = 0.8,
+              .max_width_ratio_between_bgr = 1.2,
+              .min_height_ratio_between_bgr = 0.8,
+              .max_height_ratio_between_bgr = 1.2,
           },
       .medium =
           {
               .history_size = 12,
               .min_alive_count = 5,
               .continuous_max_lost_count = 3,
+              .min_iou_between_bgr = 0.3,
+              .min_width_ratio_between_bgr = 0.5,
+              .max_width_ratio_between_bgr = 1.5,
+              .min_height_ratio_between_bgr = 0.5,
+              .max_height_ratio_between_bgr = 1.5,
           },
       .low =
           {
               .history_size = 8,
               .min_alive_count = 3,
               .continuous_max_lost_count = 2,
+              .min_iou_between_bgr = 0.3,
+              .min_width_ratio_between_bgr = 0.5,
+              .max_width_ratio_between_bgr = 1.5,
+              .min_height_ratio_between_bgr = 0.5,
+              .max_height_ratio_between_bgr = 1.5,
           },
   };
 }
@@ -400,4 +429,6 @@ const LivenessConfig &Config::get_liveness() {
   return i.liveness_levels_.get(i.user.liveness_level);
 }
 
-bool Config::enable_anti_spoofing() { return instance_.app.enable_anti_spoofing; }
+bool Config::enable_anti_spoofing() {
+  return instance_.app.enable_anti_spoofing;
+}
