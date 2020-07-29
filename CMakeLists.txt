@@ -133,7 +133,7 @@ if(NOT QuFaceSDK_LOADED_DEPS)
 endif()
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-add_definitions(-DDEBUG)
+  add_definitions(-DDEBUG)
 endif()
 
 message(STATUS "Set log level ${SZ_LOG_LEVEL}")
@@ -151,7 +151,7 @@ add_executable(main main.cpp resource.qrc)
 target_link_libraries(main PRIVATE ui)
 install(TARGETS main DESTINATION .)
 
-add_executable(audio_test audio_test.cpp)
+add_executable(audio_test audio_test.cpp resource.qrc)
 target_link_libraries(audio_test PRIVATE lib)
 install(TARGETS audio_test DESTINATION .)
 

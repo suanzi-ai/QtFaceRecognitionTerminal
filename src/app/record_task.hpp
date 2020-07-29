@@ -9,6 +9,7 @@
 #include "pingpang_buffer.hpp"
 #include "quface_common.hpp"
 #include "recognize_data.hpp"
+#include "audio.hpp"
 
 namespace suanzi {
 
@@ -39,6 +40,7 @@ class RecordTask : QObject {
   bool if_duplicated(const FaceFeature &feature);
 
   PersonService::ptr person_service_;
+  AudioPlayer player;
 
   FaceDatabasePtr unknown_database_;
 

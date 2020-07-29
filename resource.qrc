@@ -5,4 +5,10 @@
 <qresource>
     <file>asserts/background.jpg</file>
 </qresource>
+<qresource>
+    <file>asserts/success.aac</file>
+</qresource>
+<qresource>
+    <file>asserts/fail.aac</file>
+</qresource>
 </RCC>

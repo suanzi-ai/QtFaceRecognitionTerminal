@@ -10,7 +10,7 @@ void test() {
   std::thread([&]() {
     bool bswitch = true;
     while (!done) {
-      player.play("telephone.aac");
+      player.play(":asserts/success.aac");
 
       if (bswitch) {
         player.set_volume(6);

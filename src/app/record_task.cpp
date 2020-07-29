@@ -102,8 +102,11 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
     bool duplicated_;
     if (person.status != person_service_->get_status(PersonStatus::Normal)) {
       duplicated_ = if_duplicated(input->person_feature);
-    } else
+      player.play(":asserts/fail.aac");
+    } else {
       duplicated_ = if_duplicated(face_id);
+      player.play(":asserts/success.acc");
+    }
 
     // output
     rx_reset();
