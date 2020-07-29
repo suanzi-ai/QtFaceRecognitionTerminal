@@ -30,7 +30,9 @@ bool DetectionData::bgr_face_valid() {
         !isnanf(bgr_detection_.yaw) && !isnanf(bgr_detection_.pitch) &&
         cfg.min_yaw < bgr_detection_.yaw && bgr_detection_.yaw < cfg.max_yaw &&
         cfg.min_pitch < bgr_detection_.pitch &&
-        bgr_detection_.pitch < cfg.max_pitch;
+        bgr_detection_.pitch < cfg.max_pitch &&
+        cfg.min_roll < bgr_detection_.roll &&
+        bgr_detection_.roll < cfg.max_roll;
 
     bool position_valid = bgr_detection_.x > 0.1 && bgr_detection_.y > 0.05 &&
                           bgr_detection_.x + bgr_detection_.width < 0.9 &&

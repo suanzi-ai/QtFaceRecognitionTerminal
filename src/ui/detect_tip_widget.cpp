@@ -93,7 +93,8 @@ void DetectTipWidget::rx_display(DetectionRatio detection, bool to_clear,
                               (int)(detection.landmark[i][1] * box_h)});
 
       pose_ = "Yaw: " + QString::number(detection.yaw, 'f', 1) +
-              " Pitch: " + QString::number(detection.pitch, 'f', 1);
+              " Pitch: " + QString::number(detection.pitch, 'f', 1) + 
+              " Roll: " + QString::number(detection.roll, 'f', 1);
     } else
       pose_ = "";
 

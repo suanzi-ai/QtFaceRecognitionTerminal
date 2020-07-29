@@ -78,6 +78,8 @@ typedef struct {
   SZ_FLOAT min_yaw;
   SZ_FLOAT max_pitch;
   SZ_FLOAT min_pitch;
+  SZ_FLOAT min_roll;
+  SZ_FLOAT max_roll;
 } DetectConfig;
 
 void to_json(json &j, const DetectConfig &c);

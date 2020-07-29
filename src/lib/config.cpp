@@ -91,6 +91,8 @@ void suanzi::to_json(json &j, const DetectConfig &c) {
   SAVE_JSON_TO(j, "min_yaw", c.min_yaw);
   SAVE_JSON_TO(j, "max_pitch", c.max_pitch);
   SAVE_JSON_TO(j, "min_pitch", c.min_pitch);
+  SAVE_JSON_TO(j, "max_roll", c.max_roll);
+  SAVE_JSON_TO(j, "min_roll", c.min_roll);
 }
 
 void suanzi::from_json(const json &j, DetectConfig &c) {
@@ -100,6 +102,8 @@ void suanzi::from_json(const json &j, DetectConfig &c) {
   LOAD_JSON_TO(j, "min_yaw", c.min_yaw);
   LOAD_JSON_TO(j, "max_pitch", c.max_pitch);
   LOAD_JSON_TO(j, "min_pitch", c.min_pitch);
+  LOAD_JSON_TO(j, "max_roll", c.max_roll);
+  LOAD_JSON_TO(j, "min_roll", c.min_roll);
 }
 
 void suanzi::to_json(json &j, const ExtractConfig &c) {
@@ -245,6 +249,8 @@ void Config::load_defaults() {
               .min_yaw = -25,
               .max_pitch = 90,   // disable max pitch
               .min_pitch = -90,  // disable min pitch
+              .min_roll = -10,
+              .max_roll = 10,
           },
       .medium =
           {
@@ -254,6 +260,8 @@ void Config::load_defaults() {
               .min_yaw = -25,
               .max_pitch = 90,   // disable max pitch
               .min_pitch = -90,  // disable min pitch
+              .min_roll = -10,
+              .max_roll = 10,
           },
       .low =
           {
@@ -263,6 +271,8 @@ void Config::load_defaults() {
               .min_yaw = -25,
               .max_pitch = 90,   // disable max pitch
               .min_pitch = -90,  // disable min pitch
+              .min_roll = -10,
+              .max_roll = 10,
           },
   };
 
