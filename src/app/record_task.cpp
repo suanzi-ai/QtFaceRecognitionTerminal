@@ -159,13 +159,18 @@ bool RecordTask::sequence_query(const std::vector<QueryResult> &history,
   float max_person_accumulate_score = person_accumulate_score[max_person_id];
   float max_person_score = person_max_score[max_person_id];
 
-  SZ_LOG_DEBUG("id={}, count={}, max_score={}, accumulate_score={}",
-               max_person_id, max_count, max_person_score,
-               person_accumulate_score[max_person_id]);
+  SZ_LOG_DEBUG("id={}, count={}/{}, max={:.2f}/{:.2f}, sum={:.2f}/{:.2f}",
+               max_person_id, max_count, cfg.history_size, max_person_score,
+               cfg.min_recognize_score, person_accumulate_score[max_person_id],
+               cfg.min_accumulate_score);
   if (max_count >= cfg.min_recognize_count &&
       max_person_accumulate_score >= cfg.min_accumulate_score &&
       max_person_score >= cfg.min_recognize_score) {
     face_id = max_person_id;
+    return true;
+  }
+  if (max_count == cfg.history_size &&
+      max_person_accumulate_score >= cfg.min_accumulate_score) {
     return true;
   } else {
     return false;
