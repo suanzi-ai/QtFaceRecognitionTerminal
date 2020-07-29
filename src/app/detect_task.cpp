@@ -131,8 +131,9 @@ bool DetectTask::detect_and_select(const MmzImage *image,
     }
   }
 
+  float prob_threshold = is_bgr ? 0.9: 0.75;
   ret = pose_estimator_->estimate((const SVP_IMAGE_S *)image->pImplData,
-                                  detections[max_id], pose);
+                                  detections[max_id], pose, prob_threshold);
   if (ret != SZ_RETCODE_OK) {
     // SZ_LOG_ERROR("Pose estimating error. Low quality", ret);
     return false;
