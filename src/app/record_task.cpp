@@ -80,8 +80,8 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
 
     // decide fake or live
     if (!sequence_antispoof(live_history_)) {
-      if (Config::get_user().blacklist_policy == "alarm") {
-        person.name = "异常";
+      if (Config::get_user().liveness_policy == "alarm") {
+        person.name = "活体失败";
       } else {  // stranger
         person.name = "访客";
       }
@@ -92,7 +92,7 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
 
     if (person.status == person_service_->get_status(PersonStatus::Blacklist)) {
       if (Config::get_user().blacklist_policy == "alarm") {
-        person.name = "异常";
+        person.name = "黑名单";
       } else {  // stranger
         person.name = "访客";
       }

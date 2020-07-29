@@ -76,32 +76,14 @@ void RecognizeTipWidget::paintEvent(QPaintEvent *event) {
   painter.setFont(font);
   painter.drawText(w * 6 / 100, h * 70 / 100, date);
 
-  // draw avatar
+  // draw info and avatar
   QString name, staff_number, avatar_path;
-  auto cfg = Config::get_user();
-  if (person_.status == PersonService::get_status(PersonStatus::Stranger)) {
-    name = "访客";
-    staff_number = "";
-    avatar_path = ":asserts/avatar_unknown.jpg";
-  }
-  if (person_.status == PersonService::get_status(PersonStatus::Fake)) {
-    name = "活体异常";
-    staff_number = "";
-    avatar_path = ":asserts/avatar_unknown.jpg";
-  }
-  if (person_.status == PersonService::get_status(PersonStatus::Blacklist)) {
-    if (Config::get_user().blacklist_policy == "alarm")
-      name = "黑名单";
-    else
-      name = "访客";
-    staff_number = "";
-    avatar_path = ":asserts/avatar_unknown.jpg";
-  }
-  if (person_.status == PersonService::get_status(PersonStatus::Normal)) {
-    name = person_.name.c_str();
+  name = person_.name.c_str();
+  avatar_path = person_.face_path.c_str();
+  if (person_.number.length() > 0)
     staff_number = ("工号: " + person_.number).c_str();
-    avatar_path = person_.face_path.c_str();
-  }
+  else
+    staff_number = "";
 
   QPixmap avatar(avatar_path);
   avatar = avatar.scaled(mask_.size());
