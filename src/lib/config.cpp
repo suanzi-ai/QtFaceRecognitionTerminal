@@ -4,6 +4,7 @@ using namespace suanzi;
 
 void suanzi::to_json(json &j, const UserConfig &c) {
   SAVE_JSON_TO(j, "blacklist_policy", c.blacklist_policy);
+  SAVE_JSON_TO(j, "liveness_policy", c.liveness_policy);
   SAVE_JSON_TO(j, "detect_level", c.detect_level);
   SAVE_JSON_TO(j, "extract_level", c.extract_level);
   SAVE_JSON_TO(j, "liveness_level", c.liveness_level);
