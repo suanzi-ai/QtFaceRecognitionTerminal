@@ -1,11 +1,10 @@
 #pragma once
 
-#include <QMetaType>
-
 #include <httplib.h>
+
+#include <QMetaType>
 #include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
-
 #include <quface/common.hpp>
 
 #include "logger.hpp"
@@ -61,7 +60,8 @@ class PersonService {
   }
 
   SZ_RETCODE report_face_record(uint person_id,
-                                const std::vector<SZ_UINT8> &image_content) {
+                                const std::vector<SZ_UINT8> &image_content,
+                                const std::string &status) {
     std::string content(image_content.begin(), image_content.end());
     httplib::MultipartFormDataItems items = {
         {"file", content, "face.jpg", "images/jpeg"},
@@ -91,6 +91,7 @@ class PersonService {
     json j = {
         {"personID", person_id},
         {"imagePath", filePath},
+        {"status", status},
     };
     std::string path = "/api/v1/faceRecords";
     auto res = client_.Post(path.c_str(), j.dump(), "application/json");

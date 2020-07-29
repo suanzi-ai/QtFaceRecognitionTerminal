@@ -26,7 +26,7 @@ void UploadTask::rx_upload(PersonData person, bool if_duplicated) {
   if (!if_duplicated) {
     SZ_LOG_DEBUG("upload snapshots");
     if (cv::imencode(".jpg", person.face_snapshot, image_buffer))
-      person_service_->report_face_record(person.id, image_buffer);
+      person_service_->report_face_record(person.id, image_buffer, person.status);
     else
       SZ_LOG_ERROR("Encode jpg failed");
   }
