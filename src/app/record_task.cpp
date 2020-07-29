@@ -16,6 +16,8 @@ RecordTask::RecordTask(PersonService::ptr person_service, QThread *thread,
   // Create db for unknown faces
   unknown_database_ = std::make_shared<FaceDatabase>("_UNKNOWN_DB_");
 
+  player.set_volume(6);
+
   // Create thread
   if (thread == nullptr) {
     static QThread new_thread;
