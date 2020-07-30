@@ -18,22 +18,10 @@ struct DetectionRatio {
   float pitch;
   float roll;
 
-  void scale(int x_scale, int y_scale, FaceDetection &detection, FacePose &pose) {
-    detection.bbox.x = x * x_scale;
-    detection.bbox.y = y * y_scale;
-    detection.bbox.width = width * x_scale;
-    detection.bbox.height = height * y_scale;
+  void scale(int x_scale, int y_scale, FaceDetection &detection, FacePose &pose);
+  bool is_overlap(DetectionRatio other);
+  bool is_valid();
 
-    for (int i = 0; i < SZ_LANDMARK_NUM; i++) {
-      pose.landmarks.point[i].x =
-          landmark[i][0] * x_scale;
-      pose.landmarks.point[i].y =
-          landmark[i][1] * y_scale;
-    }
-    pose.yaw = yaw;
-    pose.pitch = pitch;
-    pose.roll = roll;
-  }
 };
 
 class DetectionData : public ImagePackage {

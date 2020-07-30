@@ -4,6 +4,62 @@
 
 using namespace suanzi;
 
+void DetectionRatio::scale(int x_scale, int y_scale, FaceDetection &detection,
+                           FacePose &pose) {
+  detection.bbox.x = x * x_scale;
+  detection.bbox.y = y * y_scale;
+  detection.bbox.width = width * x_scale;
+  detection.bbox.height = height * y_scale;
+
+  for (int i = 0; i < SZ_LANDMARK_NUM; i++) {
+    pose.landmarks.point[i].x = landmark[i][0] * x_scale;
+    pose.landmarks.point[i].y = landmark[i][1] * y_scale;
+  }
+  pose.yaw = yaw;
+  pose.pitch = pitch;
+  pose.roll = roll;
+}
+
+bool DetectionRatio::is_overlap(DetectionRatio other) {
+  float x1 = x, x2 = other.x;
+  float y1 = y, y2 = other.y;
+  float w1 = width, w2 = other.width;
+  float h1 = height, h2 = other.height;
+
+  if (x1 > x2 + w2 || y1 > y2 + h2 || x1 + w1 < x2 || y1 + h1 < y2)
+    return false;
+
+  float overlay_w = std::min(x1 + w1, x2 + w2) - std::max(x1, x2);
+  float overlay_h = std::min(y1 + h1, y2 + h2) - std::max(y1, y2);
+  float iou = overlay_w * overlay_h / (w1 * h1 + w2 * h2) * 2;
+
+  auto cfg = Config::get_liveness();
+  bool ret = iou > cfg.min_iou_between_bgr &&
+             w1 / w2 >= cfg.min_width_ratio_between_bgr &&
+             w1 / w2 <= cfg.max_width_ratio_between_bgr &&
+             h1 / h2 >= cfg.min_height_ratio_between_bgr &&
+             h1 / h2 <= cfg.max_height_ratio_between_bgr;
+  if (!ret) {
+    SZ_LOG_DEBUG("bgr=[{:.2f}, {:.2f}, {:.2f}, {:.2f}]", x1, y1, w1, h1);
+    SZ_LOG_DEBUG("nir=[{:.2f}, {:.2f}, {:.2f}, {:.2f}]", x2, y2, w2, h2);
+    SZ_LOG_DEBUG("iou = {:.2f}, w1 / w1 = {:.2f}, h1 / h2 = {:.2f}", iou,
+                 w1 / w2, h1 / h2);
+  }
+  return ret;
+}
+
+bool DetectionRatio::is_valid() {
+  auto cfg = Config::get_detect();
+  bool pose_valid = !isnanf(yaw) && !isnanf(pitch) && !isnanf(roll) &&
+                    cfg.min_yaw < yaw && yaw < cfg.max_yaw &&
+                    cfg.min_pitch < pitch && pitch < cfg.max_pitch &&
+                    cfg.min_roll < roll && roll < cfg.max_roll;
+
+  bool position_valid =
+      x > 0.1 && y > 0.05 && x + width < 0.9 && y + height < 0.95;
+  return pose_valid && position_valid;
+}
+
 DetectionData::DetectionData() {
   bgr_face_detected_ = false;
   nir_face_detected_ = false;
@@ -24,51 +80,10 @@ bool DetectionData::bgr_face_detected() { return bgr_face_detected_; }
 bool DetectionData::nir_face_detected() { return nir_face_detected_; }
 
 bool DetectionData::bgr_face_valid() {
-  if (bgr_face_detected()) {
-    auto cfg = Config::get_detect();
-    bool pose_valid =
-        !isnanf(bgr_detection_.yaw) && !isnanf(bgr_detection_.pitch) &&
-        cfg.min_yaw < bgr_detection_.yaw && bgr_detection_.yaw < cfg.max_yaw &&
-        cfg.min_pitch < bgr_detection_.pitch &&
-        bgr_detection_.pitch < cfg.max_pitch &&
-        cfg.min_roll < bgr_detection_.roll &&
-        bgr_detection_.roll < cfg.max_roll;
-
-    bool position_valid = bgr_detection_.x > 0.1 && bgr_detection_.y > 0.05 &&
-                          bgr_detection_.x + bgr_detection_.width < 0.9 &&
-                          bgr_detection_.y + bgr_detection_.height < 0.95;
-    return pose_valid && position_valid;
-  }
-  return false;
+  return bgr_face_detected() && bgr_detection_.is_valid();
 }
 
 bool DetectionData::nir_face_valid() {
-  if (bgr_face_detected() && nir_face_detected()) {
-    float x1 = bgr_detection_.x, x2 = nir_detection_.x;
-    float y1 = bgr_detection_.y, y2 = nir_detection_.y;
-    float w1 = bgr_detection_.width, w2 = nir_detection_.width;
-    float h1 = bgr_detection_.height, h2 = nir_detection_.height;
-
-    if (x1 > x2 + w2 || y1 > y2 + h2 || x1 + w1 < x2 || y1 + h1 < y2)
-      return false;
-
-    float overlay_w = std::min(x1 + w1, x2 + w2) - std::max(x1, x2);
-    float overlay_h = std::min(y1 + h1, y2 + h2) - std::max(y1, y2);
-    float iou = overlay_w * overlay_h / (w1 * h1 + w2 * h2) * 2;
-
-    auto cfg = Config::get_liveness();
-    bool ret = iou > cfg.min_iou_between_bgr &&
-               w1 / w2 >= cfg.min_width_ratio_between_bgr &&
-               w1 / w2 <= cfg.max_width_ratio_between_bgr &&
-               h1 / h2 >= cfg.min_height_ratio_between_bgr &&
-               h1 / h2 <= cfg.max_height_ratio_between_bgr;
-    if (!ret) {
-      SZ_LOG_DEBUG("bgr=[{:.2f}, {:.2f}, {:.2f}, {:.2f}]", x1, y1, w1, h1);
-      SZ_LOG_DEBUG("nir=[{:.2f}, {:.2f}, {:.2f}, {:.2f}]", x2, y2, w2, h2);
-      SZ_LOG_DEBUG("iou = {:.2f}, w1 / w1 = {:.2f}, h1 / h2 = {:.2f}", iou,
-                   w1 / w2, h1 / h2);
-    }
-    return ret;
-  }
-  return false;
+  return bgr_face_detected() && nir_face_detected() &&
+         nir_detection_.is_overlap(bgr_detection_);
 }
