@@ -4,6 +4,8 @@
 #include <QPainter>
 #include <QTimer>
 
+#include "config.hpp"
+
 using namespace suanzi;
 
 DetectTipWidget::DetectTipWidget(int win_x, int win_y, int win_width,
@@ -13,6 +15,8 @@ DetectTipWidget::DetectTipWidget(int win_x, int win_y, int win_width,
       win_width_(win_width),
       win_height_(win_height),
       lost_age_(0),
+      is_valid_(false),
+      valid_count_(0),
       QWidget(parent) {
   QPalette palette = this->palette();
   palette.setColor(QPalette::Background, Qt::transparent);
@@ -57,7 +61,10 @@ void DetectTipWidget::paint(QPainter *painter) {
     // top_x,
     //              top_y, bottom_x, bottom_y, width, height);
 
-    painter->setPen(QPen(QColor(0, 0, 255, 128), 5));
+    if (is_valid_)
+      painter->setPen(QPen(QColor(0, 0, 255, 128), 5));
+    else
+      painter->setPen(QPen(QColor(255, 0, 0, 128), 5));
     painter->drawLine(top_x, top_y, top_x + width / 5, top_y);
     painter->drawLine(top_x, top_y, top_x, top_y + height / 5);
     painter->drawLine(top_x, bottom_y, top_x + width / 5, bottom_y);
@@ -85,7 +92,7 @@ void DetectTipWidget::rx_display(DetectionRatio detection, bool to_clear,
   int box_h = win_height_ - 1;
 
   if (!to_clear) {
-    // resize to square
+    // display pose for debug
     landmarks_.clear();
     if (show_pose) {
       for (int i = 0; i < SZ_LANDMARK_NUM; i++)
@@ -93,11 +100,12 @@ void DetectTipWidget::rx_display(DetectionRatio detection, bool to_clear,
                               (int)(detection.landmark[i][1] * box_h)});
 
       pose_ = "Yaw: " + QString::number(detection.yaw, 'f', 1) +
-              " Pitch: " + QString::number(detection.pitch, 'f', 1) + 
+              " Pitch: " + QString::number(detection.pitch, 'f', 1) +
               " Roll: " + QString::number(detection.roll, 'f', 1);
     } else
       pose_ = "";
 
+    // resize to square
     float center_x = box_x + (detection.x + .5f * detection.width) * box_w;
     float center_Y = box_y + (detection.y + .5f * detection.height) * box_h;
     float size = .5f * (detection.width * box_w + detection.height * box_h);
@@ -108,10 +116,26 @@ void DetectTipWidget::rx_display(DetectionRatio detection, bool to_clear,
     rects_.push_back(next_rect);
     if (rects_.size() > MAX_RECT_COUNT) rects_.erase(rects_.begin());
 
+    // decide face validation
+    auto cfg = Config::get_extract();
+    int threshold = std::max(cfg.history_size / 2, 2);
+    if (detection.is_valid()) {
+      valid_count_ = std::min(valid_count_ + 1, threshold);
+      if (valid_count_ >= threshold)
+        is_valid_ = true;
+    }
+    else {
+      valid_count_ = std::max(valid_count_ - 1, 0);
+      if (valid_count_ <= 0)
+        is_valid_ = false;
+    }
+
   } else {
     if (++lost_age_ > MAX_LOST_AGE) {
       rects_.clear();
       lost_age_ = 0;
+      valid_count_ = 0;
+      is_valid_ = false;
     }
   }
 

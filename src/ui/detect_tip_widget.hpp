@@ -32,13 +32,16 @@ class DetectTipWidget : public QWidget {
   QPolygon landmarks_;
   QString pose_;
 
-  bool is_updated_;
   int win_x_;
   int win_y_;
   int win_width_;
   int win_height_;
 
   int lost_age_;
+
+  bool is_valid_;
+  int valid_count_;
+
 };
 
 }  // namespace suanzi
