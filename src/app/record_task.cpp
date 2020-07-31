@@ -107,7 +107,7 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
       player.play(":asserts/fail.aac");
     } else {
       duplicated_ = if_duplicated(face_id);
-      player.play(":asserts/success.acc");
+      player.play(":asserts/success.aac");
     }
 
     // output
