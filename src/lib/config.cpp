@@ -28,6 +28,8 @@ void suanzi::to_json(json &j, const AppConfig &c) {
   SAVE_JSON_TO(j, "person_service_base_url", c.person_service_base_url);
   SAVE_JSON_TO(j, "enable_anti_spoofing", c.enable_anti_spoofing);
   SAVE_JSON_TO(j, "show_infrared_window", c.show_infrared_window);
+  SAVE_JSON_TO(j, "record_infraraed_faces", c.record_infraraed_faces);
+  SAVE_JSON_TO(j, "infraraed_faces_store_path", c.infraraed_faces_store_path);
 }
 
 void suanzi::from_json(const json &j, AppConfig &c) {
@@ -38,6 +40,8 @@ void suanzi::from_json(const json &j, AppConfig &c) {
   LOAD_JSON_TO(j, "person_service_base_url", c.person_service_base_url);
   LOAD_JSON_TO(j, "enable_anti_spoofing", c.enable_anti_spoofing);
   LOAD_JSON_TO(j, "show_infrared_window", c.show_infrared_window);
+  LOAD_JSON_TO(j, "record_infraraed_faces", c.record_infraraed_faces);
+  LOAD_JSON_TO(j, "infraraed_faces_store_path", c.infraraed_faces_store_path);
 }
 
 void suanzi::to_json(json &j, const QufaceConfig &c) {
@@ -195,6 +199,8 @@ void Config::load_defaults() {
       .person_service_base_url = "http://127.0.0.1",
       .enable_anti_spoofing = false,
       .show_infrared_window = false,
+      .record_infraraed_faces = false,
+      .infraraed_faces_store_path = "/user/quface-app/var/face-terminal/ir-faces/",
   };
 
   user = {

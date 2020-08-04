@@ -38,6 +38,8 @@ typedef struct {
   std::string person_service_base_url;
   bool enable_anti_spoofing;
   bool show_infrared_window;
+  bool record_infraraed_faces;
+  std::string infraraed_faces_store_path;
 } AppConfig;
 
 void to_json(json &j, const AppConfig &c);
