@@ -106,10 +106,6 @@ bool RecognizeTask::is_live(DetectionData *detection) {
     suanzi::FacePose pose;
     detection->nir_detection_.scale(width, height, face_detection, pose);
 
-    // set channel U,V to zeros, remain Y
-    memset(detection->img_nir_large->pData + width * height, 0x80,
-           width * height / 2);
-
     SZ_BOOL ret;
     if (SZ_RETCODE_OK !=
         anti_spoofing_->validate(
