@@ -84,6 +84,10 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
           SLOT(rx_frame(PingPangBuffer<RecognizeData> *)));
   connect((const QObject *)record_task_, SIGNAL(tx_finish()),
           (const QObject *)recognize_task_, SLOT(rx_finish()));
+  connect((const QObject *)record_task_, SIGNAL(tx_nir_finish(bool)),
+          (const QObject *)recognize_task_, SLOT(rx_nir_finish(bool)));
+  connect((const QObject *)record_task_, SIGNAL(tx_bgr_finish(bool)),
+          (const QObject *)recognize_task_, SLOT(rx_bgr_finish(bool)));
 
   // Connect detect_task to face_timer
   connect((const QObject *)detect_task_,

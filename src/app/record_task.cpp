@@ -42,16 +42,29 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
   buffer->switch_buffer();
   RecognizeData *input = buffer->get_pang();
 
-  live_history_.push_back(input->is_live);
-  while (live_history_.size() > Config::get_liveness().history_size)
-    live_history_.erase(live_history_.begin());
+  int live_size = Config::get_liveness().history_size;
+  int person_size = Config::get_extract().history_size;
 
-  person_history_.push_back(input->person_info);
-  while (person_history_.size() > Config::get_extract().history_size)
-    person_history_.erase(person_history_.begin());
+  // receive liveness data
+  if (input->has_live) live_history_.push_back(input->is_live);
 
-  if (live_history_.size() == Config::get_liveness().history_size &&
-      person_history_.size() == Config::get_extract().history_size) {
+  if (live_history_.size() > live_size)
+    live_history_.erase(live_history_.begin() + live_size, live_history_.end());
+
+  if (live_history_.size() == live_size) emit tx_nir_finish(true);
+
+  // receive recognize data
+  if (input->has_person_info) person_history_.push_back(input->person_info);
+
+  if (person_history_.size() > person_size)
+    person_history_.erase(person_history_.begin() + person_size,
+                          person_history_.end());
+
+  if (person_history_.size() == person_size) emit tx_bgr_finish(true);
+
+  // do sequence inference
+  if (live_history_.size() == live_size &&
+      person_history_.size() == person_size) {
     PersonData person;
 
     static MmzImage *snapshot =
@@ -112,8 +125,8 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
 
     // output
     rx_reset();
-    SZ_LOG_INFO("record: staff_number={}, status={}", person.number,
-                person.status);
+    SZ_LOG_INFO("Record: id={}, staff={}, status={}", person.id,
+                person.number, person.status);
     emit tx_display(person, duplicated_);
   }
 
@@ -123,6 +136,9 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
 void RecordTask::rx_reset() {
   person_history_.clear();
   live_history_.clear();
+
+  emit tx_nir_finish(false);
+  emit tx_bgr_finish(false);
 }
 
 bool RecordTask::sequence_query(const std::vector<QueryResult> &history,
@@ -159,10 +175,11 @@ bool RecordTask::sequence_query(const std::vector<QueryResult> &history,
   float max_person_accumulate_score = person_accumulate_score[max_person_id];
   float max_person_score = person_max_score[max_person_id];
 
-  SZ_LOG_DEBUG("id={}, count={}/{}, max={:.2f}/{:.2f}, sum={:.2f}/{:.2f}",
-               max_person_id, max_count, cfg.history_size, max_person_score,
-               cfg.min_recognize_score, person_accumulate_score[max_person_id],
+  SZ_LOG_DEBUG("count={}/{}, max={:.2f}/{:.2f}, sum={:.2f}/{:.2f}", max_count,
+               cfg.history_size, max_person_score, cfg.min_recognize_score,
+               person_accumulate_score[max_person_id],
                cfg.min_accumulate_score);
+
   if (max_count >= cfg.min_recognize_count &&
       max_person_accumulate_score >= cfg.min_accumulate_score &&
       max_person_score >= cfg.min_recognize_score) {
@@ -183,7 +200,7 @@ bool RecordTask::sequence_antispoof(const std::vector<bool> &history) {
     if (is_live) count++;
   }
 
-  SZ_LOG_DEBUG("live count={}", count);
+  SZ_LOG_DEBUG("live={}/{}", count, Config::get_liveness().min_alive_count);
   return count >= Config::get_liveness().min_alive_count;
 }
 

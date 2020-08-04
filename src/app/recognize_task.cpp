@@ -57,6 +57,8 @@ RecognizeTask::RecognizeTask(FaceDatabasePtr db, FaceExtractorPtr extractor,
   }
 
   rx_finished_ = true;
+  rx_nir_finished_ = false;
+  rx_bgr_finished_ = false;
 }
 
 RecognizeTask::~RecognizeTask() {
@@ -76,14 +78,22 @@ void RecognizeTask::rx_frame(PingPangBuffer<DetectionData> *buffer) {
   output->nir_face_detected_ = input->nir_face_detected_;
   output->bgr_detection_ = input->bgr_detection_;
   output->nir_detection_ = input->nir_detection_;
+  output->has_live = !rx_nir_finished_;
+  output->has_person_info = !rx_bgr_finished_;
 
   if (input->bgr_face_valid()) {
-    if (!Config::enable_anti_spoofing())
-      output->is_live = true;
-    else
-      output->is_live = is_live(input);
+    // SZ_LOG_DEBUG("has_live={}, has_person_info={}", output->has_live,
+    // output->has_person_info);
+    if (output->has_live) {
+      if (!Config::enable_anti_spoofing())
+        output->is_live = true;
+      else
+        output->is_live = is_live(input);
+    }
 
-    extract_and_query(input, output->person_feature, output->person_info);
+    if (output->has_person_info)
+      extract_and_query(input, output->person_feature, output->person_info);
+
     if (rx_finished_) {
       rx_finished_ = false;
       emit tx_frame(pingpang_buffer_);
@@ -96,6 +106,14 @@ void RecognizeTask::rx_frame(PingPangBuffer<DetectionData> *buffer) {
 }
 
 void RecognizeTask::rx_finish() { rx_finished_ = true; }
+
+void RecognizeTask::rx_nir_finish(bool if_finished) {
+  rx_nir_finished_ = if_finished;
+}
+
+void RecognizeTask::rx_bgr_finish(bool if_finished) {
+  rx_bgr_finished_ = if_finished;
+}
 
 bool RecognizeTask::is_live(DetectionData *detection) {
   if (detection->nir_face_valid()) {
@@ -120,7 +138,6 @@ bool RecognizeTask::is_live(DetectionData *detection) {
       if (cfg.record_infraraed_faces &&
           width == detection->img_nir_large->width &&
           height == detection->img_nir_large->height) {
-
         static MmzImage *snapshot =
             new MmzImage(width, height, SZ_IMAGETYPE_BGR_PACKAGE);
 

@@ -16,7 +16,10 @@ class RecognizeData : public DetectionData {
 
   ~RecognizeData();
 
+  bool has_live;
   bool is_live;
+
+  bool has_person_info;
   QueryResult person_info;
   FaceFeature person_feature;
 };

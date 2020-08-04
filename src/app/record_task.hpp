@@ -28,6 +28,9 @@ class RecordTask : QObject {
  signals:
   void tx_finish();
 
+  void tx_nir_finish(bool if_finished);
+  void tx_bgr_finish(bool if_finished);
+
   // for display
   void tx_display(PersonData person, bool if_duplicated);
 
