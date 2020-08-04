@@ -63,10 +63,12 @@ SZ_RETCODE PersonService::update_person_face_image(
 
   auto res = client_.Post(path.c_str(), items);
   if (res && res->status < 400) {
-    // SZ_LOG_DEBUG("Got person body {}", res->body);
     return SZ_RETCODE_OK;
   }
-  return SZ_RETCODE_FAILED;
+  else {
+    SZ_LOG_ERROR("Got person body {}", res->body);
+    return SZ_RETCODE_FAILED;
+  }
 }
 
 SZ_RETCODE PersonService::report_face_record(

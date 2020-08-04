@@ -1,6 +1,8 @@
 #pragma once
 
 #include <nlohmann/json.hpp>
+
+#include "person_service.hpp"
 #include "quface_common.hpp"
 
 namespace suanzi {
@@ -21,13 +23,15 @@ class FaceService {
  public:
   typedef std::shared_ptr<FaceService> ptr;
 
-  FaceService(FaceDatabasePtr db, FaceDetectorPtr detector, FacePoseEstimatorPtr pose_estimator,
-              FaceExtractorPtr extractor, const std::string &image_store_dir,
-              bool store_image = false)
+  FaceService(FaceDatabasePtr db, FaceDetectorPtr detector,
+              FacePoseEstimatorPtr pose_estimator, FaceExtractorPtr extractor,
+              PersonService::ptr person_service,
+              const std::string &image_store_dir, bool store_image = false)
       : db_(db),
         detector_(detector),
         pose_estimator_(pose_estimator),
         extractor_(extractor),
+        person_service_(person_service),
         image_store_dir_(image_store_dir),
         store_image_(store_image) {}
   ~FaceService() {}
@@ -47,7 +51,7 @@ class FaceService {
   bool save_image(SZ_UINT32 faceId, const std::vector<SZ_BYTE> &buffer);
   bool load_image(SZ_UINT32 faceId, std::vector<SZ_BYTE> &buffer);
   SZ_RETCODE extract_image_feature(SZ_UINT32 faceId,
-                                   const std::vector<SZ_BYTE> &imgBuf,
+                                   std::vector<SZ_BYTE> &imgBuf,
                                    FaceFeature &pFeature);
   SZ_RETCODE read_image_as_base64(SZ_UINT32 id, std::string &result);
 
@@ -55,6 +59,8 @@ class FaceService {
   FaceDetectorPtr detector_;
   FacePoseEstimatorPtr pose_estimator_;
   FaceExtractorPtr extractor_;
+  PersonService::ptr person_service_;
+
   std::string image_store_dir_;
   bool store_image_;
 };

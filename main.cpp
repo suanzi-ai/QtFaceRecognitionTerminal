@@ -42,7 +42,8 @@ int main(int argc, char* argv[]) {
   auto person_service = PersonService::make_shared(
       config->app.person_service_base_url, config->app.image_store_path);
   auto face_service = std::make_shared<FaceService>(
-      db, detector, pose_estimator, extractor, config->app.image_store_path);
+      db, detector, pose_estimator, extractor, person_service,
+      config->app.image_store_path);
   auto face_server = std::make_shared<FaceServer>(face_service);
   auto http_server = std::make_shared<HTTPServer>(config);
   face_server->add_event_source(http_server);
