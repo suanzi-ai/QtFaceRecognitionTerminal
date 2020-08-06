@@ -31,6 +31,8 @@ void ImagePackage::copy_to(ImagePackage &pkg) {
   img_bgr_small->copy_to(*pkg.img_bgr_small);
   img_nir_large->copy_to(*pkg.img_nir_large);
   img_nir_small->copy_to(*pkg.img_nir_small);
+
+  pkg.frame_idx = frame_idx;
 }
 
 bool ImagePackage::get_jpeg_buffer(const MmzImage *src_img,
