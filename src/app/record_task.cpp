@@ -125,8 +125,8 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
 
     // output
     rx_reset();
-    SZ_LOG_INFO("Record: id={}, staff={}, status={}", person.id,
-                person.number, person.status);
+    SZ_LOG_INFO("Record: id={}, staff={}, status={}", person.id, person.number,
+                person.status);
     emit tx_display(person, duplicated_);
   }
 
