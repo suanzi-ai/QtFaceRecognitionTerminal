@@ -255,10 +255,10 @@ void Config::load_defaults() {
           {
               .threshold = 0.4f,
               .min_face_size = 40,
-              .max_yaw = 25,
-              .min_yaw = -25,
-              .max_pitch = 90,   // disable max pitch
-              .min_pitch = -90,  // disable min pitch
+              .max_yaw = 10,
+              .min_yaw = -10,
+              .max_pitch = 10,   // disable max pitch
+              .min_pitch = -10,  // disable min pitch
               .min_roll = -10,
               .max_roll = 10,
               .min_tracking_iou = 0.9,
@@ -267,54 +267,54 @@ void Config::load_defaults() {
       .medium =
           {
               .threshold = 0.4f,
-              .min_face_size = 40,
-              .max_yaw = 25,
-              .min_yaw = -25,
-              .max_pitch = 90,   // disable max pitch
-              .min_pitch = -90,  // disable min pitch
-              .min_roll = -10,
-              .max_roll = 10,
+              .min_face_size = 30,
+              .max_yaw = 15,
+              .min_yaw = -15,
+              .max_pitch = 15,   // disable max pitch
+              .min_pitch = -15,  // disable min pitch
+              .min_roll = -15,
+              .max_roll = 15,
               .min_tracking_iou = 0.9,
               .min_tracking_number = 3
           },
       .low =
           {
               .threshold = 0.4f,
-              .min_face_size = 40,
-              .max_yaw = 25,
-              .min_yaw = -25,
-              .max_pitch = 90,   // disable max pitch
-              .min_pitch = -90,  // disable min pitch
-              .min_roll = -10,
-              .max_roll = 10,
-              .min_tracking_iou = 0.9,
-              .min_tracking_number = 3
+              .min_face_size = 30,
+              .max_yaw = 15,
+              .min_yaw = -15,
+              .max_pitch = 15,   // disable max pitch
+              .min_pitch = -15,  // disable min pitch
+              .min_roll = -15,
+              .max_roll = 15,
+              .min_tracking_iou = 0.85,
+              .min_tracking_number = 2
           },
   };
 
   extract_levels_ = {
       .high =
           {
-              .history_size = 15,
-              .min_recognize_count = 10,
-              .min_recognize_score = .75f,
-              .min_accumulate_score = 7.0f,
+              .history_size = 2,
+              .min_recognize_count = 2,
+              .min_recognize_score = .8f,
+              .min_accumulate_score = 1.6f,
               .max_lost_age = 20,
           },
       .medium =
           {
-              .history_size = 15,
-              .min_recognize_count = 10,
-              .min_recognize_score = .75f,
-              .min_accumulate_score = 7.0f,
+              .history_size = 1,
+              .min_recognize_count = 1,
+              .min_recognize_score = .8f,
+              .min_accumulate_score = .8f,
               .max_lost_age = 20,
           },
       .low =
           {
-              .history_size = 15,
-              .min_recognize_count = 10,
-              .min_recognize_score = .75f,
-              .min_accumulate_score = 7.0f,
+              .history_size = 1,
+              .min_recognize_count = 1,
+              .min_recognize_score = .775f,
+              .min_accumulate_score = .775f,
               .max_lost_age = 20,
           },
   };
@@ -322,36 +322,36 @@ void Config::load_defaults() {
   liveness_levels_ = {
       .high =
           {
-              .history_size = 16,
-              .min_alive_count = 7,
+              .history_size = 5,
+              .min_alive_count = 2,
               .continuous_max_lost_count = 3,
-              .min_iou_between_bgr = 0.5,
-              .min_width_ratio_between_bgr = 0.8,
-              .max_width_ratio_between_bgr = 1.2,
-              .min_height_ratio_between_bgr = 0.8,
-              .max_height_ratio_between_bgr = 1.2,
+              .min_iou_between_bgr = 0.1,
+              .min_width_ratio_between_bgr = .5f,
+              .max_width_ratio_between_bgr = 2.f,
+              .min_height_ratio_between_bgr = .5f,
+              .max_height_ratio_between_bgr = 2.f,
           },
       .medium =
           {
-              .history_size = 12,
-              .min_alive_count = 5,
+              .history_size = 3,
+              .min_alive_count = 1,
               .continuous_max_lost_count = 3,
-              .min_iou_between_bgr = 0.3,
-              .min_width_ratio_between_bgr = 0.5,
-              .max_width_ratio_between_bgr = 1.5,
-              .min_height_ratio_between_bgr = 0.5,
-              .max_height_ratio_between_bgr = 1.5,
+              .min_iou_between_bgr = 0.1,
+              .min_width_ratio_between_bgr = .5f,
+              .max_width_ratio_between_bgr = 2.f,
+              .min_height_ratio_between_bgr = .5f,
+              .max_height_ratio_between_bgr = 2.f,
           },
       .low =
           {
-              .history_size = 8,
-              .min_alive_count = 3,
+              .history_size = 5,
+              .min_alive_count = 1,
               .continuous_max_lost_count = 2,
-              .min_iou_between_bgr = 0.3,
-              .min_width_ratio_between_bgr = 0.5,
-              .max_width_ratio_between_bgr = 1.5,
-              .min_height_ratio_between_bgr = 0.5,
-              .max_height_ratio_between_bgr = 1.5,
+              .min_iou_between_bgr = 0.1,
+              .min_width_ratio_between_bgr = .5f,
+              .max_width_ratio_between_bgr = 2.f,
+              .min_height_ratio_between_bgr = .5f,
+              .max_height_ratio_between_bgr = 2.f,
           },
   };
 }
