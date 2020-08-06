@@ -85,7 +85,7 @@ void DetectTipWidget::paint(QPainter *painter) {
 }
 
 void DetectTipWidget::rx_display(DetectionRatio detection, bool to_clear,
-                                 bool show_pose) {
+                                 bool is_bgr) {
   int box_x = win_x_ + 1;
   int box_y = win_y_ + 1;
   int box_w = win_width_ - 1;
@@ -94,7 +94,7 @@ void DetectTipWidget::rx_display(DetectionRatio detection, bool to_clear,
   if (!to_clear) {
     // display pose for debug
     landmarks_.clear();
-    if (show_pose) {
+    if (is_bgr) {
       for (int i = 0; i < SZ_LANDMARK_NUM; i++)
         landmarks_.push_back({(int)(detection.landmark[i][0] * box_w),
                               (int)(detection.landmark[i][1] * box_h)});
@@ -116,29 +116,62 @@ void DetectTipWidget::rx_display(DetectionRatio detection, bool to_clear,
     rects_.push_back(next_rect);
     if (rects_.size() > MAX_RECT_COUNT) rects_.erase(rects_.begin());
 
-    // decide face validation
-    auto cfg = Config::get_extract();
-    int threshold = std::max(cfg.history_size / 2, 2);
-    if (detection.is_valid()) {
-      valid_count_ = std::min(valid_count_ + 1, threshold);
-      if (valid_count_ >= threshold)
-        is_valid_ = true;
-    }
-    else {
-      valid_count_ = std::max(valid_count_ - 1, 0);
-      if (valid_count_ <= 0)
-        is_valid_ = false;
-    }
+    if (is_bgr) is_valid_ = decide_valid(detection);
 
   } else {
     if (++lost_age_ > MAX_LOST_AGE) {
       rects_.clear();
       lost_age_ = 0;
-      valid_count_ = 0;
       is_valid_ = false;
     }
   }
 
   QWidget *p = (QWidget *)parent();
   p->update();
+}
+
+// todo: merge decide_valid with detection_data bgr_valid
+bool DetectTipWidget::decide_valid(DetectionRatio detection) {
+  bool ret = false;
+  if (detection.is_valid()) {
+    static float x1 = 0;
+    static float y1 = 0;
+    static float w1 = 0;
+    static float h1 = 0;
+
+    static int stable_counter = 0;
+
+    auto cfg = Config::get_detect();
+
+    float x2 = detection.x, y2 = detection.y;
+    float w2 = detection.width, h2 = detection.height;
+
+    if (x1 > x2 + w2 || y1 > y2 + h2 || x1 + w1 < x2 || y1 + h1 < y2)
+      ret = false;
+    else {
+      float overlay_w = std::min(x1 + w1, x2 + w2) - std::max(x1, x2);
+      float overlay_h = std::min(y1 + h1, y2 + h2) - std::max(y1, y2);
+      float iou = overlay_w * overlay_h / (w1 * h1 + w2 * h2) * 2;
+
+      ret = iou >= cfg.min_tracking_iou;
+    }
+
+    x1 = x2;
+    y1 = y2;
+    w1 = w2;
+    h1 = h2;
+
+    if (ret)
+      stable_counter++;
+    else
+      stable_counter = 0;
+
+    ret = stable_counter >= cfg.min_tracking_number;
+  }
+
+  if (ret) {
+    valid_count_ = 10;
+    return true;
+  } else
+    return --valid_count_ > 0;
 }

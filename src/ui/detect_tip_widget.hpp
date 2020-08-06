@@ -22,7 +22,9 @@ class DetectTipWidget : public QWidget {
   void paint(QPainter *painter);
 
  private slots:
-  void rx_display(DetectionRatio detection, bool to_clear, bool show_pose);
+  void rx_display(DetectionRatio detection, bool to_clear, bool is_bgr);
+
+  bool decide_valid(DetectionRatio detection);
 
  private:
   static constexpr int MAX_RECT_COUNT = 10;
