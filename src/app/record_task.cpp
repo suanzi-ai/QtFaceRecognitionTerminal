@@ -51,8 +51,7 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
   }
 
   // reset if new person appear
-  if (input->has_person_info && !if_new(input->person_feature))
-    rx_reset();
+  if (input->has_person_info && !if_new(input->person_feature)) rx_reset();
 
   int live_size = Config::get_liveness().history_size;
   int person_size = Config::get_extract().history_size;
@@ -60,10 +59,13 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
   // receive liveness data
   if (input->has_live) live_history_.push_back(input->is_live);
 
+  // do sequence anti_spoof
+  bool is_live = sequence_antispoof(live_history_);
+
   if (live_history_.size() > live_size)
     live_history_.erase(live_history_.begin() + live_size, live_history_.end());
 
-  if (live_history_.size() == live_size) emit tx_nir_finish(true);
+  if (is_live || live_history_.size() == live_size) emit tx_nir_finish(true);
 
   // receive recognize data
   if (input->has_person_info) person_history_.push_back(input->person_info);
@@ -75,14 +77,15 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
   if (person_history_.size() == person_size) emit tx_bgr_finish(true);
 
   // do sequence inference
-  if (live_history_.size() == live_size &&
+  if ((is_live || live_history_.size() == live_size) &&
       person_history_.size() == person_size) {
     PersonData person;
     int width = input->img_bgr_small->width;
     int height = input->img_bgr_small->height;
     person.face_snapshot.create(height, width, CV_8UC3);
-    memcpy(person.face_snapshot.data, input->img_bgr_small->pData, width * height * 3 / 2);
-    
+    memcpy(person.face_snapshot.data, input->img_bgr_small->pData,
+           width * height * 3 / 2);
+
     // query person info
     SZ_UINT32 face_id;
     if (!sequence_query(person_history_, face_id) ||
@@ -94,7 +97,7 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
     }
 
     // decide fake or live
-    if (!sequence_antispoof(live_history_)) {
+    if (!is_live) {
       if (Config::get_user().liveness_policy == "alarm") {
         person.name = "活体失败";
       } else {  // stranger
@@ -246,13 +249,19 @@ bool RecordTask::sequence_query(const std::vector<QueryResult> &history,
 }
 
 bool RecordTask::sequence_antispoof(const std::vector<bool> &history) {
+  if (history.size() == 0) return false;
+
   int count = 0;
   for (auto is_live : history) {
     if (is_live) count++;
   }
 
-  SZ_LOG_DEBUG("live={}/{}", count, Config::get_liveness().min_alive_count);
-  return count >= Config::get_liveness().min_alive_count;
+  bool ret = count >= Config::get_liveness().min_alive_count;
+  if (ret || history.size() == Config::get_liveness().history_size)
+    SZ_LOG_DEBUG("live={}/{}/{}", count, Config::get_liveness().min_alive_count,
+                 history.size());
+
+  return ret;
 }
 
 bool RecordTask::if_duplicated(const SZ_UINT32 &face_id) {

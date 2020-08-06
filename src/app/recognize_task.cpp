@@ -81,21 +81,19 @@ void RecognizeTask::rx_frame(PingPangBuffer<DetectionData> *buffer) {
   output->has_live = !rx_nir_finished_;
   output->has_person_info = !rx_bgr_finished_;
 
-  if (input->bgr_face_detected()) {
+  if (input->bgr_face_valid()) {
     if (output->has_live) {
       if (!Config::enable_anti_spoofing())
         output->is_live = true;
       else
         output->is_live = is_live(input);
     }
-  } else
-    output->has_live = false;
-
-  if (input->bgr_face_valid()) {
     if (output->has_person_info)
       extract_and_query(input, output->person_feature, output->person_info);
-  } else
+  } else {
+    output->has_live = false;
     output->has_person_info = false;
+  }
 
   if (rx_finished_) {
     rx_finished_ = false;
