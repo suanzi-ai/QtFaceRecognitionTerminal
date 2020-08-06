@@ -78,13 +78,10 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
   emit tx_bgr_display(output->bgr_detection_, !output->bgr_face_detected_,
                       true);
 
-  if (Config::enable_anti_spoofing()) {
-    output->nir_face_detected_ =
-        detect_and_select(input->img_nir_small, output->nir_detection_, false);
-    emit tx_nir_display(output->nir_detection_, !output->nir_face_detected_,
-                        false);
-  } else
-    output->nir_face_detected_ = false;
+  output->nir_face_detected_ =
+      detect_and_select(input->img_nir_small, output->nir_detection_, false);
+  emit tx_nir_display(output->nir_detection_, !output->nir_face_detected_,
+                      false);
 
   if (rx_finished_) {
     rx_finished_ = false;
