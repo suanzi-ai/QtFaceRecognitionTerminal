@@ -78,21 +78,11 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
   if (live_history_.size() == live_size &&
       person_history_.size() == person_size) {
     PersonData person;
-
-    static MmzImage *snapshot =
-        new MmzImage(224, 320, SZ_IMAGETYPE_BGR_PACKAGE);
-
     int width = input->img_bgr_small->width;
     int height = input->img_bgr_small->height;
-    snapshot->setSize(width, height);
-    if (Ive::getInstance()->yuv2RgbPacked(snapshot, input->img_bgr_small,
-                                          true)) {
-      cv::Mat(height, width, CV_8UC3, snapshot->pData)
-          .copyTo(person.face_snapshot);
-    } else {
-      SZ_LOG_ERROR("upload snapshot failed");
-    }
-
+    person.face_snapshot.create(height, width, CV_8UC3);
+    memcpy(person.face_snapshot.data, input->img_bgr_small->pData, width * height * 3 / 2);
+    
     // query person info
     SZ_UINT32 face_id;
     if (!sequence_query(person_history_, face_id) ||

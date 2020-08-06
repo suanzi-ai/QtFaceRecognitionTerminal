@@ -6,7 +6,6 @@
 #include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
 #include <quface/common.hpp>
-
 #include "logger.hpp"
 
 namespace suanzi {

@@ -1,4 +1,5 @@
 #include "upload_task.hpp"
+#include "venc.hpp"
 
 #include <QThread>
 
@@ -25,7 +26,8 @@ void UploadTask::rx_upload(PersonData person, bool if_duplicated) {
 
   if (!if_duplicated) {
     SZ_LOG_DEBUG("upload snapshots");
-    if (cv::imencode(".jpg", person.face_snapshot, image_buffer))
+    VEncoder *pEncoder = VEncoder::get_instance();
+	  if (pEncoder->encode(image_buffer, person.face_snapshot.data, person.face_snapshot.cols, person.face_snapshot.rows))
       person_service_->report_face_record(person.id, image_buffer, person.status);
     else
       SZ_LOG_ERROR("Encode jpg failed");

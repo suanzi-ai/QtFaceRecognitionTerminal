@@ -5,13 +5,16 @@
 #include <ctime>
 #include <iostream>
 #include <regex>
-
+#include "vb_pool.hpp"
 #include "quface/common.hpp"
 
 using namespace suanzi;
 
 CameraReader::CameraReader(QObject *parent) {
   auto app = Config::get_app();
+
+  //init sys vb pool
+  VbPool::get_instance();
 
   if (!load_screen_type()) {
     SZ_LOG_ERROR("Load screen type error");
