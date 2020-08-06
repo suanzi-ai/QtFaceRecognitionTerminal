@@ -144,7 +144,7 @@ bool DetectTask::detect_and_select(const MmzImage *image,
   detection.x = rect.x * 1.0 / image->width;
   detection.y = rect.y * 1.0 / image->height;
   detection.width = rect.width * 1.0 / image->width;
-  detection.height = rect.height * 0.8 / image->height;  // remove neck
+  detection.height = rect.height * 1.0 / image->height;
 
   // return landmarks
   for (int i = 0; i < SZ_LANDMARK_NUM; i++) {

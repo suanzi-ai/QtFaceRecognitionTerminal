@@ -123,6 +123,7 @@ void DetectTipWidget::rx_display(DetectionRatio detection, bool to_clear,
       rects_.clear();
       lost_age_ = 0;
       is_valid_ = false;
+      valid_count_ = 0;
     }
   }
 
