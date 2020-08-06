@@ -17,6 +17,7 @@ RecordTask::RecordTask(PersonService::ptr person_service, QThread *thread,
   unknown_database_ = std::make_shared<FaceDatabase>("_UNKNOWN_DB_");
 
   player.set_volume(6);
+  reset_counter_ = 0;
 
   // Create thread
   if (thread == nullptr) {
@@ -41,6 +42,17 @@ RecordTask::~RecordTask() {
 void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
   buffer->switch_buffer();
   RecognizeData *input = buffer->get_pang();
+
+  if (!input->has_live && !input->has_person_info &&
+      ++reset_counter_ > Config::get_extract().max_lost_age) {
+    rx_reset();
+    emit tx_finish();
+    return;
+  }
+
+  // reset if new person appear
+  if (input->has_person_info && !if_new(input->person_feature))
+    rx_reset();
 
   int live_size = Config::get_liveness().history_size;
   int person_size = Config::get_extract().history_size;
@@ -136,9 +148,58 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
 void RecordTask::rx_reset() {
   person_history_.clear();
   live_history_.clear();
+  reset_counter_ = 0;
 
   emit tx_nir_finish(false);
   emit tx_bgr_finish(false);
+}
+
+bool RecordTask::if_new(const FaceFeature &feature) {
+  bool ret;
+  if (person_history_.size() == 0) {
+    ret = true;
+  } else {
+    float score = 0.0;
+
+#if __ARM_NEON
+    assert(SZ_FEATURE_NUM % 16 == 0);
+    int dim = SZ_FEATURE_NUM;
+
+    const float *com_feat = feature.value;
+    const float *q_feat = last_feature_.value;
+    float32x4_t out = vmovq_n_f32(0.0);
+    float32x4_t f1, f2;
+    float outTmp[4];
+    for (int k = 0; k < dim; k += 16) {
+      f1 = vld1q_f32(com_feat + k);
+      f2 = vld1q_f32(q_feat + k);
+      out = vmlaq_f32(out, f1, f2);
+
+      f1 = vld1q_f32(com_feat + k + 4);
+      f2 = vld1q_f32(q_feat + k + 4);
+      out = vmlaq_f32(out, f1, f2);
+
+      f1 = vld1q_f32(com_feat + k + 8);
+      f2 = vld1q_f32(q_feat + k + 8);
+      out = vmlaq_f32(out, f1, f2);
+
+      f1 = vld1q_f32(com_feat + k + 12);
+      f2 = vld1q_f32(q_feat + k + 12);
+      out = vmlaq_f32(out, f1, f2);
+    }
+    vst1q_f32(outTmp, out);
+
+    score = outTmp[0] + outTmp[1] + outTmp[2] + outTmp[3];
+#else
+    for (int k = 0; k < SZ_FEATURE_NUM; k++)
+      score += feature.value[k] * last_feature_.value[k];
+#endif
+
+    ret = score / 2 + 0.5f > 0.9;
+  }
+  memcpy(last_feature_.value, feature.value, SZ_FEATURE_NUM * sizeof(SZ_FLOAT));
+
+  return ret;
 }
 
 bool RecordTask::sequence_query(const std::vector<QueryResult> &history,

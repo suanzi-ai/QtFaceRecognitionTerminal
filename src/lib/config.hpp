@@ -82,6 +82,8 @@ typedef struct {
   SZ_FLOAT min_pitch;
   SZ_FLOAT min_roll;
   SZ_FLOAT max_roll;
+  SZ_FLOAT min_tracking_iou;
+  SZ_UINT32 min_tracking_number;
 } DetectConfig;
 
 void to_json(json &j, const DetectConfig &c);

@@ -80,7 +80,43 @@ bool DetectionData::bgr_face_detected() { return bgr_face_detected_; }
 bool DetectionData::nir_face_detected() { return nir_face_detected_; }
 
 bool DetectionData::bgr_face_valid() {
-  return bgr_face_detected() && bgr_detection_.is_valid();
+  bool ret = false;
+  if (bgr_face_detected() && bgr_detection_.is_valid()) {
+
+    static float x1 = 0;
+    static float y1 = 0;
+    static float w1 = 0;
+    static float h1 = 0;
+
+    static int stable_counter = 0;
+
+    auto cfg = Config::get_detect();
+
+    float x2 = bgr_detection_.x, y2 = bgr_detection_.y;
+    float w2 = bgr_detection_.width, h2 = bgr_detection_.height;
+
+    if (x1 > x2 + w2 || y1 > y2 + h2 || x1 + w1 < x2 || y1 + h1 < y2)
+      ret = false;
+    else {
+      float overlay_w = std::min(x1 + w1, x2 + w2) - std::max(x1, x2);
+      float overlay_h = std::min(y1 + h1, y2 + h2) - std::max(y1, y2);
+      float iou = overlay_w * overlay_h / (w1 * h1 + w2 * h2) * 2;
+
+      ret = iou >= cfg.min_tracking_iou;
+    }
+
+    x1 = x2;
+    y1 = y2;
+    w1 = w2;
+    h1 = h2;
+
+    if (ret) stable_counter ++;
+    else stable_counter = 0;
+
+    ret = stable_counter >= cfg.min_tracking_number;
+  }
+
+  return ret;
 }
 
 bool DetectionData::nir_face_valid() {

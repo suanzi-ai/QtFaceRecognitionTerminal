@@ -97,6 +97,8 @@ void suanzi::to_json(json &j, const DetectConfig &c) {
   SAVE_JSON_TO(j, "min_pitch", c.min_pitch);
   SAVE_JSON_TO(j, "max_roll", c.max_roll);
   SAVE_JSON_TO(j, "min_roll", c.min_roll);
+  SAVE_JSON_TO(j, "min_tracking_iou", c.min_tracking_iou);
+  SAVE_JSON_TO(j, "min_tracking_number", c.min_tracking_number);
 }
 
 void suanzi::from_json(const json &j, DetectConfig &c) {
@@ -108,6 +110,8 @@ void suanzi::from_json(const json &j, DetectConfig &c) {
   LOAD_JSON_TO(j, "min_pitch", c.min_pitch);
   LOAD_JSON_TO(j, "max_roll", c.max_roll);
   LOAD_JSON_TO(j, "min_roll", c.min_roll);
+  LOAD_JSON_TO(j, "min_tracking_iou", c.min_tracking_iou);
+  LOAD_JSON_TO(j, "min_tracking_number", c.min_tracking_number);
 }
 
 void suanzi::to_json(json &j, const ExtractConfig &c) {
@@ -257,6 +261,8 @@ void Config::load_defaults() {
               .min_pitch = -90,  // disable min pitch
               .min_roll = -10,
               .max_roll = 10,
+              .min_tracking_iou = 0.9,
+              .min_tracking_number = 3
           },
       .medium =
           {
@@ -268,6 +274,8 @@ void Config::load_defaults() {
               .min_pitch = -90,  // disable min pitch
               .min_roll = -10,
               .max_roll = 10,
+              .min_tracking_iou = 0.9,
+              .min_tracking_number = 3
           },
       .low =
           {
@@ -279,6 +287,8 @@ void Config::load_defaults() {
               .min_pitch = -90,  // disable min pitch
               .min_roll = -10,
               .max_roll = 10,
+              .min_tracking_iou = 0.9,
+              .min_tracking_number = 3
           },
   };
 

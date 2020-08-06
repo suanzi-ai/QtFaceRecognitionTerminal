@@ -81,27 +81,28 @@ void RecognizeTask::rx_frame(PingPangBuffer<DetectionData> *buffer) {
   output->has_live = !rx_nir_finished_;
   output->has_person_info = !rx_bgr_finished_;
 
-  if (input->bgr_face_valid()) {
-    // SZ_LOG_DEBUG("has_live={}, has_person_info={}", output->has_live,
-    // output->has_person_info);
+  if (input->bgr_face_detected()) {
     if (output->has_live) {
       if (!Config::enable_anti_spoofing())
         output->is_live = true;
       else
         output->is_live = is_live(input);
     }
+  } else
+    output->has_live = false;
 
+  if (input->bgr_face_valid()) {
     if (output->has_person_info)
       extract_and_query(input, output->person_feature, output->person_info);
+  } else
+    output->has_person_info = false;
 
-    if (rx_finished_) {
-      rx_finished_ = false;
-      emit tx_frame(pingpang_buffer_);
-    } else {
-      QThread::usleep(10);
-    }
+  if (rx_finished_) {
+    rx_finished_ = false;
+    emit tx_frame(pingpang_buffer_);
+  } else {
+    QThread::usleep(10);
   }
-
   emit tx_finish();
 }
 

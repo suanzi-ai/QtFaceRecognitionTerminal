@@ -35,6 +35,8 @@ class RecordTask : QObject {
   void tx_display(PersonData person, bool if_duplicated);
 
  private:
+  bool if_new(const FaceFeature &feature);
+
   bool sequence_query(const std::vector<QueryResult> &history,
                       SZ_UINT32 &face_id);
   bool sequence_antispoof(const std::vector<bool> &history);
@@ -53,6 +55,10 @@ class RecordTask : QObject {
   std::vector<bool> live_history_;
   std::map<SZ_UINT32, std::chrono::steady_clock::time_point>
       unknown_query_clock_;
+
+  int reset_counter_;
+
+  FaceFeature last_feature_;
 };
 
 }  // namespace suanzi

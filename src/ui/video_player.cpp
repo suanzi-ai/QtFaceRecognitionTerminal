@@ -95,9 +95,9 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
           (const QObject *)face_timer_,
           SLOT(rx_frame(PingPangBuffer<DetectionData> *)));
 
-  // Connect face_timer to record_task
-  connect((const QObject *)face_timer_, SIGNAL(tx_face_reset()),
-          (const QObject *)record_task_, SLOT(rx_reset()));
+//   // Connect face_timer to record_task
+//   connect((const QObject *)face_timer_, SIGNAL(tx_face_disappear(int)),
+//           (const QObject *)record_task_, SLOT(rx_reset()));
 
   // Connect detect_task to detect_tip_widget
   connect((const QObject *)detect_task_,
