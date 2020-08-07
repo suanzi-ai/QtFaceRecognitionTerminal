@@ -8,6 +8,8 @@
 
 #include "logger.hpp"
 
+#define APP_DIR_PREFIX "/user/quface-app"
+
 #define LOAD_JSON_TO(config, key, value) \
   if (config.contains(key)) {            \
     config.at(key).get_to(value);        \
@@ -106,9 +108,9 @@ typedef struct {
   SZ_INT32 continuous_max_lost_count;
   SZ_FLOAT min_iou_between_bgr;
   SZ_FLOAT min_width_ratio_between_bgr;
-  SZ_FLOAT max_width_ratio_between_bgr; 
+  SZ_FLOAT max_width_ratio_between_bgr;
   SZ_FLOAT min_height_ratio_between_bgr;
-  SZ_FLOAT max_height_ratio_between_bgr; 
+  SZ_FLOAT max_height_ratio_between_bgr;
 } LivenessConfig;
 
 void to_json(json &j, const LivenessConfig &c);

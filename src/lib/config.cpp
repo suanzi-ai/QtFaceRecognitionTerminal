@@ -199,12 +199,13 @@ void Config::load_defaults() {
       .recognize_tip_top_percent = 78,
       .server_port = 8010,
       .server_host = "127.0.0.1",
-      .image_store_path = "/user/quface-app/var/db/upload/",
+      .image_store_path = APP_DIR_PREFIX "/var/db/upload/",
       .person_service_base_url = "http://127.0.0.1",
       .enable_anti_spoofing = false,
       .show_infrared_window = false,
       .record_infraraed_faces = false,
-      .infraraed_faces_store_path = "/user/quface-app/var/face-terminal/ir-faces/",
+      .infraraed_faces_store_path =
+          APP_DIR_PREFIX "/var/face-terminal/ir-faces/",
   };
 
   user = {
@@ -221,7 +222,7 @@ void Config::load_defaults() {
       .device_name = "",
       .device_secret = "",
       .client_id = "face-service",
-      .db_name = "quface",
+      .db_name = APP_DIR_PREFIX "/var/db/quface",
       .model_file_path = "facemodel.bin",
       .license_filename = "license.json",
   };
@@ -251,35 +252,27 @@ void Config::load_defaults() {
   };
 
   detect_levels_ = {
-      .high =
-          {
-              .threshold = 0.4f,
-              .min_face_size = 40,
-              .max_yaw = 10,
-              .min_yaw = -10,
-              .max_pitch = 10,   // disable max pitch
-              .min_pitch = -10,  // disable min pitch
-              .min_roll = -10,
-              .max_roll = 10,
-              .min_tracking_iou = 0.9,
-              .min_tracking_number = 3
-          },
-      .medium =
-          {
-              .threshold = 0.4f,
-              .min_face_size = 30,
-              .max_yaw = 15,
-              .min_yaw = -15,
-              .max_pitch = 15,   // disable max pitch
-              .min_pitch = -15,  // disable min pitch
-              .min_roll = -15,
-              .max_roll = 15,
-              .min_tracking_iou = 0.9,
-              .min_tracking_number = 3
-          },
-      .low =
-          {
-              .threshold = 0.4f,
+      .high = {.threshold = 0.4f,
+               .min_face_size = 40,
+               .max_yaw = 10,
+               .min_yaw = -10,
+               .max_pitch = 10,   // disable max pitch
+               .min_pitch = -10,  // disable min pitch
+               .min_roll = -10,
+               .max_roll = 10,
+               .min_tracking_iou = 0.9,
+               .min_tracking_number = 3},
+      .medium = {.threshold = 0.4f,
+                 .min_face_size = 30,
+                 .max_yaw = 15,
+                 .min_yaw = -15,
+                 .max_pitch = 15,   // disable max pitch
+                 .min_pitch = -15,  // disable min pitch
+                 .min_roll = -15,
+                 .max_roll = 15,
+                 .min_tracking_iou = 0.9,
+                 .min_tracking_number = 3},
+      .low = {.threshold = 0.4f,
               .min_face_size = 30,
               .max_yaw = 15,
               .min_yaw = -15,
@@ -288,8 +281,7 @@ void Config::load_defaults() {
               .min_roll = -15,
               .max_roll = 15,
               .min_tracking_iou = 0.85,
-              .min_tracking_number = 2
-          },
+              .min_tracking_number = 2},
   };
 
   extract_levels_ = {
