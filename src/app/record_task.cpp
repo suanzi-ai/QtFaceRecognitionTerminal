@@ -15,8 +15,6 @@ RecordTask::RecordTask(PersonService::ptr person_service, QThread *thread,
     : person_service_(person_service) {
   // Create db for unknown faces
   unknown_database_ = std::make_shared<FaceDatabase>("_UNKNOWN_DB_");
-
-  player.set_volume(6);
   reset_counter_ = 0;
 
   // Create thread
@@ -122,10 +120,8 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
     bool duplicated_;
     if (person.status != person_service_->get_status(PersonStatus::Normal)) {
       duplicated_ = if_duplicated(input->person_feature);
-      player.play(":asserts/fail.aac");
     } else {
       duplicated_ = if_duplicated(face_id);
-      player.play(":asserts/success.aac");
     }
 
     // output

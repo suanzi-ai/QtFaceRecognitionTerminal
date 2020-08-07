@@ -8,6 +8,7 @@
 #include "pingpang_buffer.hpp"
 #include "recognize_data.hpp"
 
+#include "audio_task.hpp"
 #include "camera_reader.hpp"
 #include "detect_task.hpp"
 #include "face_timer.hpp"
@@ -51,6 +52,7 @@ class VideoPlayer : public QWidget {
   FaceTimer *face_timer_;
 
   UploadTask *upload_task_;
+  AudioTask *audio_task_;
 };
 
 }  // namespace suanzi

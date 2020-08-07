@@ -60,6 +60,7 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
 
   // IO Tasks
   upload_task_ = new UploadTask(person_service, nullptr, this);
+  audio_task_ = new AudioTask(nullptr, this);
 
   // Connect camera_reader to detect_task
   connect((const QObject *)camera_reader_,
@@ -119,6 +120,9 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
   // Connect record_task to upload_task_
   connect((const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool)),
           (const QObject *)upload_task_, SLOT(rx_upload(PersonData, bool)));
+
+  connect((const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool)),
+          (const QObject *)audio_task_, SLOT(rx_display(PersonData, bool)));
 
   // Connect face_timer to screen_saver
   connect((const QObject *)face_timer_, SIGNAL(tx_face_disappear(int)),
