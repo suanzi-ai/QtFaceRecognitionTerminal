@@ -1,19 +1,21 @@
 #include "camera_reader.hpp"
 
-#include <QDebug>
 #include <chrono>
 #include <ctime>
 #include <iostream>
 #include <regex>
-#include "vb_pool.hpp"
+
+#include <QDebug>
+
 #include "quface/common.hpp"
+#include "vb_pool.hpp"
 
 using namespace suanzi;
 
 CameraReader::CameraReader(QObject *parent) {
   auto app = Config::get_app();
 
-  //init sys vb pool
+  // init sys vb pool
   VbPool::get_instance();
 
   if (!load_screen_type()) {
@@ -21,18 +23,20 @@ CameraReader::CameraReader(QObject *parent) {
   }
 
   // Initialize VI_VPSS for BGR
-  vi_bgr_ = new Vi(DEV_IDX_BRG, PIPE_IDX_BRG, SONY_IMX307_MIPI_2M_30FPS_12BIT,
-                   BGR_FLIP);
-  vpss_bgr_ = new Vpss(DEV_IDX_BRG, VPSS_CH_SIZES_BGR[0].width,
+  auto bgr_index = Config::get_camera(true).index;
+  vi_bgr_ = new Vi(CAMERAS[bgr_index][0], CAMERAS[bgr_index][1],
+                   SONY_IMX307_MIPI_2M_30FPS_12BIT, BGR_FLIP);
+  vpss_bgr_ = new Vpss(CAMERAS[bgr_index][0], VPSS_CH_SIZES_BGR[0].width,
                        VPSS_CH_SIZES_BGR[0].height);
   vi_vpss_bgr_ =
       new Vi_Vpss(vi_bgr_, vpss_bgr_, VPSS_CH_SIZES_BGR, CH_INDEXES_BGR,
                   CH_ROTATES_BGR, sizeof(VPSS_CH_SIZES_BGR) / sizeof(Size));
 
   // Initialize VI_VPSS for NIR
-  vi_nir_ = new Vi(DEV_IDX_NIR, PIPE_IDX_NIR, SONY_IMX307_MIPI_2M_30FPS_12BIT,
-                   NIR_FLIP);
-  vpss_nir_ = new Vpss(DEV_IDX_NIR, VPSS_CH_SIZES_NIR[0].width,
+  auto nir_index = Config::get_camera(false).index;
+  vi_nir_ = new Vi(CAMERAS[nir_index][0], CAMERAS[nir_index][1],
+                   SONY_IMX307_MIPI_2M_30FPS_12BIT, NIR_FLIP);
+  vpss_nir_ = new Vpss(CAMERAS[nir_index][0], VPSS_CH_SIZES_NIR[0].width,
                        VPSS_CH_SIZES_NIR[0].height);
   vi_vpss_nir_ =
       new Vi_Vpss(vi_nir_, vpss_nir_, VPSS_CH_SIZES_NIR, CH_INDEXES_NIR,
@@ -156,13 +160,11 @@ bool CameraReader::capture_frame(ImagePackage *pkg) {
   // set channel U,V to zeros, remain Y
   int width = pkg->img_nir_large->width;
   int height = pkg->img_nir_large->height;
-  memset(pkg->img_nir_large->pData + width * height, 0x80,
-          width * height / 2);
+  memset(pkg->img_nir_large->pData + width * height, 0x80, width * height / 2);
 
   width = pkg->img_nir_small->width;
   height = pkg->img_nir_small->height;
-  memset(pkg->img_nir_small->pData + width * height, 0x80,
-          width * height / 2);
+  memset(pkg->img_nir_small->pData + width * height, 0x80, width * height / 2);
 
   pkg->frame_idx = frame_idx++;
 

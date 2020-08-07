@@ -228,7 +228,7 @@ void Config::load_defaults() {
   };
 
   normal = {
-      .index = 1,
+      .index = 0,
       .rotate = 0,
       .flip = -2,
       .min_face_height = 100,
@@ -431,6 +431,13 @@ const UserConfig &Config::get_user() { return instance_.user; }
 const AppConfig &Config::get_app() { return instance_.app; }
 
 const QufaceConfig &Config::get_quface() { return instance_.quface; }
+
+const CameraConfig &Config::get_camera(bool is_bgr) {
+  if (is_bgr)
+    return instance_.normal;
+  else
+    return instance_.infrared;
+}
 
 const DetectConfig &Config::get_detect() {
   auto &i = instance_;

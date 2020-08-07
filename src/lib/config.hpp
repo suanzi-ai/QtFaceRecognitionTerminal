@@ -165,9 +165,11 @@ class Config {
   static const UserConfig &get_user();
   static const AppConfig &get_app();
   static const QufaceConfig &get_quface();
+  static const CameraConfig &get_camera(bool is_bgr);
   static const DetectConfig &get_detect();
   static const ExtractConfig &get_extract();
   static const LivenessConfig &get_liveness();
+
   static bool enable_anti_spoofing();
 
   friend void from_json(const json &j, Config &c);
