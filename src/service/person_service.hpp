@@ -57,7 +57,7 @@ class PersonService {
   static std::string get_status(PersonStatus s);
 
  private:
-  httplib::Client2 client_;
+  httplib::Client client_;
   std::string image_store_path_;
 };
 }  // namespace suanzi
