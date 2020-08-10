@@ -368,15 +368,14 @@ SZ_RETCODE Config::load_from_json(const json &j) {
 SZ_RETCODE Config::reload() {
   try {
     std::ifstream config_fd(config_file_);
-    if (!config_fd.is_open()) {
+    if (config_fd.is_open()) {
+      SZ_LOG_INFO("Load config from {}", config_file_);
+      json config;
+      config_fd >> config;
+      config.get_to(*this);
+    } else {
       SZ_LOG_WARN("{} not present, will using defaults", config_file_);
-      return SZ_RETCODE_OK;
     }
-
-    json config;
-    config_fd >> config;
-
-    config.get_to(*this);
 
     std::ifstream override_fd(config_override_file_);
     if (override_fd.is_open()) {
