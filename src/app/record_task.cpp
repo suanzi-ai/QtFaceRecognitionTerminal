@@ -80,8 +80,14 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
     PersonData person;
     int width = input->img_bgr_small->width;
     int height = input->img_bgr_small->height;
-    person.face_snapshot.create(height, width, CV_8UC3);
-    memcpy(person.face_snapshot.data, input->img_bgr_small->pData,
+    person.bgr_face_snapshot.create(height, width, CV_8UC3);
+    memcpy(person.bgr_face_snapshot.data, input->img_bgr_small->pData,
+           width * height * 3 / 2);
+
+    width = input->img_nir_small->width;
+    height = input->img_nir_small->height;
+    person.nir_face_snapshot.create(height, width, CV_8UC3);
+    memcpy(person.nir_face_snapshot.data, input->img_nir_small->pData,
            width * height * 3 / 2);
 
     // query person info

@@ -6,6 +6,7 @@
 #include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
 #include <quface/common.hpp>
+
 #include "logger.hpp"
 
 namespace suanzi {
@@ -22,7 +23,8 @@ struct PersonData {
   std::string status;
   std::string face_url;
   std::string face_path;
-  cv::Mat face_snapshot;
+  cv::Mat bgr_face_snapshot;
+  cv::Mat nir_face_snapshot;
 };
 
 void to_json(json &j, const PersonData &p);
@@ -47,11 +49,14 @@ class PersonService {
 
   SZ_RETCODE get_person(SZ_UINT32 id, PersonData &person);
 
+  SZ_RETCODE upload_image(const std::vector<SZ_UINT8> &image_content,
+                          std::string &file_path);
   SZ_RETCODE update_person_face_image(
       uint id, const std::vector<SZ_UINT8> &image_content);
 
   SZ_RETCODE report_face_record(uint person_id,
-                                const std::vector<SZ_UINT8> &image_content,
+                                const std::vector<SZ_UINT8> &bgr_image_content,
+                                const std::vector<SZ_UINT8> &nir_image_content,
                                 const std::string &status);
 
   static std::string get_status(PersonStatus s);

@@ -64,16 +64,14 @@ SZ_RETCODE PersonService::update_person_face_image(
   auto res = client_.Post(path.c_str(), items);
   if (res && res->status < 400) {
     return SZ_RETCODE_OK;
-  }
-  else {
+  } else {
     SZ_LOG_ERROR("Got person body {}", res->body);
     return SZ_RETCODE_FAILED;
   }
 }
 
-SZ_RETCODE PersonService::report_face_record(
-    uint person_id, const std::vector<SZ_UINT8> &image_content,
-    const std::string &status) {
+SZ_RETCODE PersonService::upload_image(
+    const std::vector<SZ_UINT8> &image_content, std::string &file_path) {
   std::string content(image_content.begin(), image_content.end());
   httplib::MultipartFormDataItems items = {
       {"file", content, "face.jpg", "images/jpeg"},
@@ -91,18 +89,38 @@ SZ_RETCODE PersonService::report_face_record(
     return SZ_RETCODE_FAILED;
   }
 
-  std::string filePath;
   try {
     json body = json::parse(imgRes->body);
-    filePath = body["filePath"];
+    file_path = body["filePath"];
   } catch (std::exception &exc) {
     SZ_LOG_ERROR("Json parse err {}", exc.what());
     return SZ_RETCODE_FAILED;
   }
 
+  return SZ_RETCODE_OK;
+}
+
+SZ_RETCODE PersonService::report_face_record(
+    uint person_id, const std::vector<SZ_UINT8> &bgr_image_content,
+    const std::vector<SZ_UINT8> &nir_image_content, const std::string &status) {
+  std::string bgr_file_path;
+  SZ_RETCODE ret = upload_image(bgr_image_content, bgr_file_path);
+  if (ret != SZ_RETCODE_OK) {
+    return ret;
+  }
+
+  std::string nir_file_path;
+  if (!nir_image_content.empty()) {
+    ret = upload_image(nir_image_content, nir_file_path);
+    if (ret != SZ_RETCODE_OK) {
+      return ret;
+    }
+  }
+
   json j = {
       {"personID", person_id},
-      {"imagePath", filePath},
+      {"imagePath", bgr_file_path},
+      {"irImagePath", nir_file_path},
       {"status", status},
   };
   std::string path = "/api/v1/faceRecords";
