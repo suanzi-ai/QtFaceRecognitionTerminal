@@ -2,6 +2,13 @@
 
 #include <thread>
 #include <unistd.h>
+#include "platform_interface.h"
+#include "ambient_temp_task.hpp"
+#include "object_temp_task.hpp"
+#include <QObject>
+
+
+using namespace suanzi;
 
 void test() {
   suanzi::AudioPlayer player;
@@ -26,8 +33,27 @@ void test() {
   sleep(1);
 }
 
+class TestTemp: public QObject {
+	
+	public:
+		TestTemp() {
+			static ObjectTempTask obj_temp_task;
+			static AmbientTempTask ambient_task;
+		    connect((const QObject *)&ambient_task, SIGNAL(tx_ambient_temp(float)),
+		          (const QObject *)&obj_temp_task, SLOT(rx_ambient_temp(float)));
+		}
+};
+
+#include <QtWidgets/QApplication>
+
 int main(int argc, char* argv[]) {
+#if 0
   HI_MPI_SYS_Init();
   test();
   HI_MPI_SYS_Exit();
+#endif
+	TestTemp test_temp;
+	getchar();
+	//QApplication app(argc, argv);
+	//return app.exec();
 }
