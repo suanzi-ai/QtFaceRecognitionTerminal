@@ -72,12 +72,7 @@ typedef struct {
   int index;
   int rotate;
   int flip;
-  int min_face_height;
-  int min_face_width;
-  int max_window_height;
-  int max_window_width;
-  int target_area_width_percent;
-  int target_area_height_percent;
+  int pipe;
 } CameraConfig;
 
 void to_json(json &j, const CameraConfig &c);

@@ -23,20 +23,20 @@ CameraReader::CameraReader(QObject *parent) {
   }
 
   // Initialize VI_VPSS for BGR
-  auto bgr_index = Config::get_camera(true).index;
-  vi_bgr_ = new Vi(CAMERAS[bgr_index][0], CAMERAS[bgr_index][1],
+  auto bgr_cam = Config::get_camera(true);
+  vi_bgr_ = new Vi(bgr_cam.index, bgr_cam.pipe,
                    SONY_IMX307_MIPI_2M_30FPS_12BIT, BGR_FLIP);
-  vpss_bgr_ = new Vpss(CAMERAS[bgr_index][0], VPSS_CH_SIZES_BGR[0].width,
+  vpss_bgr_ = new Vpss(bgr_cam.index, VPSS_CH_SIZES_BGR[0].width,
                        VPSS_CH_SIZES_BGR[0].height);
   vi_vpss_bgr_ =
       new Vi_Vpss(vi_bgr_, vpss_bgr_, VPSS_CH_SIZES_BGR, CH_INDEXES_BGR,
                   CH_ROTATES_BGR, sizeof(VPSS_CH_SIZES_BGR) / sizeof(Size));
 
   // Initialize VI_VPSS for NIR
-  auto nir_index = Config::get_camera(false).index;
-  vi_nir_ = new Vi(CAMERAS[nir_index][0], CAMERAS[nir_index][1],
+  auto nir_cam = Config::get_camera(false);
+  vi_nir_ = new Vi(nir_cam.index, nir_cam.pipe,
                    SONY_IMX307_MIPI_2M_30FPS_12BIT, NIR_FLIP);
-  vpss_nir_ = new Vpss(CAMERAS[nir_index][0], VPSS_CH_SIZES_NIR[0].width,
+  vpss_nir_ = new Vpss(nir_cam.index, VPSS_CH_SIZES_NIR[0].width,
                        VPSS_CH_SIZES_NIR[0].height);
   vi_vpss_nir_ =
       new Vi_Vpss(vi_nir_, vpss_nir_, VPSS_CH_SIZES_NIR, CH_INDEXES_NIR,

@@ -84,24 +84,14 @@ void suanzi::to_json(json &j, const CameraConfig &c) {
   SAVE_JSON_TO(j, "index", c.index);
   SAVE_JSON_TO(j, "rotate", c.rotate);
   SAVE_JSON_TO(j, "flip", c.flip);
-  SAVE_JSON_TO(j, "min_face_height", c.min_face_height);
-  SAVE_JSON_TO(j, "min_face_width", c.min_face_width);
-  SAVE_JSON_TO(j, "max_window_height", c.max_window_height);
-  SAVE_JSON_TO(j, "max_window_width", c.max_window_width);
-  SAVE_JSON_TO(j, "target_area_width_percent", c.target_area_width_percent);
-  SAVE_JSON_TO(j, "target_area_height_percent", c.target_area_height_percent);
+  SAVE_JSON_TO(j, "pipe", c.pipe);
 }
 
 void suanzi::from_json(const json &j, CameraConfig &c) {
   LOAD_JSON_TO(j, "index", c.index);
   LOAD_JSON_TO(j, "rotate", c.rotate);
   LOAD_JSON_TO(j, "flip", c.flip);
-  LOAD_JSON_TO(j, "min_face_height", c.min_face_height);
-  LOAD_JSON_TO(j, "min_face_width", c.min_face_width);
-  LOAD_JSON_TO(j, "max_window_height", c.max_window_height);
-  LOAD_JSON_TO(j, "max_window_width", c.max_window_width);
-  LOAD_JSON_TO(j, "target_area_width_percent", c.target_area_width_percent);
-  LOAD_JSON_TO(j, "target_area_height_percent", c.target_area_height_percent);
+  LOAD_JSON_TO(j, "pipe", c.pipe);
 }
 
 void suanzi::to_json(json &j, const DetectConfig &c) {
@@ -252,27 +242,17 @@ void Config::load_defaults() {
   };
 
   normal = {
-      .index = 0,
+      .index = 1,
       .rotate = 0,
-      .flip = -2,
-      .min_face_height = 100,
-      .min_face_width = 100,
-      .max_window_height = 800,
-      .max_window_width = 600,
-      .target_area_width_percent = 60,
-      .target_area_height_percent = 60,
+      .flip = 1,
+      .pipe = 2,
   };
 
   infrared = {
-      .index = 1,
+      .index = 0,
       .rotate = 0,
-      .flip = -2,
-      .min_face_height = 100,
-      .min_face_width = 100,
-      .max_window_height = 800,
-      .max_window_width = 600,
-      .target_area_width_percent = 60,
-      .target_area_height_percent = 60,
+      .flip = 1,
+      .pipe = 0,
   };
 
   detect_levels_ = {
