@@ -3,24 +3,25 @@
 
 #include <QThread>
 
+#include "rs485.hpp"
+
 namespace suanzi {
 
-class ObjectTempTask : QThread {
+class DashuTask : QThread {
 	
   Q_OBJECT
  public:
-  ObjectTempTask(QObject *parent = nullptr);
-  ~ObjectTempTask();
+  DashuTask(QObject *parent = nullptr);
+  ~DashuTask();
 
  private:
  	void run();
-	
+
  private slots:
-  void rx_ambient_temp(float temp);
- 
+  void tx_temperature(float temperature);
 
  private:
-  
+ 	Rs485 *rs485_;
 };
 
 }  // namespace suanzi
