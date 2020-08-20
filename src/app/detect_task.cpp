@@ -65,6 +65,70 @@ DetectTask::~DetectTask() {
   if (pingpang_buffer_) delete pingpang_buffer_;
 }
 
+SZ_RETCODE DetectTask::adjust_isp_by_detection(const DetectionData *output) {
+  auto bgr_cam = Config::get_camera(CAMERA_BGR);
+  auto nir_cam = Config::get_camera(CAMERA_NIR);
+
+  ROICfg bgr_roi_cfg = {
+      0.4,
+      0.4,
+      0.2,
+      0.2,
+  };
+  ROICfg nir_roi_cfg = {
+      0.4,
+      0.4,
+      0.2,
+      0.2,
+  };
+
+  auto isp = Isp::getInstance();
+  if (detect_count_ % 3 == 2) {
+    if (output->bgr_face_detected_) {
+      auto det = output->bgr_detection_;
+      bgr_roi_cfg.x = det.x;
+      bgr_roi_cfg.y = det.y;
+      bgr_roi_cfg.width = det.width;
+      bgr_roi_cfg.height = det.height;
+
+      if (!isp->set_roi(bgr_cam.pipe, &bgr_roi_cfg, &bgr_cam.isp.stat)) {
+        return SZ_RETCODE_FAILED;
+      }
+    } else if (output->nir_face_detected_) {
+      auto det = output->nir_detection_;
+      nir_roi_cfg.x = det.x;
+      nir_roi_cfg.y = det.y;
+      nir_roi_cfg.width = det.width;
+      nir_roi_cfg.height = det.height;
+      if (!isp->set_roi(nir_cam.pipe, &nir_roi_cfg, &nir_cam.isp.stat)) {
+        return SZ_RETCODE_FAILED;
+      }
+    }
+
+    if (output->nir_face_detected_) {
+      auto det = output->nir_detection_;
+      nir_roi_cfg.x = det.x;
+      nir_roi_cfg.y = det.y;
+      nir_roi_cfg.width = det.width;
+      nir_roi_cfg.height = det.height;
+      if (!isp->set_roi(nir_cam.pipe, &nir_roi_cfg, &nir_cam.isp.stat)) {
+        return SZ_RETCODE_FAILED;
+      }
+    }
+  }
+
+  if (no_detect_count_ == 20) {
+    if (!isp->set_roi(bgr_cam.pipe, &bgr_roi_cfg, &bgr_cam.isp.stat)) {
+      return SZ_RETCODE_FAILED;
+    }
+    if (!isp->set_roi(nir_cam.pipe, &nir_roi_cfg, &nir_cam.isp.stat)) {
+      return SZ_RETCODE_FAILED;
+    }
+  }
+
+  return SZ_RETCODE_OK;
+}
+
 void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
   auto cfg = Config::get_detect();
 
@@ -83,6 +147,19 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
   emit tx_nir_display(output->nir_detection_, !output->nir_face_detected_,
                       false);
 
+  if (output->bgr_face_detected_ || output->nir_face_detected_) {
+    detect_count_++;
+    no_detect_count_ = 0;
+  } else {
+    detect_count_ = 0;
+    no_detect_count_++;
+  }
+
+  SZ_RETCODE ret = adjust_isp_by_detection(output);
+  if (ret != SZ_RETCODE_OK) {
+    SZ_LOG_ERROR("Adjust isp failed");
+  }
+
   if (rx_finished_) {
     rx_finished_ = false;
     emit tx_frame(pingpang_buffer_);
@@ -96,8 +173,7 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
 void DetectTask::rx_finish() { rx_finished_ = true; }
 
 bool DetectTask::detect_and_select(const MmzImage *image,
-                                   DetectionRatio &detection,
-                                   bool is_bgr) {
+                                   DetectionRatio &detection, bool is_bgr) {
   auto cfg = Config::get_detect();
 
   // detect faces: 256x256  7ms
@@ -128,7 +204,7 @@ bool DetectTask::detect_and_select(const MmzImage *image,
     }
   }
 
-  float prob_threshold = is_bgr ? 0.9: 0.75;
+  float prob_threshold = is_bgr ? 0.9 : 0.75;
   ret = pose_estimator_->estimate((const SVP_IMAGE_S *)image->pImplData,
                                   detections[max_id], pose, prob_threshold);
   if (ret != SZ_RETCODE_OK) {
@@ -145,10 +221,8 @@ bool DetectTask::detect_and_select(const MmzImage *image,
 
   // return landmarks
   for (int i = 0; i < SZ_LANDMARK_NUM; i++) {
-    detection.landmark[i][0] =
-        pose.landmarks.point[i].x / image->width;
-    detection.landmark[i][1] =
-        pose.landmarks.point[i].y / image->height;
+    detection.landmark[i][0] = pose.landmarks.point[i].x / image->width;
+    detection.landmark[i][1] = pose.landmarks.point[i].y / image->height;
   }
 
   // return head pose

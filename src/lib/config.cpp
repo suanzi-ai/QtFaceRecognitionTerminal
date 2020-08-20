@@ -85,6 +85,7 @@ void suanzi::to_json(json &j, const CameraConfig &c) {
   SAVE_JSON_TO(j, "rotate", c.rotate);
   SAVE_JSON_TO(j, "flip", c.flip);
   SAVE_JSON_TO(j, "pipe", c.pipe);
+  SAVE_JSON_TO(j, "isp", c.isp);
 }
 
 void suanzi::from_json(const json &j, CameraConfig &c) {
@@ -92,6 +93,7 @@ void suanzi::from_json(const json &j, CameraConfig &c) {
   LOAD_JSON_TO(j, "rotate", c.rotate);
   LOAD_JSON_TO(j, "flip", c.flip);
   LOAD_JSON_TO(j, "pipe", c.pipe);
+  LOAD_JSON_TO(j, "isp", c.isp);
 }
 
 void suanzi::to_json(json &j, const DetectConfig &c) {
@@ -160,6 +162,82 @@ void suanzi::from_json(const json &j, LivenessConfig &c) {
                c.min_height_ratio_between_bgr);
   LOAD_JSON_TO(j, "max_height_ratio_between_bgr",
                c.max_height_ratio_between_bgr);
+}
+
+void suanzi::to_json(json &j, const ISPExposureConfig &c) {
+  SAVE_JSON_TO(j, "hist_stat_adjust", c.hist_stat_adjust);
+  SAVE_JSON_TO(j, "speed", c.speed);
+  SAVE_JSON_TO(j, "black_speed_bias", c.black_speed_bias);
+  SAVE_JSON_TO(j, "tolerance", c.tolerance);
+  SAVE_JSON_TO(j, "compensation", c.compensation);
+  SAVE_JSON_TO(j, "ev_bias", c.ev_bias);
+  SAVE_JSON_TO(j, "ae_strategy_mode", c.ae_strategy_mode);
+  SAVE_JSON_TO(j, "hist_ratio_slope", c.hist_ratio_slope);
+  SAVE_JSON_TO(j, "max_hist_offset", c.max_hist_offset);
+}
+
+void suanzi::from_json(const json &j, ISPExposureConfig &c) {
+  LOAD_JSON_TO(j, "hist_stat_adjust", c.hist_stat_adjust);
+  LOAD_JSON_TO(j, "speed", c.speed);
+  LOAD_JSON_TO(j, "black_speed_bias", c.black_speed_bias);
+  LOAD_JSON_TO(j, "tolerance", c.tolerance);
+  LOAD_JSON_TO(j, "compensation", c.compensation);
+  LOAD_JSON_TO(j, "ev_bias", c.ev_bias);
+  LOAD_JSON_TO(j, "ae_strategy_mode", c.ae_strategy_mode);
+  LOAD_JSON_TO(j, "hist_ratio_slope", c.hist_ratio_slope);
+  LOAD_JSON_TO(j, "max_hist_offset", c.max_hist_offset);
+}
+
+void suanzi::to_json(json &j, const ISPStatConfig &c) {
+  SAVE_JSON_TO(j, "roi_margin", c.roi_margin);
+  SAVE_JSON_TO(j, "roi_weight", c.roi_weight);
+  SAVE_JSON_TO(j, "non_roi_weight", c.non_roi_weight);
+  SAVE_JSON_TO(j, "crop_enable", c.crop_enable);
+  SAVE_JSON_TO(j, "crop_margin", c.crop_margin);
+}
+
+void suanzi::from_json(const json &j, ISPStatConfig &c) {
+  LOAD_JSON_TO(j, "roi_margin", c.roi_margin);
+  LOAD_JSON_TO(j, "roi_weight", c.roi_weight);
+  LOAD_JSON_TO(j, "non_roi_weight", c.non_roi_weight);
+  LOAD_JSON_TO(j, "crop_enable", c.crop_enable);
+  LOAD_JSON_TO(j, "crop_margin", c.crop_margin);
+}
+
+void suanzi::to_json(json &j, const ISPGammaConfig &c) {
+  SAVE_JSON_TO(j, "enable", c.enable);
+  SAVE_JSON_TO(j, "curve_type", c.curve_type);
+}
+
+void suanzi::from_json(const json &j, ISPGammaConfig &c) {
+  LOAD_JSON_TO(j, "enable", c.enable);
+  LOAD_JSON_TO(j, "curve_type", c.curve_type);
+}
+
+void suanzi::to_json(json &j, const ISPHLCConfig &c) {
+  SAVE_JSON_TO(j, "enable", c.enable);
+  SAVE_JSON_TO(j, "luma_target", c.luma_target);
+  SAVE_JSON_TO(j, "luma_threshold", c.luma_threshold);
+}
+
+void suanzi::from_json(const json &j, ISPHLCConfig &c) {
+  LOAD_JSON_TO(j, "enable", c.enable);
+  LOAD_JSON_TO(j, "luma_target", c.luma_target);
+  LOAD_JSON_TO(j, "luma_threshold", c.luma_threshold);
+}
+
+void suanzi::to_json(json &j, const ISPConfig &c) {
+  SAVE_JSON_TO(j, "stat", c.stat);
+  SAVE_JSON_TO(j, "exposure", c.exposure);
+  SAVE_JSON_TO(j, "gamma", c.gamma);
+  SAVE_JSON_TO(j, "hlc", c.hlc);
+}
+
+void suanzi::from_json(const json &j, ISPConfig &c) {
+  LOAD_JSON_TO(j, "stat", c.stat);
+  LOAD_JSON_TO(j, "exposure", c.exposure);
+  LOAD_JSON_TO(j, "gamma", c.gamma);
+  LOAD_JSON_TO(j, "hlc", c.hlc);
 }
 
 void suanzi::from_json(const json &j, Config &c) {
@@ -246,6 +324,41 @@ void Config::load_defaults() {
       .rotate = 0,
       .flip = 1,
       .pipe = 2,
+      .isp =
+          {
+              .stat =
+                  {
+                      .roi_margin = 2,
+                      .roi_weight = 2,
+                      .non_roi_weight = 1,
+                      .crop_enable = false,
+                      .crop_margin = 25,
+                  },
+              .exposure =
+                  {
+                      .hist_stat_adjust = true,
+                      .speed = 0x60,              // default:  0x40
+                      .black_speed_bias = 0x180,  // default:  0x90
+                      .tolerance = 0x2,
+                      .compensation = 0x38,
+                      .ev_bias = 0x400,
+                      .ae_strategy_mode =
+                          1,  // 0: HIGHLIGHT_PRIOR 1: LOWLIGHT_PRIOR
+                      .hist_ratio_slope = 0xFFF,  // default: 0x80
+                      .max_hist_offset = 0x6,     // default: 0x10
+                  },
+              .gamma =
+                  {
+                      .enable = true,
+                      .curve_type = 0,
+                  },
+              .hlc =
+                  {
+                      .enable = false,
+                      .luma_threshold = 240,
+                      .luma_target = 10,
+                  },
+          },
   };
 
   infrared = {
@@ -253,6 +366,41 @@ void Config::load_defaults() {
       .rotate = 0,
       .flip = 1,
       .pipe = 0,
+      .isp =
+          {
+              .stat =
+                  {
+                      .roi_margin = 2,
+                      .roi_weight = 2,
+                      .non_roi_weight = 1,
+                      .crop_enable = false,
+                      .crop_margin = 25,
+                  },
+              .exposure =
+                  {
+                      .hist_stat_adjust = false,
+                      .speed = 0x60,              // default:  0x40
+                      .black_speed_bias = 0x180,  // default:  0x90
+                      .tolerance = 0x2,
+                      .compensation = 0x38,
+                      .ev_bias = 0x400,
+                      .ae_strategy_mode =
+                          1,  // 0: HIGHLIGHT_PRIOR 1: LOWLIGHT_PRIOR
+                      .hist_ratio_slope = 0xFFF,  // default: 0x80
+                      .max_hist_offset = 0x6,     // default: 0x10
+                  },
+              .gamma =
+                  {
+                      .enable = true,
+                      .curve_type = 0,
+                  },
+              .hlc =
+                  {
+                      .enable = false,
+                      .luma_threshold = 240,
+                      .luma_target = 10,
+                  },
+          },
   };
 
   detect_levels_ = {
@@ -437,6 +585,13 @@ const QufaceConfig &Config::get_quface() { return instance_.quface; }
 
 const CameraConfig &Config::get_camera(bool is_bgr) {
   if (is_bgr)
+    return instance_.normal;
+  else
+    return instance_.infrared;
+}
+
+const CameraConfig &Config::get_camera(CameraType tp) {
+  if (tp == CAMERA_BGR)
     return instance_.normal;
   else
     return instance_.infrared;

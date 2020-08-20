@@ -69,16 +69,6 @@ void to_json(json &j, const QufaceConfig &c);
 void from_json(const json &j, QufaceConfig &c);
 
 typedef struct {
-  int index;
-  int rotate;
-  int flip;
-  int pipe;
-} CameraConfig;
-
-void to_json(json &j, const CameraConfig &c);
-void from_json(const json &j, CameraConfig &c);
-
-typedef struct {
   SZ_FLOAT threshold;
   SZ_UINT32 min_face_size;
   SZ_FLOAT max_yaw;
@@ -119,6 +109,70 @@ typedef struct {
 void to_json(json &j, const LivenessConfig &c);
 void from_json(const json &j, LivenessConfig &c);
 
+typedef struct {
+  bool hist_stat_adjust;
+  SZ_UINT8 speed;
+  SZ_UINT16 black_speed_bias;
+  SZ_UINT8 tolerance;
+  SZ_UINT8 compensation;
+  SZ_UINT16 ev_bias;
+  int ae_strategy_mode;
+  SZ_UINT16 hist_ratio_slope;
+  SZ_UINT8 max_hist_offset;
+} ISPExposureConfig;
+
+void to_json(json &j, const ISPExposureConfig &c);
+void from_json(const json &j, ISPExposureConfig &c);
+
+typedef struct {
+  int roi_margin;
+  SZ_UINT8 roi_weight;
+  SZ_UINT8 non_roi_weight;
+  bool crop_enable;
+  int crop_margin;
+} ISPStatConfig;
+
+void to_json(json &j, const ISPStatConfig &c);
+void from_json(const json &j, ISPStatConfig &c);
+
+typedef struct {
+  bool enable;
+  int curve_type;
+} ISPGammaConfig;
+
+void to_json(json &j, const ISPGammaConfig &c);
+void from_json(const json &j, ISPGammaConfig &c);
+
+typedef struct {
+  bool enable;
+  int luma_threshold;
+  int luma_target;
+} ISPHLCConfig;
+
+void to_json(json &j, const ISPHLCConfig &c);
+void from_json(const json &j, ISPHLCConfig &c);
+
+typedef struct {
+  ISPStatConfig stat;
+  ISPExposureConfig exposure;
+  ISPGammaConfig gamma;
+  ISPHLCConfig hlc;
+} ISPConfig;
+
+void to_json(json &j, const ISPConfig &c);
+void from_json(const json &j, ISPConfig &c);
+
+typedef struct {
+  int index;
+  int rotate;
+  int flip;
+  int pipe;
+  ISPConfig isp;
+} CameraConfig;
+
+void to_json(json &j, const CameraConfig &c);
+void from_json(const json &j, CameraConfig &c);
+
 template <typename T>
 struct Levels {
   T high;
@@ -150,6 +204,10 @@ void from_json(const json &j, Levels<T> &c) {
   LOAD_JSON_TO(j, "low", c.low);
 }
 
+typedef enum _CameraType {
+  CAMERA_BGR = 1,
+  CAMERA_NIR = 2,
+} CameraType;
 
 class Config {
  public:
@@ -169,9 +227,12 @@ class Config {
   static const AppConfig &get_app();
   static const QufaceConfig &get_quface();
   static const CameraConfig &get_camera(bool is_bgr);
+  static const CameraConfig &get_camera(CameraType tp);
   static const DetectConfig &get_detect();
   static const ExtractConfig &get_extract();
   static const LivenessConfig &get_liveness();
+  // static const ISPConfig &get_isp();
+  // static const ISPExposureConfig &get_isp_exposure();
 
   static bool enable_anti_spoofing();
 
