@@ -16,6 +16,7 @@ RecordTask::RecordTask(PersonService::ptr person_service, QThread *thread,
   // Create db for unknown faces
   unknown_database_ = std::make_shared<FaceDatabase>("_UNKNOWN_DB_");
   reset_counter_ = 0;
+  temperature_ = 26.;
 
   // Create thread
   if (thread == nullptr) {
@@ -130,6 +131,9 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
       duplicated_ = if_duplicated(face_id);
     }
 
+    // set temperature
+    person.temperature = temperature_;
+
     // output
     rx_reset();
     SZ_LOG_INFO("Record: id={}, staff={}, status={}", person.id, person.number,
@@ -147,6 +151,10 @@ void RecordTask::rx_reset() {
 
   emit tx_nir_finish(false);
   emit tx_bgr_finish(false);
+}
+
+void RecordTask::rx_temperature(float temperature) {
+  temperature_ = temperature;
 }
 
 bool RecordTask::if_new(const FaceFeature &feature) {

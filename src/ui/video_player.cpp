@@ -7,6 +7,7 @@
 #include <QTimer>
 
 #include "config.hpp"
+#include "dashu_task.hpp"
 
 using namespace suanzi;
 
@@ -61,6 +62,8 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
   // IO Tasks
   upload_task_ = new UploadTask(person_service, nullptr, this);
   audio_task_ = new AudioTask(nullptr, this);
+
+  temperature_task_ = new DashuTask();
 
   // Connect camera_reader to detect_task
   connect((const QObject *)camera_reader_,
@@ -129,6 +132,10 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
           (const QObject *)screen_saver_, SLOT(rx_display(int)));
   connect((const QObject *)face_timer_, SIGNAL(tx_face_appear(int)),
           (const QObject *)screen_saver_, SLOT(rx_hide()));
+
+  // Connect temperature to record_task
+  connect((const QObject *)temperature_task_, SIGNAL(tx_temperature(float)),
+          (const QObject *)record_task_, SLOT(rx_temperature(float)));
 
   camera_reader_->start_sample();
 

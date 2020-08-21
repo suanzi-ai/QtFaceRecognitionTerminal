@@ -4,10 +4,11 @@
 #include <QThread>
 
 #include "rs485.hpp"
+#include "temperature_task.hpp"
 
 namespace suanzi {
 
-class DashuTask : QThread {
+class DashuTask : public QThread, public TemperatureTask {
 	
   Q_OBJECT
  public:
@@ -17,7 +18,7 @@ class DashuTask : QThread {
  private:
  	void run();
 
- private slots:
+ signals:
   void tx_temperature(float temperature);
 
  private:

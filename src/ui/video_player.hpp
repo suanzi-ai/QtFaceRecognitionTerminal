@@ -20,6 +20,8 @@
 #include "recognize_tip_widget.hpp"
 #include "screen_saver_widget.hpp"
 
+#include "temperature_task.hpp"
+
 namespace suanzi {
 
 class VideoPlayer : public QWidget {
@@ -53,6 +55,8 @@ class VideoPlayer : public QWidget {
 
   UploadTask *upload_task_;
   AudioTask *audio_task_;
+
+  TemperatureTask *temperature_task_;
 };
 
 }  // namespace suanzi

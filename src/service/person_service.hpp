@@ -25,6 +25,7 @@ struct PersonData {
   std::string face_path;
   cv::Mat bgr_face_snapshot;
   cv::Mat nir_face_snapshot;
+  float temperature;
 };
 
 void to_json(json &j, const PersonData &p);

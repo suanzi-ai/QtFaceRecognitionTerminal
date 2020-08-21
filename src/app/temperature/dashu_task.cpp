@@ -1,6 +1,7 @@
 #include "dashu_task.hpp"
 
 #include "platform_interface.h"
+#include "logger.hpp"
 
 using namespace suanzi;
 
