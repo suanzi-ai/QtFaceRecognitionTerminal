@@ -102,7 +102,8 @@ SZ_RETCODE PersonService::upload_image(
 
 SZ_RETCODE PersonService::report_face_record(
     uint person_id, const std::vector<SZ_UINT8> &bgr_image_content,
-    const std::vector<SZ_UINT8> &nir_image_content, const std::string &status, const std::string &body_temperature) {
+    const std::vector<SZ_UINT8> &nir_image_content, const std::string &status,
+    const std::string &body_temperature) {
   std::string bgr_file_path;
   SZ_RETCODE ret = upload_image(bgr_image_content, bgr_file_path);
   if (ret != SZ_RETCODE_OK) {
@@ -118,10 +119,8 @@ SZ_RETCODE PersonService::report_face_record(
   }
 
   json j = {
-      {"personID", person_id},
-      {"imagePath", bgr_file_path},
-      {"irImagePath", nir_file_path},
-      {"status", status},
+      {"personID", person_id},           {"imagePath", bgr_file_path},
+      {"irImagePath", nir_file_path},    {"status", status},
       {"temperature", body_temperature},
   };
   std::string path = "/api/v1/faceRecords";

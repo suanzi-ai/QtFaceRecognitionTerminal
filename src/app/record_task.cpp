@@ -131,14 +131,15 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
       duplicated_ = if_duplicated(face_id);
     }
 
-	char temperature_str[10]; 
-	sprintf(temperature_str, "%.1f", body_temperature_);
-	person.temperature = std::string(temperature_str);
+    char temperature_str[10];
+    sprintf(temperature_str, "%.1f", body_temperature_);
+    person.temperature = std::string(temperature_str);
     // output
     rx_reset();
-    SZ_LOG_INFO("Record: id={}, staff={}, status={}", person.id, person.number,
-                person.status);
-    emit tx_display(person, duplicated_);
+    SZ_LOG_INFO("Record: id={}, staff={}, status={}, temperature={}", person.id,
+                person.number, person.status, person.temperature);
+    if (body_temperature_ > 35.5)
+      emit tx_display(person, duplicated_);
   }
 
   emit tx_finish();
@@ -334,8 +335,6 @@ bool RecordTask::if_duplicated(const FaceFeature &feature) {
   }
 }
 
-
 void RecordTask::rx_temperature(float body_temperature) {
-	body_temperature_ = body_temperature;
+  body_temperature_ = body_temperature;
 }
-
