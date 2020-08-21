@@ -1,6 +1,7 @@
 #include "face_timer.hpp"
 
 #include "config.hpp"
+#include "gpio.hpp"
 
 using namespace suanzi;
 
@@ -35,10 +36,12 @@ void FaceTimer::rx_frame(PingPangBuffer<DetectionData> *buffer) {
                                 current_clock - disappear_begin_)
                                 .count();
       emit tx_face_disappear(disappear_duration_);
+      Gpio::set_level(52, false);
     }
   } else {
     if (disappear_counter_ >= Config::get_extract().max_lost_age) {
       emit tx_face_appear(disappear_duration_);
+      Gpio::set_level(52, true);
 
       disappear_counter_ = 0;
       disappear_duration_ = 0;
