@@ -7,6 +7,7 @@
 #include <QTimer>
 
 #include "config.hpp"
+#include "gpio.hpp"
 #include "logger.hpp"
 
 using namespace suanzi;
@@ -35,6 +36,11 @@ RecognizeTipWidget::~RecognizeTipWidget() {}
 
 void RecognizeTipWidget::rx_display(PersonData person, bool if_duplicated) {
   person_ = person;
+
+  // Open door GPIO
+  if (person_.status == PersonService::get_status(PersonStatus::Normal))
+    Gpio::set_level(52, true);
+
   hide();
   show();
 
@@ -42,7 +48,10 @@ void RecognizeTipWidget::rx_display(PersonData person, bool if_duplicated) {
   timer_.start();
 }
 
-void RecognizeTipWidget::rx_reset() { hide(); }
+void RecognizeTipWidget::rx_reset() {
+  hide();
+  Gpio::set_level(52, false);
+}
 
 void RecognizeTipWidget::paintEvent(QPaintEvent *event) {
   QPainter painter(this);
