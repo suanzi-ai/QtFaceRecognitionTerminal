@@ -1,13 +1,15 @@
 aux_source_directory(. _LIB_FILES)
 aux_source_directory(io _LIB_IO_FILES)
 aux_source_directory(audio _LIB_AUDIO_FILES)
-add_library(lib STATIC ${_LIB_FILES} ${_LIB_IO_FILES} ${_LIB_AUDIO_FILES})
+aux_source_directory(irtemp _LIB_IRTEMP_FILES)
+add_library(lib STATIC ${_LIB_FILES} ${_LIB_IO_FILES} ${_LIB_AUDIO_FILES} ${_LIB_IRTEMP_FILES})
 
 target_include_directories(
   lib
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/io>
-  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/audio>)
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/audio>
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/irtemp>)
 
 target_link_libraries(
   lib

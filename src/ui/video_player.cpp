@@ -7,6 +7,7 @@
 #include <QTimer>
 
 #include "config.hpp"
+#include "temperature_task.hpp"
 #include "dashu_task.hpp"
 
 using namespace suanzi;
@@ -50,9 +51,10 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
   screen_saver_ = new ScreenSaverWidget(screen_width, screen_height, nullptr);
   screen_saver_->hide();
 
-  face_box_ = new FaceBoxWidget(screen_width * 0.333, screen_height * 0.25,
-                                screen_width * 0.333, screen_height * 0.333);
-  face_box_->show();
+
+  //face_box_ = new FaceBoxWidget(200, 200, 400, 400);
+  //face_box_->show();
+
 
   // Initialize QThreads
   camera_reader_ = new CameraReader(this);
@@ -144,12 +146,24 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
   camera_reader_->start_sample();
 
   QTimer::singleShot(1, this, SLOT(init_widgets()));
+
+   /*
+   static Otpa16TempTask otpa16_task;
+   connect((const QObject *)&otpa16_task, SIGNAL(tx_display(OtpaTempData)),
+	      (const QObject *)heat_map_widget_, SLOT(rx_display(OtpaTempData)));*/
+   
 }
 
 VideoPlayer::~VideoPlayer() {}
 
 void VideoPlayer::paintEvent(QPaintEvent *event) {
   QPainter painter(this);
+  int screen_width, screen_height;
+  camera_reader_->get_screen_size(screen_width, screen_height);
+  painter.setPen(Qt::green);
+  painter.drawRect(200, 300, 400, 400);
+
+  
   detect_tip_widget_bgr_->paint(&painter);
   detect_tip_widget_nir_->paint(&painter);
 }

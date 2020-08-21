@@ -1,17 +1,19 @@
 #ifndef __TEMPERATURE_TASK_HPP__
 #define __TEMPERATURE_TASK_HPP__
 
+#include <QThread>
+
 namespace suanzi {
 
-class TemperatureTask {
+class TemperatureTask : public QThread {
+	
+  Q_OBJECT
 
- public:
-  TemperatureTask();
-  ~TemperatureTask();
+protected:
 
- private:
-  void run();
-  
+ signals:
+  void tx_temperature(float temperature);
+
 };
 
 }  // namespace suanzi

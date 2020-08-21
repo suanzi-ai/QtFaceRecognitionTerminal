@@ -23,8 +23,7 @@ class RecordTask : QObject {
  private slots:
   void rx_frame(PingPangBuffer<RecognizeData> *buffer);
   void rx_reset();
-
-  void rx_temperature(float temperature);
+  void rx_temperature(float body_temperature);
 
  signals:
   void tx_finish();
@@ -57,10 +56,9 @@ class RecordTask : QObject {
       unknown_query_clock_;
 
   int reset_counter_;
+  float body_temperature_;
 
   FaceFeature last_feature_;
-
-  float temperature_;
 };
 
 }  // namespace suanzi

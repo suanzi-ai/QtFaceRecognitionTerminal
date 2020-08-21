@@ -21,11 +21,11 @@ struct PersonData {
   std::string department;
   std::string mobile;
   std::string status;
+  std::string temperature;
   std::string face_url;
   std::string face_path;
   cv::Mat bgr_face_snapshot;
   cv::Mat nir_face_snapshot;
-  float temperature;
 };
 
 void to_json(json &j, const PersonData &p);
@@ -58,7 +58,7 @@ class PersonService {
   SZ_RETCODE report_face_record(uint person_id,
                                 const std::vector<SZ_UINT8> &bgr_image_content,
                                 const std::vector<SZ_UINT8> &nir_image_content,
-                                const std::string &status);
+                                const std::string &status, const std::string &body_temperature);
 
   static std::string get_status(PersonStatus s);
 

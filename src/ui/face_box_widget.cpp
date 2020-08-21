@@ -14,8 +14,6 @@ FaceBoxWidget::FaceBoxWidget(int x, int y, int width, int height,
   QPalette palette = this->palette();
   palette.setColor(QPalette::Background, Qt::transparent);
   setPalette(palette);
-
-  move(0, 0);
 }
 
 FaceBoxWidget::~FaceBoxWidget() {}

@@ -1,5 +1,5 @@
 aux_source_directory(. _APP_FILES)
-aux_source_directory(./temperature _TEMPERATURE_FILES)
+aux_source_directory(temperature _TEMPERATURE_FILES)
 
 add_library(app STATIC ${_APP_FILES} ${_TEMPERATURE_FILES})
 

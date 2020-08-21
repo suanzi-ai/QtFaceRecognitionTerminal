@@ -54,10 +54,9 @@ bool DetectionRatio::is_valid() {
                     cfg.min_yaw < yaw && yaw < cfg.max_yaw &&
                     cfg.min_pitch < pitch && pitch < cfg.max_pitch &&
                     cfg.min_roll < roll && roll < cfg.max_roll;
-
   bool position_valid =
       // x > 0.01 && y > 0.01 && x + width < 0.99 && y + height < 0.99;
-      x > 0.333 && y > 0.25 && x + width < 0.666 && y + height < 0.583;
+      x > 0.3 && y > 0.189 && x + width < 0.81 && y + height < 0.583 && width > 0.3 && height > 0.2;
   return pose_valid && position_valid;
 }
 

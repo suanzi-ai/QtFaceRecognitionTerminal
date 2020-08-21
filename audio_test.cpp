@@ -3,8 +3,6 @@
 #include <thread>
 #include <unistd.h>
 #include "platform_interface.h"
-#include "ambient_temp_task.hpp"
-#include "object_temp_task.hpp"
 #include <QObject>
 
 
@@ -33,6 +31,8 @@ void test() {
   sleep(1);
 }
 
+
+#if 0
 class TestTemp: public QObject {
 	
 	public:
@@ -44,6 +44,8 @@ class TestTemp: public QObject {
 		}
 };
 
+#endif
+
 #include <QtWidgets/QApplication>
 
 int main(int argc, char* argv[]) {
@@ -52,8 +54,8 @@ int main(int argc, char* argv[]) {
   test();
   HI_MPI_SYS_Exit();
 #endif
-	TestTemp test_temp;
-	getchar();
+	//TestTemp test_temp;
+	//getchar();
 	//QApplication app(argc, argv);
 	//return app.exec();
 }

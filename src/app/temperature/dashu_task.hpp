@@ -1,15 +1,15 @@
 #ifndef __OBJECT_TEMP_TASK_H
 #define __OBJECT_TEMP_TASK_H
 
-#include <QThread>
+#include "temperature_task.hpp"
 
 #include "rs485.hpp"
 #include "temperature_task.hpp"
 
 namespace suanzi {
 
-class DashuTask : public QThread, public TemperatureTask {
-	
+class DashuTask : public TemperatureTask {
+
   Q_OBJECT
  public:
   DashuTask(QObject *parent = nullptr);
@@ -17,9 +17,6 @@ class DashuTask : public QThread, public TemperatureTask {
 
  private:
  	void run();
-
- signals:
-  void tx_temperature(float temperature);
 
  private:
  	Rs485 *rs485_;

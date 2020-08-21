@@ -43,7 +43,7 @@ void UploadTask::rx_upload(PersonData person, bool if_duplicated) {
 
     if (bgr_encode_result)
       person_service_->report_face_record(person.id, bgr_image_buffer,
-                                          nir_image_buffer, person.status);
+                                          nir_image_buffer, person.status, person.temperature);
     else
       SZ_LOG_ERROR("Encode bgr jpg failed");
   }

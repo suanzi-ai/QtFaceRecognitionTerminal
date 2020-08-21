@@ -21,38 +21,59 @@ Otpa16::Otpa16() {
 Otpa16::~Otpa16() {close(fd_);}
 
 
-bool Otpa16::read_temperature(unsigned char *buf, int len) {
-	if (len < 5)
+bool Otpa16::read_temperature(OtpaTempData *otpa_temp_data) {
+	
+	unsigned char buf[525];
+	buf[0] = 2;//cmd len
+	buf[1] = 0x4e;
+	buf[2] = 0x00;
+	if (read(fd_, buf, 525) != 525)
 		return false;
-	buf[0] = 4;//cmd len
-	buf[1] = 0x68; //device addr
-	buf[2] = 0xd0; //register addr
-	buf[3] = 0x4e;
-	buf[4] = 0x00;
-	return read(fd_, buf, len) == len;
+	
+	//check data is valid
+	if (buf[0] != 0x02 || buf[1] != 0x4e || buf[8] != 0x03)
+		return false;
+	
+	static unsigned char update_seq_no = 255;
+	unsigned char cur_update_seq_no = buf[3] & 0x0f;
+	//read old data
+	if (update_seq_no == cur_update_seq_no)
+		return false;
+	update_seq_no = cur_update_seq_no;
+	
+	otpa_temp_data->ambient_temp = (buf[9] * 256 + buf[10] - 27315) / 100.0;				
+	float max_temp = 0.0;
+	int offset = 0;
+	for (int i = 13, offset = 0; i < 525; i += 2, offset++) { 
+	
+		otpa_temp_data->pixel_temp[offset] = (buf[i] * 256 + buf[i + 1] - 27315) / 100.0;	
+		if (max_temp < otpa_temp_data->pixel_temp[offset]) {
+			max_temp = otpa_temp_data->pixel_temp[offset];
+			otpa_temp_data->max_pixel_temp_index = offset;
+		}
+	}
+	return true;
 }
 
 
 bool Otpa16::set_sample_fps(int sample_interval) {
-	unsigned char buf[5];
-	buf[0] = 0x68;//device addr
-	buf[1] = 0xd0;//register addr
-	buf[2] = 0x2f;
-	buf[3] = 0x06;//default 1fps
+	unsigned char buf[3];
+	buf[0] = 0x2f;
+	buf[1] = 0x06;//default 1fps
 	switch(sample_interval) {
 	  case 250:
-	  buf[3] = 0x04; //4fps
+	  buf[1] = 0x04; //4fps
 	  break;
 	  case 500:
-	  buf[3] = 0x05; //2fps
+	  buf[1] = 0x05; //2fps
 	  break;
 	  case 1000:
-	  buf[3] = 0x06;//1fps
+	  buf[1] = 0x06;//1fps
 	  break;
 	  case 2000:
-	  buf[3] = 0x07;//0.5fps
+	  buf[1] = 0x07;//0.5fps
 	  break;
     }
-	buf[4] = 0x00;
-    return write(fd_, buf, 5) == 1;
+	buf[2] = 0x00;
+    return write(fd_, buf, 3) == 1;
 }
