@@ -50,6 +50,10 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
   screen_saver_ = new ScreenSaverWidget(screen_width, screen_height, nullptr);
   screen_saver_->hide();
 
+  face_box_ = new FaceBoxWidget(screen_width * 0.333, screen_height * 0.25,
+                                screen_width * 0.333, screen_height * 0.333);
+  face_box_->show();
+
   // Initialize QThreads
   camera_reader_ = new CameraReader(this);
 
@@ -99,9 +103,9 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
           (const QObject *)face_timer_,
           SLOT(rx_frame(PingPangBuffer<DetectionData> *)));
 
-//   // Connect face_timer to record_task
-//   connect((const QObject *)face_timer_, SIGNAL(tx_face_disappear(int)),
-//           (const QObject *)record_task_, SLOT(rx_reset()));
+  //   // Connect face_timer to record_task
+  //   connect((const QObject *)face_timer_, SIGNAL(tx_face_disappear(int)),
+  //           (const QObject *)record_task_, SLOT(rx_reset()));
 
   // Connect detect_task to detect_tip_widget
   connect((const QObject *)detect_task_,

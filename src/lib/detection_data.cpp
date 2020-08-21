@@ -56,7 +56,8 @@ bool DetectionRatio::is_valid() {
                     cfg.min_roll < roll && roll < cfg.max_roll;
 
   bool position_valid =
-      x > 0.01 && y > 0.01 && x + width < 0.99 && y + height < 0.99;
+      // x > 0.01 && y > 0.01 && x + width < 0.99 && y + height < 0.99;
+      x > 0.333 && y > 0.25 && x + width < 0.666 && y + height < 0.583;
   return pose_valid && position_valid;
 }
 

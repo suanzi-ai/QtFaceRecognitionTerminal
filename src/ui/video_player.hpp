@@ -19,6 +19,7 @@
 #include "detect_tip_widget.hpp"
 #include "recognize_tip_widget.hpp"
 #include "screen_saver_widget.hpp"
+#include "face_box_widget.hpp"
 
 #include "temperature_task.hpp"
 
@@ -44,7 +45,9 @@ class VideoPlayer : public QWidget {
   DetectTipWidget *detect_tip_widget_bgr_;
   DetectTipWidget *detect_tip_widget_nir_;
   RecognizeTipWidget *recognize_tip_widget_;
+
   ScreenSaverWidget *screen_saver_;
+  FaceBoxWidget *face_box_;
 
   CameraReader *camera_reader_;
 
