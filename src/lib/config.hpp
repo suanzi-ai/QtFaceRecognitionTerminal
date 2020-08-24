@@ -41,6 +41,12 @@ typedef struct {
   bool enable_anti_spoofing;
   bool show_infrared_window;
   bool record_infraraed_faces;
+  SZ_FLOAT device_face_x;
+  SZ_FLOAT device_face_y;
+  SZ_FLOAT device_face_height;
+  SZ_FLOAT device_face_width;
+  SZ_FLOAT temperature_distance;
+  bool disabled_temperature;
   std::string infraraed_faces_store_path;
 } AppConfig;
 

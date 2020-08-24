@@ -29,6 +29,12 @@ void suanzi::to_json(json &j, const AppConfig &c) {
   SAVE_JSON_TO(j, "enable_anti_spoofing", c.enable_anti_spoofing);
   SAVE_JSON_TO(j, "show_infrared_window", c.show_infrared_window);
   SAVE_JSON_TO(j, "record_infraraed_faces", c.record_infraraed_faces);
+  SAVE_JSON_TO(j, "device_face_x", c.device_face_x);
+  SAVE_JSON_TO(j, "device_face_y", c.device_face_y);
+  SAVE_JSON_TO(j, "device_face_height", c.device_face_height);
+  SAVE_JSON_TO(j, "device_face_width", c.device_face_width);
+  SAVE_JSON_TO(j, "temperature_distance", c.temperature_distance);
+  SAVE_JSON_TO(j, "disabled_temperature", c.disabled_temperature);
   SAVE_JSON_TO(j, "infraraed_faces_store_path", c.infraraed_faces_store_path);
 }
 
@@ -41,6 +47,12 @@ void suanzi::from_json(const json &j, AppConfig &c) {
   LOAD_JSON_TO(j, "enable_anti_spoofing", c.enable_anti_spoofing);
   LOAD_JSON_TO(j, "show_infrared_window", c.show_infrared_window);
   LOAD_JSON_TO(j, "record_infraraed_faces", c.record_infraraed_faces);
+  LOAD_JSON_TO(j, "device_face_x", c.device_face_x);
+  LOAD_JSON_TO(j, "device_face_y", c.device_face_y);
+  LOAD_JSON_TO(j, "device_face_height", c.device_face_height);
+  LOAD_JSON_TO(j, "device_face_width", c.device_face_width);
+  LOAD_JSON_TO(j, "temperature_distance", c.temperature_distance);
+  LOAD_JSON_TO(j, "disabled_temperature", c.disabled_temperature);
   LOAD_JSON_TO(j, "infraraed_faces_store_path", c.infraraed_faces_store_path);
 }
 
@@ -204,6 +216,12 @@ void Config::load_defaults() {
       .enable_anti_spoofing = false,
       .show_infrared_window = false,
       .record_infraraed_faces = false,
+      .device_face_x = 0.2,
+      .device_face_y = 0.3,
+      .device_face_height = 0.4,
+      .device_face_width = 0.4,
+      .temperature_distance = 0.68,
+      .disabled_temperature = true,
       .infraraed_faces_store_path =
           APP_DIR_PREFIX "/var/face-terminal/ir-faces/",
   };

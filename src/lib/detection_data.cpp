@@ -50,13 +50,24 @@ bool DetectionRatio::is_overlap(DetectionRatio other) {
 
 bool DetectionRatio::is_valid() {
   auto cfg = Config::get_detect();
+  auto app = Config::get_app();
+  float face_width, face_height, face_x, face_y, temperature_distance;
+  face_width = app.device_face_width;
+  face_height = app.device_face_height;
+  face_x = app.device_face_x;
+  face_y = app.device_face_y;
+  temperature_distance = app.temperature_distance;
   bool pose_valid = !isnanf(yaw) && !isnanf(pitch) && !isnanf(roll) &&
                     cfg.min_yaw < yaw && yaw < cfg.max_yaw &&
                     cfg.min_pitch < pitch && pitch < cfg.max_pitch &&
                     cfg.min_roll < roll && roll < cfg.max_roll;
   bool position_valid =
-      // x > 0.01 && y > 0.01 && x + width < 0.99 && y + height < 0.99;
-      x > 0.3 && y > 0.189 && x + width < 0.81 && y + height < 0.583 && width > 0.3 && height > 0.2;
+      x > face_x && y > face_y && x + width < face_x + face_width &&
+      y + height < face_height + face_y && width > face_width * temperature_distance &&
+      height > face_height * temperature_distance;
+  // SZ_LOG_INFO(
+  //     "X >:{:.2f}, Y >{:.2f}, x + width < {:.2f}, y + height < {:.2f}]",
+  //     face_x, face_y, (face_x + face_width), (face_height + face_y));
   return pose_valid && position_valid;
 }
 
@@ -82,7 +93,6 @@ bool DetectionData::nir_face_detected() { return nir_face_detected_; }
 bool DetectionData::bgr_face_valid() {
   bool ret = false;
   if (bgr_face_detected() && bgr_detection_.is_valid()) {
-
     static float x1 = 0;
     static float y1 = 0;
     static float w1 = 0;
@@ -110,8 +120,10 @@ bool DetectionData::bgr_face_valid() {
     w1 = w2;
     h1 = h2;
 
-    if (ret) stable_counter ++;
-    else stable_counter = 0;
+    if (ret)
+      stable_counter++;
+    else
+      stable_counter = 0;
 
     ret = stable_counter >= cfg.min_tracking_number;
   }
