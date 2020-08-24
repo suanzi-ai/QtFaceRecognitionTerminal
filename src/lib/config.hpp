@@ -50,6 +50,7 @@ typedef struct {
   SZ_UINT16 device_body_open_angle;
   bool disabled_temperature;
   std::string infraraed_faces_store_path;
+  bool show_isp_hist_window;
 } AppConfig;
 
 void to_json(json &j, const AppConfig &c);

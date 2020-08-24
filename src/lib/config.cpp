@@ -38,6 +38,7 @@ void suanzi::to_json(json &j, const AppConfig &c) {
   SAVE_JSON_TO(j, "device_body_open_angle", c.device_body_open_angle);
   SAVE_JSON_TO(j, "disabled_temperature", c.disabled_temperature);
   SAVE_JSON_TO(j, "infraraed_faces_store_path", c.infraraed_faces_store_path);
+  SAVE_JSON_TO(j, "show_isp_hist_window", c.show_isp_hist_window);
 }
 
 void suanzi::from_json(const json &j, AppConfig &c) {
@@ -58,6 +59,7 @@ void suanzi::from_json(const json &j, AppConfig &c) {
   LOAD_JSON_TO(j, "device_body_open_angle", c.device_body_open_angle);
   LOAD_JSON_TO(j, "disabled_temperature", c.disabled_temperature);
   LOAD_JSON_TO(j, "infraraed_faces_store_path", c.infraraed_faces_store_path);
+  LOAD_JSON_TO(j, "show_isp_hist_window", c.show_isp_hist_window);
 }
 
 void suanzi::to_json(json &j, const QufaceConfig &c) {
@@ -309,6 +311,7 @@ void Config::load_defaults() {
       .disabled_temperature = true,
       .infraraed_faces_store_path =
           APP_DIR_PREFIX "/var/face-terminal/ir-faces/",
+      .show_isp_hist_window = false,
   };
 
   user = {
@@ -347,17 +350,17 @@ void Config::load_defaults() {
                       .roi_margin = 2,
                       .roi_weight = 2,
                       .non_roi_weight = 1,
-                      .crop_enable = false,
+                      .crop_enable = true,
                       .crop_margin = 25,
                   },
               .exposure =
                   {
                       .hist_stat_adjust = true,
-                      .speed = 0x60,              // default:  0x40
-                      .black_speed_bias = 0x180,  // default:  0x90
-                      .tolerance = 0x2,
-                      .compensation = 0x38,
-                      .ev_bias = 0x400,
+                      .speed = 0x60,              // default: 0x40
+                      .black_speed_bias = 0x120,  // default: 0x90
+                      .tolerance = 0x2,           // default: 0x2
+                      .compensation = 0x38,       // default: 0x38
+                      .ev_bias = 0x480,           // default: 0x400
                       .ae_strategy_mode =
                           1,  // 0: HIGHLIGHT_PRIOR 1: LOWLIGHT_PRIOR
                       .hist_ratio_slope = 0xFFF,  // default: 0x80
@@ -389,17 +392,17 @@ void Config::load_defaults() {
                       .roi_margin = 2,
                       .roi_weight = 2,
                       .non_roi_weight = 1,
-                      .crop_enable = false,
+                      .crop_enable = true,
                       .crop_margin = 25,
                   },
               .exposure =
                   {
-                      .hist_stat_adjust = false,
-                      .speed = 0x60,              // default:  0x40
-                      .black_speed_bias = 0x180,  // default:  0x90
-                      .tolerance = 0x2,
-                      .compensation = 0x38,
-                      .ev_bias = 0x400,
+                      .hist_stat_adjust = true,
+                      .speed = 0x60,              // default: 0x40
+                      .black_speed_bias = 0x120,  // default: 0x90
+                      .tolerance = 0x2,           // default: 0x2
+                      .compensation = 0x38,       // default: 0x38
+                      .ev_bias = 0x480,           // default: 0x400
                       .ae_strategy_mode =
                           1,  // 0: HIGHLIGHT_PRIOR 1: LOWLIGHT_PRIOR
                       .hist_ratio_slope = 0xFFF,  // default: 0x80

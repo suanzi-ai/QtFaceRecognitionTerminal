@@ -36,6 +36,8 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
     SZ_LOG_INFO("Get screen w={}, h={}", screen_width, screen_height);
   }
 
+  isp_hist_widget_ = new ISPHistWidget(this);
+
   detect_tip_widget_bgr_ =
       new DetectTipWidget(0, 0, screen_width, screen_height, this);
   detect_tip_widget_bgr_->hide();
@@ -184,6 +186,10 @@ void VideoPlayer::paintEvent(QPaintEvent *event) {
 
   detect_tip_widget_bgr_->paint(&painter);
   detect_tip_widget_nir_->paint(&painter);
+
+  if (Config::get_app().show_isp_hist_window) {
+    isp_hist_widget_->paint(&painter);
+  }
 }
 
 void VideoPlayer::init_widgets() {
@@ -199,6 +205,9 @@ void VideoPlayer::init_widgets() {
 
   recognize_tip_widget_->setFixedSize(w, h);
   recognize_tip_widget_->move(x, y);
+
+  isp_hist_widget_->setFixedSize(200, 160);
+  isp_hist_widget_->move(0, 0);
 }
 
 
