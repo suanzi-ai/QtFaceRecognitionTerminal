@@ -66,6 +66,7 @@ DetectTask::~DetectTask() {
 }
 
 SZ_RETCODE DetectTask::adjust_isp_by_detection(const DetectionData *output) {
+  auto isp_global = Config::get_isp();
   auto bgr_cam = Config::get_camera(CAMERA_BGR);
   auto nir_cam = Config::get_camera(CAMERA_NIR);
 
@@ -83,7 +84,7 @@ SZ_RETCODE DetectTask::adjust_isp_by_detection(const DetectionData *output) {
   };
 
   auto isp = Isp::getInstance();
-  if (detect_count_ % 3 == 2) {
+  if (detect_count_ % isp_global.adjust_window_size == isp_global.adjust_window_size - 1) {
     if (output->bgr_face_detected_) {
       auto det = output->bgr_detection_;
       bgr_roi_cfg.x = det.x;
@@ -117,7 +118,7 @@ SZ_RETCODE DetectTask::adjust_isp_by_detection(const DetectionData *output) {
     }
   }
 
-  if (no_detect_count_ == 20) {
+  if (no_detect_count_ == isp_global.restore_size) {
     if (!isp->set_roi(bgr_cam.pipe, &bgr_roi_cfg, &bgr_cam.isp.stat)) {
       return SZ_RETCODE_FAILED;
     }

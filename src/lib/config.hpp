@@ -130,6 +130,8 @@ typedef struct {
   SZ_UINT8 non_roi_weight;
   bool crop_enable;
   int crop_margin;
+  int adjust_window_size;  // 调整间隔，聚焦于人脸
+  int restore_size;        // 调整恢复间隔，聚焦于中心
 } ISPStatConfig;
 
 void to_json(json &j, const ISPStatConfig &c);
@@ -161,6 +163,14 @@ typedef struct {
 
 void to_json(json &j, const ISPConfig &c);
 void from_json(const json &j, ISPConfig &c);
+
+typedef struct {
+  int adjust_window_size;  // 调整间隔，聚焦于人脸
+  int restore_size;        // 调整恢复间隔，聚焦于中心
+} ISPGlobalConfig;
+
+void to_json(json &j, const ISPGlobalConfig &c);
+void from_json(const json &j, ISPGlobalConfig &c);
 
 typedef struct {
   int index;
@@ -231,8 +241,7 @@ class Config {
   static const DetectConfig &get_detect();
   static const ExtractConfig &get_extract();
   static const LivenessConfig &get_liveness();
-  // static const ISPConfig &get_isp();
-  // static const ISPExposureConfig &get_isp_exposure();
+  static const ISPGlobalConfig &get_isp();
 
   static bool enable_anti_spoofing();
 
@@ -248,6 +257,7 @@ class Config {
   QufaceConfig quface;
   CameraConfig normal;
   CameraConfig infrared;
+  ISPGlobalConfig isp;
 
  private:
   static Config instance_;

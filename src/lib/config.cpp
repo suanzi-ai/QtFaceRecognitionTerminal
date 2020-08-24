@@ -240,10 +240,21 @@ void suanzi::from_json(const json &j, ISPConfig &c) {
   LOAD_JSON_TO(j, "hlc", c.hlc);
 }
 
+void suanzi::to_json(json &j, const ISPGlobalConfig &c) {
+  SAVE_JSON_TO(j, "adjust_window_size", c.adjust_window_size);
+  SAVE_JSON_TO(j, "restore_size", c.restore_size);
+}
+
+void suanzi::from_json(const json &j, ISPGlobalConfig &c) {
+  LOAD_JSON_TO(j, "adjust_window_size", c.adjust_window_size);
+  LOAD_JSON_TO(j, "restore_size", c.restore_size);
+}
+
 void suanzi::from_json(const json &j, Config &c) {
   LOAD_JSON_TO(j, "user", c.user);
   LOAD_JSON_TO(j, "app", c.app);
   LOAD_JSON_TO(j, "quface", c.quface);
+  LOAD_JSON_TO(j, "isp", c.isp);
 
   if (j.contains("cameras")) {
     LOAD_JSON_TO(j.at("cameras"), "normal", c.normal);
@@ -317,6 +328,11 @@ void Config::load_defaults() {
       .db_name = APP_DIR_PREFIX "/var/db/quface",
       .model_file_path = "facemodel.bin",
       .license_filename = "license.json",
+  };
+
+  isp = {
+      .adjust_window_size = 10,
+      .restore_size = 20,
   };
 
   normal = {
@@ -582,6 +598,8 @@ const UserConfig &Config::get_user() { return instance_.user; }
 const AppConfig &Config::get_app() { return instance_.app; }
 
 const QufaceConfig &Config::get_quface() { return instance_.quface; }
+
+const ISPGlobalConfig &Config::get_isp() { return instance_.isp; }
 
 const CameraConfig &Config::get_camera(bool is_bgr) {
   if (is_bgr)
