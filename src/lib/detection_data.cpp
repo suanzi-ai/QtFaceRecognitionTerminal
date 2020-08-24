@@ -51,23 +51,33 @@ bool DetectionRatio::is_overlap(DetectionRatio other) {
 bool DetectionRatio::is_valid() {
   auto cfg = Config::get_detect();
   auto app = Config::get_app();
-  float face_width, face_height, face_x, face_y, temperature_distance;
-  face_width = app.device_face_width;
-  face_height = app.device_face_height;
-  face_x = app.device_face_x;
-  face_y = app.device_face_y;
-  temperature_distance = app.temperature_distance;
   bool pose_valid = !isnanf(yaw) && !isnanf(pitch) && !isnanf(roll) &&
                     cfg.min_yaw < yaw && yaw < cfg.max_yaw &&
                     cfg.min_pitch < pitch && pitch < cfg.max_pitch &&
                     cfg.min_roll < roll && roll < cfg.max_roll;
-  bool position_valid =
-      x > face_x && y > face_y && x + width < face_x + face_width &&
-      y + height < face_height + face_y && width > face_width * temperature_distance &&
-      height > face_height * temperature_distance;
-  // SZ_LOG_INFO(
-  //     "X >:{:.2f}, Y >{:.2f}, x + width < {:.2f}, y + height < {:.2f}]",
-  //     face_x, face_y, (face_x + face_width), (face_height + face_y));
+  bool position_valid;
+
+  if (app.disabled_temperature)
+    position_valid =
+        x > 0.01 && y > 0.01 && x + width < 0.99 && y + height < 0.99;
+  else {
+    float face_width, face_height, face_x, face_y, temperature_distance;
+
+    face_width = app.device_face_width;
+    face_height = app.device_face_height;
+    face_x = app.device_face_x;
+    face_y = app.device_face_y;
+    temperature_distance = app.temperature_distance;
+
+    position_valid = x > face_x && y > face_y &&
+                     x + width < face_x + face_width &&
+                     y + height < face_height + face_y &&
+                     width > face_width * temperature_distance &&
+                     height > face_height * temperature_distance;
+    // SZ_LOG_INFO(
+    //     "X >:{:.2f}, Y >{:.2f}, x + width < {:.2f}, y + height < {:.2f}]",
+    //     face_x, face_y, (face_x + face_width), (face_height + face_y));
+  }
   return pose_valid && position_valid;
 }
 

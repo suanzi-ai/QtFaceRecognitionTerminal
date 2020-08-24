@@ -51,9 +51,6 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
   screen_saver_ = new ScreenSaverWidget(screen_width, screen_height, nullptr);
   screen_saver_->hide();
 
-  // face_box_ = new FaceBoxWidget(200, 200, 400, 400);
-  // face_box_->show();
-
   // Initialize QThreads
   camera_reader_ = new CameraReader(this);
 
@@ -66,8 +63,6 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
   // IO Tasks
   upload_task_ = new UploadTask(person_service, nullptr, this);
   audio_task_ = new AudioTask(nullptr, this);
-
-  temperature_task_ = new DashuTask();
 
   // Connect camera_reader to detect_task
   connect((const QObject *)camera_reader_,
@@ -138,8 +133,11 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
           (const QObject *)screen_saver_, SLOT(rx_hide()));
 
   // Connect temperature to record_task
-  connect((const QObject *)temperature_task_, SIGNAL(tx_temperature(float)),
-          (const QObject *)record_task_, SLOT(rx_temperature(float)));
+  if (!Config::get_app().disabled_temperature) {
+    temperature_task_ = new DashuTask();
+    connect((const QObject *)temperature_task_, SIGNAL(tx_temperature(float)),
+            (const QObject *)record_task_, SLOT(rx_temperature(float)));
+  }
 
   camera_reader_->start_sample();
 
@@ -157,15 +155,18 @@ VideoPlayer::~VideoPlayer() {}
 void VideoPlayer::paintEvent(QPaintEvent *event) {
   QPainter painter(this);
   auto app = Config::get_app();
-  int screen_width, screen_height;
-  float x, y, face_width, face_height;
-  camera_reader_->get_screen_size(screen_width, screen_height);
-  x = (float)(app.device_face_x * screen_width);
-  y = (float)(app.device_face_y * screen_height);
-  face_width = (float)(app.device_face_width * screen_width);
-  face_height = (float)(app.device_face_height * screen_height);
-  painter.setPen(Qt::green);
-  painter.drawRect(x, y, face_width, face_height);
+
+  if (!app.disabled_temperature) {
+    int screen_width, screen_height;
+    float x, y, face_width, face_height;
+    camera_reader_->get_screen_size(screen_width, screen_height);
+    x = (float)(app.device_face_x * screen_width);
+    y = (float)(app.device_face_y * screen_height);
+    face_width = (float)(app.device_face_width * screen_width);
+    face_height = (float)(app.device_face_height * screen_height);
+    painter.setPen(Qt::green);
+    painter.drawRect(x, y, face_width, face_height);
+  }
 
   detect_tip_widget_bgr_->paint(&painter);
   detect_tip_widget_nir_->paint(&painter);
