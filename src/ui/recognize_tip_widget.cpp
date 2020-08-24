@@ -39,7 +39,7 @@ void RecognizeTipWidget::rx_display(PersonData person, bool if_duplicated) {
 
   // Open door GPIO
   if (person_.status == PersonService::get_status(PersonStatus::Normal))
-    Gpio::set_level(52, true);
+    Gpio::set_level(GpioPinDOOR, true);
 
   hide();
   show();
@@ -50,7 +50,7 @@ void RecognizeTipWidget::rx_display(PersonData person, bool if_duplicated) {
 
 void RecognizeTipWidget::rx_reset() {
   hide();
-  Gpio::set_level(52, false);
+  Gpio::set_level(GpioPinDOOR, false);
 }
 
 void RecognizeTipWidget::paintEvent(QPaintEvent *event) {

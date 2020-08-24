@@ -145,16 +145,15 @@ bool RecognizeTask::is_live(DetectionData *detection) {
         static int true_idx = 0;
         static int false_idx = 0;
 
-        cv::Rect face_rect = {face_detection.bbox.x, face_detection.bbox.y,
-                              face_detection.bbox.width,
-                              face_detection.bbox.height};
+        cv::Rect face_rect = {
+            (int)face_detection.bbox.x, (int)face_detection.bbox.y,
+            (int)face_detection.bbox.width, (int)face_detection.bbox.height};
 
         if (Ive::getInstance()->yuv2RgbPacked(snapshot,
                                               detection->img_nir_large, true) &&
             face_rect.x >= 0 && face_rect.y >= 0 &&
             face_rect.x + face_rect.width <= nir_face.cols &&
             face_rect.y + face_rect.height <= nir_face.rows) {
-
           std::string file_path = cfg.infraraed_faces_store_path;
           if (ret == SZ_TRUE) {
             true_idx = (true_idx + 1) % 10000;
