@@ -70,21 +70,12 @@ SZ_RETCODE DetectTask::adjust_isp_by_detection(const DetectionData *output) {
   auto bgr_cam = Config::get_camera(CAMERA_BGR);
   auto nir_cam = Config::get_camera(CAMERA_NIR);
 
-  ROICfg bgr_roi_cfg = {
-      0.4,
-      0.4,
-      0.2,
-      0.2,
-  };
-  ROICfg nir_roi_cfg = {
-      0.4,
-      0.4,
-      0.2,
-      0.2,
-  };
+  ROICfg bgr_roi_cfg = {0.2, 0.2, 0.4, 0.4};
+  ROICfg nir_roi_cfg = {0.2, 0.2, 0.4, 0.4};
 
   auto isp = Isp::getInstance();
-  if (detect_count_ % isp_global.adjust_window_size == isp_global.adjust_window_size - 1) {
+  if (detect_count_ % isp_global.adjust_window_size ==
+      isp_global.adjust_window_size - 1) {
     if (output->bgr_face_detected_) {
       auto det = output->bgr_detection_;
       bgr_roi_cfg.x = det.x;

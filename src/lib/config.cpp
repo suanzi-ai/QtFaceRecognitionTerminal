@@ -351,21 +351,21 @@ void Config::load_defaults(ConfigData &c) {
           {
               .stat =
                   {
-                      .roi_enable = false,
+                      .roi_enable = true,
                       .roi_margin = 2,
                       .roi_weight = 2,
                       .non_roi_weight = 1,
-                      .crop_enable = true,
+                      .crop_enable = false,
                       .crop_margin = 25,
                   },
               .exposure =
                   {
                       .hist_stat_adjust = true,
-                      .speed = 0x60,              // default: 0x40
-                      .black_speed_bias = 0x120,  // default: 0x90
-                      .tolerance = 0x2,           // default: 0x2
-                      .compensation = 0x38,       // default: 0x38
-                      .ev_bias = 0x480,           // default: 0x400
+                      .speed = 0x60,             // default: 0x40
+                      .black_speed_bias = 0x90,  // default: 0x90
+                      .tolerance = 0x2,          // default: 0x2
+                      .compensation = 0x38,      // default: 0x38
+                      .ev_bias = 0x600,          // default: 0x400
                       .ae_strategy_mode =
                           1,  // 0: HIGHLIGHT_PRIOR 1: LOWLIGHT_PRIOR
                       .hist_ratio_slope = 0xFFF,  // default: 0x80
@@ -394,21 +394,21 @@ void Config::load_defaults(ConfigData &c) {
           {
               .stat =
                   {
-                      .roi_enable = false,
+                      .roi_enable = true,
                       .roi_margin = 2,
                       .roi_weight = 2,
                       .non_roi_weight = 1,
-                      .crop_enable = true,
+                      .crop_enable = false,
                       .crop_margin = 25,
                   },
               .exposure =
                   {
                       .hist_stat_adjust = true,
-                      .speed = 0x60,              // default: 0x40
-                      .black_speed_bias = 0x120,  // default: 0x90
-                      .tolerance = 0x2,           // default: 0x2
-                      .compensation = 0x38,       // default: 0x38
-                      .ev_bias = 0x480,           // default: 0x400
+                      .speed = 0x60,             // default: 0x40
+                      .black_speed_bias = 0x90,  // default: 0x90
+                      .tolerance = 0x2,          // default: 0x2
+                      .compensation = 0x38,      // default: 0x38
+                      .ev_bias = 0x600,          // default: 0x400
                       .ae_strategy_mode =
                           1,  // 0: HIGHLIGHT_PRIOR 1: LOWLIGHT_PRIOR
                       .hist_ratio_slope = 0xFFF,  // default: 0x80
