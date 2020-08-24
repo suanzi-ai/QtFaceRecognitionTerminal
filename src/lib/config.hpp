@@ -2,6 +2,7 @@
 #define CONFIG_HPP
 
 #include <fstream>
+#include <mutex>
 #include <nlohmann/json.hpp>
 #include <quface/common.hpp>
 #include <string>
@@ -126,13 +127,12 @@ void to_json(json &j, const ISPExposureConfig &c);
 void from_json(const json &j, ISPExposureConfig &c);
 
 typedef struct {
+  bool roi_enable;
   int roi_margin;
   SZ_UINT8 roi_weight;
   SZ_UINT8 non_roi_weight;
   bool crop_enable;
   int crop_margin;
-  int adjust_window_size;  // 调整间隔，聚焦于人脸
-  int restore_size;        // 调整恢复间隔，聚焦于中心
 } ISPStatConfig;
 
 void to_json(json &j, const ISPStatConfig &c);
@@ -220,20 +220,33 @@ typedef enum _CameraType {
   CAMERA_NIR = 2,
 } CameraType;
 
+typedef struct {
+  UserConfig user;
+  AppConfig app;
+  QufaceConfig quface;
+  CameraConfig normal;
+  CameraConfig infrared;
+  ISPGlobalConfig isp;
+  Levels<DetectConfig> detect_levels_;
+  Levels<ExtractConfig> extract_levels_;
+  Levels<LivenessConfig> liveness_levels_;
+} ConfigData;
+
+void from_json(const json &j, ConfigData &c);
+void to_json(json &j, const ConfigData &c);
+
 class Config {
  public:
   typedef std::shared_ptr<Config> ptr;
-  static Config::ptr get_instance();
-
-  Config() { load_defaults(); }
+  static Config *get_instance();
 
   SZ_RETCODE load_from_file(const std::string &config_file,
                             const std::string &config_override_file);
-  SZ_RETCODE load_from_json(const json &j);
   SZ_RETCODE reload();
-  SZ_RETCODE save();
+  SZ_RETCODE save_diff(const json &target);
   SZ_RETCODE reset();
 
+  static const ConfigData &get_all();
   static const UserConfig &get_user();
   static const AppConfig &get_app();
   static const QufaceConfig &get_quface();
@@ -246,33 +259,19 @@ class Config {
 
   static bool enable_anti_spoofing();
 
-  friend void from_json(const json &j, Config &c);
-  friend void to_json(json &j, const Config &c);
+ private:
+  void load_defaults(ConfigData &c);
+  SZ_RETCODE read_config(json &cfg);
+  SZ_RETCODE read_override_config(json &cfg);
 
  private:
-  void load_defaults();
-
- public:
-  UserConfig user;
-  AppConfig app;
-  QufaceConfig quface;
-  CameraConfig normal;
-  CameraConfig infrared;
-  ISPGlobalConfig isp;
-
- private:
+  mutable std::mutex cfg_mutex_;
+  ConfigData cfg_data_;
   static Config instance_;
-
-  Levels<DetectConfig> detect_levels_;
-  Levels<ExtractConfig> extract_levels_;
-  Levels<LivenessConfig> liveness_levels_;
 
   std::string config_file_;
   std::string config_override_file_;
 };
-
-void from_json(const json &j, Config &c);
-void to_json(json &j, const Config &c);
 
 }  // namespace suanzi
 

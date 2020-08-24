@@ -15,12 +15,11 @@ class HTTPServer : public EventEmitter {
  public:
   typedef std::shared_ptr<HTTPServer> ptr;
 
-  HTTPServer(Config::ptr config);
+  HTTPServer();
 
   void run(uint16_t port, const std::string &host = "0.0.0.0");
 
  private:
   std::shared_ptr<Server> server_;
-  Config::ptr config_;
 };
 }  // namespace suanzi

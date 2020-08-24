@@ -5,7 +5,7 @@
 
 using namespace suanzi;
 
-HTTPServer::HTTPServer(Config::ptr config) : config_(config) {
+HTTPServer::HTTPServer() {
   server_ = std::make_shared<Server>();
 
   server_->set_logger([](const Request& req, const Response& res) {
@@ -76,20 +76,21 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
 
   server_->Post("/config", [&](const Request& req, Response& res) {
     try {
+      auto cfg = Config::get_instance();
       SZ_RETCODE ret;
       auto j = json::parse(req.body);
-      ret = config_->load_from_json(j);
+      ret = cfg->save_diff(j);
       if (ret != SZ_RETCODE_OK) {
         json data = {{"ok", false},
-                     {"message", "load error " + std::to_string(ret)}};
+                     {"message", "save error " + std::to_string(ret)}};
         res.set_content(data.dump(), "application/json");
         return;
       }
 
-      ret = config_->save();
+      ret = cfg->reload();
       if (ret != SZ_RETCODE_OK) {
         json data = {{"ok", false},
-                     {"message", "save error " + std::to_string(ret)}};
+                     {"message", "reload error " + std::to_string(ret)}};
         res.set_content(data.dump(), "application/json");
         return;
       }
@@ -106,12 +107,16 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
   });
 
   server_->Get("/config", [&](const Request& req, Response& res) {
-    json body(*config_);
+    auto cfg = Config::get_all();
+
+    json body(cfg);
     res.set_content(body.dump(), "application/json");
   });
 
   server_->Post("/config/-/reset", [&](const Request& req, Response& res) {
-    SZ_RETCODE ret = config_->reset();
+    auto cfg = Config::get_instance();
+
+    SZ_RETCODE ret = cfg->reset();
     if (ret != SZ_RETCODE_OK) {
       json data = {{"ok", false},
                    {"message", "save error " + std::to_string(ret)}};

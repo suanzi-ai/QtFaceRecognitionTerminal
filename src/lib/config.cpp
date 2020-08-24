@@ -191,6 +191,7 @@ void suanzi::from_json(const json &j, ISPExposureConfig &c) {
 }
 
 void suanzi::to_json(json &j, const ISPStatConfig &c) {
+  SAVE_JSON_TO(j, "roi_enable", c.roi_enable);
   SAVE_JSON_TO(j, "roi_margin", c.roi_margin);
   SAVE_JSON_TO(j, "roi_weight", c.roi_weight);
   SAVE_JSON_TO(j, "non_roi_weight", c.non_roi_weight);
@@ -199,6 +200,7 @@ void suanzi::to_json(json &j, const ISPStatConfig &c) {
 }
 
 void suanzi::from_json(const json &j, ISPStatConfig &c) {
+  LOAD_JSON_TO(j, "roi_enable", c.roi_enable);
   LOAD_JSON_TO(j, "roi_margin", c.roi_margin);
   LOAD_JSON_TO(j, "roi_weight", c.roi_weight);
   LOAD_JSON_TO(j, "non_roi_weight", c.non_roi_weight);
@@ -252,7 +254,7 @@ void suanzi::from_json(const json &j, ISPGlobalConfig &c) {
   LOAD_JSON_TO(j, "restore_size", c.restore_size);
 }
 
-void suanzi::from_json(const json &j, Config &c) {
+void suanzi::from_json(const json &j, ConfigData &c) {
   LOAD_JSON_TO(j, "user", c.user);
   LOAD_JSON_TO(j, "app", c.app);
   LOAD_JSON_TO(j, "quface", c.quface);
@@ -270,7 +272,7 @@ void suanzi::from_json(const json &j, Config &c) {
   }
 }
 
-void suanzi::to_json(json &j, const Config &c) {
+void suanzi::to_json(json &j, const ConfigData &c) {
   SAVE_JSON_TO(j, "user", c.user);
   SAVE_JSON_TO(j, "app", c.app);
   SAVE_JSON_TO(j, "quface", c.quface);
@@ -285,14 +287,16 @@ void suanzi::to_json(json &j, const Config &c) {
   SAVE_JSON_TO(pro, "extract_levels", c.extract_levels_);
   SAVE_JSON_TO(pro, "liveness_levels", c.liveness_levels_);
   SAVE_JSON_TO(j, "pro", pro);
+
+  SAVE_JSON_TO(j, "isp", c.isp);
 }
 
 Config Config::instance_;
 
-Config::ptr Config::get_instance() { return Config::ptr(&instance_); }
+Config *Config::get_instance() { return &instance_; }
 
-void Config::load_defaults() {
-  app = {
+void Config::load_defaults(ConfigData &c) {
+  c.app = {
       .recognize_tip_top_percent = 78,
       .server_port = 8010,
       .server_host = "127.0.0.1",
@@ -314,7 +318,7 @@ void Config::load_defaults() {
       .show_isp_hist_window = false,
   };
 
-  user = {
+  c.user = {
       .blacklist_policy = "alarm",
       .liveness_policy = "alarm",
       .detect_level = "medium",
@@ -323,7 +327,7 @@ void Config::load_defaults() {
       .duplication_interval = 60,
   };
 
-  quface = {
+  c.quface = {
       .product_key = "",
       .device_name = "",
       .device_secret = "",
@@ -333,12 +337,12 @@ void Config::load_defaults() {
       .license_filename = "license.json",
   };
 
-  isp = {
+  c.isp = {
       .adjust_window_size = 10,
       .restore_size = 20,
   };
 
-  normal = {
+  c.normal = {
       .index = 1,
       .rotate = 0,
       .flip = 1,
@@ -347,6 +351,7 @@ void Config::load_defaults() {
           {
               .stat =
                   {
+                      .roi_enable = false,
                       .roi_margin = 2,
                       .roi_weight = 2,
                       .non_roi_weight = 1,
@@ -380,7 +385,7 @@ void Config::load_defaults() {
           },
   };
 
-  infrared = {
+  c.infrared = {
       .index = 0,
       .rotate = 0,
       .flip = 1,
@@ -389,6 +394,7 @@ void Config::load_defaults() {
           {
               .stat =
                   {
+                      .roi_enable = false,
                       .roi_margin = 2,
                       .roi_weight = 2,
                       .non_roi_weight = 1,
@@ -422,7 +428,7 @@ void Config::load_defaults() {
           },
   };
 
-  detect_levels_ = {
+  c.detect_levels_ = {
       .high = {.threshold = 0.4f,
                .min_face_size = 40,
                .max_yaw = 10,
@@ -455,7 +461,7 @@ void Config::load_defaults() {
               .min_tracking_number = 2},
   };
 
-  extract_levels_ = {
+  c.extract_levels_ = {
       .high =
           {
               .history_size = 2,
@@ -482,7 +488,7 @@ void Config::load_defaults() {
           },
   };
 
-  liveness_levels_ = {
+  c.liveness_levels_ = {
       .high =
           {
               .history_size = 5,
@@ -523,63 +529,109 @@ SZ_RETCODE Config::load_from_file(const std::string &config_file,
                                   const std::string &config_override_file) {
   config_file_ = config_file;
   config_override_file_ = config_override_file;
-  reload();
+
+  return reload();
 }
 
-SZ_RETCODE Config::load_from_json(const json &j) {
-  try {
-    j.get_to(*this);
-  } catch (const std::exception &exc) {
-    SZ_LOG_ERROR("load_from_json: {}", exc.what());
+SZ_RETCODE Config::read_config(json &cfg) {
+  ConfigData cfg_data;
+  load_defaults(cfg_data);
+  json config(cfg_data);
+
+  std::ifstream ifd(config_file_);
+  if (!ifd.is_open()) {
+    SZ_LOG_ERROR("Open {} failed, write defaults", config_file_);
+  } else {
+    SZ_LOG_INFO("Load config from {}", config_file_);
+    json file_cfg;
+    ifd >> file_cfg;
+    config.merge_patch(file_cfg);
+  }
+
+  std::ofstream o(config_file_);
+  if (!o.is_open()) {
+    SZ_LOG_ERROR("Open {} for write failed", config_file_);
     return SZ_RETCODE_FAILED;
   }
+  o << config.dump(2);
+  cfg = config;
+
+  SZ_LOG_INFO("Config updated to {}", config_file_);
+
+  return SZ_RETCODE_OK;
+}
+
+SZ_RETCODE Config::read_override_config(json &cfg) {
+  std::ifstream ifd(config_override_file_);
+  if (!ifd.is_open()) {
+    SZ_LOG_ERROR("Open {} failed", config_override_file_);
+    return SZ_RETCODE_OK;
+  }
+
+  SZ_LOG_INFO("Override config from {}", config_override_file_);
+  ifd >> cfg;
   return SZ_RETCODE_OK;
 }
 
 SZ_RETCODE Config::reload() {
+  std::unique_lock<std::mutex> lock(cfg_mutex_);
+
+  SZ_LOG_INFO("Load from files ...");
   try {
-    std::ifstream config_fd(config_file_);
-    if (config_fd.is_open()) {
-      SZ_LOG_INFO("Load config from {}", config_file_);
-      json config;
-      config_fd >> config;
-      config.get_to(*this);
-    } else {
-      SZ_LOG_WARN("{} not present, will using defaults", config_file_);
+    json config;
+    SZ_RETCODE ret = read_config(config);
+    if (ret != SZ_RETCODE_OK) {
+      return ret;
     }
 
-    std::ifstream override_fd(config_override_file_);
-    if (override_fd.is_open()) {
-      SZ_LOG_INFO("Override config from {}", config_override_file_);
-      json override_config;
-      override_fd >> override_config;
-
-      override_config.get_to(*this);
+    json config_patch;
+    ret = read_override_config(config_patch);
+    if (ret != SZ_RETCODE_OK) {
+      return ret;
     }
+
+    if (config_patch.is_array()) {
+      config = config.patch(config_patch);
+    }
+
+    config.get_to(cfg_data_);
   } catch (std::exception &exc) {
     SZ_LOG_ERROR("Load error, will using defaults: {}", exc.what());
+    return SZ_RETCODE_FAILED;
   }
 
   return SZ_RETCODE_OK;
 }
 
-SZ_RETCODE Config::save() {
-  json config = json(*this);
+SZ_RETCODE Config::save_diff(const json &target_patch) {
+  try {
+    json source;
+    SZ_RETCODE ret = read_config(source);
+    if (ret != SZ_RETCODE_OK) {
+      return ret;
+    }
 
-  std::ofstream o(config_override_file_);
-  if (!o.is_open()) {
-    SZ_LOG_WARN("Open {} failed, can't save", config_override_file_);
+    json target = source;
+    target.merge_patch(target_patch);
+
+    std::ofstream o(config_override_file_);
+    if (!o.is_open()) {
+      SZ_LOG_WARN("Open {} failed, can't save", config_override_file_);
+      return SZ_RETCODE_FAILED;
+    }
+
+    json diff = json::diff(source, target);
+
+    o << diff.dump(2);
+  } catch (std::exception &exc) {
+    SZ_LOG_ERROR("Save diff error: {}", exc.what());
     return SZ_RETCODE_FAILED;
   }
-
-  o << config.dump(2);
 
   return SZ_RETCODE_OK;
 }
 
 SZ_RETCODE Config::reset() {
-  json config = json(*this);
-
   SZ_LOG_INFO("Clear everything in {} ...", config_override_file_);
   std::ofstream o(config_override_file_);
   if (!o.is_open()) {
@@ -588,51 +640,69 @@ SZ_RETCODE Config::reset() {
   }
 
   o << "{}";
-
-  SZ_LOG_INFO("Load defaults ...");
-  load_defaults();
-
-  SZ_LOG_INFO("Load from files ...");
   return reload();
 }
 
-const UserConfig &Config::get_user() { return instance_.user; }
+const ConfigData &Config::get_all() {
+  std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
+  return instance_.cfg_data_;
+}
 
-const AppConfig &Config::get_app() { return instance_.app; }
+const UserConfig &Config::get_user() {
+  std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
+  return instance_.cfg_data_.user;
+}
 
-const QufaceConfig &Config::get_quface() { return instance_.quface; }
+const AppConfig &Config::get_app() {
+  std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
+  return instance_.cfg_data_.app;
+}
 
-const ISPGlobalConfig &Config::get_isp() { return instance_.isp; }
+const QufaceConfig &Config::get_quface() {
+  std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
+  return instance_.cfg_data_.quface;
+}
+
+const ISPGlobalConfig &Config::get_isp() {
+  std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
+  return instance_.cfg_data_.isp;
+}
 
 const CameraConfig &Config::get_camera(bool is_bgr) {
+  std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
   if (is_bgr)
-    return instance_.normal;
+    return instance_.cfg_data_.normal;
   else
-    return instance_.infrared;
+    return instance_.cfg_data_.infrared;
 }
 
 const CameraConfig &Config::get_camera(CameraType tp) {
+  std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
   if (tp == CAMERA_BGR)
-    return instance_.normal;
+    return instance_.cfg_data_.normal;
   else
-    return instance_.infrared;
+    return instance_.cfg_data_.infrared;
 }
 
 const DetectConfig &Config::get_detect() {
+  std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
   auto &i = instance_;
-  return i.detect_levels_.get(i.user.detect_level);
+  return i.cfg_data_.detect_levels_.get(i.cfg_data_.user.detect_level);
 }
 
 const ExtractConfig &Config::get_extract() {
+  std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
   auto &i = instance_;
-  return i.extract_levels_.get(i.user.extract_level);
+  return i.cfg_data_.extract_levels_.get(i.cfg_data_.user.extract_level);
 }
 
 const LivenessConfig &Config::get_liveness() {
+  std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
   auto &i = instance_;
-  return i.liveness_levels_.get(i.user.liveness_level);
+  return i.cfg_data_.liveness_levels_.get(i.cfg_data_.user.liveness_level);
 }
 
 bool Config::enable_anti_spoofing() {
-  return instance_.app.enable_anti_spoofing;
+  std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
+  return instance_.cfg_data_.app.enable_anti_spoofing;
 }
