@@ -143,6 +143,10 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
 
   QTimer::singleShot(1, this, SLOT(init_widgets()));
 
+  static QTimer updateIpTimer;
+  connect(&updateIpTimer, SIGNAL(timeout()), this, SLOT(update_ip_and_version()));
+  updateIpTimer.start(1000);
+
   /*
   static Otpa16TempTask otpa16_task;
   connect((const QObject *)&otpa16_task, SIGNAL(tx_display(OtpaTempData)),
@@ -158,8 +162,8 @@ void VideoPlayer::paintEvent(QPaintEvent *event) {
   int screen_width, screen_height;
   camera_reader_->get_screen_size(screen_width, screen_height);
   
-  painter.drawText(20, 30, QString(person_service_->get_local_ip().c_str()));
-  painter.drawText(screen_width - 230, 30, QString(person_service_->get_system_version().c_str()));
+  painter.drawText(20, 40, QString(ip_.c_str()));
+  painter.drawText(screen_width - 230, 40, QString(version_.c_str()));
   
   if (!app.disabled_temperature) {
     int device_body_start_angle,
@@ -195,4 +199,10 @@ void VideoPlayer::init_widgets() {
 
   recognize_tip_widget_->setFixedSize(w, h);
   recognize_tip_widget_->move(x, y);
+}
+
+
+void VideoPlayer::update_ip_and_version() {
+	ip_ = person_service_->get_local_ip();
+	version_ = person_service_->get_system_version();
 }

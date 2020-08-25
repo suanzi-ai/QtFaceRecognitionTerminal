@@ -38,6 +38,7 @@ class VideoPlayer : public QWidget {
 
  private slots:
   void init_widgets();
+  void update_ip_and_version();
 
  private:
   DetectTipWidget *detect_tip_widget_bgr_;
@@ -59,6 +60,8 @@ class VideoPlayer : public QWidget {
 
   TemperatureTask *temperature_task_;
   PersonService::ptr person_service_;
+  std::string ip_;
+  std::string version_;
 };
 
 }  // namespace suanzi
