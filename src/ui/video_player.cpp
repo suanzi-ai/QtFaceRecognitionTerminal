@@ -188,7 +188,10 @@ void VideoPlayer::paintEvent(QPaintEvent *event) {
   detect_tip_widget_nir_->paint(&painter);
 
   if (Config::get_app().show_isp_hist_window) {
+    isp_hist_widget_->show();
     isp_hist_widget_->paint(&painter);
+  } else {
+    isp_hist_widget_->hide();
   }
 }
 
@@ -206,7 +209,7 @@ void VideoPlayer::init_widgets() {
   recognize_tip_widget_->setFixedSize(w, h);
   recognize_tip_widget_->move(x, y);
 
-  isp_hist_widget_->setFixedSize(200, 160);
+  isp_hist_widget_->setFixedSize(300, 225);
   isp_hist_widget_->move(0, 0);
 }
 

@@ -50,9 +50,6 @@ set(RESOURCE_PREFIX
 set(HISI_SDK_PREFIX
     "${PROJECT_DEPENDENCY_DIR}/${HISI_SDK_PLATFORM}"
     CACHE STRING "Dir for hisi sdk")
-set(THIRD_PARTY_PREFIX
-    "${PROJECT_DEPENDENCY_DIR}/3rd"
-    CACHE STRING "Dir for 3rd")
 set(QUFACE_SDK_PREFIX
     "${PROJECT_DEPENDENCY_DIR}/qufacesdk"
     CACHE STRING "Dir for quface sdk")
@@ -61,7 +58,6 @@ set(QT_SDK_PREFIX
     CACHE STRING "Dir for qt sdk")
 
 message(STATUS "set HISI_SDK_PREFIX to: ${HISI_SDK_PREFIX}")
-message(STATUS "set THIRD_PARTY_PREFIX to: ${THIRD_PARTY_PREFIX}")
 message(STATUS "set QUFACE_SDK_PREFIX to: ${QUFACE_SDK_PREFIX}")
 message(STATUS "set QT_SDK_PREFIX to: ${QT_SDK_PREFIX}")
 
@@ -71,10 +67,9 @@ if(NOT EXISTS ${QUFACE_SDK_PREFIX})
   message(FATAL_ERROR "QUFACE_SDK_PREFIX: ${QUFACE_SDK_PREFIX} not exists!")
 endif()
 
-set(CMAKE_FIND_ROOT_PATH ${HISI_SDK_PREFIX} ${THIRD_PARTY_PREFIX}
-                         ${QUFACE_SDK_PREFIX} ${QT_SDK_PREFIX})
-set(CMAKE_PREFIX_PATH ${HISI_SDK_PREFIX} ${THIRD_PARTY_PREFIX}
-                      ${QUFACE_SDK_PREFIX} ${QT_SDK_PREFIX})
+set(CMAKE_FIND_ROOT_PATH ${HISI_SDK_PREFIX} ${QUFACE_SDK_PREFIX}
+                         ${QT_SDK_PREFIX})
+set(CMAKE_PREFIX_PATH ${HISI_SDK_PREFIX} ${QUFACE_SDK_PREFIX} ${QT_SDK_PREFIX})
 
 if(DOWNLOAD_DEPENDENCY)
   # -- Download dependecies --
@@ -84,15 +79,15 @@ if(DOWNLOAD_DEPENDENCY)
 
   download_and_extract(
     URL
-    https://quvision.oss-cn-beijing.aliyuncs.com/qufacesdk/deps/prebuild-3rd-0.1.3.tar.gz
+    https://quvision.oss-cn-beijing.aliyuncs.com/qufacesdk/hisi/qt5-himix200-sdk.tgz
     FILENAME
-    ${DOWNLOAD_DIR}/prebuild-3rd-0.1.3.tar.gz
+    ${DOWNLOAD_DIR}/qt5-himix200-sdk.tgz
     HASH_TYPE
     SHA256
     HASH
-    ce34e1a94997f7980e67b4a681184a52bccbf7d4c8e19f347e8aed77f3fe6dfd
+    4bb36a23e1db1ebdc4b6676ceb095771531ee2fee5b12d7c4029ef4ee5e70ba7
     EXTRACT_DIR
-    ${THIRD_PARTY_PREFIX})
+    ${QT_SDK_PREFIX})
 
   download_and_extract(
     URL
@@ -105,23 +100,12 @@ if(DOWNLOAD_DEPENDENCY)
     f9075af18adbb95a21789f6d79ca98fa1f92fee0696a2d156a88425fa4efdbcb
     EXTRACT_DIR
     ${HISI_SDK_PREFIX})
-
-  download_and_extract(
-    URL
-    https://quvision.oss-cn-beijing.aliyuncs.com/qufacesdk/models/hisi-model-latest.tar.gz
-    FILENAME
-    ${DOWNLOAD_DIR}/hisi-model-latest.tar.gz
-    HASH_TYPE
-    SHA256
-    EXTRACT_DIR
-    ${RESOURCE_PREFIX}/models
-    REMOVE_EXTRACT_DIR_IF_EXISTS)
 endif()
 
 find_package(QuFaceSDK REQUIRED)
 message(STATUS "Found QuFaceSDK ${QuFaceSDK_VERSION}")
 
-find_package(Qt5 REQUIRED COMPONENTS Widgets)
+find_package(Qt5 REQUIRED COMPONENTS Widgets Charts)
 message(STATUS "Found Qt5 ${Qt5_VERSION}")
 
 find_package(httplib)
