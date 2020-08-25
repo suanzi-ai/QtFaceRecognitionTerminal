@@ -28,7 +28,6 @@ void suanzi::to_json(json &j, const AppConfig &c) {
   SAVE_JSON_TO(j, "person_service_base_url", c.person_service_base_url);
   SAVE_JSON_TO(j, "enable_anti_spoofing", c.enable_anti_spoofing);
   SAVE_JSON_TO(j, "show_infrared_window", c.show_infrared_window);
-  SAVE_JSON_TO(j, "record_infraraed_faces", c.record_infraraed_faces);
   SAVE_JSON_TO(j, "device_face_x", c.device_face_x);
   SAVE_JSON_TO(j, "device_face_y", c.device_face_y);
   SAVE_JSON_TO(j, "device_face_height", c.device_face_height);
@@ -49,7 +48,6 @@ void suanzi::from_json(const json &j, AppConfig &c) {
   LOAD_JSON_TO(j, "person_service_base_url", c.person_service_base_url);
   LOAD_JSON_TO(j, "enable_anti_spoofing", c.enable_anti_spoofing);
   LOAD_JSON_TO(j, "show_infrared_window", c.show_infrared_window);
-  LOAD_JSON_TO(j, "record_infraraed_faces", c.record_infraraed_faces);
   LOAD_JSON_TO(j, "device_face_x", c.device_face_x);
   LOAD_JSON_TO(j, "device_face_y", c.device_face_y);
   LOAD_JSON_TO(j, "device_face_height", c.device_face_height);
@@ -314,7 +312,6 @@ void Config::load_defaults(ConfigData &c) {
       .person_service_base_url = "http://127.0.0.1",
       .enable_anti_spoofing = false,
       .show_infrared_window = false,
-      .record_infraraed_faces = false,
       .device_face_x = 0.289,
       .device_face_y = 0.18,
       .device_face_height = 0.35,

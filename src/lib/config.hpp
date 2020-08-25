@@ -41,7 +41,6 @@ typedef struct {
   std::string person_service_base_url;
   bool enable_anti_spoofing;
   bool show_infrared_window;
-  bool record_infraraed_faces;
   SZ_FLOAT device_face_x;
   SZ_FLOAT device_face_y;
   SZ_FLOAT device_face_height;
