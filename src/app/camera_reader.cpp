@@ -157,15 +157,6 @@ bool CameraReader::capture_frame(ImagePackage *pkg) {
     QThread::usleep(10);
   }
 
-  // set channel U,V to zeros, remain Y
-  int width = pkg->img_nir_large->width;
-  int height = pkg->img_nir_large->height;
-  memset(pkg->img_nir_large->pData + width * height, 0x80, width * height / 2);
-
-  width = pkg->img_nir_small->width;
-  height = pkg->img_nir_small->height;
-  memset(pkg->img_nir_small->pData + width * height, 0x80, width * height / 2);
-
   pkg->frame_idx = frame_idx++;
 
   return true;

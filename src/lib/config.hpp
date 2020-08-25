@@ -156,8 +156,16 @@ void to_json(json &j, const ISPHLCConfig &c);
 void from_json(const json &j, ISPHLCConfig &c);
 
 typedef struct {
+  bool enable;
+} ISPWBConfig;
+
+void to_json(json &j, const ISPWBConfig &c);
+void from_json(const json &j, ISPWBConfig &c);
+
+typedef struct {
   ISPStatConfig stat;
   ISPExposureConfig exposure;
+  ISPWBConfig wb;
   ISPGammaConfig gamma;
   ISPHLCConfig hlc;
 } ISPConfig;

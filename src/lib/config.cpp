@@ -218,6 +218,14 @@ void suanzi::from_json(const json &j, ISPGammaConfig &c) {
   LOAD_JSON_TO(j, "curve_type", c.curve_type);
 }
 
+void suanzi::to_json(json &j, const ISPWBConfig &c) {
+  SAVE_JSON_TO(j, "enable", c.enable);
+}
+
+void suanzi::from_json(const json &j, ISPWBConfig &c) {
+  LOAD_JSON_TO(j, "enable", c.enable);
+}
+
 void suanzi::to_json(json &j, const ISPHLCConfig &c) {
   SAVE_JSON_TO(j, "enable", c.enable);
   SAVE_JSON_TO(j, "luma_target", c.luma_target);
@@ -233,6 +241,7 @@ void suanzi::from_json(const json &j, ISPHLCConfig &c) {
 void suanzi::to_json(json &j, const ISPConfig &c) {
   SAVE_JSON_TO(j, "stat", c.stat);
   SAVE_JSON_TO(j, "exposure", c.exposure);
+  SAVE_JSON_TO(j, "wb", c.wb);
   SAVE_JSON_TO(j, "gamma", c.gamma);
   SAVE_JSON_TO(j, "hlc", c.hlc);
 }
@@ -240,6 +249,7 @@ void suanzi::to_json(json &j, const ISPConfig &c) {
 void suanzi::from_json(const json &j, ISPConfig &c) {
   LOAD_JSON_TO(j, "stat", c.stat);
   LOAD_JSON_TO(j, "exposure", c.exposure);
+  LOAD_JSON_TO(j, "wb", c.wb);
   LOAD_JSON_TO(j, "gamma", c.gamma);
   LOAD_JSON_TO(j, "hlc", c.hlc);
 }
@@ -371,6 +381,10 @@ void Config::load_defaults(ConfigData &c) {
                       .hist_ratio_slope = 0xFFF,  // default: 0x80
                       .max_hist_offset = 0x6,     // default: 0x10
                   },
+              .wb =
+                  {
+                      .enable = true,
+                  },
               .gamma =
                   {
                       .enable = true,
@@ -413,6 +427,10 @@ void Config::load_defaults(ConfigData &c) {
                           1,  // 0: HIGHLIGHT_PRIOR 1: LOWLIGHT_PRIOR
                       .hist_ratio_slope = 0xFFF,  // default: 0x80
                       .max_hist_offset = 0x6,     // default: 0x10
+                  },
+              .wb =
+                  {
+                      .enable = false,
                   },
               .gamma =
                   {
