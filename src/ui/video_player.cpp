@@ -157,15 +157,21 @@ void VideoPlayer::paintEvent(QPaintEvent *event) {
   auto app = Config::get_app();
 
   if (!app.disabled_temperature) {
-    int screen_width, screen_height;
+    int screen_width, screen_height, device_body_start_angle,
+        device_body_open_angle;
     float x, y, face_width, face_height;
     camera_reader_->get_screen_size(screen_width, screen_height);
     x = (float)(app.device_face_x * screen_width);
     y = (float)(app.device_face_y * screen_height);
     face_width = (float)(app.device_face_width * screen_width);
     face_height = (float)(app.device_face_height * screen_height);
-    painter.setPen(Qt::green);
-    painter.drawRect(x, y, face_width, face_height);
+    device_body_start_angle = app.device_body_start_angle;
+    device_body_open_angle = app.device_body_open_angle;
+    painter.setPen(QPen(Qt::white, 5, Qt::SolidLine));
+    painter.drawEllipse(x, y, face_width, face_height);
+    painter.drawChord(x / 1.2, y + face_height + 25, face_width * 1.2, face_height, // +40是身体与头部的间距 *1.2是身体要比头宽一点
+                      device_body_start_angle, device_body_open_angle);
+    //     painter.drawRect(x, y, face_width, face_height);
   }
 
   detect_tip_widget_bgr_->paint(&painter);
