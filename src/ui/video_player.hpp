@@ -58,6 +58,7 @@ class VideoPlayer : public QWidget {
   AudioTask *audio_task_;
 
   TemperatureTask *temperature_task_;
+  PersonService::ptr person_service_;
 };
 
 }  // namespace suanzi

@@ -17,7 +17,7 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
                          FaceExtractorPtr extractor,
                          FaceAntiSpoofingPtr anti_spoofing,
                          PersonService::ptr person_service, QWidget *parent)
-    : QWidget(parent) {
+    : person_service_(person_service), QWidget(parent) {
   // Initialize QT widget
   QPalette pal = palette();
   pal.setColor(QPalette::Background, Qt::transparent);
@@ -155,12 +155,16 @@ VideoPlayer::~VideoPlayer() {}
 void VideoPlayer::paintEvent(QPaintEvent *event) {
   QPainter painter(this);
   auto app = Config::get_app();
-
+  int screen_width, screen_height;
+  camera_reader_->get_screen_size(screen_width, screen_height);
+  
+  painter.drawText(20, 30, QString(person_service_->get_local_ip().c_str()));
+  painter.drawText(screen_width - 230, 30, QString(person_service_->get_system_version().c_str()));
+  
   if (!app.disabled_temperature) {
-    int screen_width, screen_height, device_body_start_angle,
+    int device_body_start_angle,
         device_body_open_angle;
     float x, y, face_width, face_height;
-    camera_reader_->get_screen_size(screen_width, screen_height);
     x = (float)(app.device_face_x * screen_width);
     y = (float)(app.device_face_y * screen_height);
     face_width = (float)(app.device_face_width * screen_width);

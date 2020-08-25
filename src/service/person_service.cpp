@@ -1,4 +1,5 @@
 #include "person_service.hpp"
+#include "config.hpp"
 
 void suanzi::to_json(json &j, const PersonData &p) {
   j = json{
@@ -52,6 +53,33 @@ SZ_RETCODE PersonService::get_person(SZ_UINT32 id, PersonData &person) {
   }
   return SZ_RETCODE_FAILED;
 }
+
+
+std::string PersonService::get_local_ip() {
+	std::string path = "/api/v1/systems/currentNetwork";
+	auto res = client_.Get(path.c_str());
+	std::string ip = "unknown";
+  	if (res && res->status < 400) {
+		std::string name = "";
+		json body = json::parse(res->body);
+		LOAD_JSON_TO(body, "ip", ip);
+		LOAD_JSON_TO(body, "name", name);
+		ip = name + "_" + ip;
+  	}
+	return "Ip:" + ip;
+}
+
+std::string PersonService::get_system_version() {
+	std::string path = "/api/v1/systems/meta";
+	std::string version = "unknown";
+	auto res = client_.Get(path.c_str());
+	if (res && res->status < 400) {
+		json body = json::parse(res->body);
+		LOAD_JSON_TO(body, "releaseVersion", version);
+  	}
+	return "Version:" + version;
+}
+
 
 SZ_RETCODE PersonService::update_person_face_image(
     uint id, const std::vector<SZ_UINT8> &image_content) {
