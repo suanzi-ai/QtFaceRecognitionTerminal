@@ -79,16 +79,16 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
   if ((is_live || live_history_.size() == live_size) &&
       person_history_.size() == person_size) {
     PersonData person;
-    int width = input->img_bgr_small->width;
-    int height = input->img_bgr_small->height;
+    int width = input->img_bgr_large->width;
+    int height = input->img_bgr_large->height;
     person.bgr_face_snapshot.create(height, width, CV_8UC3);
-    memcpy(person.bgr_face_snapshot.data, input->img_bgr_small->pData,
+    memcpy(person.bgr_face_snapshot.data, input->img_bgr_large->pData,
            width * height * 3 / 2);
 
-    width = input->img_nir_small->width;
-    height = input->img_nir_small->height;
+    width = input->img_nir_large->width;
+    height = input->img_nir_large->height;
     person.nir_face_snapshot.create(height, width, CV_8UC3);
-    memcpy(person.nir_face_snapshot.data, input->img_nir_small->pData,
+    memcpy(person.nir_face_snapshot.data, input->img_nir_large->pData,
            width * height * 3 / 2);
 
     // query person info

@@ -98,12 +98,23 @@ SZ_RETCODE PersonService::update_person_face_image(
   }
 }
 
-SZ_RETCODE PersonService::upload_image(
+SZ_RETCODE PersonService::upload_bgr_image(
     const std::vector<SZ_UINT8> &image_content, std::string &file_path) {
+  return upload_image("record", image_content, file_path);
+}
+
+SZ_RETCODE PersonService::upload_nir_image(
+    const std::vector<SZ_UINT8> &image_content, std::string &file_path) {
+  return upload_image("ir-record", image_content, file_path);
+}
+
+SZ_RETCODE PersonService::upload_image(
+    const std::string &type, const std::vector<SZ_UINT8> &image_content,
+    std::string &file_path) {
   std::string content(image_content.begin(), image_content.end());
   httplib::MultipartFormDataItems items = {
       {"file", content, "face.jpg", "images/jpeg"},
-      {"type", "record", "", ""},
+      {"type", type, "", ""},
   };
 
   auto imgRes = client_.Post("/api/v1/images", items);
@@ -133,14 +144,14 @@ SZ_RETCODE PersonService::report_face_record(
     const std::vector<SZ_UINT8> &nir_image_content, const std::string &status,
     const std::string &body_temperature) {
   std::string bgr_file_path;
-  SZ_RETCODE ret = upload_image(bgr_image_content, bgr_file_path);
+  SZ_RETCODE ret = upload_bgr_image(bgr_image_content, bgr_file_path);
   if (ret != SZ_RETCODE_OK) {
     return ret;
   }
 
   std::string nir_file_path;
   if (!nir_image_content.empty()) {
-    ret = upload_image(nir_image_content, nir_file_path);
+    ret = upload_nir_image(nir_image_content, nir_file_path);
     if (ret != SZ_RETCODE_OK) {
       return ret;
     }

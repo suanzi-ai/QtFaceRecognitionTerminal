@@ -53,8 +53,14 @@ class PersonService {
   
   SZ_RETCODE get_person(SZ_UINT32 id, PersonData &person);
 
-  SZ_RETCODE upload_image(const std::vector<SZ_UINT8> &image_content,
+  SZ_RETCODE upload_image(const std::string &type,
+                          const std::vector<SZ_UINT8> &image_content,
                           std::string &file_path);
+  SZ_RETCODE upload_bgr_image(const std::vector<SZ_UINT8> &image_content,
+                              std::string &file_path);
+  SZ_RETCODE upload_nir_image(const std::vector<SZ_UINT8> &image_content,
+                              std::string &file_path);
+
   SZ_RETCODE update_person_face_image(
       uint id, const std::vector<SZ_UINT8> &image_content);
 
