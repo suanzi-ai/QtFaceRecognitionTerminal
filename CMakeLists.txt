@@ -47,6 +47,9 @@ set(PROJECT_DEPENDENCY_DIR
 set(RESOURCE_PREFIX
     "${PROJECT_SOURCE_DIR}/resources"
     CACHE STRING "Dir for model & font file")
+set(${THIRD_PARTY_PREFIX}
+    "${PROJECT_DEPENDENCY_DIR}/3rd"
+    CACHE STRING "Dir for third party")
 set(HISI_SDK_PREFIX
     "${PROJECT_DEPENDENCY_DIR}/${HISI_SDK_PLATFORM}"
     CACHE STRING "Dir for hisi sdk")
@@ -58,6 +61,7 @@ set(QT_SDK_PREFIX
     CACHE STRING "Dir for qt sdk")
 
 message(STATUS "set HISI_SDK_PREFIX to: ${HISI_SDK_PREFIX}")
+message(STATUS "set THIRD_PARTY_PREFIX to: ${THIRD_PARTY_PREFIX}")
 message(STATUS "set QUFACE_SDK_PREFIX to: ${QUFACE_SDK_PREFIX}")
 message(STATUS "set QT_SDK_PREFIX to: ${QT_SDK_PREFIX}")
 
@@ -68,8 +72,9 @@ if(NOT EXISTS ${QUFACE_SDK_PREFIX})
 endif()
 
 set(CMAKE_FIND_ROOT_PATH ${HISI_SDK_PREFIX} ${QUFACE_SDK_PREFIX}
-                         ${QT_SDK_PREFIX})
-set(CMAKE_PREFIX_PATH ${HISI_SDK_PREFIX} ${QUFACE_SDK_PREFIX} ${QT_SDK_PREFIX})
+                         ${THIRD_PARTY_PREFIX} ${QT_SDK_PREFIX})
+set(CMAKE_PREFIX_PATH ${HISI_SDK_PREFIX} ${QUFACE_SDK_PREFIX}
+                      ${THIRD_PARTY_PREFIX} ${QT_SDK_PREFIX})
 
 if(DOWNLOAD_DEPENDENCY)
   # -- Download dependecies --
@@ -136,7 +141,7 @@ target_link_libraries(main PRIVATE ui)
 install(TARGETS main DESTINATION .)
 
 # add_executable(audio_test audio_test.cpp resource.qrc)
-# target_link_libraries(audio_test PRIVATE lib app)
-# install(TARGETS audio_test DESTINATION .)
+# target_link_libraries(audio_test PRIVATE lib app) install(TARGETS audio_test
+# DESTINATION .)
 
 install(DIRECTORY ${RESOURCE_PREFIX}/models/ DESTINATION .)
