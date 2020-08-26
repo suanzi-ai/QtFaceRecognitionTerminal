@@ -105,6 +105,15 @@ if(DOWNLOAD_DEPENDENCY)
     f9075af18adbb95a21789f6d79ca98fa1f92fee0696a2d156a88425fa4efdbcb
     EXTRACT_DIR
     ${HISI_SDK_PREFIX})
+else()
+  if(NOT EXISTS ${QT_SDK_PREFIX})
+    message(STATUS "HINTS:     set DOWNLOAD_DEPENDENCY to ON")
+    message(FATAL_ERROR "QT_SDK_PREFIX: ${QT_SDK_PREFIX} not exists!")
+  endif()
+  if(NOT EXISTS ${HISI_SDK_PREFIX})
+    message(STATUS "HINTS:     set DOWNLOAD_DEPENDENCY to ON")
+    message(FATAL_ERROR "HISI_SDK_PREFIX: ${HISI_SDK_PREFIX} not exists!")
+  endif()
 endif()
 
 find_package(QuFaceSDK REQUIRED)

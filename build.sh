@@ -13,14 +13,6 @@ fi
 
 . $ENV_FILE
 
-if [[ $USER_QT_SDK_HOME ]]; then
-    echo -e "-- Found USER_QT_SDK_HOME=$USER_QT_SDK_HOME"
-else
-    echo -e "-- Please specify the QT SDK Home:"
-    echo -e "--    'export USER_QT_SDK_HOME=path/to/qtsdk'"
-    exit 1
-fi
-
 build_type=${USER_BUILD_TYPE:-"Release"}
 cmake_generator=${USER_CMAKE_GENERATOR:-"Unix Makefiles"}
 
@@ -60,7 +52,7 @@ build_dir=$build_root_dir/$build_type
 dep_dir=$source_dir/deps
 install_dir=$build_dir/install
 
-dep_sub_dirs="qufacesdk 3rd rp-dv300 resources"
+dep_sub_dirs="qufacesdk qtsdk 3rd rp-dv300 resources"
 if [[ $clean_3rd == "yes" ]]; then
     echo "Cleaning dep dir ..."
     for d in $dep_sub_dirs; do
