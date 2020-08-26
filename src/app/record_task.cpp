@@ -131,9 +131,7 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
       duplicated_ = if_duplicated(face_id);
     }
 
-    char temperature_str[10];
-    sprintf(temperature_str, "%.1f", body_temperature_);
-    person.temperature = std::string(temperature_str);
+    person.temperature = body_temperature_;
     // output
     rx_reset();
     SZ_LOG_INFO("Record: id={}, staff={}, status={}, temperature={}", person.id,

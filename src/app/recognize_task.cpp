@@ -129,48 +129,7 @@ bool RecognizeTask::is_live(DetectionData *detection) {
             (const SVP_IMAGE_S *)detection->img_nir_large->pImplData,
             face_detection, ret))
       return false;
-    else {
-      // Record infraraed face for antispoof training
-      auto cfg = Config::get_app();
-      static int width = 704;
-      static int height = 1080;
-      if (cfg.record_infraraed_faces &&
-          width == detection->img_nir_large->width &&
-          height == detection->img_nir_large->height) {
-        static MmzImage *snapshot =
-            new MmzImage(width, height, SZ_IMAGETYPE_BGR_PACKAGE);
-
-        static cv::Mat nir_face(height, width, CV_8UC3, snapshot->pData);
-
-        static int true_idx = 0;
-        static int false_idx = 0;
-
-        cv::Rect face_rect = {
-            (int)face_detection.bbox.x, (int)face_detection.bbox.y,
-            (int)face_detection.bbox.width, (int)face_detection.bbox.height};
-
-        if (Ive::getInstance()->yuv2RgbPacked(snapshot,
-                                              detection->img_nir_large, true) &&
-            face_rect.x >= 0 && face_rect.y >= 0 &&
-            face_rect.x + face_rect.width <= nir_face.cols &&
-            face_rect.y + face_rect.height <= nir_face.rows) {
-          std::string file_path = cfg.infraraed_faces_store_path;
-          if (ret == SZ_TRUE) {
-            true_idx = (true_idx + 1) % 10000;
-            file_path += "live_" + std::to_string(true_idx) + ".jpg";
-          } else {
-            false_idx = (false_idx + 1) % 10000;
-            file_path += "fake_" + std::to_string(false_idx) + ".jpg";
-          }
-          cv::imwrite(file_path, nir_face(face_rect));
-        } else {
-          SZ_LOG_ERROR("save ir-face failed");
-        }
-      }
-
-      return ret == SZ_TRUE;
-    }
-
+    return ret == SZ_TRUE;
   } else
     return false;
 }

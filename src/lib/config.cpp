@@ -28,7 +28,6 @@ void suanzi::to_json(json &j, const AppConfig &c) {
   SAVE_JSON_TO(j, "person_service_base_url", c.person_service_base_url);
   SAVE_JSON_TO(j, "enable_anti_spoofing", c.enable_anti_spoofing);
   SAVE_JSON_TO(j, "show_infrared_window", c.show_infrared_window);
-  SAVE_JSON_TO(j, "record_infraraed_faces", c.record_infraraed_faces);
   SAVE_JSON_TO(j, "device_face_x", c.device_face_x);
   SAVE_JSON_TO(j, "device_face_y", c.device_face_y);
   SAVE_JSON_TO(j, "device_face_height", c.device_face_height);
@@ -38,6 +37,7 @@ void suanzi::to_json(json &j, const AppConfig &c) {
   SAVE_JSON_TO(j, "device_body_open_angle", c.device_body_open_angle);
   SAVE_JSON_TO(j, "disabled_temperature", c.disabled_temperature);
   SAVE_JSON_TO(j, "infraraed_faces_store_path", c.infraraed_faces_store_path);
+  SAVE_JSON_TO(j, "show_isp_hist_window", c.show_isp_hist_window);
 }
 
 void suanzi::from_json(const json &j, AppConfig &c) {
@@ -48,7 +48,6 @@ void suanzi::from_json(const json &j, AppConfig &c) {
   LOAD_JSON_TO(j, "person_service_base_url", c.person_service_base_url);
   LOAD_JSON_TO(j, "enable_anti_spoofing", c.enable_anti_spoofing);
   LOAD_JSON_TO(j, "show_infrared_window", c.show_infrared_window);
-  LOAD_JSON_TO(j, "record_infraraed_faces", c.record_infraraed_faces);
   LOAD_JSON_TO(j, "device_face_x", c.device_face_x);
   LOAD_JSON_TO(j, "device_face_y", c.device_face_y);
   LOAD_JSON_TO(j, "device_face_height", c.device_face_height);
@@ -58,6 +57,7 @@ void suanzi::from_json(const json &j, AppConfig &c) {
   LOAD_JSON_TO(j, "device_body_open_angle", c.device_body_open_angle);
   LOAD_JSON_TO(j, "disabled_temperature", c.disabled_temperature);
   LOAD_JSON_TO(j, "infraraed_faces_store_path", c.infraraed_faces_store_path);
+  LOAD_JSON_TO(j, "show_isp_hist_window", c.show_isp_hist_window);
 }
 
 void suanzi::to_json(json &j, const QufaceConfig &c) {
@@ -84,24 +84,16 @@ void suanzi::to_json(json &j, const CameraConfig &c) {
   SAVE_JSON_TO(j, "index", c.index);
   SAVE_JSON_TO(j, "rotate", c.rotate);
   SAVE_JSON_TO(j, "flip", c.flip);
-  SAVE_JSON_TO(j, "min_face_height", c.min_face_height);
-  SAVE_JSON_TO(j, "min_face_width", c.min_face_width);
-  SAVE_JSON_TO(j, "max_window_height", c.max_window_height);
-  SAVE_JSON_TO(j, "max_window_width", c.max_window_width);
-  SAVE_JSON_TO(j, "target_area_width_percent", c.target_area_width_percent);
-  SAVE_JSON_TO(j, "target_area_height_percent", c.target_area_height_percent);
+  SAVE_JSON_TO(j, "pipe", c.pipe);
+  SAVE_JSON_TO(j, "isp", c.isp);
 }
 
 void suanzi::from_json(const json &j, CameraConfig &c) {
   LOAD_JSON_TO(j, "index", c.index);
   LOAD_JSON_TO(j, "rotate", c.rotate);
   LOAD_JSON_TO(j, "flip", c.flip);
-  LOAD_JSON_TO(j, "min_face_height", c.min_face_height);
-  LOAD_JSON_TO(j, "min_face_width", c.min_face_width);
-  LOAD_JSON_TO(j, "max_window_height", c.max_window_height);
-  LOAD_JSON_TO(j, "max_window_width", c.max_window_width);
-  LOAD_JSON_TO(j, "target_area_width_percent", c.target_area_width_percent);
-  LOAD_JSON_TO(j, "target_area_height_percent", c.target_area_height_percent);
+  LOAD_JSON_TO(j, "pipe", c.pipe);
+  LOAD_JSON_TO(j, "isp", c.isp);
 }
 
 void suanzi::to_json(json &j, const DetectConfig &c) {
@@ -172,10 +164,109 @@ void suanzi::from_json(const json &j, LivenessConfig &c) {
                c.max_height_ratio_between_bgr);
 }
 
-void suanzi::from_json(const json &j, Config &c) {
+void suanzi::to_json(json &j, const ISPExposureConfig &c) {
+  SAVE_JSON_TO(j, "hist_stat_adjust", c.hist_stat_adjust);
+  SAVE_JSON_TO(j, "speed", c.speed);
+  SAVE_JSON_TO(j, "black_speed_bias", c.black_speed_bias);
+  SAVE_JSON_TO(j, "tolerance", c.tolerance);
+  SAVE_JSON_TO(j, "compensation", c.compensation);
+  SAVE_JSON_TO(j, "ev_bias", c.ev_bias);
+  SAVE_JSON_TO(j, "ae_strategy_mode", c.ae_strategy_mode);
+  SAVE_JSON_TO(j, "hist_ratio_slope", c.hist_ratio_slope);
+  SAVE_JSON_TO(j, "max_hist_offset", c.max_hist_offset);
+}
+
+void suanzi::from_json(const json &j, ISPExposureConfig &c) {
+  LOAD_JSON_TO(j, "hist_stat_adjust", c.hist_stat_adjust);
+  LOAD_JSON_TO(j, "speed", c.speed);
+  LOAD_JSON_TO(j, "black_speed_bias", c.black_speed_bias);
+  LOAD_JSON_TO(j, "tolerance", c.tolerance);
+  LOAD_JSON_TO(j, "compensation", c.compensation);
+  LOAD_JSON_TO(j, "ev_bias", c.ev_bias);
+  LOAD_JSON_TO(j, "ae_strategy_mode", c.ae_strategy_mode);
+  LOAD_JSON_TO(j, "hist_ratio_slope", c.hist_ratio_slope);
+  LOAD_JSON_TO(j, "max_hist_offset", c.max_hist_offset);
+}
+
+void suanzi::to_json(json &j, const ISPStatConfig &c) {
+  SAVE_JSON_TO(j, "roi_enable", c.roi_enable);
+  SAVE_JSON_TO(j, "roi_margin", c.roi_margin);
+  SAVE_JSON_TO(j, "roi_weight", c.roi_weight);
+  SAVE_JSON_TO(j, "non_roi_weight", c.non_roi_weight);
+  SAVE_JSON_TO(j, "crop_enable", c.crop_enable);
+  SAVE_JSON_TO(j, "crop_margin", c.crop_margin);
+}
+
+void suanzi::from_json(const json &j, ISPStatConfig &c) {
+  LOAD_JSON_TO(j, "roi_enable", c.roi_enable);
+  LOAD_JSON_TO(j, "roi_margin", c.roi_margin);
+  LOAD_JSON_TO(j, "roi_weight", c.roi_weight);
+  LOAD_JSON_TO(j, "non_roi_weight", c.non_roi_weight);
+  LOAD_JSON_TO(j, "crop_enable", c.crop_enable);
+  LOAD_JSON_TO(j, "crop_margin", c.crop_margin);
+}
+
+void suanzi::to_json(json &j, const ISPGammaConfig &c) {
+  SAVE_JSON_TO(j, "enable", c.enable);
+  SAVE_JSON_TO(j, "curve_type", c.curve_type);
+}
+
+void suanzi::from_json(const json &j, ISPGammaConfig &c) {
+  LOAD_JSON_TO(j, "enable", c.enable);
+  LOAD_JSON_TO(j, "curve_type", c.curve_type);
+}
+
+void suanzi::to_json(json &j, const ISPWBConfig &c) {
+  SAVE_JSON_TO(j, "enable", c.enable);
+}
+
+void suanzi::from_json(const json &j, ISPWBConfig &c) {
+  LOAD_JSON_TO(j, "enable", c.enable);
+}
+
+void suanzi::to_json(json &j, const ISPHLCConfig &c) {
+  SAVE_JSON_TO(j, "enable", c.enable);
+  SAVE_JSON_TO(j, "luma_target", c.luma_target);
+  SAVE_JSON_TO(j, "luma_threshold", c.luma_threshold);
+}
+
+void suanzi::from_json(const json &j, ISPHLCConfig &c) {
+  LOAD_JSON_TO(j, "enable", c.enable);
+  LOAD_JSON_TO(j, "luma_target", c.luma_target);
+  LOAD_JSON_TO(j, "luma_threshold", c.luma_threshold);
+}
+
+void suanzi::to_json(json &j, const ISPConfig &c) {
+  SAVE_JSON_TO(j, "stat", c.stat);
+  SAVE_JSON_TO(j, "exposure", c.exposure);
+  SAVE_JSON_TO(j, "wb", c.wb);
+  SAVE_JSON_TO(j, "gamma", c.gamma);
+  SAVE_JSON_TO(j, "hlc", c.hlc);
+}
+
+void suanzi::from_json(const json &j, ISPConfig &c) {
+  LOAD_JSON_TO(j, "stat", c.stat);
+  LOAD_JSON_TO(j, "exposure", c.exposure);
+  LOAD_JSON_TO(j, "wb", c.wb);
+  LOAD_JSON_TO(j, "gamma", c.gamma);
+  LOAD_JSON_TO(j, "hlc", c.hlc);
+}
+
+void suanzi::to_json(json &j, const ISPGlobalConfig &c) {
+  SAVE_JSON_TO(j, "adjust_window_size", c.adjust_window_size);
+  SAVE_JSON_TO(j, "restore_size", c.restore_size);
+}
+
+void suanzi::from_json(const json &j, ISPGlobalConfig &c) {
+  LOAD_JSON_TO(j, "adjust_window_size", c.adjust_window_size);
+  LOAD_JSON_TO(j, "restore_size", c.restore_size);
+}
+
+void suanzi::from_json(const json &j, ConfigData &c) {
   LOAD_JSON_TO(j, "user", c.user);
   LOAD_JSON_TO(j, "app", c.app);
   LOAD_JSON_TO(j, "quface", c.quface);
+  LOAD_JSON_TO(j, "isp", c.isp);
 
   if (j.contains("cameras")) {
     LOAD_JSON_TO(j.at("cameras"), "normal", c.normal);
@@ -189,7 +280,7 @@ void suanzi::from_json(const json &j, Config &c) {
   }
 }
 
-void suanzi::to_json(json &j, const Config &c) {
+void suanzi::to_json(json &j, const ConfigData &c) {
   SAVE_JSON_TO(j, "user", c.user);
   SAVE_JSON_TO(j, "app", c.app);
   SAVE_JSON_TO(j, "quface", c.quface);
@@ -204,14 +295,16 @@ void suanzi::to_json(json &j, const Config &c) {
   SAVE_JSON_TO(pro, "extract_levels", c.extract_levels_);
   SAVE_JSON_TO(pro, "liveness_levels", c.liveness_levels_);
   SAVE_JSON_TO(j, "pro", pro);
+
+  SAVE_JSON_TO(j, "isp", c.isp);
 }
 
 Config Config::instance_;
 
-Config::ptr Config::get_instance() { return Config::ptr(&instance_); }
+Config *Config::get_instance() { return &instance_; }
 
-void Config::load_defaults() {
-  app = {
+void Config::load_defaults(ConfigData &c) {
+  c.app = {
       .recognize_tip_top_percent = 78,
       .server_port = 8010,
       .server_host = "127.0.0.1",
@@ -219,7 +312,6 @@ void Config::load_defaults() {
       .person_service_base_url = "http://127.0.0.1",
       .enable_anti_spoofing = false,
       .show_infrared_window = false,
-      .record_infraraed_faces = false,
       .device_face_x = 0.289,
       .device_face_y = 0.18,
       .device_face_height = 0.35,
@@ -230,9 +322,10 @@ void Config::load_defaults() {
       .disabled_temperature = true,
       .infraraed_faces_store_path =
           APP_DIR_PREFIX "/var/face-terminal/ir-faces/",
+      .show_isp_hist_window = false,
   };
 
-  user = {
+  c.user = {
       .blacklist_policy = "alarm",
       .liveness_policy = "alarm",
       .detect_level = "medium",
@@ -241,7 +334,7 @@ void Config::load_defaults() {
       .duplication_interval = 60,
   };
 
-  quface = {
+  c.quface = {
       .product_key = "",
       .device_name = "",
       .device_secret = "",
@@ -251,31 +344,106 @@ void Config::load_defaults() {
       .license_filename = "license.json",
   };
 
-  normal = {
-      .index = 0,
-      .rotate = 0,
-      .flip = -2,
-      .min_face_height = 100,
-      .min_face_width = 100,
-      .max_window_height = 800,
-      .max_window_width = 600,
-      .target_area_width_percent = 60,
-      .target_area_height_percent = 60,
+  c.isp = {
+      .adjust_window_size = 10,
+      .restore_size = 20,
   };
 
-  infrared = {
+  c.normal = {
       .index = 1,
       .rotate = 0,
-      .flip = -2,
-      .min_face_height = 100,
-      .min_face_width = 100,
-      .max_window_height = 800,
-      .max_window_width = 600,
-      .target_area_width_percent = 60,
-      .target_area_height_percent = 60,
+      .flip = 1,
+      .pipe = 2,
+      .isp =
+          {
+              .stat =
+                  {
+                      .roi_enable = true,
+                      .roi_margin = 2,
+                      .roi_weight = 2,
+                      .non_roi_weight = 1,
+                      .crop_enable = false,
+                      .crop_margin = 25,
+                  },
+              .exposure =
+                  {
+                      .hist_stat_adjust = true,
+                      .speed = 0x60,             // default: 0x40
+                      .black_speed_bias = 0x90,  // default: 0x90
+                      .tolerance = 0x2,          // default: 0x2
+                      .compensation = 0x38,      // default: 0x38
+                      .ev_bias = 0x600,          // default: 0x400
+                      .ae_strategy_mode =
+                          1,  // 0: HIGHLIGHT_PRIOR 1: LOWLIGHT_PRIOR
+                      .hist_ratio_slope = 0xFFF,  // default: 0x80
+                      .max_hist_offset = 0x6,     // default: 0x10
+                  },
+              .wb =
+                  {
+                      .enable = true,
+                  },
+              .gamma =
+                  {
+                      .enable = true,
+                      .curve_type = 0,
+                  },
+              .hlc =
+                  {
+                      .enable = false,
+                      .luma_threshold = 240,
+                      .luma_target = 10,
+                  },
+          },
   };
 
-  detect_levels_ = {
+  c.infrared = {
+      .index = 0,
+      .rotate = 0,
+      .flip = 1,
+      .pipe = 0,
+      .isp =
+          {
+              .stat =
+                  {
+                      .roi_enable = true,
+                      .roi_margin = 2,
+                      .roi_weight = 2,
+                      .non_roi_weight = 1,
+                      .crop_enable = false,
+                      .crop_margin = 25,
+                  },
+              .exposure =
+                  {
+                      .hist_stat_adjust = true,
+                      .speed = 0x60,             // default: 0x40
+                      .black_speed_bias = 0x90,  // default: 0x90
+                      .tolerance = 0x2,          // default: 0x2
+                      .compensation = 0x38,      // default: 0x38
+                      .ev_bias = 0x600,          // default: 0x400
+                      .ae_strategy_mode =
+                          1,  // 0: HIGHLIGHT_PRIOR 1: LOWLIGHT_PRIOR
+                      .hist_ratio_slope = 0xFFF,  // default: 0x80
+                      .max_hist_offset = 0x6,     // default: 0x10
+                  },
+              .wb =
+                  {
+                      .enable = false,
+                  },
+              .gamma =
+                  {
+                      .enable = true,
+                      .curve_type = 0,
+                  },
+              .hlc =
+                  {
+                      .enable = false,
+                      .luma_threshold = 240,
+                      .luma_target = 10,
+                  },
+          },
+  };
+
+  c.detect_levels_ = {
       .high = {.threshold = 0.4f,
                .min_face_size = 40,
                .max_yaw = 10,
@@ -308,7 +476,7 @@ void Config::load_defaults() {
               .min_tracking_number = 2},
   };
 
-  extract_levels_ = {
+  c.extract_levels_ = {
       .high =
           {
               .history_size = 2,
@@ -335,7 +503,7 @@ void Config::load_defaults() {
           },
   };
 
-  liveness_levels_ = {
+  c.liveness_levels_ = {
       .high =
           {
               .history_size = 5,
@@ -376,63 +544,109 @@ SZ_RETCODE Config::load_from_file(const std::string &config_file,
                                   const std::string &config_override_file) {
   config_file_ = config_file;
   config_override_file_ = config_override_file;
-  reload();
+
+  return reload();
 }
 
-SZ_RETCODE Config::load_from_json(const json &j) {
-  try {
-    j.get_to(*this);
-  } catch (const std::exception &exc) {
-    SZ_LOG_ERROR("load_from_json: {}", exc.what());
+SZ_RETCODE Config::read_config(json &cfg) {
+  ConfigData cfg_data;
+  load_defaults(cfg_data);
+  json config(cfg_data);
+
+  std::ifstream ifd(config_file_);
+  if (!ifd.is_open()) {
+    SZ_LOG_ERROR("Open {} failed, write defaults", config_file_);
+  } else {
+    SZ_LOG_INFO("Load config from {}", config_file_);
+    json file_cfg;
+    ifd >> file_cfg;
+    config.merge_patch(file_cfg);
+  }
+
+  std::ofstream o(config_file_);
+  if (!o.is_open()) {
+    SZ_LOG_ERROR("Open {} for write failed", config_file_);
     return SZ_RETCODE_FAILED;
   }
+  o << config.dump(2);
+  cfg = config;
+
+  SZ_LOG_INFO("Config updated to {}", config_file_);
+
+  return SZ_RETCODE_OK;
+}
+
+SZ_RETCODE Config::read_override_config(json &cfg) {
+  std::ifstream ifd(config_override_file_);
+  if (!ifd.is_open()) {
+    SZ_LOG_ERROR("Open {} failed", config_override_file_);
+    return SZ_RETCODE_OK;
+  }
+
+  SZ_LOG_INFO("Override config from {}", config_override_file_);
+  ifd >> cfg;
   return SZ_RETCODE_OK;
 }
 
 SZ_RETCODE Config::reload() {
+  std::unique_lock<std::mutex> lock(cfg_mutex_);
+
+  SZ_LOG_INFO("Load from files ...");
   try {
-    std::ifstream config_fd(config_file_);
-    if (config_fd.is_open()) {
-      SZ_LOG_INFO("Load config from {}", config_file_);
-      json config;
-      config_fd >> config;
-      config.get_to(*this);
-    } else {
-      SZ_LOG_WARN("{} not present, will using defaults", config_file_);
+    json config;
+    SZ_RETCODE ret = read_config(config);
+    if (ret != SZ_RETCODE_OK) {
+      return ret;
     }
 
-    std::ifstream override_fd(config_override_file_);
-    if (override_fd.is_open()) {
-      SZ_LOG_INFO("Override config from {}", config_override_file_);
-      json override_config;
-      override_fd >> override_config;
-
-      override_config.get_to(*this);
+    json config_patch;
+    ret = read_override_config(config_patch);
+    if (ret != SZ_RETCODE_OK) {
+      return ret;
     }
+
+    if (config_patch.is_array()) {
+      config = config.patch(config_patch);
+    }
+
+    config.get_to(cfg_data_);
   } catch (std::exception &exc) {
     SZ_LOG_ERROR("Load error, will using defaults: {}", exc.what());
+    return SZ_RETCODE_FAILED;
   }
 
   return SZ_RETCODE_OK;
 }
 
-SZ_RETCODE Config::save() {
-  json config = json(*this);
+SZ_RETCODE Config::save_diff(const json &target_patch) {
+  try {
+    json source;
+    SZ_RETCODE ret = read_config(source);
+    if (ret != SZ_RETCODE_OK) {
+      return ret;
+    }
 
-  std::ofstream o(config_override_file_);
-  if (!o.is_open()) {
-    SZ_LOG_WARN("Open {} failed, can't save", config_override_file_);
+    json target = source;
+    target.merge_patch(target_patch);
+
+    std::ofstream o(config_override_file_);
+    if (!o.is_open()) {
+      SZ_LOG_WARN("Open {} failed, can't save", config_override_file_);
+      return SZ_RETCODE_FAILED;
+    }
+
+    json diff = json::diff(source, target);
+
+    o << diff.dump(2);
+  } catch (std::exception &exc) {
+    SZ_LOG_ERROR("Save diff error: {}", exc.what());
     return SZ_RETCODE_FAILED;
   }
-
-  o << config.dump(2);
 
   return SZ_RETCODE_OK;
 }
 
 SZ_RETCODE Config::reset() {
-  json config = json(*this);
-
   SZ_LOG_INFO("Clear everything in {} ...", config_override_file_);
   std::ofstream o(config_override_file_);
   if (!o.is_open()) {
@@ -441,42 +655,69 @@ SZ_RETCODE Config::reset() {
   }
 
   o << "{}";
-
-  SZ_LOG_INFO("Load defaults ...");
-  load_defaults();
-
-  SZ_LOG_INFO("Load from files ...");
   return reload();
 }
 
-const UserConfig &Config::get_user() { return instance_.user; }
+const ConfigData &Config::get_all() {
+  std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
+  return instance_.cfg_data_;
+}
 
-const AppConfig &Config::get_app() { return instance_.app; }
+const UserConfig &Config::get_user() {
+  std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
+  return instance_.cfg_data_.user;
+}
 
-const QufaceConfig &Config::get_quface() { return instance_.quface; }
+const AppConfig &Config::get_app() {
+  std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
+  return instance_.cfg_data_.app;
+}
+
+const QufaceConfig &Config::get_quface() {
+  std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
+  return instance_.cfg_data_.quface;
+}
+
+const ISPGlobalConfig &Config::get_isp() {
+  std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
+  return instance_.cfg_data_.isp;
+}
 
 const CameraConfig &Config::get_camera(bool is_bgr) {
+  std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
   if (is_bgr)
-    return instance_.normal;
+    return instance_.cfg_data_.normal;
   else
-    return instance_.infrared;
+    return instance_.cfg_data_.infrared;
+}
+
+const CameraConfig &Config::get_camera(CameraType tp) {
+  std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
+  if (tp == CAMERA_BGR)
+    return instance_.cfg_data_.normal;
+  else
+    return instance_.cfg_data_.infrared;
 }
 
 const DetectConfig &Config::get_detect() {
+  std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
   auto &i = instance_;
-  return i.detect_levels_.get(i.user.detect_level);
+  return i.cfg_data_.detect_levels_.get(i.cfg_data_.user.detect_level);
 }
 
 const ExtractConfig &Config::get_extract() {
+  std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
   auto &i = instance_;
-  return i.extract_levels_.get(i.user.extract_level);
+  return i.cfg_data_.extract_levels_.get(i.cfg_data_.user.extract_level);
 }
 
 const LivenessConfig &Config::get_liveness() {
+  std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
   auto &i = instance_;
-  return i.liveness_levels_.get(i.user.liveness_level);
+  return i.cfg_data_.liveness_levels_.get(i.cfg_data_.user.liveness_level);
 }
 
 bool Config::enable_anti_spoofing() {
-  return instance_.app.enable_anti_spoofing;
+  std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
+  return instance_.cfg_data_.app.enable_anti_spoofing;
 }

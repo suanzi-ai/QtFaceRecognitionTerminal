@@ -36,6 +36,9 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
     SZ_LOG_INFO("Get screen w={}, h={}", screen_width, screen_height);
   }
 
+  isp_hist_widget_ = new ISPHistWidget(this);
+  isp_hist_widget_->hide();
+
   detect_tip_widget_bgr_ =
       new DetectTipWidget(0, 0, screen_width, screen_height, this);
   detect_tip_widget_bgr_->hide();
@@ -161,10 +164,10 @@ void VideoPlayer::paintEvent(QPaintEvent *event) {
   auto app = Config::get_app();
   int screen_width, screen_height;
   camera_reader_->get_screen_size(screen_width, screen_height);
-  
+
   painter.drawText(20, 40, QString(ip_.c_str()));
   painter.drawText(screen_width - 230, 40, QString(version_.c_str()));
-  
+
   if (!app.disabled_temperature) {
     int device_body_start_angle,
         device_body_open_angle;
@@ -184,6 +187,13 @@ void VideoPlayer::paintEvent(QPaintEvent *event) {
 
   detect_tip_widget_bgr_->paint(&painter);
   detect_tip_widget_nir_->paint(&painter);
+
+  if (Config::get_app().show_isp_hist_window) {
+    isp_hist_widget_->show();
+    isp_hist_widget_->paint(&painter);
+  } else {
+    isp_hist_widget_->hide();
+  }
 }
 
 void VideoPlayer::init_widgets() {
@@ -199,6 +209,9 @@ void VideoPlayer::init_widgets() {
 
   recognize_tip_widget_->setFixedSize(w, h);
   recognize_tip_widget_->move(x, y);
+
+  isp_hist_widget_->setFixedSize(300, 225);
+  isp_hist_widget_->move(0, 0);
 }
 
 

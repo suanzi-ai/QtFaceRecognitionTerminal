@@ -2,6 +2,7 @@
 #define CONFIG_HPP
 
 #include <fstream>
+#include <mutex>
 #include <nlohmann/json.hpp>
 #include <quface/common.hpp>
 #include <string>
@@ -40,7 +41,6 @@ typedef struct {
   std::string person_service_base_url;
   bool enable_anti_spoofing;
   bool show_infrared_window;
-  bool record_infraraed_faces;
   SZ_FLOAT device_face_x;
   SZ_FLOAT device_face_y;
   SZ_FLOAT device_face_height;
@@ -50,6 +50,7 @@ typedef struct {
   SZ_UINT16 device_body_open_angle;
   bool disabled_temperature;
   std::string infraraed_faces_store_path;
+  bool show_isp_hist_window;
 } AppConfig;
 
 void to_json(json &j, const AppConfig &c);
@@ -67,21 +68,6 @@ typedef struct {
 
 void to_json(json &j, const QufaceConfig &c);
 void from_json(const json &j, QufaceConfig &c);
-
-typedef struct {
-  int index;
-  int rotate;
-  int flip;
-  int min_face_height;
-  int min_face_width;
-  int max_window_height;
-  int max_window_width;
-  int target_area_width_percent;
-  int target_area_height_percent;
-} CameraConfig;
-
-void to_json(json &j, const CameraConfig &c);
-void from_json(const json &j, CameraConfig &c);
 
 typedef struct {
   SZ_FLOAT threshold;
@@ -124,6 +110,87 @@ typedef struct {
 void to_json(json &j, const LivenessConfig &c);
 void from_json(const json &j, LivenessConfig &c);
 
+typedef struct {
+  bool hist_stat_adjust;
+  SZ_UINT8 speed;
+  SZ_UINT16 black_speed_bias;
+  SZ_UINT8 tolerance;
+  SZ_UINT8 compensation;
+  SZ_UINT16 ev_bias;
+  int ae_strategy_mode;
+  SZ_UINT16 hist_ratio_slope;
+  SZ_UINT8 max_hist_offset;
+} ISPExposureConfig;
+
+void to_json(json &j, const ISPExposureConfig &c);
+void from_json(const json &j, ISPExposureConfig &c);
+
+typedef struct {
+  bool roi_enable;
+  int roi_margin;
+  SZ_UINT8 roi_weight;
+  SZ_UINT8 non_roi_weight;
+  bool crop_enable;
+  int crop_margin;
+} ISPStatConfig;
+
+void to_json(json &j, const ISPStatConfig &c);
+void from_json(const json &j, ISPStatConfig &c);
+
+typedef struct {
+  bool enable;
+  int curve_type;
+} ISPGammaConfig;
+
+void to_json(json &j, const ISPGammaConfig &c);
+void from_json(const json &j, ISPGammaConfig &c);
+
+typedef struct {
+  bool enable;
+  int luma_threshold;
+  int luma_target;
+} ISPHLCConfig;
+
+void to_json(json &j, const ISPHLCConfig &c);
+void from_json(const json &j, ISPHLCConfig &c);
+
+typedef struct {
+  bool enable;
+} ISPWBConfig;
+
+void to_json(json &j, const ISPWBConfig &c);
+void from_json(const json &j, ISPWBConfig &c);
+
+typedef struct {
+  ISPStatConfig stat;
+  ISPExposureConfig exposure;
+  ISPWBConfig wb;
+  ISPGammaConfig gamma;
+  ISPHLCConfig hlc;
+} ISPConfig;
+
+void to_json(json &j, const ISPConfig &c);
+void from_json(const json &j, ISPConfig &c);
+
+typedef struct {
+  int adjust_window_size;  // 调整间隔，聚焦于人脸
+  int restore_size;        // 调整恢复间隔，聚焦于中心
+} ISPGlobalConfig;
+
+void to_json(json &j, const ISPGlobalConfig &c);
+void from_json(const json &j, ISPGlobalConfig &c);
+
+typedef struct {
+  int index;
+  int rotate;
+  int flip;
+  int pipe;
+  ISPConfig isp;
+} CameraConfig;
+
+void to_json(json &j, const CameraConfig &c);
+void from_json(const json &j, CameraConfig &c);
+
 template <typename T>
 struct Levels {
   T high;
@@ -155,57 +222,63 @@ void from_json(const json &j, Levels<T> &c) {
   LOAD_JSON_TO(j, "low", c.low);
 }
 
+typedef enum _CameraType {
+  CAMERA_BGR = 1,
+  CAMERA_NIR = 2,
+} CameraType;
 
-class Config {
- public:
-  typedef std::shared_ptr<Config> ptr;
-  static Config::ptr get_instance();
-
-  Config() { load_defaults(); }
-
-  SZ_RETCODE load_from_file(const std::string &config_file,
-                            const std::string &config_override_file);
-  SZ_RETCODE load_from_json(const json &j);
-  SZ_RETCODE reload();
-  SZ_RETCODE save();
-  SZ_RETCODE reset();
-
-  static const UserConfig &get_user();
-  static const AppConfig &get_app();
-  static const QufaceConfig &get_quface();
-  static const CameraConfig &get_camera(bool is_bgr);
-  static const DetectConfig &get_detect();
-  static const ExtractConfig &get_extract();
-  static const LivenessConfig &get_liveness();
-
-  static bool enable_anti_spoofing();
-
-  friend void from_json(const json &j, Config &c);
-  friend void to_json(json &j, const Config &c);
-
- private:
-  void load_defaults();
-
- public:
+typedef struct {
   UserConfig user;
   AppConfig app;
   QufaceConfig quface;
   CameraConfig normal;
   CameraConfig infrared;
-
- private:
-  static Config instance_;
-
+  ISPGlobalConfig isp;
   Levels<DetectConfig> detect_levels_;
   Levels<ExtractConfig> extract_levels_;
   Levels<LivenessConfig> liveness_levels_;
+} ConfigData;
+
+void from_json(const json &j, ConfigData &c);
+void to_json(json &j, const ConfigData &c);
+
+class Config {
+ public:
+  typedef std::shared_ptr<Config> ptr;
+  static Config *get_instance();
+
+  SZ_RETCODE load_from_file(const std::string &config_file,
+                            const std::string &config_override_file);
+  SZ_RETCODE reload();
+  SZ_RETCODE save_diff(const json &target);
+  SZ_RETCODE reset();
+
+  static const ConfigData &get_all();
+  static const UserConfig &get_user();
+  static const AppConfig &get_app();
+  static const QufaceConfig &get_quface();
+  static const CameraConfig &get_camera(bool is_bgr);
+  static const CameraConfig &get_camera(CameraType tp);
+  static const DetectConfig &get_detect();
+  static const ExtractConfig &get_extract();
+  static const LivenessConfig &get_liveness();
+  static const ISPGlobalConfig &get_isp();
+
+  static bool enable_anti_spoofing();
+
+ private:
+  void load_defaults(ConfigData &c);
+  SZ_RETCODE read_config(json &cfg);
+  SZ_RETCODE read_override_config(json &cfg);
+
+ private:
+  mutable std::mutex cfg_mutex_;
+  ConfigData cfg_data_;
+  static Config instance_;
 
   std::string config_file_;
   std::string config_override_file_;
 };
-
-void from_json(const json &j, Config &c);
-void to_json(json &j, const Config &c);
 
 }  // namespace suanzi
 

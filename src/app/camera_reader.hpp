@@ -39,7 +39,6 @@ class CameraReader : QThread {
  private:
   const HI_BOOL BGR_FLIP = HI_TRUE;
   const HI_BOOL NIR_FLIP = HI_TRUE;
-  const int CAMERAS[2][2] = {{0, 0}, {1, 2}};
 
   const Size VPSS_CH_SIZES_BGR[3] = {
       {1920, 1080}, {1080, 704}, {320, 224}};  // larger small

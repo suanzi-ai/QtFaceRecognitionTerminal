@@ -20,6 +20,7 @@
 #include "recognize_tip_widget.hpp"
 #include "screen_saver_widget.hpp"
 #include "temperature_task.hpp"
+#include "isp_hist_widget.hpp"
 
 namespace suanzi {
 
@@ -47,6 +48,7 @@ class VideoPlayer : public QWidget {
 
   ScreenSaverWidget *screen_saver_;
   //HeatMapWidget *heat_map_widget_;
+  ISPHistWidget *isp_hist_widget_;
 
   CameraReader *camera_reader_;
 

@@ -9,6 +9,7 @@
 #include "image_package.hpp"
 #include "pingpang_buffer.hpp"
 #include "quface_common.hpp"
+#include "isp.h"
 
 namespace suanzi {
 
@@ -18,6 +19,8 @@ class DetectTask : QObject {
   DetectTask(FaceDetectorPtr detector, FacePoseEstimatorPtr pose_estimator,
              QThread *thread = nullptr, QObject *parent = nullptr);
   ~DetectTask();
+
+  SZ_RETCODE adjust_isp_by_detection(const DetectionData *output);
 
  private slots:
   void rx_frame(PingPangBuffer<ImagePackage> *buffer);
@@ -54,6 +57,9 @@ class DetectTask : QObject {
 
   DetectionData *buffer_ping_, *buffer_pang_;
   PingPangBuffer<DetectionData> *pingpang_buffer_;
+
+  uint detect_count_ = 0;
+  uint no_detect_count_ = 0;
 };
 
 }  // namespace suanzi

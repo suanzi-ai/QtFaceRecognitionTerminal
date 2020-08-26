@@ -6,4 +6,7 @@ target_include_directories(
   ui PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/ui>
   PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src/ui/heat_map>)
 
-target_link_libraries(ui PUBLIC app)
+target_link_libraries(
+  ui
+  PUBLIC app
+  PUBLIC Qt5::Charts)
