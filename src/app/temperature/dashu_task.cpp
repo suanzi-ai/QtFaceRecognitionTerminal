@@ -1,5 +1,4 @@
 #include "dashu_task.hpp"
-#include "logger.hpp"
 #include "platform_interface.h"
 #include "logger.hpp"
 

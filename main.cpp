@@ -55,7 +55,6 @@ int main(int argc, char* argv[]) {
   qRegisterMetaType<PersonData>("PersonData");
   qRegisterMetaType<DetectionRatio>("DetectionRatio");
 
-
   QApplication app(argc, argv);
 
   VideoPlayer player(db, detector, pose_estimator, extractor, anti_spoof,

@@ -2,9 +2,8 @@
 #define __OBJECT_TEMP_TASK_H
 
 #include "temperature_task.hpp"
-
 #include "rs485.hpp"
-#include "temperature_task.hpp"
+
 
 namespace suanzi {
 

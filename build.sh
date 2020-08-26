@@ -73,7 +73,7 @@ pushd $build_dir
 cmake $source_dir -G "$cmake_generator" \
     -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
     -DCMAKE_INSTALL_PREFIX=$install_dir \
-    -DDOWNLOAD_DEPENDENCY=OFF \
+    -DDOWNLOAD_DEPENDENCY=ON \
     -DHISI_SDK_PLATFORM=rp-dv300 \
     -DPROJECT_DEPENDENCY_DIR=$dep_dir \
     -DQT_SDK_PREFIX=$USER_QT_SDK_HOME \

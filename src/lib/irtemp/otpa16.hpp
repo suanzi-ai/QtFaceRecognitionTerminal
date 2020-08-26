@@ -5,10 +5,10 @@
 
 namespace suanzi {
 
-struct OtpaTempData {
+struct OtpaTemperatureData {
 	float ambient_temp;
 	float pixel_temp[256];
-	float max_pixel_temp_index;
+	int max_pixel_temp_index;
 };
 
 
@@ -16,7 +16,7 @@ class Otpa16 {
  public:
   Otpa16();
   ~Otpa16();
-  bool read_temperature(OtpaTempData *otpa_temp_data);
+  bool read_temperature(OtpaTemperatureData *otpa_temp_data);
   bool set_sample_fps(int sample_interval);
 
  private:
@@ -25,7 +25,7 @@ class Otpa16 {
 
 }  // namespace suanzi
 
-Q_DECLARE_METATYPE(suanzi::OtpaTempData);
+Q_DECLARE_METATYPE(suanzi::OtpaTemperatureData);
 
 
 #endif

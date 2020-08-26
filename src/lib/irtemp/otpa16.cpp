@@ -11,6 +11,7 @@
 using namespace suanzi;
 
 Otpa16::Otpa16() {
+	qRegisterMetaType<OtpaTemperatureData>("OtpaTemperatureData");
 	fd_ = open("/dev/i2c-device3", O_RDWR);
     if (fd_ < 0) {
         SZ_LOG_ERROR("can't open /dev/i2c-device3");
@@ -21,7 +22,7 @@ Otpa16::Otpa16() {
 Otpa16::~Otpa16() {close(fd_);}
 
 
-bool Otpa16::read_temperature(OtpaTempData *otpa_temp_data) {
+bool Otpa16::read_temperature(OtpaTemperatureData *otpa_temp_data) {
 	
 	unsigned char buf[525];
 	buf[0] = 2;//cmd len
