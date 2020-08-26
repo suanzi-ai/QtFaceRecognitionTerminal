@@ -37,6 +37,7 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
   }
 
   isp_hist_widget_ = new ISPHistWidget(this);
+  isp_hist_widget_->hide();
 
   detect_tip_widget_bgr_ =
       new DetectTipWidget(0, 0, screen_width, screen_height, this);
@@ -163,10 +164,10 @@ void VideoPlayer::paintEvent(QPaintEvent *event) {
   auto app = Config::get_app();
   int screen_width, screen_height;
   camera_reader_->get_screen_size(screen_width, screen_height);
-  
+
   painter.drawText(20, 40, QString(ip_.c_str()));
   painter.drawText(screen_width - 230, 40, QString(version_.c_str()));
-  
+
   if (!app.disabled_temperature) {
     int device_body_start_angle,
         device_body_open_angle;
