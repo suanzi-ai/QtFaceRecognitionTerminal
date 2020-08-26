@@ -59,11 +59,15 @@ set(QUFACE_SDK_PREFIX
 set(QT_SDK_PREFIX
     "${PROJECT_DEPENDENCY_DIR}/qtsdk"
     CACHE STRING "Dir for qt sdk")
+set(TEMPERATURE_SDK_PREFIX
+    "${PROJECT_DEPENDENCY_DIR}/temperature"
+    CACHE STRING "Dir for temperature sdk")
 
 message(STATUS "set HISI_SDK_PREFIX to: ${HISI_SDK_PREFIX}")
 message(STATUS "set THIRD_PARTY_PREFIX to: ${THIRD_PARTY_PREFIX}")
 message(STATUS "set QUFACE_SDK_PREFIX to: ${QUFACE_SDK_PREFIX}")
 message(STATUS "set QT_SDK_PREFIX to: ${QT_SDK_PREFIX}")
+message(STATUS "set TEMPERATURE_SDK_PREFIX to: ${TEMPERATURE_SDK_PREFIX}")
 
 if(NOT EXISTS ${QUFACE_SDK_PREFIX})
   message(STATUS "HINTS:     cd path_to_quface")
@@ -71,10 +75,12 @@ if(NOT EXISTS ${QUFACE_SDK_PREFIX})
   message(FATAL_ERROR "QUFACE_SDK_PREFIX: ${QUFACE_SDK_PREFIX} not exists!")
 endif()
 
-set(CMAKE_FIND_ROOT_PATH ${HISI_SDK_PREFIX} ${QUFACE_SDK_PREFIX}
-                         ${THIRD_PARTY_PREFIX} ${QT_SDK_PREFIX})
-set(CMAKE_PREFIX_PATH ${HISI_SDK_PREFIX} ${QUFACE_SDK_PREFIX}
-                      ${THIRD_PARTY_PREFIX} ${QT_SDK_PREFIX})
+set(CMAKE_FIND_ROOT_PATH
+    ${HISI_SDK_PREFIX} ${QUFACE_SDK_PREFIX} ${THIRD_PARTY_PREFIX}
+    ${QT_SDK_PREFIX} ${TEMPERATURE_SDK_PREFIX})
+set(CMAKE_PREFIX_PATH
+    ${HISI_SDK_PREFIX} ${QUFACE_SDK_PREFIX} ${THIRD_PARTY_PREFIX}
+    ${QT_SDK_PREFIX} ${TEMPERATURE_SDK_PREFIX})
 
 if(DOWNLOAD_DEPENDENCY)
   # -- Download dependecies --
@@ -105,6 +111,18 @@ if(DOWNLOAD_DEPENDENCY)
     f9075af18adbb95a21789f6d79ca98fa1f92fee0696a2d156a88425fa4efdbcb
     EXTRACT_DIR
     ${HISI_SDK_PREFIX})
+
+  download_and_extract(
+    URL
+    https://quvision.oss-cn-beijing.aliyuncs.com/qufacesdk/hisi/temperature-himix200.tgz
+    FILENAME
+    ${DOWNLOAD_DIR}/temperature-himix200.tgz
+    HASH_TYPE
+    SHA256
+    HASH
+    f30e0b80138bd20a65f00e0a0d178cae0fd20a633dcf56d31deb32619934cf44
+    EXTRACT_DIR
+    ${TEMPERATURE_SDK_PREFIX})
 else()
   if(NOT EXISTS ${QT_SDK_PREFIX})
     message(STATUS "HINTS:     set DOWNLOAD_DEPENDENCY to ON")
@@ -113,6 +131,12 @@ else()
   if(NOT EXISTS ${HISI_SDK_PREFIX})
     message(STATUS "HINTS:     set DOWNLOAD_DEPENDENCY to ON")
     message(FATAL_ERROR "HISI_SDK_PREFIX: ${HISI_SDK_PREFIX} not exists!")
+  endif()
+  if(NOT EXISTS ${TEMPERATURE_SDK_PREFIX})
+    message(STATUS "HINTS:     set DOWNLOAD_DEPENDENCY to ON")
+    message(
+      FATAL_ERROR
+        "TEMPERATURE_SDK_PREFIX: ${TEMPERATURE_SDK_PREFIX} not exists!")
   endif()
 endif()
 
@@ -129,6 +153,13 @@ if(NOT QuFaceSDK_LOADED_DEPS)
   find_package(OpenCV 3 REQUIRED HINTS /usr/local/opt/opencv@3)
   find_package(spdlog REQUIRED)
 endif()
+
+add_library(temperature::temperature STATIC IMPORTED)
+set_target_properties(
+  temperature::temperature
+  PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${TEMPERATURE_SDK_PREFIX}/include"
+             IMPORTED_LOCATION "${TEMPERATURE_SDK_PREFIX}/lib/libtemperature.a"
+             INTERFACE_POSITION_INDEPENDENT_CODE "ON")
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_definitions(-DDEBUG)
