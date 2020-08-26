@@ -108,18 +108,18 @@ void RecognizeTipWidget::paintEvent(QPaintEvent *event) {
   painter.drawText(w * 72.5 / 100, h * 46.42 / 100, name);
 
   bool disable_temperature = Config::get_app().disabled_temperature;
+  std::stringstream ss;
+  ss << "温度: " << std::setprecision(1) << person_.temperature;
+  QString body_temperature = ss.str().c_str();
+
   if (staff_number.length() > 0) {
     font.setPixelSize(base_font_size * 2);
     painter.setFont(font);
     painter.drawText(w * 72.5 / 100, h * 71.43 / 100, staff_number);
     if (!disable_temperature) {
-      QString body_temperature =
-          ("温度: " + std::to_string(person_.temperature)).c_str();
       painter.drawText(w * 72.5 / 100, h * 96.44 / 100, body_temperature);
     }
   } else if (!disable_temperature) {
-    QString body_temperature =
-        ("温度: " + std::to_string(person_.temperature)).c_str();
     painter.drawText(w * 72.5 / 100, h * 71.43 / 100, body_temperature);
   }
 }
