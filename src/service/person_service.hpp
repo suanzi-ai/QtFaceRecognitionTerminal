@@ -21,7 +21,7 @@ struct PersonData {
   std::string department;
   std::string mobile;
   std::string status;
-  std::string temperature;
+  float temperature;
   std::string face_url;
   std::string face_path;
   cv::Mat bgr_face_snapshot;
@@ -50,7 +50,7 @@ class PersonService {
 
   std::string get_local_ip();
   std::string get_system_version();
-  
+
   SZ_RETCODE get_person(SZ_UINT32 id, PersonData &person);
 
   SZ_RETCODE upload_image(const std::string &type,
@@ -67,7 +67,8 @@ class PersonService {
   SZ_RETCODE report_face_record(uint person_id,
                                 const std::vector<SZ_UINT8> &bgr_image_content,
                                 const std::vector<SZ_UINT8> &nir_image_content,
-                                const std::string &status, const std::string &body_temperature);
+                                const std::string &status,
+                                float body_temperature);
 
   static std::string get_status(PersonStatus s);
 
