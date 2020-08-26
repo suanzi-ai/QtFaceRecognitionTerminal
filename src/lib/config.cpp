@@ -217,11 +217,23 @@ void suanzi::from_json(const json &j, ISPGammaConfig &c) {
 }
 
 void suanzi::to_json(json &j, const ISPWBConfig &c) {
-  SAVE_JSON_TO(j, "enable", c.enable);
+  SAVE_JSON_TO(j, "op_type", c.op_type);
+  SAVE_JSON_TO(j, "by_pass", c.by_pass);
 }
 
 void suanzi::from_json(const json &j, ISPWBConfig &c) {
-  LOAD_JSON_TO(j, "enable", c.enable);
+  LOAD_JSON_TO(j, "op_type", c.op_type);
+  LOAD_JSON_TO(j, "by_pass", c.by_pass);
+}
+
+void suanzi::to_json(json &j, const ISPSaturationConfig &c) {
+  SAVE_JSON_TO(j, "op_type", c.op_type);
+  SAVE_JSON_TO(j, "manual_saturation", c.manual_saturation);
+}
+
+void suanzi::from_json(const json &j, ISPSaturationConfig &c) {
+  LOAD_JSON_TO(j, "op_type", c.op_type);
+  LOAD_JSON_TO(j, "manual_saturation", c.manual_saturation);
 }
 
 void suanzi::to_json(json &j, const ISPHLCConfig &c) {
@@ -240,6 +252,7 @@ void suanzi::to_json(json &j, const ISPConfig &c) {
   SAVE_JSON_TO(j, "stat", c.stat);
   SAVE_JSON_TO(j, "exposure", c.exposure);
   SAVE_JSON_TO(j, "wb", c.wb);
+  SAVE_JSON_TO(j, "saturation", c.saturation);
   SAVE_JSON_TO(j, "gamma", c.gamma);
   SAVE_JSON_TO(j, "hlc", c.hlc);
 }
@@ -248,6 +261,7 @@ void suanzi::from_json(const json &j, ISPConfig &c) {
   LOAD_JSON_TO(j, "stat", c.stat);
   LOAD_JSON_TO(j, "exposure", c.exposure);
   LOAD_JSON_TO(j, "wb", c.wb);
+  LOAD_JSON_TO(j, "saturation", c.saturation);
   LOAD_JSON_TO(j, "gamma", c.gamma);
   LOAD_JSON_TO(j, "hlc", c.hlc);
 }
@@ -380,7 +394,13 @@ void Config::load_defaults(ConfigData &c) {
                   },
               .wb =
                   {
-                      .enable = true,
+                      .by_pass = false,
+                      .op_type = "auto",
+                  },
+              .saturation =
+                  {
+                      .op_type = "auto",
+                      .manual_saturation = 0x64,
                   },
               .gamma =
                   {
@@ -427,7 +447,13 @@ void Config::load_defaults(ConfigData &c) {
                   },
               .wb =
                   {
-                      .enable = false,
+                      .by_pass = false,
+                      .op_type = "manual",
+                  },
+              .saturation =
+                  {
+                      .op_type = "manual",
+                      .manual_saturation = 0,
                   },
               .gamma =
                   {

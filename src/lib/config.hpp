@@ -155,16 +155,26 @@ void to_json(json &j, const ISPHLCConfig &c);
 void from_json(const json &j, ISPHLCConfig &c);
 
 typedef struct {
-  bool enable;
+  bool by_pass;
+  std::string op_type;
 } ISPWBConfig;
 
 void to_json(json &j, const ISPWBConfig &c);
 void from_json(const json &j, ISPWBConfig &c);
 
 typedef struct {
+  std::string op_type;
+  SZ_UINT8 manual_saturation;
+} ISPSaturationConfig;
+
+void to_json(json &j, const ISPSaturationConfig &c);
+void from_json(const json &j, ISPSaturationConfig &c);
+
+typedef struct {
   ISPStatConfig stat;
   ISPExposureConfig exposure;
   ISPWBConfig wb;
+  ISPSaturationConfig saturation;
   ISPGammaConfig gamma;
   ISPHLCConfig hlc;
 } ISPConfig;
