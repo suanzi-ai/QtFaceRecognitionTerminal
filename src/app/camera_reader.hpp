@@ -28,6 +28,7 @@ class CameraReader : QThread {
 
   bool load_screen_type();
   bool get_screen_size(int &width, int &height);
+  bool update_isp();
 
  private:
  private slots:

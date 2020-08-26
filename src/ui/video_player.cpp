@@ -55,8 +55,6 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
   screen_saver_->hide();
 
   // Initialize QThreads
-  camera_reader_ = new CameraReader(this);
-
   detect_task_ = new DetectTask(detector, pose_estimator, nullptr, this);
   recognize_task_ =
       new RecognizeTask(db, extractor, anti_spoofing, nullptr, this);

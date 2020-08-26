@@ -248,6 +248,16 @@ void suanzi::from_json(const json &j, ISPHLCConfig &c) {
   LOAD_JSON_TO(j, "luma_threshold", c.luma_threshold);
 }
 
+void suanzi::to_json(json &j, const ISPDRCConfig &c) {
+  SAVE_JSON_TO(j, "enable", c.enable);
+  SAVE_JSON_TO(j, "op_type", c.op_type);
+}
+
+void suanzi::from_json(const json &j, ISPDRCConfig &c) {
+  LOAD_JSON_TO(j, "enable", c.enable);
+  LOAD_JSON_TO(j, "op_type", c.op_type);
+}
+
 void suanzi::to_json(json &j, const ISPConfig &c) {
   SAVE_JSON_TO(j, "stat", c.stat);
   SAVE_JSON_TO(j, "exposure", c.exposure);
@@ -255,6 +265,7 @@ void suanzi::to_json(json &j, const ISPConfig &c) {
   SAVE_JSON_TO(j, "saturation", c.saturation);
   SAVE_JSON_TO(j, "gamma", c.gamma);
   SAVE_JSON_TO(j, "hlc", c.hlc);
+  SAVE_JSON_TO(j, "drc", c.drc);
 }
 
 void suanzi::from_json(const json &j, ISPConfig &c) {
@@ -264,6 +275,7 @@ void suanzi::from_json(const json &j, ISPConfig &c) {
   LOAD_JSON_TO(j, "saturation", c.saturation);
   LOAD_JSON_TO(j, "gamma", c.gamma);
   LOAD_JSON_TO(j, "hlc", c.hlc);
+  LOAD_JSON_TO(j, "drc", c.drc);
 }
 
 void suanzi::to_json(json &j, const ISPGlobalConfig &c) {
@@ -413,6 +425,7 @@ void Config::load_defaults(ConfigData &c) {
                       .luma_threshold = 240,
                       .luma_target = 10,
                   },
+              .drc = {.enable = true, .op_type = "auto"},
           },
   };
 
@@ -466,6 +479,7 @@ void Config::load_defaults(ConfigData &c) {
                       .luma_threshold = 240,
                       .luma_target = 10,
                   },
+              .drc = {.enable = true, .op_type = "auto"},
           },
   };
 
@@ -615,31 +629,35 @@ SZ_RETCODE Config::read_override_config(json &cfg) {
 }
 
 SZ_RETCODE Config::reload() {
-  std::unique_lock<std::mutex> lock(cfg_mutex_);
+  {
+    std::unique_lock<std::mutex> lock(cfg_mutex_);
 
-  SZ_LOG_INFO("Load from files ...");
-  try {
-    json config;
-    SZ_RETCODE ret = read_config(config);
-    if (ret != SZ_RETCODE_OK) {
-      return ret;
+    SZ_LOG_INFO("Load from files ...");
+    try {
+      json config;
+      SZ_RETCODE ret = read_config(config);
+      if (ret != SZ_RETCODE_OK) {
+        return ret;
+      }
+
+      json config_patch;
+      ret = read_override_config(config_patch);
+      if (ret != SZ_RETCODE_OK) {
+        return ret;
+      }
+
+      if (config_patch.is_array()) {
+        config = config.patch(config_patch);
+      }
+
+      config.get_to(cfg_data_);
+    } catch (std::exception &exc) {
+      SZ_LOG_ERROR("Load error, will using defaults: {}", exc.what());
+      return SZ_RETCODE_FAILED;
     }
-
-    json config_patch;
-    ret = read_override_config(config_patch);
-    if (ret != SZ_RETCODE_OK) {
-      return ret;
-    }
-
-    if (config_patch.is_array()) {
-      config = config.patch(config_patch);
-    }
-
-    config.get_to(cfg_data_);
-  } catch (std::exception &exc) {
-    SZ_LOG_ERROR("Load error, will using defaults: {}", exc.what());
-    return SZ_RETCODE_FAILED;
   }
+
+  dispatch("reload");
 
   return SZ_RETCODE_OK;
 }

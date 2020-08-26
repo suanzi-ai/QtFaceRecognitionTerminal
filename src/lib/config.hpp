@@ -1,6 +1,8 @@
 #ifndef CONFIG_HPP
 #define CONFIG_HPP
 
+#include <eventpp/eventdispatcher.h>
+
 #include <fstream>
 #include <mutex>
 #include <nlohmann/json.hpp>
@@ -155,6 +157,14 @@ void to_json(json &j, const ISPHLCConfig &c);
 void from_json(const json &j, ISPHLCConfig &c);
 
 typedef struct {
+  bool enable;
+  std::string op_type;
+} ISPDRCConfig;
+
+void to_json(json &j, const ISPDRCConfig &c);
+void from_json(const json &j, ISPDRCConfig &c);
+
+typedef struct {
   bool by_pass;
   std::string op_type;
 } ISPWBConfig;
@@ -177,6 +187,7 @@ typedef struct {
   ISPSaturationConfig saturation;
   ISPGammaConfig gamma;
   ISPHLCConfig hlc;
+  ISPDRCConfig drc;
 } ISPConfig;
 
 void to_json(json &j, const ISPConfig &c);
@@ -252,7 +263,9 @@ typedef struct {
 void from_json(const json &j, ConfigData &c);
 void to_json(json &j, const ConfigData &c);
 
-class Config {
+typedef eventpp::EventDispatcher<std::string, void()> ConfigEventEmitter;
+
+class Config : public ConfigEventEmitter {
  public:
   typedef std::shared_ptr<Config> ptr;
   static Config *get_instance();

@@ -1,11 +1,10 @@
 #include "camera_reader.hpp"
 
+#include <QDebug>
 #include <chrono>
 #include <ctime>
 #include <iostream>
 #include <regex>
-
-#include <QDebug>
 
 #include "quface/common.hpp"
 #include "vb_pool.hpp"
@@ -24,8 +23,8 @@ CameraReader::CameraReader(QObject *parent) {
 
   // Initialize VI_VPSS for BGR
   auto bgr_cam = Config::get_camera(true);
-  vi_bgr_ = new Vi(bgr_cam.index, bgr_cam.pipe,
-                   SONY_IMX307_MIPI_2M_30FPS_12BIT, BGR_FLIP);
+  vi_bgr_ = new Vi(bgr_cam.index, bgr_cam.pipe, SONY_IMX307_MIPI_2M_30FPS_12BIT,
+                   BGR_FLIP);
   vpss_bgr_ = new Vpss(bgr_cam.index, VPSS_CH_SIZES_BGR[0].width,
                        VPSS_CH_SIZES_BGR[0].height);
   vi_vpss_bgr_ =
@@ -34,8 +33,8 @@ CameraReader::CameraReader(QObject *parent) {
 
   // Initialize VI_VPSS for NIR
   auto nir_cam = Config::get_camera(false);
-  vi_nir_ = new Vi(nir_cam.index, nir_cam.pipe,
-                   SONY_IMX307_MIPI_2M_30FPS_12BIT, NIR_FLIP);
+  vi_nir_ = new Vi(nir_cam.index, nir_cam.pipe, SONY_IMX307_MIPI_2M_30FPS_12BIT,
+                   NIR_FLIP);
   vpss_nir_ = new Vpss(nir_cam.index, VPSS_CH_SIZES_NIR[0].width,
                        VPSS_CH_SIZES_NIR[0].height);
   vi_vpss_nir_ =
@@ -47,6 +46,18 @@ CameraReader::CameraReader(QObject *parent) {
   } else {
     static Vi_Vpss_Vo vi_vpss_vo(vi_vpss_bgr_, &vo_bgr);
   }
+
+  SZ_LOG_INFO("Update isp ...");
+  if (!update_isp()) {
+    SZ_LOG_ERROR("Update isp failed");
+  }
+
+  Config::get_instance()->appendListener("reload", [&]() {
+    SZ_LOG_INFO("Update isp ...");
+    if (!update_isp()) {
+      SZ_LOG_ERROR("Update isp failed");
+    }
+  });
 
   // Initialize PINGPANG buffer
   Size size_bgr_1 = VPSS_CH_SIZES_BGR[1];
@@ -138,6 +149,19 @@ bool CameraReader::load_screen_type() {
 
 bool CameraReader::get_screen_size(int &width, int &height) {
   return get_screen_width_height(lcd_screen_type_, width, height);
+}
+
+bool CameraReader::update_isp() {
+  auto isp = Isp::getInstance();
+  {
+    auto cfg = Config::get_camera(CAMERA_BGR);
+    if (!isp->set_from_cfg(cfg.pipe, &cfg.isp)) return false;
+  }
+  {
+    auto cfg = Config::get_camera(CAMERA_NIR);
+    if (!isp->set_from_cfg(cfg.pipe, &cfg.isp)) return false;
+    return true;
+  }
 }
 
 void CameraReader::start_sample() { start(); }

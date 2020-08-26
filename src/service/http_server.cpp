@@ -95,8 +95,6 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
         return;
       }
 
-      Isp::getInstance()->reload_from_cfg();
-
       json data = {{"ok", true}, {"message", "ok"}};
       res.set_content(data.dump(), "application/json");
     } catch (const std::exception& exc) {
