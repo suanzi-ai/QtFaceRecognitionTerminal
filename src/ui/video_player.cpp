@@ -8,6 +8,7 @@
 
 #include "config.hpp"
 #include "dashu_task.hpp"
+#include "otpa_task.hpp"
 #include "temperature_task.hpp"
 
 using namespace suanzi;
@@ -135,7 +136,17 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
 
   // Connect temperature to record_task
   if (!Config::get_app().disabled_temperature) {
-    temperature_task_ = new DashuTask();
+    auto app = Config::get_app();
+    int temperature_manufacturer = app.temperature_manufacturer;
+    switch (temperature_manufacturer) {
+      case 1:
+        temperature_task_ = new OtpaTask();
+        break;
+
+      default:
+        temperature_task_ = new DashuTask();
+        break;
+    }
     connect((const QObject *)temperature_task_, SIGNAL(tx_temperature(float)),
             (const QObject *)record_task_, SLOT(rx_temperature(float)));
   }
@@ -145,7 +156,8 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
   QTimer::singleShot(1, this, SLOT(init_widgets()));
 
   static QTimer updateIpTimer;
-  connect(&updateIpTimer, SIGNAL(timeout()), this, SLOT(update_ip_and_version()));
+  connect(&updateIpTimer, SIGNAL(timeout()), this,
+          SLOT(update_ip_and_version()));
   updateIpTimer.start(1000);
 
   /*
@@ -167,8 +179,7 @@ void VideoPlayer::paintEvent(QPaintEvent *event) {
   painter.drawText(screen_width - 230, 40, QString(version_.c_str()));
 
   if (!app.disabled_temperature) {
-    int device_body_start_angle,
-        device_body_open_angle;
+    int device_body_start_angle, device_body_open_angle;
     float x, y, face_width, face_height;
     x = (float)(app.device_face_x * screen_width);
     y = (float)(app.device_face_y * screen_height);
@@ -178,9 +189,14 @@ void VideoPlayer::paintEvent(QPaintEvent *event) {
     device_body_open_angle = app.device_body_open_angle;
     painter.setPen(QPen(Qt::white, 5, Qt::SolidLine));
     painter.drawEllipse(x, y, face_width, face_height);
-    painter.drawChord(x / 1.2, y + face_height + 25, face_width * 1.2, face_height, // +40是身体与头部的间距 *1.2是身体要比头宽一点
-                      device_body_start_angle, device_body_open_angle);
-    //     painter.drawRect(x, y, face_width, face_height);
+    //     painter.drawChord(
+    //         x / 1.2, y + face_height + 25, face_width * 1.2,
+    //         face_height,  // +40是身体与头部的间距 *1.2是身体要比头宽一点
+    //         device_body_start_angle, device_body_open_angle);
+    painter.drawChord(
+        x / 1.2, y + face_height + 25, face_width * 1.2,
+        face_height,  // +40是身体与头部的间距 *1.2是身体要比头宽一点
+        device_body_start_angle, device_body_open_angle);
   }
 
   detect_tip_widget_bgr_->paint(&painter);
@@ -212,8 +228,7 @@ void VideoPlayer::init_widgets() {
   isp_hist_widget_->move(0, 0);
 }
 
-
 void VideoPlayer::update_ip_and_version() {
-	ip_ = person_service_->get_local_ip();
-	version_ = person_service_->get_system_version();
+  ip_ = person_service_->get_local_ip();
+  version_ = person_service_->get_system_version();
 }

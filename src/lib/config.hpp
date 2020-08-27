@@ -50,6 +50,7 @@ typedef struct {
   SZ_FLOAT temperature_distance;
   SZ_UINT16 device_body_start_angle;
   SZ_UINT16 device_body_open_angle;
+  int temperature_manufacturer;
   bool disabled_temperature;
   std::string infraraed_faces_store_path;
   bool show_isp_hist_window;

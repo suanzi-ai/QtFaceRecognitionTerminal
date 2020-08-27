@@ -35,6 +35,7 @@ void suanzi::to_json(json &j, const AppConfig &c) {
   SAVE_JSON_TO(j, "temperature_distance", c.temperature_distance);
   SAVE_JSON_TO(j, "device_body_start_angle", c.device_body_start_angle);
   SAVE_JSON_TO(j, "device_body_open_angle", c.device_body_open_angle);
+  SAVE_JSON_TO(j, "temperature_manufacturer", c.temperature_manufacturer);
   SAVE_JSON_TO(j, "disabled_temperature", c.disabled_temperature);
   SAVE_JSON_TO(j, "infraraed_faces_store_path", c.infraraed_faces_store_path);
   SAVE_JSON_TO(j, "show_isp_hist_window", c.show_isp_hist_window);
@@ -55,6 +56,7 @@ void suanzi::from_json(const json &j, AppConfig &c) {
   LOAD_JSON_TO(j, "temperature_distance", c.temperature_distance);
   LOAD_JSON_TO(j, "device_body_start_angle", c.device_body_start_angle);
   LOAD_JSON_TO(j, "device_body_open_angle", c.device_body_open_angle);
+  LOAD_JSON_TO(j, "temperature_manufacturer", c.temperature_manufacturer);
   LOAD_JSON_TO(j, "disabled_temperature", c.disabled_temperature);
   LOAD_JSON_TO(j, "infraraed_faces_store_path", c.infraraed_faces_store_path);
   LOAD_JSON_TO(j, "show_isp_hist_window", c.show_isp_hist_window);
@@ -345,6 +347,7 @@ void Config::load_defaults(ConfigData &c) {
       .temperature_distance = 0.68,
       .device_body_start_angle = 2500,
       .device_body_open_angle = 180,
+      .temperature_manufacturer = 0, // 0大树 1众志
       .disabled_temperature = true,
       .infraraed_faces_store_path =
           APP_DIR_PREFIX "/var/face-terminal/ir-faces/",

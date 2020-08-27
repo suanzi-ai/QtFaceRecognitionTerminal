@@ -74,6 +74,7 @@ bool DetectionRatio::is_valid() {
                      y + height - 0.04 < face_height + face_y &&
                      width > face_width * temperature_distance &&
                      height > face_height * temperature_distance;  // 补偿0.04，以让人脸完全进入框中也能识别
+  
     // SZ_LOG_INFO(
     //     "X {:.2f} >:{:.2f}, Y{:.2f}>{:.2f}, x + width {:.2f} < {:.2f}, y + "
     //     "height {:.2f}< "

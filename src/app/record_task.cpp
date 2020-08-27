@@ -136,8 +136,8 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
     rx_reset();
     SZ_LOG_INFO("Record: id={}, staff={}, status={}, temperature={}", person.id,
                 person.number, person.status, person.temperature);
-    if (Config::get_app().disabled_temperature || body_temperature_ > 35.5)
-      emit tx_display(person, duplicated_);
+
+    emit tx_display(person, duplicated_);
   }
 
   emit tx_finish();
