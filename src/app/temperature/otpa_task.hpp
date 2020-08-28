@@ -7,17 +7,16 @@
 namespace suanzi {
 
 class OtpaTask : public TemperatureTask {
-
   Q_OBJECT
  public:
   OtpaTask(QObject *parent = nullptr);
   ~OtpaTask();
 
  private:
- 	void run();
+  void run();
 
  private:
- 	Otpa16 *otpa16_;
+  Otpa16 *otpa16_;
 };
 
 }  // namespace suanzi

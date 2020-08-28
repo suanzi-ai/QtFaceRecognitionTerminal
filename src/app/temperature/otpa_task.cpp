@@ -1,4 +1,5 @@
 #include "otpa_task.hpp"
+
 #include "logger.hpp"
 
 using namespace suanzi;
@@ -14,11 +15,12 @@ void OtpaTask::run() {
   OtpaTemperatureData otpa_temp;
   while (true) {
     // Update Ambient Temperature
-  float temperature = 0.0;
-	if (otpa16_->read_temperature(&otpa_temp)) {
-		printf("max temp:%.2f\n", otpa_temp.pixel_temp[otpa_temp.max_pixel_temp_index]);
-		emit tx_temperature(otpa_temp.pixel_temp[otpa_temp.max_pixel_temp_index]);
-	}
+    float temperature = 0.0;
+    if (otpa16_->read_temperature(&otpa_temp)) {
+      // printf("max temp:%.2f\n",
+      //        otpa_temp.pixel_temp[otpa_temp.max_pixel_temp_index]);
+      emit tx_temperature(otpa_temp.pixel_temp[otpa_temp.max_pixel_temp_index]);
+    }
     usleep(250000);
   }
 }
