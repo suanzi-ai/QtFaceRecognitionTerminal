@@ -57,7 +57,8 @@ bool DetectionRatio::is_valid() {
                     cfg.min_roll < roll && roll < cfg.max_roll;
   bool position_valid;
 
-  if (app.disabled_temperature)
+  // Temperature Mode: disabled or fake
+  if (app.disabled_temperature || app.temperature_manufacturer == 2)
     position_valid =
         x > 0.01 && y > 0.01 && x + width < 0.99 && y + height < 0.99;
   else {
@@ -69,18 +70,13 @@ bool DetectionRatio::is_valid() {
     face_y = app.device_face_y;
     temperature_distance = app.temperature_distance;
 
-    position_valid = x > face_x && y > face_y &&
-                     x + width < face_x + face_width &&
-                     y + height - 0.04 < face_height + face_y &&
-                     width > face_width * temperature_distance &&
-                     height > face_height * temperature_distance;  // 补偿0.04，以让人脸完全进入框中也能识别
-  
-    // SZ_LOG_INFO(
-    //     "X {:.2f} >:{:.2f}, Y{:.2f}>{:.2f}, x + width {:.2f} < {:.2f}, y + "
-    //     "height {:.2f}< "
-    //     "{:.2f}]",
-    //     x, y, face_x, face_y, (x + width), (face_x + face_width), (y + height - 0.05),
-    //     (face_height + face_y));
+    position_valid =
+        x > face_x && y > face_y && x + width < face_x + face_width &&
+        y + height - 0.04 < face_height + face_y &&
+        width > face_width * temperature_distance &&
+        height >
+            face_height *
+                temperature_distance;  // 补偿0.04，以让人脸完全进入框中也能识别
   }
   return pose_valid && position_valid;
 }

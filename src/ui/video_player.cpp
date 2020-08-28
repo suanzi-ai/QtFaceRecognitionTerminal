@@ -181,7 +181,8 @@ void VideoPlayer::paintEvent(QPaintEvent *event) {
   painter.drawText(20, 40, QString(ip_.c_str()));
   painter.drawText(screen_width - 230, 40, QString(version_.c_str()));
 
-  if (!app.disabled_temperature) {
+  // Temperature mode: enable and is not fake mode
+  if (!app.disabled_temperature && app.temperature_manufacturer != 2) {
     int device_body_start_angle, device_body_open_angle;
     float x, y, face_width, face_height;
     x = (float)(app.device_face_x * screen_width);
