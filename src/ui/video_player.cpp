@@ -60,7 +60,7 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
   detect_task_ = new DetectTask(detector, pose_estimator, nullptr, this);
   recognize_task_ =
       new RecognizeTask(db, extractor, anti_spoofing, nullptr, this);
-  record_task_ = new RecordTask(person_service, nullptr, this);
+  record_task_ = new RecordTask(person_service, db, nullptr, this);
   face_timer_ = new FaceTimer(nullptr, this);
 
   // IO Tasks

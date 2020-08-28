@@ -15,8 +15,8 @@ namespace suanzi {
 class RecordTask : QObject {
   Q_OBJECT
  public:
-  RecordTask(PersonService::ptr person_service, QThread *thread = nullptr,
-             QObject *parent = nullptr);
+  RecordTask(PersonService::ptr person_service, FaceDatabasePtr db,
+             QThread *thread = nullptr, QObject *parent = nullptr);
 
   ~RecordTask();
 
@@ -38,7 +38,7 @@ class RecordTask : QObject {
   bool if_new(const FaceFeature &feature);
 
   bool sequence_query(const std::vector<QueryResult> &history,
-                      SZ_UINT32 &face_id);
+                      SZ_UINT32 &face_id, SZ_FLOAT &score);
   bool sequence_antispoof(const std::vector<bool> &history);
 
   bool if_duplicated(const SZ_UINT32 &face_id);
@@ -46,7 +46,7 @@ class RecordTask : QObject {
 
   PersonService::ptr person_service_;
 
-  FaceDatabasePtr unknown_database_;
+  FaceDatabasePtr db_, unknown_database_;
 
   std::vector<QueryResult> person_history_;
   std::map<SZ_UINT32, std::chrono::steady_clock::time_point> query_clock_;

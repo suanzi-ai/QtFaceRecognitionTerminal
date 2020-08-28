@@ -10,13 +10,13 @@
 
 using namespace suanzi;
 
-RecordTask::RecordTask(PersonService::ptr person_service, QThread *thread,
-                       QObject *parent)
-    : person_service_(person_service) {
+RecordTask::RecordTask(PersonService::ptr person_service, FaceDatabasePtr db,
+                       QThread *thread, QObject *parent)
+    : person_service_(person_service), db_(db) {
   // Create db for unknown faces
   unknown_database_ = std::make_shared<FaceDatabase>("_UNKNOWN_DB_");
   reset_counter_ = 0;
-  body_temperature_ = 26.;
+  body_temperature_ = 0;
 
   // Create thread
   if (thread == nullptr) {
@@ -93,9 +93,10 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
 
     // query person info
     SZ_UINT32 face_id;
-    if (!sequence_query(person_history_, face_id) ||
+    if (!sequence_query(person_history_, face_id, person.score) ||
         SZ_RETCODE_OK != person_service_->get_person(face_id, person)) {
       person.id = 0;
+      person.score = 0;
       person.name = "访客";
       person.face_path = ":asserts/avatar_unknown.jpg";
       person.status = person_service_->get_status(PersonStatus::Stranger);
@@ -109,6 +110,7 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
         person.name = "访客";
       }
       person.id = 0;
+      person.score = 0;
       person.face_path = ":asserts/avatar_unknown.jpg";
       person.status = person_service_->get_status(PersonStatus::Fake);
     }
@@ -120,6 +122,7 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
         person.name = "访客";
       }
       person.id = 0;
+      person.score = 0;
       person.face_path = ":asserts/avatar_unknown.jpg";
     }
 
@@ -129,17 +132,22 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
       duplicated_ = if_duplicated(input->person_feature);
     } else {
       duplicated_ = if_duplicated(face_id);
+
+      // Update face feature
+      if (person.score < 0.9) db_->add(face_id, input->person_feature, 0.1);
     }
 
     person.temperature = body_temperature_;
     // output
     rx_reset();
     if (!Config::get_app().disabled_temperature)
-      SZ_LOG_INFO("Record: id={}, staff={}, status={}, temperature={}",
-                  person.id, person.number, person.status, person.temperature);
+      SZ_LOG_INFO(
+          "Record: id={}, staff={}, score={:.2f}, status={}, temperature={}",
+          person.id, person.number, person.score, person.status,
+          person.temperature);
     else
-      SZ_LOG_INFO("Record: id={}, staff={}, status={}", person.id,
-                  person.number, person.status);
+      SZ_LOG_INFO("Record: id={}, staff={}, score={:.2f}, status={}", person.id,
+                  person.number, person.score, person.status);
 
     emit tx_display(person, duplicated_);
   }
@@ -205,7 +213,7 @@ bool RecordTask::if_new(const FaceFeature &feature) {
 }
 
 bool RecordTask::sequence_query(const std::vector<QueryResult> &history,
-                                SZ_UINT32 &face_id) {
+                                SZ_UINT32 &face_id, SZ_FLOAT &score) {
   auto cfg = Config::get_extract();
   std::map<SZ_UINT32, int> person_counts;
   std::map<SZ_UINT32, float> person_accumulate_score;
@@ -247,10 +255,13 @@ bool RecordTask::sequence_query(const std::vector<QueryResult> &history,
       max_person_accumulate_score >= cfg.min_accumulate_score &&
       max_person_score >= cfg.min_recognize_score) {
     face_id = max_person_id;
+    score = max_person_score;
     return true;
   }
   if (max_count == cfg.history_size &&
       max_person_accumulate_score >= cfg.min_accumulate_score) {
+    face_id = max_person_id;
+    score = max_person_score;
     return true;
   } else {
     return false;

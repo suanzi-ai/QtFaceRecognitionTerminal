@@ -14,6 +14,7 @@ using json = nlohmann::json;
 
 struct PersonData {
   SZ_UINT32 id;
+  SZ_FLOAT score;
   std::string number;
   std::string name;
   std::string gender;
