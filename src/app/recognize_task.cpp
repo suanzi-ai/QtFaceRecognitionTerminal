@@ -145,21 +145,24 @@ void RecognizeTask::extract_and_query(DetectionData *detection,
   detection->bgr_detection_.scale(width, height, face_detection, pose);
 
   // extract: 25ms
-  face_extractor_->extract(
+  SZ_RETCODE ret = face_extractor_->extract(
       (const SVP_IMAGE_S *)detection->img_bgr_large->pImplData, face_detection,
       pose, feature);
-
-  // query
-  static std::vector<suanzi::QueryResult> results;
-  results.clear();
-
-  SZ_RETCODE ret = face_database_->query(feature, 1, results);
   if (SZ_RETCODE_OK == ret) {
-    person_info.score = results[0].score;
-    person_info.face_id = results[0].face_id;
-  } else {
-    // SZ_RETCODE_EMPTY_DATABASE == ret
-    person_info.score = 0;
-    person_info.face_id = 0;
+    // query
+    static std::vector<suanzi::QueryResult> results;
+    results.clear();
+
+    ret = face_database_->query(feature, 1, results);
+    if (SZ_RETCODE_OK == ret) {
+      person_info.score = results[0].score;
+      person_info.face_id = results[0].face_id;
+
+      return;
+    }
   }
+
+  // SZ_RETCODE_EMPTY_DATABASE or SZ_RETCODE_FAILED
+  person_info.score = 0;
+  person_info.face_id = 0;
 }
