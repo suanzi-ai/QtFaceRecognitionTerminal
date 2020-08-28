@@ -9,6 +9,7 @@
 #include "config.hpp"
 #include "dashu_task.hpp"
 #include "otpa_task.hpp"
+#include "random_task.hpp"
 #include "temperature_task.hpp"
 
 using namespace suanzi;
@@ -142,7 +143,9 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
       case 1:
         temperature_task_ = new OtpaTask();
         break;
-
+      case 2:
+        temperature_task_ = new RandomTask();
+        break;
       default:
         temperature_task_ = new DashuTask();
         break;
@@ -189,10 +192,6 @@ void VideoPlayer::paintEvent(QPaintEvent *event) {
     device_body_open_angle = app.device_body_open_angle;
     painter.setPen(QPen(Qt::white, 5, Qt::SolidLine));
     painter.drawEllipse(x, y, face_width, face_height);
-    //     painter.drawChord(
-    //         x / 1.2, y + face_height + 25, face_width * 1.2,
-    //         face_height,  // +40是身体与头部的间距 *1.2是身体要比头宽一点
-    //         device_body_start_angle, device_body_open_angle);
     painter.drawChord(
         x / 1.2, y + face_height + 25, face_width * 1.2,
         face_height,  // +40是身体与头部的间距 *1.2是身体要比头宽一点
