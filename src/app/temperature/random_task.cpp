@@ -17,7 +17,6 @@ void RandomTask::run() {
     time(&timep);
     p = gmtime(&timep);
     int now = p->tm_sec;
-    c = (rand() % (3 - 1)) + 1;
     if (now < 10) {
       c = (rand() % (4 - 2)) + 2;  // 0.2~0.3
     } else if (now < 20) {
