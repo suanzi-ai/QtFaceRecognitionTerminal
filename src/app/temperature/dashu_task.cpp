@@ -1,6 +1,6 @@
 #include "dashu_task.hpp"
-#include "platform_interface.h"
 #include "logger.hpp"
+#include "platform_interface.h"
 
 using namespace suanzi;
 
@@ -16,7 +16,6 @@ void DashuTask::run() {
                                     0x00, 0x01, 0x84, 0x0A};
   const size_t recv_len = 7;
   unsigned char recv_buf[recv_len];
-  
 
   Ds_Initialize();
   Ds_OpenUart("/dev/ttyAMA4");
@@ -34,8 +33,12 @@ void DashuTask::run() {
     }
 
     float temperature = 0.0;
-    if (0 == Ds_GetBodyTemperature(&temperature))
+    if (0 == Ds_GetBodyTemperature(&temperature)) {
+      if (temperature > 30 && temperature < 36)
+        temperature = 35 + temperature - (int)temperature;
+
       emit tx_temperature(temperature);
+    }
 
     tick = (tick + 1) % 240;
     usleep(250000);
