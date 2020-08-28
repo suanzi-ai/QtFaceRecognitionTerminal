@@ -109,16 +109,7 @@ void RecognizeTipWidget::paintEvent(QPaintEvent *event) {
 
   bool disable_temperature = Config::get_app().disabled_temperature;
   std::stringstream ss;
-
-  char t[10];
-  sprintf(t, "%f", person_.temperature);
-  std::string original_t = t;  // 原来的温度
-  std::string optimizationt_t = original_t.substr(0, 4);
-
-  if (person_.temperature < 36)  // 小于36就取原始温度的小数位,然后拼接为新温度
-    optimizationt_t = "36" + original_t.substr(2, 2);
-
-  ss << "温度: " << optimizationt_t;
+  ss << "温度: " << std::setprecision(3) << person_.temperature;
   QString body_temperature = ss.str().c_str();
 
   if (staff_number.length() > 0) {
