@@ -134,8 +134,12 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
     person.temperature = body_temperature_;
     // output
     rx_reset();
-    SZ_LOG_INFO("Record: id={}, staff={}, status={}, temperature={}", person.id,
-                person.number, person.status, person.temperature);
+    if (!Config::get_app().disabled_temperature)
+      SZ_LOG_INFO("Record: id={}, staff={}, status={}, temperature={}",
+                  person.id, person.number, person.status, person.temperature);
+    else
+      SZ_LOG_INFO("Record: id={}, staff={}, status={}", person.id,
+                  person.number, person.status);
 
     emit tx_display(person, duplicated_);
   }
