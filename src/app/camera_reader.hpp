@@ -5,7 +5,7 @@
 #include <QSharedPointer>
 #include <QThread>
 #include <chrono>
-#include <quface-io/io.hpp>
+#include <quface-io/engine.hpp>
 
 #include "config.hpp"
 #include "image_package.hpp"
@@ -41,7 +41,7 @@ class CameraReader : QThread {
   ImagePackage *buffer_ping_, *buffer_pang_;
   PingPangBuffer<ImagePackage> *pingpang_buffer_;
 
-  io::LCD_SCREEN_TYPE lcd_screen_type_;
+  io::LCDScreenType lcd_screen_type_;
 };
 
 }  // namespace suanzi

@@ -1,6 +1,6 @@
 #include "http_server.hpp"
 
-#include <quface-io/io.hpp>
+#include <quface-io/engine.hpp>
 
 #include "static_config.hpp"
 
@@ -139,7 +139,7 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
     }
 
     ISPExposureInfo exp_info;
-    SZ_RETCODE ret = IO::instance()->isp_query_exposure_info(pipe, &exp_info);
+    SZ_RETCODE ret = Engine::instance()->isp_query_exposure_info(pipe, &exp_info);
     if (ret != SZ_RETCODE_OK) {
       json body = {{"ok", false}, {"message", "get exp info failed"}};
       res.set_content(body.dump(), "application/json");
@@ -161,7 +161,7 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
     }
 
     ISPWBInfo wb_info;
-    SZ_RETCODE ret = IO::instance()->isp_query_wb_info(pipe, &wb_info);
+    SZ_RETCODE ret = Engine::instance()->isp_query_wb_info(pipe, &wb_info);
     if (ret != SZ_RETCODE_OK) {
       json body = {{"ok", false}, {"message", "get wb info failed"}};
       res.set_content(body.dump(), "application/json");
@@ -184,7 +184,7 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
 
     ISPInnerStateInfo inner_state_info;
     SZ_RETCODE ret =
-        IO::instance()->isp_query_inner_state_info(pipe, &inner_state_info);
+        Engine::instance()->isp_query_inner_state_info(pipe, &inner_state_info);
     if (ret != SZ_RETCODE_OK) {
       json body = {{"ok", false}, {"message", "get inner state failed"}};
       res.set_content(body.dump(), "application/json");

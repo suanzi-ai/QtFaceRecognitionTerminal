@@ -1,7 +1,7 @@
 #include "upload_task.hpp"
 
 #include <QThread>
-#include <quface-io/io.hpp>
+#include <quface-io/engine.hpp>
 
 using namespace suanzi;
 using namespace suanzi::io;
@@ -28,13 +28,13 @@ void UploadTask::rx_upload(PersonData person, bool if_duplicated) {
 
   if (!if_duplicated) {
     SZ_LOG_DEBUG("upload snapshots");
-    auto io = IO::instance();
+    auto engine = Engine::instance();
 
-    SZ_RETCODE bgr_encode_result = io->encode_jpeg(
+    SZ_RETCODE bgr_encode_result = engine->encode_jpeg(
         bgr_image_buffer, person.bgr_face_snapshot.data,
         person.bgr_face_snapshot.cols, person.bgr_face_snapshot.rows);
 
-    SZ_RETCODE nir_encode_result = io->encode_jpeg(
+    SZ_RETCODE nir_encode_result = engine->encode_jpeg(
         nir_image_buffer, person.nir_face_snapshot.data,
         person.nir_face_snapshot.cols, person.nir_face_snapshot.rows);
     if (nir_encode_result != SZ_RETCODE_FAILED) {

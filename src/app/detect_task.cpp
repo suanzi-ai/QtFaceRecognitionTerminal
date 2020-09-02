@@ -5,7 +5,7 @@
 #include <chrono>
 #include <ctime>
 #include <iostream>
-#include <quface-io/io.hpp>
+#include <quface-io/engine.hpp>
 #include <string>
 
 #include "quface/common.hpp"
@@ -44,7 +44,7 @@ SZ_RETCODE DetectTask::adjust_isp_by_detection(const DetectionData *output) {
   ROICfg bgr_roi_cfg = {0.2, 0.2, 0.4, 0.4};
   ROICfg nir_roi_cfg = {0.2, 0.2, 0.4, 0.4};
 
-  auto io = io::IO::instance();
+  auto engine = io::Engine::instance();
   if (detect_count_ % isp_global.adjust_window_size ==
       isp_global.adjust_window_size - 1) {
     if (output->bgr_face_detected_) {
@@ -54,7 +54,7 @@ SZ_RETCODE DetectTask::adjust_isp_by_detection(const DetectionData *output) {
       bgr_roi_cfg.width = det.width;
       bgr_roi_cfg.height = det.height;
 
-      if (!io->isp_set_roi(bgr_cam.pipe, &bgr_roi_cfg, &bgr_cam.isp.stat)) {
+      if (!engine->isp_set_roi(bgr_cam.pipe, &bgr_roi_cfg, &bgr_cam.isp.stat)) {
         return SZ_RETCODE_FAILED;
       }
     } else if (output->nir_face_detected_) {
@@ -63,7 +63,7 @@ SZ_RETCODE DetectTask::adjust_isp_by_detection(const DetectionData *output) {
       nir_roi_cfg.y = det.y;
       nir_roi_cfg.width = det.width;
       nir_roi_cfg.height = det.height;
-      if (!io->isp_set_roi(nir_cam.pipe, &nir_roi_cfg, &nir_cam.isp.stat)) {
+      if (!engine->isp_set_roi(nir_cam.pipe, &nir_roi_cfg, &nir_cam.isp.stat)) {
         return SZ_RETCODE_FAILED;
       }
     }
@@ -74,17 +74,17 @@ SZ_RETCODE DetectTask::adjust_isp_by_detection(const DetectionData *output) {
       nir_roi_cfg.y = det.y;
       nir_roi_cfg.width = det.width;
       nir_roi_cfg.height = det.height;
-      if (!io->isp_set_roi(nir_cam.pipe, &nir_roi_cfg, &nir_cam.isp.stat)) {
+      if (!engine->isp_set_roi(nir_cam.pipe, &nir_roi_cfg, &nir_cam.isp.stat)) {
         return SZ_RETCODE_FAILED;
       }
     }
   }
 
   if (no_detect_count_ == isp_global.restore_size) {
-    if (!io->isp_set_roi(bgr_cam.pipe, &bgr_roi_cfg, &bgr_cam.isp.stat)) {
+    if (!engine->isp_set_roi(bgr_cam.pipe, &bgr_roi_cfg, &bgr_cam.isp.stat)) {
       return SZ_RETCODE_FAILED;
     }
-    if (!io->isp_set_roi(nir_cam.pipe, &nir_roi_cfg, &nir_cam.isp.stat)) {
+    if (!engine->isp_set_roi(nir_cam.pipe, &nir_roi_cfg, &nir_cam.isp.stat)) {
       return SZ_RETCODE_FAILED;
     }
   }

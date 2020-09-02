@@ -21,7 +21,7 @@ CameraReader::CameraReader(QObject *parent) {
   // Initialize VI_VPSS for NIR
   auto nir_cam = Config::get_camera(CAMERA_NIR);
 
-  IOOption opt = {
+  EngineOption opt = {
       .bgr =
           {
               .dev = bgr_cam.index,
@@ -100,7 +100,7 @@ CameraReader::CameraReader(QObject *parent) {
       .show_nir = app.show_infrared_window,
   };
 
-  IO::instance()->init(&opt);
+  Engine::instance()->init(&opt);
 
   SZ_LOG_INFO("Update isp ...");
   if (!isp_update()) {
@@ -195,23 +195,23 @@ bool CameraReader::load_screen_type() {
 }
 
 bool CameraReader::get_screen_size(int &width, int &height) {
-  auto io = IO::instance();
+  auto engine = Engine::instance();
   Size size;
-  io->get_screen_size(size);
+  engine->get_screen_size(size);
   width = size.width;
   height = size.height;
 }
 
 bool CameraReader::isp_update() {
-  auto io = IO::instance();
+  auto engine = Engine::instance();
   {
     auto cfg = Config::get_camera(CAMERA_BGR);
-    SZ_RETCODE ret = io->isp_update(cfg.pipe, &cfg.isp);
+    SZ_RETCODE ret = engine->isp_update(cfg.pipe, &cfg.isp);
     if (ret != SZ_RETCODE_OK) return false;
   }
   {
     auto cfg = Config::get_camera(CAMERA_NIR);
-    SZ_RETCODE ret = io->isp_update(cfg.pipe, &cfg.isp);
+    SZ_RETCODE ret = engine->isp_update(cfg.pipe, &cfg.isp);
     if (ret != SZ_RETCODE_OK) return false;
   }
   return true;
@@ -222,28 +222,28 @@ void CameraReader::start_sample() { start(); }
 void CameraReader::rx_finish() { rx_finished_ = true; }
 
 bool CameraReader::capture_frame(ImagePackage *pkg) {
-  auto io = IO::instance();
+  auto engine = Engine::instance();
   static int frame_idx = 0;
 
   SZ_RETCODE ret;
 
   {
-    ret = io->capture_frame(io::CAMERA_BGR, 2, *pkg->img_bgr_small);
+    ret = engine->capture_frame(io::CAMERA_BGR, 2, *pkg->img_bgr_small);
     if (ret != SZ_RETCODE_OK) return false;
 
     ret = SZ_RETCODE_FAILED;
     while (ret != SZ_RETCODE_OK) {
-      ret = io->capture_frame(io::CAMERA_BGR, 1, *pkg->img_bgr_large);
+      ret = engine->capture_frame(io::CAMERA_BGR, 1, *pkg->img_bgr_large);
       QThread::usleep(10);
     }
   }
   {
-    ret = io->capture_frame(io::CAMERA_NIR, 2, *pkg->img_nir_small);
+    ret = engine->capture_frame(io::CAMERA_NIR, 2, *pkg->img_nir_small);
     if (ret != SZ_RETCODE_OK) return false;
 
     ret = SZ_RETCODE_FAILED;
     while (ret != SZ_RETCODE_OK) {
-      ret = io->capture_frame(io::CAMERA_NIR, 1, *pkg->img_nir_large);
+      ret = engine->capture_frame(io::CAMERA_NIR, 1, *pkg->img_nir_large);
       QThread::usleep(10);
     }
   }
