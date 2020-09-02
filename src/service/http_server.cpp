@@ -9,8 +9,8 @@ HTTPServer::HTTPServer() {
   server_ = std::make_shared<Server>();
 
   server_->set_logger([](const Request& req, const Response& res) {
-    SZ_LOG_INFO("HTTP {} {} {} {}", req.method, req.path, req.content_length,
-                res.status);
+    // SZ_LOG_INFO("HTTP {} {} {} {}", req.method, req.path, req.content_length,
+    //             res.status);
   });
 
   server_->set_error_handler([](const Request& req, Response& res) {
