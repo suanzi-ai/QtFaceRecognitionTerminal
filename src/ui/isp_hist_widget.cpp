@@ -8,11 +8,12 @@
 #include <QtCharts/QLineSeries>
 #include <QtCharts/QValueAxis>
 #include <QtWidgets/QVBoxLayout>
+#include <quface-io/io.hpp>
 
 #include "config.hpp"
-#include "isp.h"
 
 using namespace suanzi;
+using namespace suanzi::io;
 
 QT_CHARTS_USE_NAMESPACE
 
@@ -53,7 +54,7 @@ ISPHistWidget::~ISPHistWidget() {}
 
 void ISPHistWidget::paint(QPainter *painter) {
   static ISP_EXP_INFO_S exp_info;
-  if (!Isp::getInstance()->query_exposure_info(0, &exp_info)) {
+  if (!IO::instance()->isp_query_exposure_info(0, &exp_info)) {
     SZ_LOG_ERROR("Draw hist, get value failed");
     return;
   }

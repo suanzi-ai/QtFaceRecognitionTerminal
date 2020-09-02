@@ -4,7 +4,6 @@
 #include <QMetaType>
 #include <QThread>
 
-#include "mmzimage.h"
 #include "image_package.hpp"
 #include "detection_data.hpp"
 #include "recognize_data.hpp"

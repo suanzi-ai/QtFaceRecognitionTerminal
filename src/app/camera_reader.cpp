@@ -6,80 +6,135 @@
 #include <iostream>
 #include <regex>
 
-#include "quface/common.hpp"
-#include "vb_pool.hpp"
-
 using namespace suanzi;
+using namespace suanzi::io;
 
 CameraReader::CameraReader(QObject *parent) {
   auto app = Config::get_app();
-
-  // init sys vb pool
-  VbPool::get_instance();
 
   if (!load_screen_type()) {
     SZ_LOG_ERROR("Load screen type error");
   }
 
   // Initialize VI_VPSS for BGR
-  auto bgr_cam = Config::get_camera(true);
-  vi_bgr_ = new Vi(bgr_cam.index, bgr_cam.pipe, SONY_IMX307_MIPI_2M_30FPS_12BIT,
-                   BGR_FLIP);
-  vpss_bgr_ = new Vpss(bgr_cam.index, VPSS_CH_SIZES_BGR[0].width,
-                       VPSS_CH_SIZES_BGR[0].height);
-  vi_vpss_bgr_ =
-      new Vi_Vpss(vi_bgr_, vpss_bgr_, VPSS_CH_SIZES_BGR, CH_INDEXES_BGR,
-                  CH_ROTATES_BGR, sizeof(VPSS_CH_SIZES_BGR) / sizeof(Size));
-
+  auto bgr_cam = Config::get_camera(CAMERA_BGR);
   // Initialize VI_VPSS for NIR
-  auto nir_cam = Config::get_camera(false);
-  vi_nir_ = new Vi(nir_cam.index, nir_cam.pipe, SONY_IMX307_MIPI_2M_30FPS_12BIT,
-                   NIR_FLIP);
-  vpss_nir_ = new Vpss(nir_cam.index, VPSS_CH_SIZES_NIR[0].width,
-                       VPSS_CH_SIZES_NIR[0].height);
-  vi_vpss_nir_ =
-      new Vi_Vpss(vi_nir_, vpss_nir_, VPSS_CH_SIZES_NIR, CH_INDEXES_NIR,
-                  CH_ROTATES_NIR, sizeof(VPSS_CH_SIZES_NIR) / sizeof(Size));
-  static Vo vo_bgr(0, VO_INTF_MIPI, lcd_screen_type_, ROTATION_E::ROTATION_90);
-  if (app.show_infrared_window) {
-    static Vi_Vpss_Vo vi_vpss_vo(vi_vpss_bgr_, vi_vpss_nir_, &vo_bgr);
-  } else {
-    static Vi_Vpss_Vo vi_vpss_vo(vi_vpss_bgr_, &vo_bgr);
-  }
+  auto nir_cam = Config::get_camera(CAMERA_NIR);
+
+  IOOption opt = {
+      .bgr =
+          {
+              .dev = bgr_cam.index,
+              .pipe = bgr_cam.pipe,
+              .flip = true,
+              .vpass_group = bgr_cam.index,
+              .channels =
+                  {
+                      VpssChannel{
+                          .index = 0,
+                          .rotate = 0,
+                          .size =
+                              {
+                                  .width = 1080,
+                                  .height = 1920,
+                              },
+                      },
+                      VpssChannel{
+                          .index = 1,
+                          .rotate = ROTATION_E::ROTATION_90,
+                          .size =
+                              {
+                                  .width = 704,
+                                  .height = 1080,
+                              },
+                      },
+                      VpssChannel{
+                          .index = 2,
+                          .rotate = ROTATION_E::ROTATION_90,
+                          .size =
+                              {
+                                  .width = 224,
+                                  .height = 320,
+                              },
+                      },
+                  },
+          },
+      .nir = {.dev = nir_cam.index,
+              .pipe = nir_cam.pipe,
+              .flip = true,
+              .vpass_group = nir_cam.index,
+              .channels =
+                  {
+                      VpssChannel{
+                          .index = 0,
+                          .rotate = 0,
+                          .size =
+                              {
+                                  .width = 1080,
+                                  .height = 1920,
+                              },
+                      },
+                      VpssChannel{
+                          .index = 1,
+                          .rotate = ROTATION_E::ROTATION_90,
+                          .size =
+                              {
+                                  .width = 704,
+                                  .height = 1080,
+                              },
+                      },
+                      VpssChannel{
+                          .index = 2,
+                          .rotate = ROTATION_E::ROTATION_90,
+                          .size =
+                              {
+                                  .width = 224,
+                                  .height = 320,
+                              },
+                      },
+                  }},
+      .screen =
+          {
+              .type = lcd_screen_type_,
+          },
+      .show_nir = app.show_infrared_window,
+  };
+
+  IO::instance()->init(&opt);
 
   SZ_LOG_INFO("Update isp ...");
-  if (!update_isp()) {
+  if (!isp_update()) {
     SZ_LOG_ERROR("Update isp failed");
   }
 
   Config::get_instance()->appendListener("reload", [&]() {
     SZ_LOG_INFO("Update isp ...");
-    if (!update_isp()) {
+    if (!isp_update()) {
       SZ_LOG_ERROR("Update isp failed");
     }
   });
 
   // Initialize PINGPANG buffer
-  Size size_bgr_1 = VPSS_CH_SIZES_BGR[1];
-  Size size_bgr_2 = VPSS_CH_SIZES_BGR[2];
-  if (CH_ROTATES_BGR[1]) {
-    size_bgr_1.height = VPSS_CH_SIZES_BGR[1].width;
-    size_bgr_1.width = VPSS_CH_SIZES_BGR[1].height;
+  Size size_bgr_1 = opt.bgr.channels[1].size;
+  Size size_bgr_2 = opt.bgr.channels[2].size;
+  if (opt.bgr.channels[1].rotate % 2) {
+    size_bgr_1.height = opt.bgr.channels[1].size.width;
+    size_bgr_1.width = opt.bgr.channels[1].size.height;
   }
-  if (CH_ROTATES_BGR[2]) {
-    size_bgr_2.height = VPSS_CH_SIZES_BGR[2].width;
-    size_bgr_2.width = VPSS_CH_SIZES_BGR[2].height;
+  if (opt.bgr.channels[2].rotate % 2) {
+    size_bgr_2.height = opt.bgr.channels[2].size.width;
+    size_bgr_2.width = opt.bgr.channels[2].size.height;
   }
 
-  Size size_nir_1 = VPSS_CH_SIZES_NIR[1];
-  Size size_nir_2 = VPSS_CH_SIZES_NIR[2];
-  if (CH_ROTATES_NIR[1]) {
-    size_nir_1.height = VPSS_CH_SIZES_NIR[1].width;
-    size_nir_1.width = VPSS_CH_SIZES_NIR[1].height;
+  Size size_nir_1 = opt.nir.channels[1].size;
+  Size size_nir_2 = opt.nir.channels[2].size;
+  if (opt.nir.channels[1].rotate % 2) {
+    size_nir_1.height = opt.nir.channels[1].size.width;
+    size_nir_1.width = opt.nir.channels[1].size.height;
   }
-  if (CH_ROTATES_NIR[2]) {
-    size_nir_2.height = VPSS_CH_SIZES_NIR[2].width;
-    size_nir_2.width = VPSS_CH_SIZES_NIR[2].height;
+  if (opt.nir.channels[2].rotate % 2) {
+    size_nir_2.height = opt.nir.channels[2].size.width;
+    size_nir_2.width = opt.nir.channels[2].size.height;
   }
 
   buffer_ping_ =
@@ -93,14 +148,6 @@ CameraReader::CameraReader(QObject *parent) {
 }
 
 CameraReader::~CameraReader() {
-  if (vi_bgr_) delete vi_bgr_;
-  if (vpss_bgr_) delete vpss_bgr_;
-  if (vi_vpss_bgr_) delete vi_vpss_bgr_;
-
-  if (vi_nir_) delete vi_nir_;
-  if (vpss_nir_) delete vpss_nir_;
-  if (vi_vpss_nir_) delete vi_vpss_nir_;
-
   if (buffer_ping_) delete buffer_ping_;
   if (buffer_pang_) delete buffer_pang_;
   if (pingpang_buffer_) delete pingpang_buffer_;
@@ -148,20 +195,26 @@ bool CameraReader::load_screen_type() {
 }
 
 bool CameraReader::get_screen_size(int &width, int &height) {
-  return get_screen_width_height(lcd_screen_type_, width, height);
+  auto io = IO::instance();
+  Size size;
+  io->get_screen_size(size);
+  width = size.width;
+  height = size.height;
 }
 
-bool CameraReader::update_isp() {
-  auto isp = Isp::getInstance();
+bool CameraReader::isp_update() {
+  auto io = IO::instance();
   {
     auto cfg = Config::get_camera(CAMERA_BGR);
-    if (!isp->set_from_cfg(cfg.pipe, &cfg.isp)) return false;
+    SZ_RETCODE ret = io->isp_update(cfg.pipe, &cfg.isp);
+    if (ret != SZ_RETCODE_OK) return false;
   }
   {
     auto cfg = Config::get_camera(CAMERA_NIR);
-    if (!isp->set_from_cfg(cfg.pipe, &cfg.isp)) return false;
-    return true;
+    SZ_RETCODE ret = io->isp_update(cfg.pipe, &cfg.isp);
+    if (ret != SZ_RETCODE_OK) return false;
   }
+  return true;
 }
 
 void CameraReader::start_sample() { start(); }
@@ -169,16 +222,30 @@ void CameraReader::start_sample() { start(); }
 void CameraReader::rx_finish() { rx_finished_ = true; }
 
 bool CameraReader::capture_frame(ImagePackage *pkg) {
+  auto io = IO::instance();
   static int frame_idx = 0;
 
-  if (!vpss_bgr_->getYuvFrame(pkg->img_bgr_small, 2)) return false;
-  while (!vpss_bgr_->getYuvFrame(pkg->img_bgr_large, 1)) {
-    QThread::usleep(10);
-  }
+  SZ_RETCODE ret;
 
-  if (!vpss_nir_->getYuvFrame(pkg->img_nir_small, 2)) return false;
-  while (!vpss_nir_->getYuvFrame(pkg->img_nir_large, 1)) {
-    QThread::usleep(10);
+  {
+    ret = io->capture_frame(io::CAMERA_BGR, 2, *pkg->img_bgr_small);
+    if (ret != SZ_RETCODE_OK) return false;
+
+    ret = SZ_RETCODE_FAILED;
+    while (ret != SZ_RETCODE_OK) {
+      ret = io->capture_frame(io::CAMERA_BGR, 1, *pkg->img_bgr_large);
+      QThread::usleep(10);
+    }
+  }
+  {
+    ret = io->capture_frame(io::CAMERA_NIR, 2, *pkg->img_nir_small);
+    if (ret != SZ_RETCODE_OK) return false;
+
+    ret = SZ_RETCODE_FAILED;
+    while (ret != SZ_RETCODE_OK) {
+      ret = io->capture_frame(io::CAMERA_NIR, 1, *pkg->img_nir_large);
+      QThread::usleep(10);
+    }
   }
 
   pkg->frame_idx = frame_idx++;

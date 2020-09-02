@@ -27,6 +27,7 @@ struct DetectionRatio {
 class DetectionData : public ImagePackage {
  public:
   DetectionData();
+  DetectionData(const ImagePackage *pkg);
   DetectionData(Size size_bgr_large, Size size_bgr_small, Size size_nir_large,
                 Size size_nir_small);
 

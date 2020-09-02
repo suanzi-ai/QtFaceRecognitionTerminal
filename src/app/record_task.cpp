@@ -2,11 +2,10 @@
 
 #include <QThread>
 #include <chrono>
+#include <quface/logger.hpp>
 #include <string>
 
 #include "config.hpp"
-#include "ive.h"
-#include "logger.hpp"
 
 using namespace suanzi;
 

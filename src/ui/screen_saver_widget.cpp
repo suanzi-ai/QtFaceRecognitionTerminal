@@ -4,7 +4,7 @@
 #include <QPaintEvent>
 #include <QPainter>
 
-#include "logger.hpp"
+#include <quface/logger.hpp>
 
 using namespace suanzi;
 

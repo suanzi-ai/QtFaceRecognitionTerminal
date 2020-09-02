@@ -8,7 +8,7 @@
 
 #include "config.hpp"
 #include "gpio.hpp"
-#include "logger.hpp"
+#include <quface/logger.hpp>
 
 using namespace suanzi;
 

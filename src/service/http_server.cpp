@@ -1,9 +1,11 @@
 #include "http_server.hpp"
 
-#include "isp.h"
+#include <quface-io/io.hpp>
+
 #include "static_config.hpp"
 
 using namespace suanzi;
+using namespace suanzi::io;
 
 HTTPServer::HTTPServer() {
   server_ = std::make_shared<Server>();
@@ -127,17 +129,18 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
   });
 
   server_->Get("/isp/exposure-info", [&](const Request& req, Response& res) {
-    int pipe = Config::get_camera(true).pipe;
+    int pipe = Config::get_camera(CAMERA_BGR).pipe;
     if (req.has_param("cam")) {
       if (req.get_param_value("cam") == "bgr") {
-        pipe = Config::get_camera(true).pipe;
+        pipe = Config::get_camera(CAMERA_BGR).pipe;
       } else {
-        pipe = Config::get_camera(false).pipe;
+        pipe = Config::get_camera(CAMERA_NIR).pipe;
       }
     }
 
     ISP_EXP_INFO_S exp_info;
-    if (!Isp::getInstance()->query_exposure_info(pipe, &exp_info)) {
+    SZ_RETCODE ret = IO::instance()->isp_query_exposure_info(pipe, &exp_info);
+    if (ret != SZ_RETCODE_OK) {
       json body = {{"ok", false}, {"message", "get exp info failed"}};
       res.set_content(body.dump(), "application/json");
       return;
@@ -166,17 +169,18 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
   });
 
   server_->Get("/isp/wb-info", [&](const Request& req, Response& res) {
-    int pipe = Config::get_camera(true).pipe;
+    int pipe = Config::get_camera(CAMERA_BGR).pipe;
     if (req.has_param("cam")) {
       if (req.get_param_value("cam") == "bgr") {
-        pipe = Config::get_camera(true).pipe;
+        pipe = Config::get_camera(CAMERA_BGR).pipe;
       } else {
-        pipe = Config::get_camera(false).pipe;
+        pipe = Config::get_camera(CAMERA_NIR).pipe;
       }
     }
 
     ISP_WB_INFO_S wb_info;
-    if (!Isp::getInstance()->query_wb_info(pipe, &wb_info)) {
+    SZ_RETCODE ret = IO::instance()->isp_query_wb_info(pipe, &wb_info);
+    if (ret != SZ_RETCODE_OK) {
       json body = {{"ok", false}, {"message", "get wb info failed"}};
       res.set_content(body.dump(), "application/json");
       return;
@@ -204,17 +208,19 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
   });
 
   server_->Get("/isp/inner-state-info", [&](const Request& req, Response& res) {
-    int pipe = Config::get_camera(true).pipe;
+    int pipe = Config::get_camera(CAMERA_BGR).pipe;
     if (req.has_param("cam")) {
       if (req.get_param_value("cam") == "bgr") {
-        pipe = Config::get_camera(true).pipe;
+        pipe = Config::get_camera(CAMERA_BGR).pipe;
       } else {
-        pipe = Config::get_camera(false).pipe;
+        pipe = Config::get_camera(CAMERA_NIR).pipe;
       }
     }
 
     ISP_INNER_STATE_INFO_S inner_state_info;
-    if (!Isp::getInstance()->query_inner_state_info(pipe, &inner_state_info)) {
+    SZ_RETCODE ret =
+        IO::instance()->isp_query_inner_state_info(pipe, &inner_state_info);
+    if (ret != SZ_RETCODE_OK) {
       json body = {{"ok", false}, {"message", "get inner state failed"}};
       res.set_content(body.dump(), "application/json");
       return;

@@ -9,7 +9,8 @@
 #include <quface/common.hpp>
 #include <string>
 
-#include "logger.hpp"
+#include <quface/logger.hpp>
+#include <quface-io/isp_option.hpp>
 
 #define APP_DIR_PREFIX "/user/quface-app"
 
@@ -114,87 +115,6 @@ void to_json(json &j, const LivenessConfig &c);
 void from_json(const json &j, LivenessConfig &c);
 
 typedef struct {
-  bool hist_stat_adjust;
-  SZ_UINT8 speed;
-  SZ_UINT16 black_speed_bias;
-  SZ_UINT8 tolerance;
-  SZ_UINT8 compensation;
-  SZ_UINT16 ev_bias;
-  int ae_strategy_mode;
-  SZ_UINT16 hist_ratio_slope;
-  SZ_UINT8 max_hist_offset;
-} ISPExposureConfig;
-
-void to_json(json &j, const ISPExposureConfig &c);
-void from_json(const json &j, ISPExposureConfig &c);
-
-typedef struct {
-  bool roi_enable;
-  int roi_margin;
-  SZ_UINT8 roi_weight;
-  SZ_UINT8 non_roi_weight;
-  bool crop_enable;
-  int crop_margin;
-} ISPStatConfig;
-
-void to_json(json &j, const ISPStatConfig &c);
-void from_json(const json &j, ISPStatConfig &c);
-
-typedef struct {
-  bool enable;
-  int curve_type;
-} ISPGammaConfig;
-
-void to_json(json &j, const ISPGammaConfig &c);
-void from_json(const json &j, ISPGammaConfig &c);
-
-typedef struct {
-  bool enable;
-  int luma_threshold;
-  int luma_target;
-} ISPHLCConfig;
-
-void to_json(json &j, const ISPHLCConfig &c);
-void from_json(const json &j, ISPHLCConfig &c);
-
-typedef struct {
-  bool enable;
-  std::string op_type;
-} ISPDRCConfig;
-
-void to_json(json &j, const ISPDRCConfig &c);
-void from_json(const json &j, ISPDRCConfig &c);
-
-typedef struct {
-  bool by_pass;
-  std::string op_type;
-} ISPWBConfig;
-
-void to_json(json &j, const ISPWBConfig &c);
-void from_json(const json &j, ISPWBConfig &c);
-
-typedef struct {
-  std::string op_type;
-  SZ_UINT8 manual_saturation;
-} ISPSaturationConfig;
-
-void to_json(json &j, const ISPSaturationConfig &c);
-void from_json(const json &j, ISPSaturationConfig &c);
-
-typedef struct {
-  ISPStatConfig stat;
-  ISPExposureConfig exposure;
-  ISPWBConfig wb;
-  ISPSaturationConfig saturation;
-  ISPGammaConfig gamma;
-  ISPHLCConfig hlc;
-  ISPDRCConfig drc;
-} ISPConfig;
-
-void to_json(json &j, const ISPConfig &c);
-void from_json(const json &j, ISPConfig &c);
-
-typedef struct {
   int adjust_window_size;  // 调整间隔，聚焦于人脸
   int restore_size;        // 调整恢复间隔，聚焦于中心
 } ISPGlobalConfig;
@@ -281,7 +201,6 @@ class Config : public ConfigEventEmitter {
   static const UserConfig &get_user();
   static const AppConfig &get_app();
   static const QufaceConfig &get_quface();
-  static const CameraConfig &get_camera(bool is_bgr);
   static const CameraConfig &get_camera(CameraType tp);
   static const DetectConfig &get_detect();
   static const ExtractConfig &get_extract();

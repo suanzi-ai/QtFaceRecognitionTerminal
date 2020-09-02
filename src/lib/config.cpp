@@ -166,120 +166,6 @@ void suanzi::from_json(const json &j, LivenessConfig &c) {
                c.max_height_ratio_between_bgr);
 }
 
-void suanzi::to_json(json &j, const ISPExposureConfig &c) {
-  SAVE_JSON_TO(j, "hist_stat_adjust", c.hist_stat_adjust);
-  SAVE_JSON_TO(j, "speed", c.speed);
-  SAVE_JSON_TO(j, "black_speed_bias", c.black_speed_bias);
-  SAVE_JSON_TO(j, "tolerance", c.tolerance);
-  SAVE_JSON_TO(j, "compensation", c.compensation);
-  SAVE_JSON_TO(j, "ev_bias", c.ev_bias);
-  SAVE_JSON_TO(j, "ae_strategy_mode", c.ae_strategy_mode);
-  SAVE_JSON_TO(j, "hist_ratio_slope", c.hist_ratio_slope);
-  SAVE_JSON_TO(j, "max_hist_offset", c.max_hist_offset);
-}
-
-void suanzi::from_json(const json &j, ISPExposureConfig &c) {
-  LOAD_JSON_TO(j, "hist_stat_adjust", c.hist_stat_adjust);
-  LOAD_JSON_TO(j, "speed", c.speed);
-  LOAD_JSON_TO(j, "black_speed_bias", c.black_speed_bias);
-  LOAD_JSON_TO(j, "tolerance", c.tolerance);
-  LOAD_JSON_TO(j, "compensation", c.compensation);
-  LOAD_JSON_TO(j, "ev_bias", c.ev_bias);
-  LOAD_JSON_TO(j, "ae_strategy_mode", c.ae_strategy_mode);
-  LOAD_JSON_TO(j, "hist_ratio_slope", c.hist_ratio_slope);
-  LOAD_JSON_TO(j, "max_hist_offset", c.max_hist_offset);
-}
-
-void suanzi::to_json(json &j, const ISPStatConfig &c) {
-  SAVE_JSON_TO(j, "roi_enable", c.roi_enable);
-  SAVE_JSON_TO(j, "roi_margin", c.roi_margin);
-  SAVE_JSON_TO(j, "roi_weight", c.roi_weight);
-  SAVE_JSON_TO(j, "non_roi_weight", c.non_roi_weight);
-  SAVE_JSON_TO(j, "crop_enable", c.crop_enable);
-  SAVE_JSON_TO(j, "crop_margin", c.crop_margin);
-}
-
-void suanzi::from_json(const json &j, ISPStatConfig &c) {
-  LOAD_JSON_TO(j, "roi_enable", c.roi_enable);
-  LOAD_JSON_TO(j, "roi_margin", c.roi_margin);
-  LOAD_JSON_TO(j, "roi_weight", c.roi_weight);
-  LOAD_JSON_TO(j, "non_roi_weight", c.non_roi_weight);
-  LOAD_JSON_TO(j, "crop_enable", c.crop_enable);
-  LOAD_JSON_TO(j, "crop_margin", c.crop_margin);
-}
-
-void suanzi::to_json(json &j, const ISPGammaConfig &c) {
-  SAVE_JSON_TO(j, "enable", c.enable);
-  SAVE_JSON_TO(j, "curve_type", c.curve_type);
-}
-
-void suanzi::from_json(const json &j, ISPGammaConfig &c) {
-  LOAD_JSON_TO(j, "enable", c.enable);
-  LOAD_JSON_TO(j, "curve_type", c.curve_type);
-}
-
-void suanzi::to_json(json &j, const ISPWBConfig &c) {
-  SAVE_JSON_TO(j, "op_type", c.op_type);
-  SAVE_JSON_TO(j, "by_pass", c.by_pass);
-}
-
-void suanzi::from_json(const json &j, ISPWBConfig &c) {
-  LOAD_JSON_TO(j, "op_type", c.op_type);
-  LOAD_JSON_TO(j, "by_pass", c.by_pass);
-}
-
-void suanzi::to_json(json &j, const ISPSaturationConfig &c) {
-  SAVE_JSON_TO(j, "op_type", c.op_type);
-  SAVE_JSON_TO(j, "manual_saturation", c.manual_saturation);
-}
-
-void suanzi::from_json(const json &j, ISPSaturationConfig &c) {
-  LOAD_JSON_TO(j, "op_type", c.op_type);
-  LOAD_JSON_TO(j, "manual_saturation", c.manual_saturation);
-}
-
-void suanzi::to_json(json &j, const ISPHLCConfig &c) {
-  SAVE_JSON_TO(j, "enable", c.enable);
-  SAVE_JSON_TO(j, "luma_target", c.luma_target);
-  SAVE_JSON_TO(j, "luma_threshold", c.luma_threshold);
-}
-
-void suanzi::from_json(const json &j, ISPHLCConfig &c) {
-  LOAD_JSON_TO(j, "enable", c.enable);
-  LOAD_JSON_TO(j, "luma_target", c.luma_target);
-  LOAD_JSON_TO(j, "luma_threshold", c.luma_threshold);
-}
-
-void suanzi::to_json(json &j, const ISPDRCConfig &c) {
-  SAVE_JSON_TO(j, "enable", c.enable);
-  SAVE_JSON_TO(j, "op_type", c.op_type);
-}
-
-void suanzi::from_json(const json &j, ISPDRCConfig &c) {
-  LOAD_JSON_TO(j, "enable", c.enable);
-  LOAD_JSON_TO(j, "op_type", c.op_type);
-}
-
-void suanzi::to_json(json &j, const ISPConfig &c) {
-  SAVE_JSON_TO(j, "stat", c.stat);
-  SAVE_JSON_TO(j, "exposure", c.exposure);
-  SAVE_JSON_TO(j, "wb", c.wb);
-  SAVE_JSON_TO(j, "saturation", c.saturation);
-  SAVE_JSON_TO(j, "gamma", c.gamma);
-  SAVE_JSON_TO(j, "hlc", c.hlc);
-  SAVE_JSON_TO(j, "drc", c.drc);
-}
-
-void suanzi::from_json(const json &j, ISPConfig &c) {
-  LOAD_JSON_TO(j, "stat", c.stat);
-  LOAD_JSON_TO(j, "exposure", c.exposure);
-  LOAD_JSON_TO(j, "wb", c.wb);
-  LOAD_JSON_TO(j, "saturation", c.saturation);
-  LOAD_JSON_TO(j, "gamma", c.gamma);
-  LOAD_JSON_TO(j, "hlc", c.hlc);
-  LOAD_JSON_TO(j, "drc", c.drc);
-}
-
 void suanzi::to_json(json &j, const ISPGlobalConfig &c) {
   SAVE_JSON_TO(j, "adjust_window_size", c.adjust_window_size);
   SAVE_JSON_TO(j, "restore_size", c.restore_size);
@@ -728,14 +614,6 @@ const QufaceConfig &Config::get_quface() {
 const ISPGlobalConfig &Config::get_isp() {
   std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
   return instance_.cfg_data_.isp;
-}
-
-const CameraConfig &Config::get_camera(bool is_bgr) {
-  std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
-  if (is_bgr)
-    return instance_.cfg_data_.normal;
-  else
-    return instance_.cfg_data_.infrared;
 }
 
 const CameraConfig &Config::get_camera(CameraType tp) {

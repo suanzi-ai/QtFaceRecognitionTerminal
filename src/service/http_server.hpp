@@ -3,10 +3,10 @@
 #include <httplib.h>
 
 #include <quface/common.hpp>
+#include <quface/logger.hpp>
 
 #include "config.hpp"
 #include "event.hpp"
-#include "logger.hpp"
 
 namespace suanzi {
 using namespace httplib;

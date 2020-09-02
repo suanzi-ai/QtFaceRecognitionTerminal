@@ -1,6 +1,6 @@
 #include "otpa_task.hpp"
 
-#include "logger.hpp"
+#include <quface/logger.hpp>
 
 using namespace suanzi;
 
@@ -14,7 +14,7 @@ OtpaTask::~OtpaTask() { delete otpa16_; }
 void OtpaTask::run() {
   OtpaTemperatureData otpa_temp;
   while (true) {
-   
+
     if (enable_read_temperature_) {
 	    float temperature = 0.0;
 	    if (otpa16_->read_temperature(&otpa_temp)) {

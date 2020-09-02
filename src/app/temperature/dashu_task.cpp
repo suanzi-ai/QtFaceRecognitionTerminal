@@ -1,5 +1,5 @@
 #include "dashu_task.hpp"
-#include "logger.hpp"
+#include <quface/logger.hpp>
 #include "platform_interface.h"
 
 using namespace suanzi;

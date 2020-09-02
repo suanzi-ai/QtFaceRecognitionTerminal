@@ -3,7 +3,6 @@
 
 #include <QObject>
 
-#include "audio.hpp"
 #include "person_service.hpp"
 
 namespace suanzi {
@@ -19,7 +18,6 @@ class AudioTask : QObject {
   void rx_reset();
 
  private:
-  AudioPlayer player_;
   bool if_playing_;
 };
 

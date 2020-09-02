@@ -7,7 +7,7 @@
 #include <opencv2/opencv.hpp>
 #include <quface/common.hpp>
 
-#include "logger.hpp"
+#include <quface/logger.hpp>
 
 namespace suanzi {
 using json = nlohmann::json;

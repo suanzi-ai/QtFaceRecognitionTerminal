@@ -171,6 +171,8 @@ configure_file("${PROJECT_SOURCE_DIR}/src/static_config.hpp.in"
                "${PROJECT_BINARY_DIR}/include/static_config.hpp")
 include_directories(${PROJECT_BINARY_DIR}/include)
 
+add_subdirectory(quface-io)
+
 add_subdirectory(src/app)
 add_subdirectory(src/lib)
 add_subdirectory(src/ui)

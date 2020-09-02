@@ -1,10 +1,10 @@
 #include "upload_task.hpp"
 
 #include <QThread>
-
-#include "venc.hpp"
+#include <quface-io/io.hpp>
 
 using namespace suanzi;
+using namespace suanzi::io;
 
 UploadTask::UploadTask(PersonService::ptr person_service, QThread *thread,
                        QObject *parent)
@@ -28,22 +28,23 @@ void UploadTask::rx_upload(PersonData person, bool if_duplicated) {
 
   if (!if_duplicated) {
     SZ_LOG_DEBUG("upload snapshots");
-    VEncoder *encoder = VEncoder::get_instance();
+    auto io = IO::instance();
 
-    bool bgr_encode_result = encoder->encode(
+    SZ_RETCODE bgr_encode_result = io->encode_jpeg(
         bgr_image_buffer, person.bgr_face_snapshot.data,
         person.bgr_face_snapshot.cols, person.bgr_face_snapshot.rows);
 
-    bool nir_encode_result = encoder->encode(
+    SZ_RETCODE nir_encode_result = io->encode_jpeg(
         nir_image_buffer, person.nir_face_snapshot.data,
         person.nir_face_snapshot.cols, person.nir_face_snapshot.rows);
-    if (!nir_encode_result) {
+    if (nir_encode_result != SZ_RETCODE_FAILED) {
       SZ_LOG_ERROR("Encode nir jpg failed");
     }
 
-    if (bgr_encode_result)
+    if (bgr_encode_result == SZ_RETCODE_OK)
       person_service_->report_face_record(person.id, bgr_image_buffer,
-                                          nir_image_buffer, person.status, person.temperature);
+                                          nir_image_buffer, person.status,
+                                          person.temperature);
     else
       SZ_LOG_ERROR("Encode bgr jpg failed");
   }
