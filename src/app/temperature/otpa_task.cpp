@@ -18,9 +18,9 @@ void OtpaTask::run() {
     if (otpa16_->read_temperature(&otpa_temp)) {
       // printf("max temp:%.2f\n",
       // otpa_temp.pixel_temp[otpa_temp.max_pixel_temp_index]);
+      temperature = otpa_temp.pixel_temp[otpa_temp.max_pixel_temp_index];
       if (temperature > 30 && temperature < 36)
         temperature = 35 + temperature - (int)temperature;
-      temperature = otpa_temp.pixel_temp[otpa_temp.max_pixel_temp_index];
 
       emit tx_temperature(temperature);
     }
