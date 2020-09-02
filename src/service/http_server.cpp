@@ -138,7 +138,7 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
       }
     }
 
-    ISP_EXP_INFO_S exp_info;
+    ISPExposureInfo exp_info;
     SZ_RETCODE ret = IO::instance()->isp_query_exposure_info(pipe, &exp_info);
     if (ret != SZ_RETCODE_OK) {
       json body = {{"ok", false}, {"message", "get exp info failed"}};
@@ -146,25 +146,7 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
       return;
     }
 
-    json body;
-    body["expTime"] = exp_info.u32ExpTime;
-    body["shortExpTime"] = exp_info.u32ShortExpTime;
-    body["medianExpTime"] = exp_info.u32MedianExpTime;
-    body["longExpTime"] = exp_info.u32LongExpTime;
-    body["aGain"] = exp_info.u32AGain;
-    body["dGain"] = exp_info.u32DGain;
-    body["ispDGain"] = exp_info.u32ISPDGain;
-    body["exposure"] = exp_info.u32Exposure;
-    body["exposureIsMAX"] = exp_info.bExposureIsMAX;
-    body["hist1024Value"] = exp_info.au32AE_Hist1024Value;
-    body["aveLum"] = exp_info.u8AveLum;
-    body["linesPer500ms"] = exp_info.u32LinesPer500ms;
-    body["pIrisFNO"] = exp_info.u32PirisFNO;
-    body["fps"] = exp_info.u32Fps;
-    body["iso"] = exp_info.u32ISO;
-    body["isoCalibrate"] = exp_info.u32ISOCalibrate;
-    body["refExpRatio"] = exp_info.u32RefExpRatio;
-    body["firstStableTime"] = exp_info.u32FirstStableTime;
+    json body(exp_info);
     res.set_content(body.dump(), "application/json");
   });
 
@@ -178,7 +160,7 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
       }
     }
 
-    ISP_WB_INFO_S wb_info;
+    ISPWBInfo wb_info;
     SZ_RETCODE ret = IO::instance()->isp_query_wb_info(pipe, &wb_info);
     if (ret != SZ_RETCODE_OK) {
       json body = {{"ok", false}, {"message", "get wb info failed"}};
@@ -186,24 +168,7 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
       return;
     }
 
-    json body;
-    body["rgain"] = wb_info.u16Rgain;
-    body["grgain"] = wb_info.u16Grgain;
-    body["gbgain"] = wb_info.u16Gbgain;
-    body["bgain"] = wb_info.u16Bgain;
-    body["saturation"] = wb_info.u16Saturation;
-    body["colorTemp"] = wb_info.u16ColorTemp;
-    body["ccm"] = wb_info.au16CCM;
-    body["ls0CT"] = wb_info.u16LS0CT;
-    body["ls1CT"] = wb_info.u16LS1CT;
-    body["ls0Area"] = wb_info.u16LS0Area;
-    body["ls1Area"] = wb_info.u16LS1Area;
-    body["multiDegree"] = wb_info.u8MultiDegree;
-    body["activeShift"] = wb_info.u16ActiveShift;
-    body["firstStableTime"] = wb_info.u32FirstStableTime;
-    body["inOutStatus"] = wb_info.enInOutStatus;
-    body["bv"] = wb_info.s16Bv;
-
+    json body(wb_info);
     res.set_content(body.dump(), "application/json");
   });
 
@@ -217,7 +182,7 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
       }
     }
 
-    ISP_INNER_STATE_INFO_S inner_state_info;
+    ISPInnerStateInfo inner_state_info;
     SZ_RETCODE ret =
         IO::instance()->isp_query_inner_state_info(pipe, &inner_state_info);
     if (ret != SZ_RETCODE_OK) {
@@ -226,27 +191,7 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
       return;
     }
 
-    json body;
-    body["textureStr"] = inner_state_info.au16TextureStr;
-    body["edgeStr"] = inner_state_info.au16EdgeStr;
-    body["textureFreq"] = inner_state_info.u16TextureFreq;
-    body["edgeFreq"] = inner_state_info.u16EdgeFreq;
-    body["overShoot"] = inner_state_info.u8OverShoot;
-    body["underShoot"] = inner_state_info.u8UnderShoot;
-    body["shootSupStr"] = inner_state_info.u8ShootSupStr;
-    body["nrLscRatio"] = inner_state_info.u8NrLscRatio;
-    body["coarseStr"] = inner_state_info.au16CoarseStr;
-    body["wdrFrameStr"] = inner_state_info.au8WDRFrameStr;
-    body["chromaStr"] = inner_state_info.au8ChromaStr;
-    body["fineStr"] = inner_state_info.u8FineStr;
-    body["coringWgt"] = inner_state_info.u16CoringWgt;
-    body["deHazeStrengthActual"] = inner_state_info.u16DeHazeStrengthActual;
-    body["drcStrengthActual"] = inner_state_info.u16DrcStrengthActual;
-    body["wdrExpRatioActual"] = inner_state_info.u32WDRExpRatioActual;
-    body["wdrSwitchFinish"] = inner_state_info.bWDRSwitchFinish;
-    body["resSwitchFinish"] = inner_state_info.bResSwitchFinish;
-    body["blActual"] = inner_state_info.au16BLActual;
-
+    json body(inner_state_info);
     res.set_content(body.dump(), "application/json");
   });
 
