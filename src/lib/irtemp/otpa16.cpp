@@ -17,6 +17,9 @@ Otpa16::Otpa16() {
         SZ_LOG_ERROR("can't open /dev/i2c-device3");
         return;
     }
+	if (!set_sample_fps(1000)) {
+		SZ_LOG_ERROR("set sample_fps failed");
+	}
 }
 
 Otpa16::~Otpa16() {close(fd_);}
