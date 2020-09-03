@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QRect>
+#include <atomic>
 
 #include "config.hpp"
 #include "detection_data.hpp"
@@ -47,6 +48,7 @@ class DetectTask : QObject {
   FaceDetectorPtr face_detector_;
   FacePoseEstimatorPtr pose_estimator_;
 
+  std::atomic_bool buffer_inited_;
   DetectionData *buffer_ping_, *buffer_pang_;
   PingPangBuffer<DetectionData> *pingpang_buffer_;
 

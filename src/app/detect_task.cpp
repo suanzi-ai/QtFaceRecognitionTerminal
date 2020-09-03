@@ -16,7 +16,9 @@ using namespace suanzi;
 DetectTask::DetectTask(FaceDetectorPtr detector,
                        FacePoseEstimatorPtr pose_estimator, QThread *thread,
                        QObject *parent)
-    : face_detector_(detector), pose_estimator_(pose_estimator) {
+    : face_detector_(detector),
+      pose_estimator_(pose_estimator),
+      buffer_inited_(false) {
   // Create thread
   if (thread == nullptr) {
     static QThread new_thread;
@@ -98,7 +100,8 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
   buffer->switch_buffer();
   ImagePackage *input = buffer->get_pang();
 
-  if (pingpang_buffer_ == nullptr) {
+  if (!buffer_inited_.load()) {
+    buffer_inited_ = true;
     buffer_ping_ = new DetectionData(input);
     buffer_pang_ = new DetectionData(input);
     pingpang_buffer_ =

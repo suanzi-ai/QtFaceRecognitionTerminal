@@ -27,7 +27,7 @@ CameraReader::CameraReader(QObject *parent) {
               .dev = bgr_cam.index,
               .pipe = bgr_cam.pipe,
               .flip = true,
-              .vpass_group = bgr_cam.index,
+              .vpss_group = bgr_cam.index,
               .channels =
                   {
                       VpssChannel{
@@ -35,34 +35,36 @@ CameraReader::CameraReader(QObject *parent) {
                           .rotate = 0,
                           .size =
                               {
-                                  .width = 1080,
-                                  .height = 1920,
-                              },
-                      },
-                      VpssChannel{
-                          .index = 1,
-                          .rotate = ROTATION_E::ROTATION_90,
-                          .size =
-                              {
-                                  .width = 704,
+                                  .width = 1920,
                                   .height = 1080,
                               },
                       },
                       VpssChannel{
-                          .index = 2,
-                          .rotate = ROTATION_E::ROTATION_90,
+                          .index = 1,
+                          .rotate = 1,
                           .size =
                               {
-                                  .width = 224,
-                                  .height = 320,
+                                  .width = 1080,
+                                  .height = 704,
+                              },
+                      },
+                      VpssChannel{
+                          .index = 2,
+                          .rotate = 1,
+                          .size =
+                              {
+                                  .width = 320,
+                                  .height = 224,
                               },
                       },
                   },
           },
-      .nir = {.dev = nir_cam.index,
+      .nir =
+          {
+              .dev = nir_cam.index,
               .pipe = nir_cam.pipe,
               .flip = true,
-              .vpass_group = nir_cam.index,
+              .vpss_group = nir_cam.index,
               .channels =
                   {
                       VpssChannel{
@@ -70,29 +72,30 @@ CameraReader::CameraReader(QObject *parent) {
                           .rotate = 0,
                           .size =
                               {
-                                  .width = 1080,
-                                  .height = 1920,
-                              },
-                      },
-                      VpssChannel{
-                          .index = 1,
-                          .rotate = ROTATION_E::ROTATION_90,
-                          .size =
-                              {
-                                  .width = 704,
+                                  .width = 1920,
                                   .height = 1080,
                               },
                       },
                       VpssChannel{
-                          .index = 2,
-                          .rotate = ROTATION_E::ROTATION_90,
+                          .index = 1,
+                          .rotate = 1,
                           .size =
                               {
-                                  .width = 224,
-                                  .height = 320,
+                                  .width = 1080,
+                                  .height = 704,
                               },
                       },
-                  }},
+                      VpssChannel{
+                          .index = 2,
+                          .rotate = 1,
+                          .size =
+                              {
+                                  .width = 320,
+                                  .height = 224,
+                              },
+                      },
+                  },
+          },
       .screen =
           {
               .type = lcd_screen_type_,
@@ -100,7 +103,7 @@ CameraReader::CameraReader(QObject *parent) {
       .show_nir = app.show_infrared_window,
   };
 
-  Engine::instance()->init(&opt);
+  Engine::instance()->init(opt);
 
   SZ_LOG_INFO("Update isp ...");
   if (!isp_update()) {
@@ -197,9 +200,13 @@ bool CameraReader::load_screen_type() {
 bool CameraReader::get_screen_size(int &width, int &height) {
   auto engine = Engine::instance();
   Size size;
-  engine->get_screen_size(size);
+  SZ_RETCODE ret = engine->get_screen_size(size);
+  if (ret != SZ_RETCODE_OK) {
+    return false;
+  }
   width = size.width;
   height = size.height;
+  return true;
 }
 
 bool CameraReader::isp_update() {
