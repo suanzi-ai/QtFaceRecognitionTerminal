@@ -1,9 +1,11 @@
 #include "face_timer.hpp"
 
+#include <quface-io/engine.hpp>
+
 #include "config.hpp"
-#include "gpio.hpp"
 
 using namespace suanzi;
+using namespace suanzi::io;
 
 FaceTimer::FaceTimer(QThread *thread, QObject *parent) {
   // Create thread
@@ -36,12 +38,12 @@ void FaceTimer::rx_frame(PingPangBuffer<DetectionData> *buffer) {
                                 current_clock - disappear_begin_)
                                 .count();
       emit tx_face_disappear(disappear_duration_);
-      Gpio::set_level(GpioPinLightBox, false);
+      Engine::instance()->gpio_set(GpioPinLightBox, false);
     }
   } else {
     if (disappear_counter_ >= Config::get_extract().max_lost_age) {
       emit tx_face_appear(disappear_duration_);
-      Gpio::set_level(GpioPinLightBox, true);
+      Engine::instance()->gpio_set(GpioPinLightBox, true);
 
       disappear_counter_ = 0;
       disappear_duration_ = 0;

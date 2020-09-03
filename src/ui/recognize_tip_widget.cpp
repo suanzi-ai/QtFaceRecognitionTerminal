@@ -7,10 +7,11 @@
 #include <QTimer>
 
 #include "config.hpp"
-#include "gpio.hpp"
+#include <quface-io/engine.hpp>
 #include <quface/logger.hpp>
 
 using namespace suanzi;
+using namespace suanzi::io;
 
 RecognizeTipWidget::RecognizeTipWidget(QWidget *parent) : QWidget(parent) {
   QPalette palette = this->palette();
@@ -39,7 +40,7 @@ void RecognizeTipWidget::rx_display(PersonData person, bool if_duplicated) {
 
   // Open door GPIO
   if (person_.status == PersonService::get_status(PersonStatus::Normal))
-    Gpio::set_level(GpioPinDOOR, true);
+    Engine::instance()->gpio_set(GpioPinDOOR, true);
 
   hide();
   show();
@@ -50,7 +51,7 @@ void RecognizeTipWidget::rx_display(PersonData person, bool if_duplicated) {
 
 void RecognizeTipWidget::rx_reset() {
   hide();
-  Gpio::set_level(GpioPinDOOR, false);
+  Engine::instance()->gpio_set(GpioPinDOOR, false);
 }
 
 void RecognizeTipWidget::paintEvent(QPaintEvent *event) {
