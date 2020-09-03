@@ -37,7 +37,7 @@ void UploadTask::rx_upload(PersonData person, bool if_duplicated) {
     SZ_RETCODE nir_encode_result = engine->encode_jpeg(
         nir_image_buffer, person.nir_face_snapshot.data,
         person.nir_face_snapshot.cols, person.nir_face_snapshot.rows);
-    if (nir_encode_result != SZ_RETCODE_FAILED) {
+    if (nir_encode_result != SZ_RETCODE_OK) {
       SZ_LOG_ERROR("Encode nir jpg failed");
     }
 

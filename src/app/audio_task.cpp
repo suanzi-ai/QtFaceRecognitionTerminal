@@ -8,8 +8,8 @@
 using namespace suanzi;
 
 AudioTask::AudioTask(QThread *thread, QObject *parent) : if_playing_(false) {
-  // auto engine = io::Engine::instance();
-  // engine->audio_set_volume(6);
+  auto engine = io::Engine::instance();
+  engine->audio_set_volume(6);
 
   // Create thread
   if (thread == nullptr) {
