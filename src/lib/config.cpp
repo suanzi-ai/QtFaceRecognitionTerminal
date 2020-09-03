@@ -616,9 +616,9 @@ const ISPGlobalConfig &Config::get_isp() {
   return instance_.cfg_data_.isp;
 }
 
-const CameraConfig &Config::get_camera(CameraType tp) {
+const CameraConfig &Config::get_camera(io::CameraType tp) {
   std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
-  if (tp == CAMERA_BGR)
+  if (tp == io::CAMERA_BGR)
     return instance_.cfg_data_.normal;
   else
     return instance_.cfg_data_.infrared;

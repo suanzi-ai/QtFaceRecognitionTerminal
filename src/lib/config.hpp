@@ -6,11 +6,11 @@
 #include <fstream>
 #include <mutex>
 #include <nlohmann/json.hpp>
-#include <quface/common.hpp>
-#include <string>
-
-#include <quface/logger.hpp>
 #include <quface-io/isp_option.hpp>
+#include <quface-io/option.hpp>
+#include <quface/common.hpp>
+#include <quface/logger.hpp>
+#include <string>
 
 #define APP_DIR_PREFIX "/user/quface-app"
 
@@ -164,11 +164,6 @@ void from_json(const json &j, Levels<T> &c) {
   LOAD_JSON_TO(j, "low", c.low);
 }
 
-typedef enum _CameraType {
-  CAMERA_BGR = 1,
-  CAMERA_NIR = 2,
-} CameraType;
-
 typedef struct {
   UserConfig user;
   AppConfig app;
@@ -201,7 +196,7 @@ class Config : public ConfigEventEmitter {
   static const UserConfig &get_user();
   static const AppConfig &get_app();
   static const QufaceConfig &get_quface();
-  static const CameraConfig &get_camera(CameraType tp);
+  static const CameraConfig &get_camera(io::CameraType tp);
   static const DetectConfig &get_detect();
   static const ExtractConfig &get_extract();
   static const LivenessConfig &get_liveness();

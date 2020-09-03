@@ -8,6 +8,7 @@
 #include <quface/logger.hpp>
 
 namespace suanzi {
+using namespace io;
 
 class ImagePackage {
  public:
