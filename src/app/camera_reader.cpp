@@ -213,12 +213,12 @@ bool CameraReader::isp_update() {
   auto engine = Engine::instance();
   {
     auto cfg = Config::get_camera(CAMERA_BGR);
-    SZ_RETCODE ret = engine->isp_update(cfg.pipe, &cfg.isp);
+    SZ_RETCODE ret = engine->isp_update(CAMERA_BGR, &cfg.isp);
     if (ret != SZ_RETCODE_OK) return false;
   }
   {
     auto cfg = Config::get_camera(CAMERA_NIR);
-    SZ_RETCODE ret = engine->isp_update(cfg.pipe, &cfg.isp);
+    SZ_RETCODE ret = engine->isp_update(CAMERA_NIR, &cfg.isp);
     if (ret != SZ_RETCODE_OK) return false;
   }
   return true;

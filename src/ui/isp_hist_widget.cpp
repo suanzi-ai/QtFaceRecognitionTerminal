@@ -54,7 +54,7 @@ ISPHistWidget::~ISPHistWidget() {}
 
 void ISPHistWidget::paint(QPainter *painter) {
   static ISPExposureInfo exp_info;
-  if (!Engine::instance()->isp_query_exposure_info(0, &exp_info)) {
+  if (!Engine::instance()->isp_query_exposure_info(CAMERA_BGR, &exp_info)) {
     SZ_LOG_ERROR("Draw hist, get value failed");
     return;
   }

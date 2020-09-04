@@ -129,17 +129,18 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
   });
 
   server_->Get("/isp/exposure-info", [&](const Request& req, Response& res) {
-    int pipe = Config::get_camera(CAMERA_BGR).pipe;
+    auto cam_type = CAMERA_BGR;
     if (req.has_param("cam")) {
       if (req.get_param_value("cam") == "bgr") {
-        pipe = Config::get_camera(CAMERA_BGR).pipe;
+        cam_type = CAMERA_BGR;
       } else {
-        pipe = Config::get_camera(CAMERA_NIR).pipe;
+        cam_type = CAMERA_NIR;
       }
     }
 
     ISPExposureInfo exp_info;
-    SZ_RETCODE ret = Engine::instance()->isp_query_exposure_info(pipe, &exp_info);
+    SZ_RETCODE ret =
+        Engine::instance()->isp_query_exposure_info(cam_type, &exp_info);
     if (ret != SZ_RETCODE_OK) {
       json body = {{"ok", false}, {"message", "get exp info failed"}};
       res.set_content(body.dump(), "application/json");
@@ -151,17 +152,17 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
   });
 
   server_->Get("/isp/wb-info", [&](const Request& req, Response& res) {
-    int pipe = Config::get_camera(CAMERA_BGR).pipe;
+    auto cam_type = CAMERA_BGR;
     if (req.has_param("cam")) {
       if (req.get_param_value("cam") == "bgr") {
-        pipe = Config::get_camera(CAMERA_BGR).pipe;
+        cam_type = CAMERA_BGR;
       } else {
-        pipe = Config::get_camera(CAMERA_NIR).pipe;
+        cam_type = CAMERA_NIR;
       }
     }
 
     ISPWBInfo wb_info;
-    SZ_RETCODE ret = Engine::instance()->isp_query_wb_info(pipe, &wb_info);
+    SZ_RETCODE ret = Engine::instance()->isp_query_wb_info(cam_type, &wb_info);
     if (ret != SZ_RETCODE_OK) {
       json body = {{"ok", false}, {"message", "get wb info failed"}};
       res.set_content(body.dump(), "application/json");
@@ -173,18 +174,18 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
   });
 
   server_->Get("/isp/inner-state-info", [&](const Request& req, Response& res) {
-    int pipe = Config::get_camera(CAMERA_BGR).pipe;
+    auto cam_type = CAMERA_BGR;
     if (req.has_param("cam")) {
       if (req.get_param_value("cam") == "bgr") {
-        pipe = Config::get_camera(CAMERA_BGR).pipe;
+        cam_type = CAMERA_BGR;
       } else {
-        pipe = Config::get_camera(CAMERA_NIR).pipe;
+        cam_type = CAMERA_NIR;
       }
     }
 
     ISPInnerStateInfo inner_state_info;
-    SZ_RETCODE ret =
-        Engine::instance()->isp_query_inner_state_info(pipe, &inner_state_info);
+    SZ_RETCODE ret = Engine::instance()->isp_query_inner_state_info(
+        cam_type, &inner_state_info);
     if (ret != SZ_RETCODE_OK) {
       json body = {{"ok", false}, {"message", "get inner state failed"}};
       res.set_content(body.dump(), "application/json");

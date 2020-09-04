@@ -58,7 +58,7 @@ SZ_RETCODE DetectTask::adjust_isp_by_detection(const DetectionData *output) {
       bgr_roi_cfg.width = det.width;
       bgr_roi_cfg.height = det.height;
 
-      ret = engine->isp_set_roi(bgr_cam.pipe, &bgr_roi_cfg, &bgr_cam.isp.stat);
+      ret = engine->isp_set_roi(CAMERA_BGR, &bgr_roi_cfg, &bgr_cam.isp.stat);
       if (ret != SZ_RETCODE_OK) {
         return ret;
       }
@@ -69,7 +69,7 @@ SZ_RETCODE DetectTask::adjust_isp_by_detection(const DetectionData *output) {
       nir_roi_cfg.width = det.width;
       nir_roi_cfg.height = det.height;
 
-      ret = engine->isp_set_roi(nir_cam.pipe, &nir_roi_cfg, &nir_cam.isp.stat);
+      ret = engine->isp_set_roi(CAMERA_NIR, &nir_roi_cfg, &nir_cam.isp.stat);
       if (ret != SZ_RETCODE_OK) {
         return ret;
       }
@@ -82,7 +82,7 @@ SZ_RETCODE DetectTask::adjust_isp_by_detection(const DetectionData *output) {
       nir_roi_cfg.width = det.width;
       nir_roi_cfg.height = det.height;
 
-      ret = engine->isp_set_roi(nir_cam.pipe, &nir_roi_cfg, &nir_cam.isp.stat);
+      ret = engine->isp_set_roi(CAMERA_NIR, &nir_roi_cfg, &nir_cam.isp.stat);
       if (ret != SZ_RETCODE_OK) {
         return ret;
       }
@@ -90,12 +90,12 @@ SZ_RETCODE DetectTask::adjust_isp_by_detection(const DetectionData *output) {
   }
 
   if (no_detect_count_ == isp_global.restore_size) {
-    ret = engine->isp_set_roi(bgr_cam.pipe, &bgr_roi_cfg, &bgr_cam.isp.stat);
+    ret = engine->isp_set_roi(CAMERA_BGR, &bgr_roi_cfg, &bgr_cam.isp.stat);
     if (ret != SZ_RETCODE_OK) {
       return ret;
     }
 
-    ret = engine->isp_set_roi(nir_cam.pipe, &nir_roi_cfg, &nir_cam.isp.stat);
+    ret = engine->isp_set_roi(CAMERA_NIR, &nir_roi_cfg, &nir_cam.isp.stat);
     if (ret != SZ_RETCODE_OK) {
       return ret;
     }
