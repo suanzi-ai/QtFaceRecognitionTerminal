@@ -35,6 +35,9 @@ class DetectTask : QObject {
 
   // for recognition
   void tx_frame(PingPangBuffer<DetectionData> *buffer);
+  
+  //start read temperature
+  void tx_enable_read_temperature(bool enable_read_temperature);
 
  private:
   // nyy

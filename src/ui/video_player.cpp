@@ -152,6 +152,8 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
     }
     connect((const QObject *)temperature_task_, SIGNAL(tx_temperature(float)),
             (const QObject *)record_task_, SLOT(rx_temperature(float)));
+	connect((const QObject *)detect_task_, SIGNAL(tx_enable_read_temperature(bool)),
+          (const QObject *)temperature_task_, SLOT(rx_enable_read_temperature(bool)));
   }
 
   camera_reader_->start_sample();

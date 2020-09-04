@@ -133,6 +133,7 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
       detect_and_select(input->img_bgr_small, output->bgr_detection_, true);
   emit tx_bgr_display(output->bgr_detection_, !output->bgr_face_detected_,
                       true);
+  emit tx_enable_read_temperature(output->bgr_face_detected_);
 
   output->nir_face_detected_ =
       detect_and_select(input->img_nir_small, output->nir_detection_, false);
