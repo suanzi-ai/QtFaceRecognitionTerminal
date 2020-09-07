@@ -182,8 +182,4 @@ add_executable(main main.cpp resource.qrc)
 target_link_libraries(main PRIVATE ui)
 install(TARGETS main DESTINATION .)
 
-# add_executable(audio_test audio_test.cpp resource.qrc)
-# target_link_libraries(audio_test PRIVATE quface_io) install(TARGETS audio_test
-# DESTINATION .)
-
 install(DIRECTORY ${RESOURCE_PREFIX}/models/ DESTINATION .)

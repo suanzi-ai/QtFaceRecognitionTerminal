@@ -7,4 +7,7 @@ target_include_directories(
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}> lib
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/io>)
 
-target_link_libraries(lib PUBLIC quface_io)
+target_link_libraries(
+  lib
+  PUBLIC quface_io
+  PUBLIC Qt5::Widgets)
