@@ -11,4 +11,10 @@
 <qresource>
     <file>asserts/fail.aac</file>
 </qresource>
+<qresource>
+    <file>asserts/temperature_abnormal.aac</file>
+</qresource>
+<qresource>
+    <file>asserts/temperature_normal.aac</file>
+</qresource>
 </RCC>
