@@ -100,7 +100,8 @@ CameraReader::CameraReader(QObject *parent) {
           {
               .type = lcd_screen_type_,
           },
-      .show_nir = app.show_infrared_window,
+      .show_secondary_win = app.show_infrared_window,
+      .secondary_win_percent = (SecondaryWinPercent)app.infrared_window_percent,
   };
 
   Engine::instance()->init(opt);
