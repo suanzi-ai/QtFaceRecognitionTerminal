@@ -9,7 +9,7 @@ using namespace suanzi;
 
 AudioTask::AudioTask(QThread* thread, QObject* parent) : if_playing_(false) {
   auto engine = io::Engine::instance();
-  engine->audio_set_volume(6);
+  engine->audio_set_volume(100);
 
   read_audio(":asserts/success.aac", success_audio_);
   read_audio(":asserts/fail.aac", fail_audio_);

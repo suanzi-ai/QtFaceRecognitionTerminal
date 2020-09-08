@@ -182,4 +182,7 @@ add_executable(main main.cpp resource.qrc)
 target_link_libraries(main PRIVATE ui)
 install(TARGETS main DESTINATION .)
 
+add_executable(smoke-test smoke-test.cpp resource.qrc)
+target_link_libraries(smoke-test PRIVATE ui)
+
 install(DIRECTORY ${RESOURCE_PREFIX}/models/ DESTINATION .)
