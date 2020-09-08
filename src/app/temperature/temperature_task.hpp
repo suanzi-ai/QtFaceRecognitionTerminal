@@ -6,7 +6,7 @@
 namespace suanzi {
 
 class TemperatureTask : public QThread {
-	
+
   Q_OBJECT
 
 protected:

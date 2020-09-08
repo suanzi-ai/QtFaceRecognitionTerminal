@@ -171,6 +171,8 @@ configure_file("${PROJECT_SOURCE_DIR}/src/static_config.hpp.in"
                "${PROJECT_BINARY_DIR}/include/static_config.hpp")
 include_directories(${PROJECT_BINARY_DIR}/include)
 
+add_subdirectory(quface-io)
+
 add_subdirectory(src/app)
 add_subdirectory(src/lib)
 add_subdirectory(src/ui)
@@ -180,8 +182,7 @@ add_executable(main main.cpp resource.qrc)
 target_link_libraries(main PRIVATE ui)
 install(TARGETS main DESTINATION .)
 
-# add_executable(audio_test audio_test.cpp resource.qrc)
-# target_link_libraries(audio_test PRIVATE lib app) install(TARGETS audio_test
-# DESTINATION .)
+add_executable(smoke-test smoke-test.cpp resource.qrc)
+target_link_libraries(smoke-test PRIVATE ui)
 
 install(DIRECTORY ${RESOURCE_PREFIX}/models/ DESTINATION .)

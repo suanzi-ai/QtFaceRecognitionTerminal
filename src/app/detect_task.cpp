@@ -5,6 +5,7 @@
 #include <chrono>
 #include <ctime>
 #include <iostream>
+#include <quface-io/engine.hpp>
 #include <string>
 
 #include "quface/common.hpp"
@@ -15,37 +16,9 @@ using namespace suanzi;
 DetectTask::DetectTask(FaceDetectorPtr detector,
                        FacePoseEstimatorPtr pose_estimator, QThread *thread,
                        QObject *parent)
-    : face_detector_(detector), pose_estimator_(pose_estimator) {
-  // Initialize PINGPANG buffer
-  Size size_bgr_1 = VPSS_CH_SIZES_BGR[1];
-  Size size_bgr_2 = VPSS_CH_SIZES_BGR[2];
-  if (CH_ROTATES_BGR[1]) {
-    size_bgr_1.height = VPSS_CH_SIZES_BGR[1].width;
-    size_bgr_1.width = VPSS_CH_SIZES_BGR[1].height;
-  }
-  if (CH_ROTATES_BGR[2]) {
-    size_bgr_2.height = VPSS_CH_SIZES_BGR[2].width;
-    size_bgr_2.width = VPSS_CH_SIZES_BGR[2].height;
-  }
-
-  Size size_nir_1 = VPSS_CH_SIZES_NIR[1];
-  Size size_nir_2 = VPSS_CH_SIZES_NIR[2];
-  if (CH_ROTATES_NIR[1]) {
-    size_nir_1.height = VPSS_CH_SIZES_NIR[1].width;
-    size_nir_1.width = VPSS_CH_SIZES_NIR[1].height;
-  }
-  if (CH_ROTATES_NIR[2]) {
-    size_nir_2.height = VPSS_CH_SIZES_NIR[2].width;
-    size_nir_2.width = VPSS_CH_SIZES_NIR[2].height;
-  }
-
-  buffer_ping_ =
-      new DetectionData(size_bgr_1, size_bgr_2, size_nir_1, size_nir_2);
-  buffer_pang_ =
-      new DetectionData(size_bgr_1, size_bgr_2, size_nir_1, size_nir_2);
-  pingpang_buffer_ =
-      new PingPangBuffer<DetectionData>(buffer_ping_, buffer_pang_);
-
+    : face_detector_(detector),
+      pose_estimator_(pose_estimator),
+      buffer_inited_(false) {
   // Create thread
   if (thread == nullptr) {
     static QThread new_thread;
@@ -73,7 +46,9 @@ SZ_RETCODE DetectTask::adjust_isp_by_detection(const DetectionData *output) {
   ROICfg bgr_roi_cfg = {0.2, 0.2, 0.4, 0.4};
   ROICfg nir_roi_cfg = {0.2, 0.2, 0.4, 0.4};
 
-  auto isp = Isp::getInstance();
+  SZ_RETCODE ret;
+
+  auto engine = io::Engine::instance();
   if (detect_count_ % isp_global.adjust_window_size ==
       isp_global.adjust_window_size - 1) {
     if (output->bgr_face_detected_) {
@@ -83,8 +58,9 @@ SZ_RETCODE DetectTask::adjust_isp_by_detection(const DetectionData *output) {
       bgr_roi_cfg.width = det.width;
       bgr_roi_cfg.height = det.height;
 
-      if (!isp->set_roi(bgr_cam.pipe, &bgr_roi_cfg, &bgr_cam.isp.stat)) {
-        return SZ_RETCODE_FAILED;
+      ret = engine->isp_set_roi(CAMERA_BGR, &bgr_roi_cfg, &bgr_cam.isp.stat);
+      if (ret != SZ_RETCODE_OK) {
+        return ret;
       }
     } else if (output->nir_face_detected_) {
       auto det = output->nir_detection_;
@@ -92,8 +68,10 @@ SZ_RETCODE DetectTask::adjust_isp_by_detection(const DetectionData *output) {
       nir_roi_cfg.y = det.y;
       nir_roi_cfg.width = det.width;
       nir_roi_cfg.height = det.height;
-      if (!isp->set_roi(nir_cam.pipe, &nir_roi_cfg, &nir_cam.isp.stat)) {
-        return SZ_RETCODE_FAILED;
+
+      ret = engine->isp_set_roi(CAMERA_NIR, &nir_roi_cfg, &nir_cam.isp.stat);
+      if (ret != SZ_RETCODE_OK) {
+        return ret;
       }
     }
 
@@ -103,18 +81,23 @@ SZ_RETCODE DetectTask::adjust_isp_by_detection(const DetectionData *output) {
       nir_roi_cfg.y = det.y;
       nir_roi_cfg.width = det.width;
       nir_roi_cfg.height = det.height;
-      if (!isp->set_roi(nir_cam.pipe, &nir_roi_cfg, &nir_cam.isp.stat)) {
-        return SZ_RETCODE_FAILED;
+
+      ret = engine->isp_set_roi(CAMERA_NIR, &nir_roi_cfg, &nir_cam.isp.stat);
+      if (ret != SZ_RETCODE_OK) {
+        return ret;
       }
     }
   }
 
   if (no_detect_count_ == isp_global.restore_size) {
-    if (!isp->set_roi(bgr_cam.pipe, &bgr_roi_cfg, &bgr_cam.isp.stat)) {
-      return SZ_RETCODE_FAILED;
+    ret = engine->isp_set_roi(CAMERA_BGR, &bgr_roi_cfg, &bgr_cam.isp.stat);
+    if (ret != SZ_RETCODE_OK) {
+      return ret;
     }
-    if (!isp->set_roi(nir_cam.pipe, &nir_roi_cfg, &nir_cam.isp.stat)) {
-      return SZ_RETCODE_FAILED;
+
+    ret = engine->isp_set_roi(CAMERA_NIR, &nir_roi_cfg, &nir_cam.isp.stat);
+    if (ret != SZ_RETCODE_OK) {
+      return ret;
     }
   }
 
@@ -126,6 +109,15 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
 
   buffer->switch_buffer();
   ImagePackage *input = buffer->get_pang();
+
+  if (!buffer_inited_.load()) {
+    buffer_inited_ = true;
+    buffer_ping_ = new DetectionData(input);
+    buffer_pang_ = new DetectionData(input);
+    pingpang_buffer_ =
+        new PingPangBuffer<DetectionData>(buffer_ping_, buffer_pang_);
+  }
+
   DetectionData *output = pingpang_buffer_->get_ping();
   input->copy_to(*output);
 

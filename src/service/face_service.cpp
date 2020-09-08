@@ -6,7 +6,7 @@
 #include <opencv2/opencv.hpp>
 
 #include "base64.hpp"
-#include "logger.hpp"
+#include <quface/logger.hpp>
 
 #define MAX_PERSON_INFO_SIZE 1024
 

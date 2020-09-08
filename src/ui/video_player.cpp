@@ -45,9 +45,11 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
       new DetectTipWidget(0, 0, screen_width, screen_height, this);
   detect_tip_widget_bgr_->hide();
 
-  detect_tip_widget_nir_ = new DetectTipWidget(
-      screen_width - screen_width * 25 / 100, 0, screen_width * 25 / 100,
-      screen_height * 25 / 100, this);
+  int pip_win_percent = app.infrared_window_percent;
+  detect_tip_widget_nir_ =
+      new DetectTipWidget(screen_width - screen_width * pip_win_percent / 100,
+                          0, screen_width * pip_win_percent / 100,
+                          screen_height * pip_win_percent / 100, this);
   detect_tip_widget_nir_->hide();
 
   recognize_tip_widget_ = new RecognizeTipWidget(nullptr);

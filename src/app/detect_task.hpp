@@ -3,13 +3,13 @@
 
 #include <QObject>
 #include <QRect>
+#include <atomic>
 
 #include "config.hpp"
 #include "detection_data.hpp"
 #include "image_package.hpp"
 #include "pingpang_buffer.hpp"
 #include "quface_common.hpp"
-#include "isp.h"
 
 namespace suanzi {
 
@@ -40,16 +40,6 @@ class DetectTask : QObject {
   void tx_enable_read_temperature(bool enable_read_temperature);
 
  private:
-  // nyy
-  const Size VPSS_CH_SIZES_BGR[3] = {
-      {1920, 1080}, {1080, 704}, {320, 224}};  // larger small
-  const Size VPSS_CH_SIZES_NIR[3] = {
-      {1920, 1080}, {1080, 704}, {320, 224}};  // larger small
-  const int CH_INDEXES_BGR[3] = {0, 1, 2};
-  const bool CH_ROTATES_BGR[3] = {false, true, true};
-  const int CH_INDEXES_NIR[3] = {0, 1, 2};
-  const bool CH_ROTATES_NIR[3] = {false, true, true};
-
   bool detect_and_select(const MmzImage *image, DetectionRatio &detection,
                          bool is_bgr);
 
@@ -58,6 +48,7 @@ class DetectTask : QObject {
   FaceDetectorPtr face_detector_;
   FacePoseEstimatorPtr pose_estimator_;
 
+  std::atomic_bool buffer_inited_;
   DetectionData *buffer_ping_, *buffer_pang_;
   PingPangBuffer<DetectionData> *pingpang_buffer_;
 

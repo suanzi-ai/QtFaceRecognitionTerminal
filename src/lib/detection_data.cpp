@@ -86,6 +86,11 @@ DetectionData::DetectionData() {
   nir_face_detected_ = false;
 }
 
+DetectionData::DetectionData(const ImagePackage *pkg) : ImagePackage(pkg) {
+  bgr_face_detected_ = false;
+  nir_face_detected_ = false;
+}
+
 DetectionData::DetectionData(Size size_bgr_large, Size size_bgr_small,
                              Size size_nir_large, Size size_nir_small)
     : ImagePackage(size_bgr_large, size_bgr_small, size_nir_large,

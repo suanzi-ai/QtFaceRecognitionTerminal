@@ -2,8 +2,8 @@
 #define AUDIO_TASK_HPP
 
 #include <QObject>
+#include <vector>
 
-#include "audio.hpp"
 #include "person_service.hpp"
 
 namespace suanzi {
@@ -19,8 +19,11 @@ class AudioTask : QObject {
   void rx_reset();
 
  private:
-  AudioPlayer player_;
+  bool read_audio(const std::string& name, std::vector<SZ_BYTE>& audio);
   bool if_playing_;
+
+  std::vector<SZ_BYTE> success_audio_;
+  std::vector<SZ_BYTE> fail_audio_;
 };
 
 }  // namespace suanzi

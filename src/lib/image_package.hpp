@@ -3,23 +3,22 @@
 
 #include <QMetaType>
 #include <opencv2/opencv.hpp>
-
-#include "ive.h"
-#include "logger.hpp"
-#include "mmzimage.h"
-#include "quface/common.hpp"
+#include <quface-io/mmzimage.hpp>
+#include <quface/common.hpp>
+#include <quface/logger.hpp>
 
 namespace suanzi {
+using namespace io;
 
 class ImagePackage {
  public:
   ImagePackage();
+  ImagePackage(const ImagePackage* pkg);
   ImagePackage(Size size_bgr_large, Size size_bgr_small, Size size_nir_large,
                Size size_nir_small);
   ~ImagePackage();
 
   void copy_to(ImagePackage &pkg);
-  bool get_jpeg_buffer(const MmzImage *src_img, std::vector<SZ_BYTE> &buffer);
 
  public:
   int frame_idx;

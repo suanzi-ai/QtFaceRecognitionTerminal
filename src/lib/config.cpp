@@ -28,6 +28,7 @@ void suanzi::to_json(json &j, const AppConfig &c) {
   SAVE_JSON_TO(j, "person_service_base_url", c.person_service_base_url);
   SAVE_JSON_TO(j, "enable_anti_spoofing", c.enable_anti_spoofing);
   SAVE_JSON_TO(j, "show_infrared_window", c.show_infrared_window);
+  SAVE_JSON_TO(j, "infrared_window_percent", c.infrared_window_percent);
   SAVE_JSON_TO(j, "device_face_x", c.device_face_x);
   SAVE_JSON_TO(j, "device_face_y", c.device_face_y);
   SAVE_JSON_TO(j, "device_face_height", c.device_face_height);
@@ -49,6 +50,7 @@ void suanzi::from_json(const json &j, AppConfig &c) {
   LOAD_JSON_TO(j, "person_service_base_url", c.person_service_base_url);
   LOAD_JSON_TO(j, "enable_anti_spoofing", c.enable_anti_spoofing);
   LOAD_JSON_TO(j, "show_infrared_window", c.show_infrared_window);
+  LOAD_JSON_TO(j, "infrared_window_percent", c.infrared_window_percent);
   LOAD_JSON_TO(j, "device_face_x", c.device_face_x);
   LOAD_JSON_TO(j, "device_face_y", c.device_face_y);
   LOAD_JSON_TO(j, "device_face_height", c.device_face_height);
@@ -166,120 +168,6 @@ void suanzi::from_json(const json &j, LivenessConfig &c) {
                c.max_height_ratio_between_bgr);
 }
 
-void suanzi::to_json(json &j, const ISPExposureConfig &c) {
-  SAVE_JSON_TO(j, "hist_stat_adjust", c.hist_stat_adjust);
-  SAVE_JSON_TO(j, "speed", c.speed);
-  SAVE_JSON_TO(j, "black_speed_bias", c.black_speed_bias);
-  SAVE_JSON_TO(j, "tolerance", c.tolerance);
-  SAVE_JSON_TO(j, "compensation", c.compensation);
-  SAVE_JSON_TO(j, "ev_bias", c.ev_bias);
-  SAVE_JSON_TO(j, "ae_strategy_mode", c.ae_strategy_mode);
-  SAVE_JSON_TO(j, "hist_ratio_slope", c.hist_ratio_slope);
-  SAVE_JSON_TO(j, "max_hist_offset", c.max_hist_offset);
-}
-
-void suanzi::from_json(const json &j, ISPExposureConfig &c) {
-  LOAD_JSON_TO(j, "hist_stat_adjust", c.hist_stat_adjust);
-  LOAD_JSON_TO(j, "speed", c.speed);
-  LOAD_JSON_TO(j, "black_speed_bias", c.black_speed_bias);
-  LOAD_JSON_TO(j, "tolerance", c.tolerance);
-  LOAD_JSON_TO(j, "compensation", c.compensation);
-  LOAD_JSON_TO(j, "ev_bias", c.ev_bias);
-  LOAD_JSON_TO(j, "ae_strategy_mode", c.ae_strategy_mode);
-  LOAD_JSON_TO(j, "hist_ratio_slope", c.hist_ratio_slope);
-  LOAD_JSON_TO(j, "max_hist_offset", c.max_hist_offset);
-}
-
-void suanzi::to_json(json &j, const ISPStatConfig &c) {
-  SAVE_JSON_TO(j, "roi_enable", c.roi_enable);
-  SAVE_JSON_TO(j, "roi_margin", c.roi_margin);
-  SAVE_JSON_TO(j, "roi_weight", c.roi_weight);
-  SAVE_JSON_TO(j, "non_roi_weight", c.non_roi_weight);
-  SAVE_JSON_TO(j, "crop_enable", c.crop_enable);
-  SAVE_JSON_TO(j, "crop_margin", c.crop_margin);
-}
-
-void suanzi::from_json(const json &j, ISPStatConfig &c) {
-  LOAD_JSON_TO(j, "roi_enable", c.roi_enable);
-  LOAD_JSON_TO(j, "roi_margin", c.roi_margin);
-  LOAD_JSON_TO(j, "roi_weight", c.roi_weight);
-  LOAD_JSON_TO(j, "non_roi_weight", c.non_roi_weight);
-  LOAD_JSON_TO(j, "crop_enable", c.crop_enable);
-  LOAD_JSON_TO(j, "crop_margin", c.crop_margin);
-}
-
-void suanzi::to_json(json &j, const ISPGammaConfig &c) {
-  SAVE_JSON_TO(j, "enable", c.enable);
-  SAVE_JSON_TO(j, "curve_type", c.curve_type);
-}
-
-void suanzi::from_json(const json &j, ISPGammaConfig &c) {
-  LOAD_JSON_TO(j, "enable", c.enable);
-  LOAD_JSON_TO(j, "curve_type", c.curve_type);
-}
-
-void suanzi::to_json(json &j, const ISPWBConfig &c) {
-  SAVE_JSON_TO(j, "op_type", c.op_type);
-  SAVE_JSON_TO(j, "by_pass", c.by_pass);
-}
-
-void suanzi::from_json(const json &j, ISPWBConfig &c) {
-  LOAD_JSON_TO(j, "op_type", c.op_type);
-  LOAD_JSON_TO(j, "by_pass", c.by_pass);
-}
-
-void suanzi::to_json(json &j, const ISPSaturationConfig &c) {
-  SAVE_JSON_TO(j, "op_type", c.op_type);
-  SAVE_JSON_TO(j, "manual_saturation", c.manual_saturation);
-}
-
-void suanzi::from_json(const json &j, ISPSaturationConfig &c) {
-  LOAD_JSON_TO(j, "op_type", c.op_type);
-  LOAD_JSON_TO(j, "manual_saturation", c.manual_saturation);
-}
-
-void suanzi::to_json(json &j, const ISPHLCConfig &c) {
-  SAVE_JSON_TO(j, "enable", c.enable);
-  SAVE_JSON_TO(j, "luma_target", c.luma_target);
-  SAVE_JSON_TO(j, "luma_threshold", c.luma_threshold);
-}
-
-void suanzi::from_json(const json &j, ISPHLCConfig &c) {
-  LOAD_JSON_TO(j, "enable", c.enable);
-  LOAD_JSON_TO(j, "luma_target", c.luma_target);
-  LOAD_JSON_TO(j, "luma_threshold", c.luma_threshold);
-}
-
-void suanzi::to_json(json &j, const ISPDRCConfig &c) {
-  SAVE_JSON_TO(j, "enable", c.enable);
-  SAVE_JSON_TO(j, "op_type", c.op_type);
-}
-
-void suanzi::from_json(const json &j, ISPDRCConfig &c) {
-  LOAD_JSON_TO(j, "enable", c.enable);
-  LOAD_JSON_TO(j, "op_type", c.op_type);
-}
-
-void suanzi::to_json(json &j, const ISPConfig &c) {
-  SAVE_JSON_TO(j, "stat", c.stat);
-  SAVE_JSON_TO(j, "exposure", c.exposure);
-  SAVE_JSON_TO(j, "wb", c.wb);
-  SAVE_JSON_TO(j, "saturation", c.saturation);
-  SAVE_JSON_TO(j, "gamma", c.gamma);
-  SAVE_JSON_TO(j, "hlc", c.hlc);
-  SAVE_JSON_TO(j, "drc", c.drc);
-}
-
-void suanzi::from_json(const json &j, ISPConfig &c) {
-  LOAD_JSON_TO(j, "stat", c.stat);
-  LOAD_JSON_TO(j, "exposure", c.exposure);
-  LOAD_JSON_TO(j, "wb", c.wb);
-  LOAD_JSON_TO(j, "saturation", c.saturation);
-  LOAD_JSON_TO(j, "gamma", c.gamma);
-  LOAD_JSON_TO(j, "hlc", c.hlc);
-  LOAD_JSON_TO(j, "drc", c.drc);
-}
-
 void suanzi::to_json(json &j, const ISPGlobalConfig &c) {
   SAVE_JSON_TO(j, "adjust_window_size", c.adjust_window_size);
   SAVE_JSON_TO(j, "restore_size", c.restore_size);
@@ -340,6 +228,7 @@ void Config::load_defaults(ConfigData &c) {
       .person_service_base_url = "http://127.0.0.1",
       .enable_anti_spoofing = false,
       .show_infrared_window = false,
+      .infrared_window_percent = 25,
       .device_face_x = 0.289,
       .device_face_y = 0.18,
       .device_face_height = 0.35,
@@ -730,17 +619,9 @@ const ISPGlobalConfig &Config::get_isp() {
   return instance_.cfg_data_.isp;
 }
 
-const CameraConfig &Config::get_camera(bool is_bgr) {
+const CameraConfig &Config::get_camera(io::CameraType tp) {
   std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
-  if (is_bgr)
-    return instance_.cfg_data_.normal;
-  else
-    return instance_.cfg_data_.infrared;
-}
-
-const CameraConfig &Config::get_camera(CameraType tp) {
-  std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
-  if (tp == CAMERA_BGR)
+  if (tp == io::CAMERA_BGR)
     return instance_.cfg_data_.normal;
   else
     return instance_.cfg_data_.infrared;
