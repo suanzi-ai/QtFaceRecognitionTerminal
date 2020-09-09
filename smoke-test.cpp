@@ -1,6 +1,9 @@
 #include <QFile>
+#include <fstream>
 #include <quface-io/engine.hpp>
 #include <quface/logger.hpp>
+#include <regex>
+#include <string>
 #include <thread>
 #include <vector>
 
@@ -8,7 +11,47 @@
 
 using namespace suanzi::io;
 
+LCDScreenType load_screen_type() {
+  std::string conf_filename = "/userdata/user.conf";
+  std::ifstream conf(conf_filename);
+  if (!conf.is_open()) {
+    SZ_LOG_ERROR("Can't open {}", conf_filename);
+    return (LCDScreenType)-1;
+  }
+
+  std::string line;
+  std::regex reg("^LCD=(\\d+).+", std::regex_constants::ECMAScript |
+                                      std::regex_constants::icase);
+  std::smatch matches;
+  while (std::getline(conf, line)) {
+    if (std::regex_match(line, matches, reg)) {
+      if (matches.size() == 2) {
+        std::ssub_match base_sub_match = matches[1];
+        std::string lcd_type = base_sub_match.str();
+        // 0: mipi-7inch-1024x600(default)
+        // 1: mipi-8inch-800x1280
+        // 2: mipi-10inch-800x1280
+        // 4: mipi-5inch-480x854
+
+        if (lcd_type == "1") {
+          SZ_LOG_INFO("Load screen type SML_LCD_MIPI_8INCH_800X1280");
+          return SML_LCD_MIPI_8INCH_800X1280;
+        } else if (lcd_type == "4") {
+          SZ_LOG_INFO("Load screen type SML_LCD_MIPI_5INCH_480X854");
+          return SML_LCD_MIPI_5INCH_480X854;
+        } else {
+          SZ_LOG_ERROR("lcd type unknown {}", lcd_type);
+        }
+      }
+    }
+  }
+
+  return (LCDScreenType)-1;
+}
+
 void test() {
+  auto screen_type = load_screen_type();
+
   EngineOption opt = {
       .bgr =
           {
@@ -50,7 +93,7 @@ void test() {
           },
       .screen =
           {
-              .type = SML_LCD_MIPI_5INCH_480X854,
+              .type = screen_type,
           },
       .show_secondary_win = true,
       .secondary_win_percent = SECONDARY_WIN_PERCENT_50,
@@ -95,7 +138,7 @@ void test() {
 int main() {
   HI_MPI_SYS_Init();
   test();
-  std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+  std::this_thread::sleep_for(std::chrono::milliseconds(60000));
   HI_MPI_SYS_Exit();
   return 0;
 }
