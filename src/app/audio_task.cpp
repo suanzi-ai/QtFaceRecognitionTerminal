@@ -5,6 +5,8 @@
 #include <QTimer>
 #include <quface-io/engine.hpp>
 
+#include "config.hpp"
+
 using namespace suanzi;
 
 AudioTask::AudioTask(QThread* thread, QObject* parent) : if_playing_(false) {
@@ -13,6 +15,8 @@ AudioTask::AudioTask(QThread* thread, QObject* parent) : if_playing_(false) {
 
   read_audio(":asserts/success.aac", success_audio_);
   read_audio(":asserts/fail.aac", fail_audio_);
+  read_audio(":asserts/temperature_normal.aac", temp_normal_audio_);
+  read_audio(":asserts/temperature_abnormal.aac", temp_abnormal_audio_);
 
   // Create thread
   if (thread == nullptr) {
@@ -40,14 +44,24 @@ bool AudioTask::read_audio(const std::string& name,
 }
 
 void AudioTask::rx_display(PersonData person, bool if_duplicated) {
+  auto user = Config::get_user();
+  if (!user.enable_audio) return;
+
   auto engine = io::Engine::instance();
   if (!if_playing_) {
     if_playing_ = true;
 
-    if (person.status != PersonService::get_status(PersonStatus::Normal))
+    if (!person.is_status_normal())
       engine->audio_play(fail_audio_);
     else
       engine->audio_play(success_audio_);
+
+    if (!user.disabled_temperature) {
+      if (!person.is_temperature_normal())
+        engine->audio_play(temp_abnormal_audio_);
+      else
+        engine->audio_play(temp_normal_audio_);
+    }
 
     QTimer::singleShot(1000, this, SLOT(rx_reset()));
   }

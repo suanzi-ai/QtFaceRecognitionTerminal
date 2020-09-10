@@ -114,7 +114,7 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
       person.status = person_service_->get_status(PersonStatus::Fake);
     }
 
-    if (person.status == person_service_->get_status(PersonStatus::Blacklist)) {
+    if (person.is_status_blacklist()) {
       if (Config::get_user().blacklist_policy == "alarm") {
         person.name = "黑名单";
       } else {  // stranger
@@ -127,7 +127,7 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
 
     // decide duplicate
     bool duplicated_;
-    if (person.status != person_service_->get_status(PersonStatus::Normal)) {
+    if (!person.is_status_normal()) {
       duplicated_ = if_duplicated(input->person_feature);
     } else {
       duplicated_ = if_duplicated(face_id);
@@ -139,7 +139,7 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
     person.temperature = body_temperature_;
     // output
     rx_reset();
-    if (!Config::get_app().disabled_temperature)
+    if (!Config::get_user().disabled_temperature)
       SZ_LOG_INFO(
           "Record: id={}, staff={}, score={:.2f}, status={}, temperature={}",
           person.id, person.number, person.score, person.status,

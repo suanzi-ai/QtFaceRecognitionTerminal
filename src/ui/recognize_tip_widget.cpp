@@ -5,10 +5,10 @@
 #include <QPaintEvent>
 #include <QPainter>
 #include <QTimer>
-
-#include "config.hpp"
 #include <quface-io/engine.hpp>
 #include <quface/logger.hpp>
+
+#include "config.hpp"
 
 using namespace suanzi;
 using namespace suanzi::io;
@@ -38,9 +38,16 @@ RecognizeTipWidget::~RecognizeTipWidget() {}
 void RecognizeTipWidget::rx_display(PersonData person, bool if_duplicated) {
   person_ = person;
 
+  auto user = Config::get_user();
+
+  bool open_door = true;
+  if (user.door_open_cond & DoorOpenCond::Status)
+    open_door = open_door && person.is_status_normal();
+  if (user.door_open_cond & DoorOpenCond::Temperature)
+    open_door = open_door && person.is_temperature_normal();
+
   // Open door GPIO
-  if (person_.status == PersonService::get_status(PersonStatus::Normal))
-    Engine::instance()->gpio_set(GpioPinDOOR, true);
+  if (open_door) Engine::instance()->gpio_set(GpioPinDOOR, true);
 
   hide();
   show();
@@ -108,7 +115,7 @@ void RecognizeTipWidget::paintEvent(QPaintEvent *event) {
   painter.setPen(Qt::white);
   painter.drawText(w * 72.5 / 100, h * 46.42 / 100, name);
 
-  bool disable_temperature = Config::get_app().disabled_temperature;
+  bool disable_temperature = Config::get_user().disabled_temperature;
   std::stringstream ss;
   ss << "温度: " << std::setprecision(3) << person_.temperature << "°";
   QString body_temperature = ss.str().c_str();

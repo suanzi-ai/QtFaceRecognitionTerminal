@@ -27,6 +27,9 @@ struct PersonData {
   std::string face_path;
   cv::Mat bgr_face_snapshot;
   cv::Mat nir_face_snapshot;
+  bool is_status_normal();
+  bool is_status_blacklist();
+  bool is_temperature_normal();
 };
 
 void to_json(json &j, const PersonData &p);

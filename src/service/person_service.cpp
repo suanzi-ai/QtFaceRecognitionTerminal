@@ -42,6 +42,22 @@ void suanzi::from_json(const json &j, PersonData &p) {
 
 using namespace suanzi;
 
+bool PersonData::is_status_normal() {
+  return status == PersonService::get_status(PersonStatus::Normal);
+}
+
+bool PersonData::is_status_blacklist() {
+  return status == PersonService::get_status(PersonStatus::Blacklist);
+}
+
+bool PersonData::is_temperature_normal() {
+  auto user = Config::get_user();
+  if (user.disabled_temperature) return true;
+
+  return temperature >= user.temperature_min &&
+         temperature <= user.temperature_max;
+}
+
 SZ_RETCODE PersonService::get_person(SZ_UINT32 id, PersonData &person) {
   std::string path = "/api/v1/persons/" + std::to_string(id);
   auto res = client_.Get(path.c_str());

@@ -24,6 +24,11 @@
 namespace suanzi {
 using json = nlohmann::json;
 
+typedef enum DoorOpenCond {
+  Status = 1,
+  Temperature = 2,
+} DoorOpenCond;
+
 typedef struct {
   std::string blacklist_policy;
   std::string liveness_policy;
@@ -31,6 +36,11 @@ typedef struct {
   std::string extract_level;
   std::string liveness_level;
   SZ_UINT16 duplication_interval;
+  SZ_UINT32 door_open_cond;
+  bool disabled_temperature;
+  float temperature_max;
+  float temperature_min;
+  bool enable_audio;
 } UserConfig;
 
 void to_json(json &j, const UserConfig &c);
@@ -53,7 +63,6 @@ typedef struct {
   SZ_UINT16 device_body_start_angle;
   SZ_UINT16 device_body_open_angle;
   int temperature_manufacturer;
-  bool disabled_temperature;
   std::string infraraed_faces_store_path;
   bool show_isp_hist_window;
 } AppConfig;

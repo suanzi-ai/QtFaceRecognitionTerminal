@@ -138,7 +138,7 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
           (const QObject *)screen_saver_, SLOT(rx_hide()));
 
   // Connect temperature to record_task
-  if (!Config::get_app().disabled_temperature) {
+  if (!Config::get_user().disabled_temperature) {
     auto app = Config::get_app();
     int temperature_manufacturer = app.temperature_manufacturer;
     switch (temperature_manufacturer) {
@@ -179,6 +179,7 @@ VideoPlayer::~VideoPlayer() {}
 void VideoPlayer::paintEvent(QPaintEvent *event) {
   QPainter painter(this);
   auto app = Config::get_app();
+  auto user = Config::get_user();
   int screen_width, screen_height;
   camera_reader_->get_screen_size(screen_width, screen_height);
 
@@ -186,7 +187,7 @@ void VideoPlayer::paintEvent(QPaintEvent *event) {
   painter.drawText(screen_width - 230, 40, QString(version_.c_str()));
 
   // Temperature mode: enable and is not fake mode
-  if (!app.disabled_temperature && app.temperature_manufacturer != 2) {
+  if (!user.disabled_temperature && app.temperature_manufacturer != 2) {
     int device_body_start_angle, device_body_open_angle;
     float x, y, face_width, face_height;
     x = (float)(app.device_face_x * screen_width);

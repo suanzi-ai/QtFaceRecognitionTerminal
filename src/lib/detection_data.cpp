@@ -51,6 +51,7 @@ bool DetectionRatio::is_overlap(DetectionRatio other) {
 bool DetectionRatio::is_valid() {
   auto cfg = Config::get_detect();
   auto app = Config::get_app();
+  auto user = Config::get_user();
   bool pose_valid = !isnanf(yaw) && !isnanf(pitch) && !isnanf(roll) &&
                     cfg.min_yaw < yaw && yaw < cfg.max_yaw &&
                     cfg.min_pitch < pitch && pitch < cfg.max_pitch &&
@@ -58,7 +59,7 @@ bool DetectionRatio::is_valid() {
   bool position_valid;
 
   // Temperature Mode: disabled or fake
-  if (app.disabled_temperature || app.temperature_manufacturer == 2)
+  if (user.disabled_temperature || app.temperature_manufacturer == 2)
     position_valid =
         x > 0.01 && y > 0.01 && x + width < 0.99 && y + height < 0.99;
   else {

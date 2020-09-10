@@ -24,6 +24,8 @@ class AudioTask : QObject {
 
   std::vector<SZ_BYTE> success_audio_;
   std::vector<SZ_BYTE> fail_audio_;
+  std::vector<SZ_BYTE> temp_normal_audio_;
+  std::vector<SZ_BYTE> temp_abnormal_audio_;
 };
 
 }  // namespace suanzi

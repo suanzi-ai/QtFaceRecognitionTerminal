@@ -9,6 +9,11 @@ void suanzi::to_json(json &j, const UserConfig &c) {
   SAVE_JSON_TO(j, "extract_level", c.extract_level);
   SAVE_JSON_TO(j, "liveness_level", c.liveness_level);
   SAVE_JSON_TO(j, "duplication_interval", c.duplication_interval);
+  SAVE_JSON_TO(j, "door_open_cond", c.door_open_cond);
+  SAVE_JSON_TO(j, "disabled_temperature", c.disabled_temperature);
+  SAVE_JSON_TO(j, "temperature_max", c.temperature_max);
+  SAVE_JSON_TO(j, "temperature_min", c.temperature_min);
+  SAVE_JSON_TO(j, "enable_audio", c.enable_audio);
 }
 
 void suanzi::from_json(const json &j, UserConfig &c) {
@@ -18,6 +23,11 @@ void suanzi::from_json(const json &j, UserConfig &c) {
   LOAD_JSON_TO(j, "extract_level", c.extract_level);
   LOAD_JSON_TO(j, "liveness_level", c.liveness_level);
   LOAD_JSON_TO(j, "duplication_interval", c.duplication_interval);
+  LOAD_JSON_TO(j, "door_open_cond", c.door_open_cond);
+  LOAD_JSON_TO(j, "disabled_temperature", c.disabled_temperature);
+  LOAD_JSON_TO(j, "temperature_max", c.temperature_max);
+  LOAD_JSON_TO(j, "temperature_min", c.temperature_min);
+  LOAD_JSON_TO(j, "enable_audio", c.enable_audio);
 }
 
 void suanzi::to_json(json &j, const AppConfig &c) {
@@ -37,7 +47,6 @@ void suanzi::to_json(json &j, const AppConfig &c) {
   SAVE_JSON_TO(j, "device_body_start_angle", c.device_body_start_angle);
   SAVE_JSON_TO(j, "device_body_open_angle", c.device_body_open_angle);
   SAVE_JSON_TO(j, "temperature_manufacturer", c.temperature_manufacturer);
-  SAVE_JSON_TO(j, "disabled_temperature", c.disabled_temperature);
   SAVE_JSON_TO(j, "infraraed_faces_store_path", c.infraraed_faces_store_path);
   SAVE_JSON_TO(j, "show_isp_hist_window", c.show_isp_hist_window);
 }
@@ -59,7 +68,6 @@ void suanzi::from_json(const json &j, AppConfig &c) {
   LOAD_JSON_TO(j, "device_body_start_angle", c.device_body_start_angle);
   LOAD_JSON_TO(j, "device_body_open_angle", c.device_body_open_angle);
   LOAD_JSON_TO(j, "temperature_manufacturer", c.temperature_manufacturer);
-  LOAD_JSON_TO(j, "disabled_temperature", c.disabled_temperature);
   LOAD_JSON_TO(j, "infraraed_faces_store_path", c.infraraed_faces_store_path);
   LOAD_JSON_TO(j, "show_isp_hist_window", c.show_isp_hist_window);
 }
@@ -236,8 +244,7 @@ void Config::load_defaults(ConfigData &c) {
       .temperature_distance = 0.68,
       .device_body_start_angle = 2500,
       .device_body_open_angle = 180,
-      .temperature_manufacturer = 0, // 0大树 1众志 2随机
-      .disabled_temperature = true,
+      .temperature_manufacturer = 0,  // 0大树 1众志 2随机
       .infraraed_faces_store_path =
           APP_DIR_PREFIX "/var/face-terminal/ir-faces/",
       .show_isp_hist_window = false,
@@ -250,6 +257,11 @@ void Config::load_defaults(ConfigData &c) {
       .extract_level = "medium",
       .liveness_level = "medium",
       .duplication_interval = 60,
+      .door_open_cond = 3,
+      .disabled_temperature = true,
+      .temperature_max = 37.3,
+      .temperature_min = 35.0,
+      .enable_audio = true,
   };
 
   c.quface = {
