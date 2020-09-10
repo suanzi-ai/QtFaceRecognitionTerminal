@@ -41,8 +41,8 @@ class RecordTask : QObject {
                       SZ_UINT32 &face_id, SZ_FLOAT &score);
   bool sequence_antispoof(const std::vector<bool> &history);
 
-  bool if_duplicated(const SZ_UINT32 &face_id);
-  bool if_duplicated(const FaceFeature &feature);
+  bool if_duplicated(const SZ_UINT32 &face_id, float &temperature);
+  bool if_duplicated(const FaceFeature &feature, float &temperature);
 
   PersonService::ptr person_service_;
 
@@ -50,10 +50,12 @@ class RecordTask : QObject {
 
   std::vector<QueryResult> person_history_;
   std::map<SZ_UINT32, std::chrono::steady_clock::time_point> query_clock_;
+  std::map<SZ_UINT32, float> known_temperature_;
 
   std::vector<bool> live_history_;
   std::map<SZ_UINT32, std::chrono::steady_clock::time_point>
       unknown_query_clock_;
+  std::map<SZ_UINT32, float> unknown_temperature_;
 
   int reset_counter_;
   float body_temperature_;
