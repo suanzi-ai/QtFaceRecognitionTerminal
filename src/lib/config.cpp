@@ -574,7 +574,7 @@ SZ_RETCODE Config::save_diff(const json &target_patch) {
       return ret;
     }
 
-    json target = source;
+    json target(cfg_data_);
     target.merge_patch(target_patch);
 
     std::ofstream o(config_override_file_);
