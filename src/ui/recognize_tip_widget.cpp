@@ -120,9 +120,9 @@ void RecognizeTipWidget::paintEvent(QPaintEvent *event) {
   ss << "温度: " << std::setprecision(3) << person_.temperature << "°C";
   QString body_temperature = ss.str().c_str();
 
+  font.setPixelSize(base_font_size * 2);
+  painter.setFont(font);
   if (staff_number.length() > 0) {
-    font.setPixelSize(base_font_size * 2);
-    painter.setFont(font);
     painter.drawText(w * 72.5 / 100, h * 71.43 / 100, staff_number);
     if (!disable_temperature) {
       // draw temperature
