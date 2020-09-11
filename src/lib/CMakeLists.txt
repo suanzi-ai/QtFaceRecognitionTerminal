@@ -9,5 +9,7 @@ target_include_directories(
 
 target_link_libraries(
   lib
-  PUBLIC quface_io
+  PUBLIC QuFaceIOSDK::io
+  PUBLIC QuFaceSDK::face
+  PUBLIC QuFaceSDK::database
   PUBLIC Qt5::Widgets)
