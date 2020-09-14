@@ -9,10 +9,9 @@ using namespace suanzi::io;
 BootUi::BootUi() {
 	b_exit_ = false;
 	int lcd_screen_type = 0;
-	int width, height;
-	if (!load_screen_type(lcd_screen_type, width, height))
+	if (!load_screen_type(lcd_screen_type, width_, height_))
 		return;
-	pvo_ = new Vo(0, VO_INTF_MIPI, (io::LCDScreenType)lcd_screen_type, width, height);
+	pvo_ = new Vo(0, VO_INTF_MIPI, (io::LCDScreenType)lcd_screen_type, width_, height_);
 	pvo_->start(VO_MODE_1MUX);
 	start();
 }
@@ -77,7 +76,7 @@ void BootUi::stop() {
 
 void BootUi::run() {
 	cv::Mat img = cv::imread("background.jpg");
-	cv::resize(img, img, {800, 1280});
+	cv::resize(img, img, {width_, height_});
 	while(!b_exit_) {
 		pvo_->sendFrame(img);
 		usleep(250000);

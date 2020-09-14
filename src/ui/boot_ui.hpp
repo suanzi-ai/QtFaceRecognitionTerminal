@@ -20,6 +20,8 @@ class BootUi   : public QThread  {
  private:
  	bool b_exit_;
 	Vo *pvo_;
+	int width_;
+	int height_;
 };
 
 }  // namespace suanzi
