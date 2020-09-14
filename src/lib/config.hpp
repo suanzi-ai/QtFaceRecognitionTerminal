@@ -201,6 +201,7 @@ class Config : public ConfigEventEmitter {
   SZ_RETCODE reload();
   SZ_RETCODE save_diff(const json &target);
   SZ_RETCODE reset();
+  static bool load_screen_type(io::LCDScreenType &lcd_screen_type);
 
   static const ConfigData &get_all();
   static const UserConfig &get_user();

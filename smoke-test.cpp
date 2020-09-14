@@ -101,7 +101,8 @@ void test() {
 
   auto engine = Engine::instance();
 
-  engine->init(opt);
+  engine->set_option(opt);
+  engine->start();
 
   {
     for (int i = 0; i < 5; i++) {

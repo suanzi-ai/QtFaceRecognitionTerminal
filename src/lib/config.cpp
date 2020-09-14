@@ -1,6 +1,9 @@
 #include "config.hpp"
 
+#include <regex>
+
 using namespace suanzi;
+using namespace suanzi::io;
 
 void suanzi::to_json(json &j, const UserConfig &c) {
   SAVE_JSON_TO(j, "blacklist_policy", c.blacklist_policy);
@@ -604,6 +607,47 @@ SZ_RETCODE Config::reset() {
 
   o << "{}";
   return reload();
+}
+
+bool Config::load_screen_type(LCDScreenType &lcd_screen_type) {
+  std::string conf_filename = "/userdata/user.conf";
+  std::ifstream conf(conf_filename);
+  if (!conf.is_open()) {
+    SZ_LOG_ERROR("Can't open {}", conf_filename);
+    return false;
+  }
+
+  std::string line;
+  std::regex reg("^LCD=(\\d+).+", std::regex_constants::ECMAScript |
+                                      std::regex_constants::icase);
+  std::smatch matches;
+  while (std::getline(conf, line)) {
+    if (std::regex_match(line, matches, reg)) {
+      if (matches.size() == 2) {
+        std::ssub_match base_sub_match = matches[1];
+        std::string lcd_type = base_sub_match.str();
+        // 0: mipi-7inch-1024x600(default)
+        // 1: mipi-8inch-800x1280
+        // 2: mipi-10inch-800x1280
+        // 4: mipi-5inch-480x854
+
+        if (lcd_type == "1") {
+          lcd_screen_type = SML_LCD_MIPI_8INCH_800X1280;
+          SZ_LOG_INFO("Load screen type SML_LCD_MIPI_8INCH_800X1280");
+          return true;
+        } else if (lcd_type == "4") {
+          lcd_screen_type = SML_LCD_MIPI_5INCH_480X854;
+          SZ_LOG_INFO("Load screen type SML_LCD_MIPI_5INCH_480X854");
+          return true;
+        } else {
+          SZ_LOG_ERROR("lcd type unknown {}", lcd_type);
+        }
+        return false;
+      }
+    }
+  }
+
+  return false;
 }
 
 const ConfigData &Config::get_all() {

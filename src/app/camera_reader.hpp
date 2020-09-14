@@ -22,7 +22,6 @@ class CameraReader : QThread {
 
   void start_sample();
 
-  bool load_screen_type();
   bool get_screen_size(int &width, int &height);
 
  private slots:
@@ -40,8 +39,6 @@ class CameraReader : QThread {
 
   ImagePackage *buffer_ping_, *buffer_pang_;
   PingPangBuffer<ImagePackage> *pingpang_buffer_;
-
-  io::LCDScreenType lcd_screen_type_;
 };
 
 }  // namespace suanzi
