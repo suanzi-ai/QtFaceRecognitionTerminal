@@ -12,6 +12,7 @@ class BootUi   : public QThread  {
   BootUi();
   ~BootUi();
   void stop();
+  bool load_screen_type(int &lcd_screen_type, int &width, int &height);
 
  private:
  	void run();
