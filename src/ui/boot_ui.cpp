@@ -49,7 +49,7 @@ bool BootUi::load_screen_type(int &lcd_screen_type, int &width, int &height) {
         } else if (lcd_type == "4") {
           lcd_screen_type = SML_LCD_MIPI_5INCH_480X854;
 		  width = 480;
-		  width = 854;
+		  height = 854;
           SZ_LOG_INFO("Load screen type SML_LCD_MIPI_5INCH_480X854");
           return true;
         } else {
