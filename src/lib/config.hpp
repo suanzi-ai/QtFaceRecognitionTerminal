@@ -136,7 +136,6 @@ typedef struct {
   int index;
   int rotate;
   int flip;
-  int pipe;
   ISPConfig isp;
 } CameraConfig;
 

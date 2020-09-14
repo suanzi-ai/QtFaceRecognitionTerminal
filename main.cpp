@@ -44,9 +44,7 @@ int main(int argc, char* argv[]) {
       .bgr =
           {
               .dev = bgr_cam.index,
-              .pipe = bgr_cam.pipe,
               .flip = true,
-              .vpss_group = bgr_cam.index,
               .channels =
                   {
                       {
@@ -81,9 +79,7 @@ int main(int argc, char* argv[]) {
       .nir =
           {
               .dev = nir_cam.index,
-              .pipe = nir_cam.pipe,
               .flip = true,
-              .vpss_group = nir_cam.index,
               .channels =
                   {
                       {
