@@ -9,7 +9,7 @@
 using namespace suanzi;
 
 int main(int argc, char* argv[]) {
-
+	
   QApplication app(argc, argv);
   Engine::instance();
   BootUi boot_ui;
