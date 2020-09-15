@@ -3,14 +3,16 @@
 
 #include <QThread>
 #include <quface-io/option.hpp>
+#include <quface-io/temperature.hpp>
 
 namespace suanzi {
+using namespace io;
 
 class TemperatureTask : public QThread {
   Q_OBJECT
 
  public:
-  TemperatureTask(io::TemperatureManufacturer p);
+  TemperatureTask(TemperatureManufacturer m);
   ~TemperatureTask();
 
  protected:
@@ -23,7 +25,8 @@ class TemperatureTask : public QThread {
  private:
   void run();
 
- protected:
+ private:
+  TemperatureReader::ptr temperature_reader_;
   bool enable_read_temperature_;
 };
 
