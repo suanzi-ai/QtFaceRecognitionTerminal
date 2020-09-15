@@ -7,10 +7,6 @@
 #include <QTimer>
 
 #include "config.hpp"
-#include "dashu_task.hpp"
-#include "otpa_task.hpp"
-#include "random_task.hpp"
-#include "haiman_task.hpp"
 #include "temperature_task.hpp"
 
 using namespace suanzi;
@@ -141,24 +137,14 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
   // Connect temperature to record_task
   if (!Config::get_user().disabled_temperature) {
     auto app = Config::get_app();
-    int temperature_manufacturer = app.temperature_manufacturer;
-    switch (temperature_manufacturer) {
-      case 1:
-        temperature_task_ = new OtpaTask();
-        break;
-      case 2:
-        temperature_task_ = new RandomTask();
-        break;
-	  case 3:
-	  	temperature_task_ = new HaimanTask();
-      default:
-        temperature_task_ = new DashuTask();
-        break;
-    }
+    temperature_task_ = new TemperatureTask(
+        (io::TemperatureManufacturer)app.temperature_manufacturer);
     connect((const QObject *)temperature_task_, SIGNAL(tx_temperature(float)),
             (const QObject *)record_task_, SLOT(rx_temperature(float)));
-	connect((const QObject *)detect_task_, SIGNAL(tx_enable_read_temperature(bool)),
-          (const QObject *)temperature_task_, SLOT(rx_enable_read_temperature(bool)));
+    connect((const QObject *)detect_task_,
+            SIGNAL(tx_enable_read_temperature(bool)),
+            (const QObject *)temperature_task_,
+            SLOT(rx_enable_read_temperature(bool)));
   }
 
   camera_reader_->start_sample();
