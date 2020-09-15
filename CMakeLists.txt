@@ -47,7 +47,7 @@ set(PROJECT_DEPENDENCY_DIR
 set(RESOURCE_PREFIX
     "${PROJECT_SOURCE_DIR}/resources"
     CACHE STRING "Dir for model & font file")
-set(${THIRD_PARTY_PREFIX}
+set(THIRD_PARTY_PREFIX
     "${PROJECT_DEPENDENCY_DIR}/3rd"
     CACHE STRING "Dir for third party")
 set(HISI_SDK_PREFIX
@@ -56,6 +56,9 @@ set(HISI_SDK_PREFIX
 set(QUFACE_SDK_PREFIX
     "${PROJECT_DEPENDENCY_DIR}/qufacesdk"
     CACHE STRING "Dir for quface sdk")
+set(QUFACE_IO_SDK_PREFIX
+    "${PROJECT_DEPENDENCY_DIR}/qufaceiosdk"
+    CACHE STRING "Dir for quface io sdk")
 set(QT_SDK_PREFIX
     "${PROJECT_DEPENDENCY_DIR}/qtsdk"
     CACHE STRING "Dir for qt sdk")
@@ -76,11 +79,11 @@ if(NOT EXISTS ${QUFACE_SDK_PREFIX})
 endif()
 
 set(CMAKE_FIND_ROOT_PATH
-    ${HISI_SDK_PREFIX} ${QUFACE_SDK_PREFIX} ${THIRD_PARTY_PREFIX}
-    ${QT_SDK_PREFIX} ${TEMPERATURE_SDK_PREFIX})
+    ${HISI_SDK_PREFIX} ${QUFACE_SDK_PREFIX} ${QUFACE_IO_SDK_PREFIX}
+    ${THIRD_PARTY_PREFIX} ${QT_SDK_PREFIX} ${TEMPERATURE_SDK_PREFIX})
 set(CMAKE_PREFIX_PATH
-    ${HISI_SDK_PREFIX} ${QUFACE_SDK_PREFIX} ${THIRD_PARTY_PREFIX}
-    ${QT_SDK_PREFIX} ${TEMPERATURE_SDK_PREFIX})
+    ${HISI_SDK_PREFIX} ${QUFACE_SDK_PREFIX} ${QUFACE_IO_SDK_PREFIX}
+    ${THIRD_PARTY_PREFIX} ${QT_SDK_PREFIX} ${TEMPERATURE_SDK_PREFIX})
 
 if(DOWNLOAD_DEPENDENCY)
   # -- Download dependecies --
@@ -143,6 +146,9 @@ endif()
 find_package(QuFaceSDK REQUIRED)
 message(STATUS "Found QuFaceSDK ${QuFaceSDK_VERSION}")
 
+find_package(QuFaceIOSDK REQUIRED)
+message(STATUS "Found QuFaceIOSDK ${QuFaceIOSDK_VERSION}")
+
 find_package(Qt5 REQUIRED COMPONENTS Widgets Charts)
 message(STATUS "Found Qt5 ${Qt5_VERSION}")
 
@@ -165,13 +171,9 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_definitions(-DDEBUG)
 endif()
 
-message(STATUS "Set log level ${SZ_LOG_LEVEL}")
-
 configure_file("${PROJECT_SOURCE_DIR}/src/static_config.hpp.in"
                "${PROJECT_BINARY_DIR}/include/static_config.hpp")
 include_directories(${PROJECT_BINARY_DIR}/include)
-
-add_subdirectory(quface-io)
 
 add_subdirectory(src/app)
 add_subdirectory(src/lib)

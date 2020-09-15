@@ -2,8 +2,10 @@
 
 set -e
 
+. ./user.env
+
 tmp_dir=/tmp/quface-upgrade
-face_terminal=~/build-cache/qtdemo/Release/main
+face_terminal=~/build-cache/qtdemo/$USER_BUILD_TYPE/main
 face_model=~/build-cache/qtdemo/facemodel.bin
 
 rm -rf $tmp_dir || true
