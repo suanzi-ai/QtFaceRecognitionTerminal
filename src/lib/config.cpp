@@ -245,7 +245,7 @@ void Config::load_defaults(ConfigData &c) {
       .temperature_distance = 0.68,
       .device_body_start_angle = 2500,
       .device_body_open_angle = 180,
-      .temperature_manufacturer = 0,  // 0大树 1众志 2随机
+      .temperature_manufacturer = 0,
       .infraraed_faces_store_path =
           APP_DIR_PREFIX "/var/face-terminal/ir-faces/",
       .show_isp_hist_window = false,
