@@ -110,8 +110,8 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
   buffer->switch_buffer();
   ImagePackage *input = buffer->get_pang();
 
-  if (!buffer_inited_.load()) {
-    buffer_inited_ = true;
+  bool buffer_inited = false;
+  if (buffer_inited_.compare_exchange_strong(buffer_inited, true)) {
     buffer_ping_ = new DetectionData(input);
     buffer_pang_ = new DetectionData(input);
     pingpang_buffer_ =
