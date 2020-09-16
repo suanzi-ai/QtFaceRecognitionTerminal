@@ -7,10 +7,6 @@
 #include <QTimer>
 
 #include "config.hpp"
-#include "dashu_task.hpp"
-#include "otpa_task.hpp"
-#include "random_task.hpp"
-#include "haiman_task.hpp"
 #include "temperature_task.hpp"
 
 using namespace suanzi;
@@ -140,25 +136,15 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
 
   // Connect temperature to record_task
   if (!Config::get_user().disabled_temperature) {
-    auto app = Config::get_app();
-    int temperature_manufacturer = app.temperature_manufacturer;
-    switch (temperature_manufacturer) {
-      case 1:
-        temperature_task_ = new OtpaTask();
-        break;
-      case 2:
-        temperature_task_ = new RandomTask();
-        break;
-	  case 3:
-	  	temperature_task_ = new HaimanTask();
-      default:
-        temperature_task_ = new DashuTask();
-        break;
-    }
+    auto temperature = Config::get_temperature();
+    temperature_task_ = new TemperatureTask(
+        (io::TemperatureManufacturer)temperature.manufacturer);
     connect((const QObject *)temperature_task_, SIGNAL(tx_temperature(float)),
             (const QObject *)record_task_, SLOT(rx_temperature(float)));
-	connect((const QObject *)detect_task_, SIGNAL(tx_enable_read_temperature(bool)),
-          (const QObject *)temperature_task_, SLOT(rx_enable_read_temperature(bool)));
+    connect((const QObject *)detect_task_,
+            SIGNAL(tx_enable_read_temperature(bool)),
+            (const QObject *)temperature_task_,
+            SLOT(rx_enable_read_temperature(bool)));
   }
 
   camera_reader_->start_sample();
@@ -181,7 +167,7 @@ VideoPlayer::~VideoPlayer() {}
 
 void VideoPlayer::paintEvent(QPaintEvent *event) {
   QPainter painter(this);
-  auto app = Config::get_app();
+  auto temperature = Config::get_temperature();
   auto user = Config::get_user();
   int screen_width, screen_height;
   camera_reader_->get_screen_size(screen_width, screen_height);
@@ -189,16 +175,15 @@ void VideoPlayer::paintEvent(QPaintEvent *event) {
   painter.drawText(20, 40, QString(ip_.c_str()));
   painter.drawText(screen_width - 230, 40, QString(version_.c_str()));
 
-  // Temperature mode: enable and is not fake mode
-  if (!user.disabled_temperature && app.temperature_manufacturer != 2) {
+  if (!user.disabled_temperature) {
     int device_body_start_angle, device_body_open_angle;
     float x, y, face_width, face_height;
-    x = (float)(app.device_face_x * screen_width);
-    y = (float)(app.device_face_y * screen_height);
-    face_width = (float)(app.device_face_width * screen_width);
-    face_height = (float)(app.device_face_height * screen_height);
-    device_body_start_angle = app.device_body_start_angle;
-    device_body_open_angle = app.device_body_open_angle;
+    x = (float)(temperature.device_face_x * screen_width);
+    y = (float)(temperature.device_face_y * screen_height);
+    face_width = (float)(temperature.device_face_width * screen_width);
+    face_height = (float)(temperature.device_face_height * screen_height);
+    device_body_start_angle = temperature.device_body_start_angle;
+    device_body_open_angle = temperature.device_body_open_angle;
     painter.setPen(QPen(Qt::white, 5, Qt::SolidLine));
     painter.drawEllipse(x, y, face_width, face_height);
     painter.drawChord(

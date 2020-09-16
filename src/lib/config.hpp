@@ -55,6 +55,13 @@ typedef struct {
   bool enable_anti_spoofing;
   bool show_infrared_window;
   int infrared_window_percent;
+  bool show_isp_hist_window;
+} AppConfig;
+
+void to_json(json &j, const AppConfig &c);
+void from_json(const json &j, AppConfig &c);
+
+typedef struct {
   SZ_FLOAT device_face_x;
   SZ_FLOAT device_face_y;
   SZ_FLOAT device_face_height;
@@ -62,13 +69,11 @@ typedef struct {
   SZ_FLOAT temperature_distance;
   SZ_UINT16 device_body_start_angle;
   SZ_UINT16 device_body_open_angle;
-  int temperature_manufacturer;
-  std::string infraraed_faces_store_path;
-  bool show_isp_hist_window;
-} AppConfig;
+  int manufacturer;
+} TemperatureConfig;
 
-void to_json(json &j, const AppConfig &c);
-void from_json(const json &j, AppConfig &c);
+void to_json(json &j, const TemperatureConfig &c);
+void from_json(const json &j, TemperatureConfig &c);
 
 typedef struct {
   std::string product_key;
@@ -176,6 +181,7 @@ void from_json(const json &j, Levels<T> &c) {
 typedef struct {
   UserConfig user;
   AppConfig app;
+  TemperatureConfig temperature;
   QufaceConfig quface;
   CameraConfig normal;
   CameraConfig infrared;
@@ -204,6 +210,7 @@ class Config : public ConfigEventEmitter {
 
   static const ConfigData &get_all();
   static const UserConfig &get_user();
+  static const TemperatureConfig &get_temperature();
   static const AppConfig &get_app();
   static const QufaceConfig &get_quface();
   static const CameraConfig &get_camera(io::CameraType tp);

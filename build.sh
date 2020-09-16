@@ -2,9 +2,17 @@
 
 set -e
 
+pushd quface-io
+./build.sh
+popd
+
 export LC_ALL=C
 
-ENV_FILE="user.env"
+source_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+build_root_dir="$source_dir/build"
+clean_3rd="no"
+
+ENV_FILE="$source_dir/user.env"
 
 if [ ! -f "$ENV_FILE" ]; then
     echo -e "-- Please copy $ENV_FILE.sample to $ENV_FILE and modify it"
@@ -15,10 +23,6 @@ fi
 
 build_type=${USER_BUILD_TYPE:-"Release"}
 cmake_generator=${USER_CMAKE_GENERATOR:-"Unix Makefiles"}
-
-source_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
-build_root_dir="$source_dir/build"
-clean_3rd="no"
 
 if [[ $USER_BUILD_DIR ]]; then
     build_root_dir=$USER_BUILD_DIR
