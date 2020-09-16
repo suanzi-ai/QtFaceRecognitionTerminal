@@ -40,6 +40,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 option(DOWNLOAD_DEPENDENCY "Download 3rd party dependencies from remote" ON)
+option(GENERATE_QT_TS_FILES "Generate qt ts files" OFF)
 
 set(PROJECT_DEPENDENCY_DIR
     "${PROJECT_SOURCE_DIR}/deps"
@@ -180,11 +181,17 @@ add_subdirectory(src/lib)
 add_subdirectory(src/ui)
 add_subdirectory(src/service)
 
-# set(TRANSLATION_FILES src/ui/recognize_tip_widget.cpp
-# src/ui/screen_saver_widget.cpp src/app/record_task.cpp)
-# qt5_create_translation(QM_FILES ${TRANSLATION_FILES} i18n/facescope_en.ts
-# i18n/facescope_zh_CN.ts)
-qt5_add_translation(QM_FILES i18n/facescope_en.ts)
+set(TRANSLATION_TS_FILES i18n/facescope_en.ts)
+if(GENERATE_QT_TS_FILES)
+  set(TRANSLATION_SRC_FILES
+      src/ui/recognize_tip_widget.cpp src/ui/screen_saver_widget.cpp
+      src/app/record_task.cpp)
+  qt5_create_translation(QM_FILES ${TRANSLATION_SRC_FILES}
+                         ${TRANSLATION_TS_FILES})
+else()
+  qt5_add_translation(QM_FILES ${TRANSLATION_TS_FILES})
+endif()
+
 configure_file(i18n/translations.qrc ${PROJECT_BINARY_DIR} COPYONLY)
 
 add_executable(main main.cpp resource.qrc
