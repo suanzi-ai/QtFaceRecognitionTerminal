@@ -1,16 +1,24 @@
 #include <QMetaType>
 #include <QtWidgets/QApplication>
-
+#include <QTranslator>
 #include "face_server.hpp"
 #include "http_server.hpp"
 #include "video_player.hpp"
-
 using namespace suanzi;
 
 int main(int argc, char* argv[]) {
-  QApplication app(argc, argv);
-  auto engine = Engine::instance();
 
+  QApplication app(argc, argv);
+  
+  auto engine = Engine::instance();
+  BootUi boot_ui;
+  
+  QTranslator translator;
+  if (!translator.load(":/asserts/facescope_en")) { 
+  	SZ_LOG_WARN("translator load failed, :/asserts/facescope_en");
+  }
+  app.installTranslator(&translator);
+  
   std::string cfg_file = "config.json";
   std::string cfg_override_file = "config.override.json";
   for (int i = 1; i < argc; i++) {

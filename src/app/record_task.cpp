@@ -96,7 +96,7 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
         SZ_RETCODE_OK != person_service_->get_person(face_id, person)) {
       person.id = 0;
       person.score = 0;
-      person.name = "访客";
+      person.name = tr("访客").toStdString();
       person.face_path = ":asserts/avatar_unknown.jpg";
       person.status = person_service_->get_status(PersonStatus::Stranger);
     }
@@ -104,9 +104,9 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
     // decide fake or live
     if (!is_live) {
       if (Config::get_user().liveness_policy == "alarm") {
-        person.name = "活体失败";
+        person.name = tr("活体失败").toStdString();
       } else {  // stranger
-        person.name = "访客";
+        person.name = tr("访客").toStdString();
       }
       person.id = 0;
       person.score = 0;
@@ -116,9 +116,9 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
 
     if (person.is_status_blacklist()) {
       if (Config::get_user().blacklist_policy == "alarm") {
-        person.name = "黑名单";
+        person.name = tr("黑名单").toStdString();
       } else {  // stranger
-        person.name = "访客";
+        person.name = tr("访客").toStdString();
       }
       person.id = 0;
       person.score = 0;

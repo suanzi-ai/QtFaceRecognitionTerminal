@@ -9,14 +9,13 @@
 using namespace suanzi;
 
 ScreenSaverWidget::ScreenSaverWidget(int width, int height, QWidget *parent)
-    : QWidget(parent), background_(":asserts/background.jpg") {
+    : QWidget(parent), background_(":asserts/backgroud.jpg") {
   QPalette palette = this->palette();
   palette.setColor(QPalette::Background, Qt::transparent);
   setPalette(palette);
 
   move(0, 0);
   setFixedSize(width, height);
-
   background_.scaled(width, height);
 }
 
@@ -37,13 +36,19 @@ void ScreenSaverWidget::paintEvent(QPaintEvent *event) {
   const int h = height();
 
   // draw background
-  painter.drawPixmap(QRect(0, 0, w, h), background_, QRect());
+  //painter.drawPixmap(QRect(0, 0, w, h), background_, QRect());
+
+  QPixmap pixmapToShow = QPixmap::fromImage(background_);
+  painter.drawPixmap(QRect(0, 0, w, h), pixmapToShow, QRect());
+
+
+  
 
   // draw datetime
   QDateTime now = QDateTime::currentDateTime().toUTC().addSecs(8 * 3600);
 
-  QString time = now.toString("hh   mm");
-  QString date = now.toString("yyyy年MM月dd日");
+  QString time = now.toString(tr("hh   mm"));
+  QString date = now.toString(tr("yyyy年MM月dd日"));
 
   int base_font_size = h * 2 / 100;
 
