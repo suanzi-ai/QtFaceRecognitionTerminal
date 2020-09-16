@@ -12,99 +12,8 @@ using namespace suanzi::io;
 CameraReader::CameraReader(QObject *parent) {
   auto app = Config::get_app();
 
-  if (!load_screen_type()) {
-    SZ_LOG_ERROR("Load screen type error");
-  }
-
-  // Initialize VI_VPSS for BGR
-  auto bgr_cam = Config::get_camera(CAMERA_BGR);
-  // Initialize VI_VPSS for NIR
-  auto nir_cam = Config::get_camera(CAMERA_NIR);
-
-  EngineOption opt = {
-      .bgr =
-          {
-              .dev = bgr_cam.index,
-              .pipe = bgr_cam.pipe,
-              .flip = true,
-              .vpss_group = bgr_cam.index,
-              .channels =
-                  {
-                      VpssChannel{
-                          .index = 0,
-                          .rotate = 0,
-                          .size =
-                              {
-                                  .width = 1920,
-                                  .height = 1080,
-                              },
-                      },
-                      VpssChannel{
-                          .index = 1,
-                          .rotate = 1,
-                          .size =
-                              {
-                                  .width = 1080,
-                                  .height = 704,
-                              },
-                      },
-                      VpssChannel{
-                          .index = 2,
-                          .rotate = 1,
-                          .size =
-                              {
-                                  .width = 320,
-                                  .height = 224,
-                              },
-                      },
-                  },
-          },
-      .nir =
-          {
-              .dev = nir_cam.index,
-              .pipe = nir_cam.pipe,
-              .flip = true,
-              .vpss_group = nir_cam.index,
-              .channels =
-                  {
-                      VpssChannel{
-                          .index = 0,
-                          .rotate = 0,
-                          .size =
-                              {
-                                  .width = 1920,
-                                  .height = 1080,
-                              },
-                      },
-                      VpssChannel{
-                          .index = 1,
-                          .rotate = 1,
-                          .size =
-                              {
-                                  .width = 1080,
-                                  .height = 704,
-                              },
-                      },
-                      VpssChannel{
-                          .index = 2,
-                          .rotate = 1,
-                          .size =
-                              {
-                                  .width = 320,
-                                  .height = 224,
-                              },
-                      },
-                  },
-          },
-      .screen =
-          {
-              .type = lcd_screen_type_,
-          },
-      .show_secondary_win = app.show_infrared_window,
-      .secondary_win_percent = (SecondaryWinPercent)app.infrared_window_percent,
-  };
-
-  Engine::instance()->init(opt);
+  auto engine = Engine::instance();
+  engine->start();
 
   SZ_LOG_INFO("Update isp ...");
   if (!isp_update()) {
@@ -119,27 +28,13 @@ CameraReader::CameraReader(QObject *parent) {
   });
 
   // Initialize PINGPANG buffer
-  Size size_bgr_1 = opt.bgr.channels[1].size;
-  Size size_bgr_2 = opt.bgr.channels[2].size;
-  if (opt.bgr.channels[1].rotate % 2) {
-    size_bgr_1.height = opt.bgr.channels[1].size.width;
-    size_bgr_1.width = opt.bgr.channels[1].size.height;
-  }
-  if (opt.bgr.channels[2].rotate % 2) {
-    size_bgr_2.height = opt.bgr.channels[2].size.width;
-    size_bgr_2.width = opt.bgr.channels[2].size.height;
-  }
+  Size size_bgr_1, size_bgr_2;
+  Size size_nir_1, size_nir_2;
 
-  Size size_nir_1 = opt.nir.channels[1].size;
-  Size size_nir_2 = opt.nir.channels[2].size;
-  if (opt.nir.channels[1].rotate % 2) {
-    size_nir_1.height = opt.nir.channels[1].size.width;
-    size_nir_1.width = opt.nir.channels[1].size.height;
-  }
-  if (opt.nir.channels[2].rotate % 2) {
-    size_nir_2.height = opt.nir.channels[2].size.width;
-    size_nir_2.width = opt.nir.channels[2].size.height;
-  }
+  engine->get_frame_size(CAMERA_BGR, 1, size_bgr_1);
+  engine->get_frame_size(CAMERA_BGR, 2, size_bgr_2);
+  engine->get_frame_size(CAMERA_NIR, 1, size_nir_1);
+  engine->get_frame_size(CAMERA_NIR, 2, size_nir_2);
 
   buffer_ping_ =
       new ImagePackage(size_bgr_1, size_bgr_2, size_nir_1, size_nir_2);
@@ -155,47 +50,6 @@ CameraReader::~CameraReader() {
   if (buffer_ping_) delete buffer_ping_;
   if (buffer_pang_) delete buffer_pang_;
   if (pingpang_buffer_) delete pingpang_buffer_;
-}
-
-bool CameraReader::load_screen_type() {
-  std::string conf_filename = "/userdata/user.conf";
-  std::ifstream conf(conf_filename);
-  if (!conf.is_open()) {
-    SZ_LOG_ERROR("Can't open {}", conf_filename);
-    return false;
-  }
-
-  std::string line;
-  std::regex reg("^LCD=(\\d+).+", std::regex_constants::ECMAScript |
-                                      std::regex_constants::icase);
-  std::smatch matches;
-  while (std::getline(conf, line)) {
-    if (std::regex_match(line, matches, reg)) {
-      if (matches.size() == 2) {
-        std::ssub_match base_sub_match = matches[1];
-        std::string lcd_type = base_sub_match.str();
-        // 0: mipi-7inch-1024x600(default)
-        // 1: mipi-8inch-800x1280
-        // 2: mipi-10inch-800x1280
-        // 4: mipi-5inch-480x854
-
-        if (lcd_type == "1") {
-          lcd_screen_type_ = SML_LCD_MIPI_8INCH_800X1280;
-          SZ_LOG_INFO("Load screen type SML_LCD_MIPI_8INCH_800X1280");
-          return true;
-        } else if (lcd_type == "4") {
-          lcd_screen_type_ = SML_LCD_MIPI_5INCH_480X854;
-          SZ_LOG_INFO("Load screen type SML_LCD_MIPI_5INCH_480X854");
-          return true;
-        } else {
-          SZ_LOG_ERROR("lcd type unknown {}", lcd_type);
-        }
-        return false;
-      }
-    }
-  }
-
-  return false;
 }
 
 bool CameraReader::get_screen_size(int &width, int &height) {

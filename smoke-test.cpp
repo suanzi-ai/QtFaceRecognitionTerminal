@@ -56,9 +56,7 @@ void test() {
       .bgr =
           {
               .dev = 0,
-              .pipe = 0,
               .flip = true,
-              .vpss_group = 0,
               .channels =
                   {
                       {
@@ -75,9 +73,7 @@ void test() {
       .nir =
           {
               .dev = 1,
-              .pipe = 2,
               .flip = true,
-              .vpss_group = 1,
               .channels =
                   {
                       {
@@ -101,7 +97,8 @@ void test() {
 
   auto engine = Engine::instance();
 
-  engine->init(opt);
+  engine->set_option(opt);
+  engine->start();
 
   {
     for (int i = 0; i < 5; i++) {
