@@ -7,6 +7,7 @@
 #define APP_VERSION "@PROJECT_VERSION@"
 
 #define QuFaceSDK_VERSION "@QuFaceSDK_VERSION@"
+#define QuFaceIOSDK_VERSION "@QuFaceIOSDK_VERSION@"
 
 #define GIT_REFSPEC "@GIT_REFSPEC@"
 #define GIT_SHA1 "@GIT_SHA1@"

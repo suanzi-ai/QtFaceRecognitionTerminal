@@ -73,12 +73,6 @@ message(STATUS "set QUFACE_SDK_PREFIX to: ${QUFACE_SDK_PREFIX}")
 message(STATUS "set QT_SDK_PREFIX to: ${QT_SDK_PREFIX}")
 message(STATUS "set TEMPERATURE_SDK_PREFIX to: ${TEMPERATURE_SDK_PREFIX}")
 
-if(NOT EXISTS ${QUFACE_SDK_PREFIX})
-  message(STATUS "HINTS:     cd path_to_quface")
-  message(STATUS "HINTS:     ./build_hisi.sh --install-to=${QUFACE_SDK_PREFIX}")
-  message(FATAL_ERROR "QUFACE_SDK_PREFIX: ${QUFACE_SDK_PREFIX} not exists!")
-endif()
-
 set(CMAKE_FIND_ROOT_PATH
     ${HISI_SDK_PREFIX} ${QUFACE_SDK_PREFIX} ${QUFACE_IO_SDK_PREFIX}
     ${THIRD_PARTY_PREFIX} ${QT_SDK_PREFIX} ${TEMPERATURE_SDK_PREFIX})
@@ -103,6 +97,26 @@ if(DOWNLOAD_DEPENDENCY)
     cef0d9f7fb8b300850813a6072c94ba7a9638b6d5b94ec3b52de9672d92d8ce6
     EXTRACT_DIR
     ${QT_SDK_PREFIX})
+
+  download_and_extract(
+    URL
+    https://quvision.oss-cn-beijing.aliyuncs.com/qufacesdk/releases/QuFaceSDK-latest-hisi-rp-dv300.tar.gz
+    FILENAME
+    ${DOWNLOAD_DIR}/QuFaceSDK-latest-hisi-rp-dv300.tar.gz
+    HASH_TYPE
+    SHA256
+    EXTRACT_DIR
+    ${QUFACE_SDK_PREFIX})
+
+  download_and_extract(
+    URL
+    https://quvision.oss-cn-beijing.aliyuncs.com/qufacesdk/io-releases/QufaceIOSDK-latest-hisi-rp-dv300.tar.gz
+    FILENAME
+    ${DOWNLOAD_DIR}/QufaceIOSDK-latest-hisi-rp-dv300.tar.gz
+    HASH_TYPE
+    SHA256
+    EXTRACT_DIR
+    ${QUFACE_IO_SDK_PREFIX})
 
   download_and_extract(
     URL

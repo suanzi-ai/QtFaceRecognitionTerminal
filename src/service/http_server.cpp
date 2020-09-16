@@ -72,6 +72,7 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
     json body = {
         {"version", GIT_DESCRIBE},
         {"quface_sdk_version", QuFaceSDK_VERSION},
+        {"quface_io_sdk_version", QuFaceIOSDK_VERSION},
     };
     res.set_content(body.dump(), "application/json");
   });
