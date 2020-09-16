@@ -30,6 +30,7 @@ typedef enum DoorOpenCond {
 } DoorOpenCond;
 
 typedef struct {
+  std::string lang;
   std::string blacklist_policy;
   std::string liveness_policy;
   std::string detect_level;

@@ -149,7 +149,7 @@ message(STATUS "Found QuFaceSDK ${QuFaceSDK_VERSION}")
 find_package(QuFaceIOSDK REQUIRED)
 message(STATUS "Found QuFaceIOSDK ${QuFaceIOSDK_VERSION}")
 
-find_package(Qt5 REQUIRED COMPONENTS Widgets Charts)
+find_package(Qt5 REQUIRED COMPONENTS Widgets Charts LinguistTools)
 message(STATUS "Found Qt5 ${Qt5_VERSION}")
 
 find_package(httplib)
@@ -180,11 +180,20 @@ add_subdirectory(src/lib)
 add_subdirectory(src/ui)
 add_subdirectory(src/service)
 
-add_executable(main main.cpp resource.qrc)
+# set(TRANSLATION_FILES src/ui/recognize_tip_widget.cpp
+# src/ui/screen_saver_widget.cpp src/app/record_task.cpp)
+# qt5_create_translation(QM_FILES ${TRANSLATION_FILES} i18n/facescope_en.ts
+# i18n/facescope_zh_CN.ts)
+qt5_add_translation(QM_FILES i18n/facescope_en.ts)
+configure_file(i18n/translations.qrc ${PROJECT_BINARY_DIR} COPYONLY)
+
+add_executable(main main.cpp resource.qrc
+                    ${PROJECT_BINARY_DIR}/translations.qrc)
 target_link_libraries(main PRIVATE ui)
 install(TARGETS main DESTINATION .)
 
-add_executable(smoke-test smoke-test.cpp resource.qrc)
+add_executable(smoke-test smoke-test.cpp resource.qrc
+                          ${PROJECT_BINARY_DIR}/translations.qrc)
 target_link_libraries(smoke-test PRIVATE ui)
 
 install(DIRECTORY ${RESOURCE_PREFIX}/models/ DESTINATION .)

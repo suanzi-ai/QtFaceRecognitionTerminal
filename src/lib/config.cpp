@@ -6,6 +6,7 @@ using namespace suanzi;
 using namespace suanzi::io;
 
 void suanzi::to_json(json &j, const UserConfig &c) {
+  SAVE_JSON_TO(j, "lang", c.lang);
   SAVE_JSON_TO(j, "blacklist_policy", c.blacklist_policy);
   SAVE_JSON_TO(j, "liveness_policy", c.liveness_policy);
   SAVE_JSON_TO(j, "detect_level", c.detect_level);
@@ -20,6 +21,7 @@ void suanzi::to_json(json &j, const UserConfig &c) {
 }
 
 void suanzi::from_json(const json &j, UserConfig &c) {
+  LOAD_JSON_TO(j, "lang", c.lang);
   LOAD_JSON_TO(j, "blacklist_policy", c.blacklist_policy);
   LOAD_JSON_TO(j, "liveness_policy", c.liveness_policy);
   LOAD_JSON_TO(j, "detect_level", c.detect_level);
@@ -259,6 +261,7 @@ void Config::load_defaults(ConfigData &c) {
   };
 
   c.user = {
+      .lang = "zh_CN",
       .blacklist_policy = "alarm",
       .liveness_policy = "alarm",
       .detect_level = "medium",
