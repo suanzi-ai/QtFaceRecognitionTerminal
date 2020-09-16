@@ -78,8 +78,8 @@ void RecognizeTipWidget::paintEvent(QPaintEvent *event) {
 
   // draw datetime
   QDateTime now = QDateTime::currentDateTime().toUTC().addSecs(8 * 3600);
-  QString time = now.toString("hh : mm");
-  QString date = now.toString("yyyy年MM月dd日");
+  QString time = now.toString(tr("hh : mm"));
+  QString date = now.toString(tr("yyyy年MM月dd日"));
 
   int base_font_size = h * 5 / 100;
 
@@ -98,7 +98,7 @@ void RecognizeTipWidget::paintEvent(QPaintEvent *event) {
   name = person_.name.c_str();
   avatar_path = person_.face_path.c_str();
   if (person_.number.length() > 0)
-    staff_number = ("工号: " + person_.number).c_str();
+    staff_number = (tr("工号: ").toStdString() + person_.number).c_str();
   else
     staff_number = "";
 
@@ -117,7 +117,7 @@ void RecognizeTipWidget::paintEvent(QPaintEvent *event) {
 
   bool disable_temperature = Config::get_user().disabled_temperature;
   std::stringstream ss;
-  ss << "温度: " << std::setprecision(3) << person_.temperature << "°C";
+  ss << tr("温度: ").toStdString() << std::setprecision(3) << person_.temperature << "°C";
   QString body_temperature = ss.str().c_str();
 
   font.setPixelSize(base_font_size * 2);

@@ -17,4 +17,7 @@
 <qresource>
     <file>asserts/temperature_normal.aac</file>
 </qresource>
+<qresource>
+    <file>asserts/facescope_en.qm</file>
+</qresource>
 </RCC>

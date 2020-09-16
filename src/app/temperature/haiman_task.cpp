@@ -34,15 +34,18 @@ void HaimanTask::run() {
 	  int timeout = 0;
 	  int recv_len = 0;
 	  recv_len = uart.recv(recv_buf, 7);
+	  printf("len=%d  ", recv_len);
 	  if (recv_len == 7 && recv_buf[0] == 0xA5 && recv_buf[6] == get_check_sum(recv_buf, 6)) {
 		 temperature = (recv_buf[2] + (recv_buf[3] << 8)) / 100.0;
+		 printf("temp=%.2f ", temperature);
 		 if (temperature < 0.00001 && temperature >= -0.0001)
 		 	;
 		 else
 			emit tx_temperature(temperature);		 	
 	  }
+	  printf("\n");
     }
 
-    usleep(250000);
+    usleep(1000000);
   }
 }

@@ -2,6 +2,7 @@
 #define SCREEN_SAVER_WIDGET_H
 
 #include <QPixmap>
+#include <QImage>
 #include <QWidget>
 
 namespace suanzi {
@@ -21,7 +22,7 @@ class ScreenSaverWidget : public QWidget {
   void rx_hide();
 
  private:
-  QPixmap background_;
+  QImage background_;
 };
 
 }  // namespace suanzi

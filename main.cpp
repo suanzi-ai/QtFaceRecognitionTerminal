@@ -1,16 +1,24 @@
 #include <QMetaType>
 #include <QtWidgets/QApplication>
-
+#include <QTranslator>
 #include "face_server.hpp"
 #include "http_server.hpp"
 #include "video_player.hpp"
 #include "boot_ui.hpp"
+#include "haiman_task.hpp"
 
 using namespace suanzi;
 
 int main(int argc, char* argv[]) {
-	
+
   QApplication app(argc, argv);
+  
+  QTranslator translator;
+  if (!translator.load(":/asserts/facescope_en")) { 
+  	SZ_LOG_WARN("translator load failed, :/asserts/facescope_en");
+  }
+  app.installTranslator(&translator);
+  
   Engine::instance();
   BootUi boot_ui;
   
