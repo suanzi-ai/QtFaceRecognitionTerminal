@@ -9,7 +9,7 @@
 using namespace suanzi;
 
 ScreenSaverWidget::ScreenSaverWidget(int width, int height, QWidget *parent)
-    : QWidget(parent), background_(":asserts/backgroud.jpg") {
+    : QWidget(parent), background_(":asserts/background.jpg") {
   QPalette palette = this->palette();
   palette.setColor(QPalette::Background, Qt::transparent);
   setPalette(palette);
