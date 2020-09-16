@@ -42,15 +42,6 @@ void suanzi::to_json(json &j, const AppConfig &c) {
   SAVE_JSON_TO(j, "enable_anti_spoofing", c.enable_anti_spoofing);
   SAVE_JSON_TO(j, "show_infrared_window", c.show_infrared_window);
   SAVE_JSON_TO(j, "infrared_window_percent", c.infrared_window_percent);
-  SAVE_JSON_TO(j, "device_face_x", c.device_face_x);
-  SAVE_JSON_TO(j, "device_face_y", c.device_face_y);
-  SAVE_JSON_TO(j, "device_face_height", c.device_face_height);
-  SAVE_JSON_TO(j, "device_face_width", c.device_face_width);
-  SAVE_JSON_TO(j, "temperature_distance", c.temperature_distance);
-  SAVE_JSON_TO(j, "device_body_start_angle", c.device_body_start_angle);
-  SAVE_JSON_TO(j, "device_body_open_angle", c.device_body_open_angle);
-  SAVE_JSON_TO(j, "temperature_manufacturer", c.temperature_manufacturer);
-  SAVE_JSON_TO(j, "infraraed_faces_store_path", c.infraraed_faces_store_path);
   SAVE_JSON_TO(j, "show_isp_hist_window", c.show_isp_hist_window);
 }
 
@@ -63,6 +54,21 @@ void suanzi::from_json(const json &j, AppConfig &c) {
   LOAD_JSON_TO(j, "enable_anti_spoofing", c.enable_anti_spoofing);
   LOAD_JSON_TO(j, "show_infrared_window", c.show_infrared_window);
   LOAD_JSON_TO(j, "infrared_window_percent", c.infrared_window_percent);
+  LOAD_JSON_TO(j, "show_isp_hist_window", c.show_isp_hist_window);
+}
+
+void suanzi::to_json(json &j, const TemperatureConfig &c) {
+  SAVE_JSON_TO(j, "device_face_x", c.device_face_x);
+  SAVE_JSON_TO(j, "device_face_y", c.device_face_y);
+  SAVE_JSON_TO(j, "device_face_height", c.device_face_height);
+  SAVE_JSON_TO(j, "device_face_width", c.device_face_width);
+  SAVE_JSON_TO(j, "temperature_distance", c.temperature_distance);
+  SAVE_JSON_TO(j, "device_body_start_angle", c.device_body_start_angle);
+  SAVE_JSON_TO(j, "device_body_open_angle", c.device_body_open_angle);
+  SAVE_JSON_TO(j, "manufacturer", c.manufacturer);
+}
+
+void suanzi::from_json(const json &j, TemperatureConfig &c) {
   LOAD_JSON_TO(j, "device_face_x", c.device_face_x);
   LOAD_JSON_TO(j, "device_face_y", c.device_face_y);
   LOAD_JSON_TO(j, "device_face_height", c.device_face_height);
@@ -70,9 +76,7 @@ void suanzi::from_json(const json &j, AppConfig &c) {
   LOAD_JSON_TO(j, "temperature_distance", c.temperature_distance);
   LOAD_JSON_TO(j, "device_body_start_angle", c.device_body_start_angle);
   LOAD_JSON_TO(j, "device_body_open_angle", c.device_body_open_angle);
-  LOAD_JSON_TO(j, "temperature_manufacturer", c.temperature_manufacturer);
-  LOAD_JSON_TO(j, "infraraed_faces_store_path", c.infraraed_faces_store_path);
-  LOAD_JSON_TO(j, "show_isp_hist_window", c.show_isp_hist_window);
+  LOAD_JSON_TO(j, "manufacturer", c.manufacturer);
 }
 
 void suanzi::to_json(json &j, const QufaceConfig &c) {
@@ -190,6 +194,7 @@ void suanzi::from_json(const json &j, ISPGlobalConfig &c) {
 void suanzi::from_json(const json &j, ConfigData &c) {
   LOAD_JSON_TO(j, "user", c.user);
   LOAD_JSON_TO(j, "app", c.app);
+  LOAD_JSON_TO(j, "temperature", c.temperature);
   LOAD_JSON_TO(j, "quface", c.quface);
   LOAD_JSON_TO(j, "isp", c.isp);
 
@@ -208,6 +213,7 @@ void suanzi::from_json(const json &j, ConfigData &c) {
 void suanzi::to_json(json &j, const ConfigData &c) {
   SAVE_JSON_TO(j, "user", c.user);
   SAVE_JSON_TO(j, "app", c.app);
+  SAVE_JSON_TO(j, "temperature", c.temperature);
   SAVE_JSON_TO(j, "quface", c.quface);
 
   json cameras;
@@ -238,17 +244,18 @@ void Config::load_defaults(ConfigData &c) {
       .enable_anti_spoofing = false,
       .show_infrared_window = false,
       .infrared_window_percent = 25,
+      .show_isp_hist_window = false,
+  };
+
+  c.temperature = {
       .device_face_x = 0.289,
       .device_face_y = 0.18,
       .device_face_height = 0.35,
       .device_face_width = 0.48,
       .temperature_distance = 0.68,
-      .device_body_start_angle = 2500,
-      .device_body_open_angle = 180,
-      .temperature_manufacturer = 0,
-      .infraraed_faces_store_path =
-          APP_DIR_PREFIX "/var/face-terminal/ir-faces/",
-      .show_isp_hist_window = false,
+      .device_body_start_angle = 180,
+      .device_body_open_angle = 2500,
+      .manufacturer = 1,
   };
 
   c.user = {
@@ -329,7 +336,11 @@ void Config::load_defaults(ConfigData &c) {
                       .luma_threshold = 240,
                       .luma_target = 10,
                   },
-              .drc = {.enable = true, .op_type = "auto"},
+              .drc =
+                  {
+                      .enable = true,
+                      .op_type = "auto",
+                  },
           },
   };
 
@@ -382,32 +393,44 @@ void Config::load_defaults(ConfigData &c) {
                       .luma_threshold = 240,
                       .luma_target = 10,
                   },
-              .drc = {.enable = true, .op_type = "auto"},
+              .drc =
+                  {
+                      .enable = true,
+                      .op_type = "auto",
+                  },
           },
   };
 
   c.detect_levels_ = {
-      .high = {.threshold = 0.4f,
-               .min_face_size = 40,
-               .max_yaw = 10,
-               .min_yaw = -10,
-               .max_pitch = 10,   // disable max pitch
-               .min_pitch = -10,  // disable min pitch
-               .min_roll = -10,
-               .max_roll = 10,
-               .min_tracking_iou = 0.9,
-               .min_tracking_number = 3},
-      .medium = {.threshold = 0.4f,
-                 .min_face_size = 30,
-                 .max_yaw = 15,
-                 .min_yaw = -15,
-                 .max_pitch = 15,   // disable max pitch
-                 .min_pitch = -15,  // disable min pitch
-                 .min_roll = -15,
-                 .max_roll = 15,
-                 .min_tracking_iou = 0.9,
-                 .min_tracking_number = 3},
-      .low = {.threshold = 0.4f,
+      .high =
+          {
+              .threshold = 0.4f,
+              .min_face_size = 40,
+              .max_yaw = 10,
+              .min_yaw = -10,
+              .max_pitch = 10,   // disable max pitch
+              .min_pitch = -10,  // disable min pitch
+              .min_roll = -10,
+              .max_roll = 10,
+              .min_tracking_iou = 0.9,
+              .min_tracking_number = 3,
+          },
+      .medium =
+          {
+              .threshold = 0.4f,
+              .min_face_size = 30,
+              .max_yaw = 15,
+              .min_yaw = -15,
+              .max_pitch = 15,   // disable max pitch
+              .min_pitch = -15,  // disable min pitch
+              .min_roll = -15,
+              .max_roll = 15,
+              .min_tracking_iou = 0.9,
+              .min_tracking_number = 3,
+          },
+      .low =
+          {
+              .threshold = 0.4f,
               .min_face_size = 30,
               .max_yaw = 15,
               .min_yaw = -15,
@@ -416,7 +439,8 @@ void Config::load_defaults(ConfigData &c) {
               .min_roll = -15,
               .max_roll = 15,
               .min_tracking_iou = 0.85,
-              .min_tracking_number = 2},
+              .min_tracking_number = 2,
+          },
   };
 
   c.extract_levels_ = {
@@ -654,6 +678,11 @@ const ConfigData &Config::get_all() {
 const UserConfig &Config::get_user() {
   std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
   return instance_.cfg_data_.user;
+}
+
+const TemperatureConfig &Config::get_temperature() {
+  std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
+  return instance_.cfg_data_.temperature;
 }
 
 const AppConfig &Config::get_app() {

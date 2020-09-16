@@ -1,5 +1,7 @@
 #include "detection_data.hpp"
 
+#include <cmath>
+
 #include "config.hpp"
 
 using namespace suanzi;
@@ -49,35 +51,34 @@ bool DetectionRatio::is_overlap(DetectionRatio other) {
 }
 
 bool DetectionRatio::is_valid() {
-  auto cfg = Config::get_detect();
-  auto app = Config::get_app();
+  auto detect = Config::get_detect();
+  auto temperature = Config::get_temperature();
   auto user = Config::get_user();
-  bool pose_valid = !isnanf(yaw) && !isnanf(pitch) && !isnanf(roll) &&
-                    cfg.min_yaw < yaw && yaw < cfg.max_yaw &&
-                    cfg.min_pitch < pitch && pitch < cfg.max_pitch &&
-                    cfg.min_roll < roll && roll < cfg.max_roll;
+  bool pose_valid = !std::isnan(yaw) && !std::isnan(pitch) &&
+                    !std::isnan(roll) && detect.min_yaw < yaw &&
+                    yaw < detect.max_yaw && detect.min_pitch < pitch &&
+                    pitch < detect.max_pitch && detect.min_roll < roll &&
+                    roll < detect.max_roll;
   bool position_valid;
 
-  // Temperature Mode: disabled or fake
-  if (user.disabled_temperature || app.temperature_manufacturer == 2)
+  if (user.disabled_temperature)
     position_valid =
         x > 0.01 && y > 0.01 && x + width < 0.99 && y + height < 0.99;
   else {
-    float face_width, face_height, face_x, face_y, temperature_distance;
+    float face_width, face_height, face_x, face_y, distance;
 
-    face_width = app.device_face_width;
-    face_height = app.device_face_height;
-    face_x = app.device_face_x;
-    face_y = app.device_face_y;
-    temperature_distance = app.temperature_distance;
+    face_width = temperature.device_face_width;
+    face_height = temperature.device_face_height;
+    face_x = temperature.device_face_x;
+    face_y = temperature.device_face_y;
+    distance = temperature.temperature_distance;
 
     position_valid =
         x > face_x && y > face_y && x + width < face_x + face_width &&
         y + height - 0.04 < face_height + face_y &&
-        width > face_width * temperature_distance &&
+        width > face_width * distance &&
         height >
-            face_height *
-                temperature_distance;  // 补偿0.04，以让人脸完全进入框中也能识别
+            face_height * distance;  // 补偿0.04，以让人脸完全进入框中也能识别
   }
   return pose_valid && position_valid;
 }
