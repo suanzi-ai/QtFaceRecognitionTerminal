@@ -7,7 +7,6 @@ export LC_ALL=C
 source_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 build_root_dir="$source_dir/build"
 install_dir=$source_dir/install
-clean_3rd="no"
 
 ENV_FILE="$source_dir/user.env"
 
@@ -96,7 +95,6 @@ pushd $build_dir
 cmake $source_dir -G "$cmake_generator" \
     -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON \
     -DCMAKE_INSTALL_PREFIX=$install_dir \
-    -DDOWNLOAD_DEPENDENCY=ON \
     -DHISI_SDK_PLATFORM=rp-dv300 \
     -DPROJECT_DEPENDENCY_DIR=$dep_dir \
     -DQT_SDK_PREFIX=$QT_SDK_PREFIX \
