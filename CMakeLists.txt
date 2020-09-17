@@ -17,18 +17,9 @@ if(CCACHE_PROGRAM)
   set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
 endif()
 
-include(cmake/GetGitRevisionDescription.cmake)
-get_git_head_revision(GIT_REFSPEC GIT_SHA1)
-git_get_exact_tag(GIT_TAG --always --tags)
-git_describe(GIT_DESCRIBE --always --tags)
-
-if(GIT_DESCRIBE MATCHES "^v([0-9]+)\\.([0-9]+)\\.([0-9]+)")
-  set(PROJECT_VERSION "${CMAKE_MATCH_1}.${CMAKE_MATCH_2}.${CMAKE_MATCH_3}")
-endif()
-
 project(
   FaceRecognitionTerminal
-  VERSION ${PROJECT_VERSION}
+  VERSION 1.0.0
   DESCRIPTION "FaceRecognitionTerminal")
 
 set(CMAKE_CXX_STANDARD 11)
@@ -73,12 +64,12 @@ message(STATUS "set QUFACE_SDK_PREFIX to: ${QUFACE_SDK_PREFIX}")
 message(STATUS "set QT_SDK_PREFIX to: ${QT_SDK_PREFIX}")
 message(STATUS "set TEMPERATURE_SDK_PREFIX to: ${TEMPERATURE_SDK_PREFIX}")
 
-set(CMAKE_FIND_ROOT_PATH
+set(PREFIX_LIST
     ${HISI_SDK_PREFIX} ${QUFACE_SDK_PREFIX} ${QUFACE_IO_SDK_PREFIX}
     ${THIRD_PARTY_PREFIX} ${QT_SDK_PREFIX} ${TEMPERATURE_SDK_PREFIX})
-set(CMAKE_PREFIX_PATH
-    ${HISI_SDK_PREFIX} ${QUFACE_SDK_PREFIX} ${QUFACE_IO_SDK_PREFIX}
-    ${THIRD_PARTY_PREFIX} ${QT_SDK_PREFIX} ${TEMPERATURE_SDK_PREFIX})
+
+set(CMAKE_FIND_ROOT_PATH ${PREFIX_LIST})
+set(CMAKE_PREFIX_PATH ${PREFIX_LIST})
 
 if(DOWNLOAD_DEPENDENCY)
   # -- Download dependecies --
@@ -100,7 +91,19 @@ if(DOWNLOAD_DEPENDENCY)
 
   download_and_extract(
     URL
-    https://quvision.oss-cn-beijing.aliyuncs.com/qufacesdk/releases/QuFaceSDK-latest-hisi-rp-dv300.tar.gz
+    https://quvision.oss-cn-beijing.aliyuncs.com/qufacesdk/deps/prebuild-3rd-0.2.0.tar.gz
+    FILENAME
+    ${DOWNLOAD_DIR}/prebuild-3rd-0.2.0.tar.gz
+    HASH_TYPE
+    SHA256
+    HASH
+    f3efdbbfff20837a141228efb4d91fe149186b4b0eeca84ccd8662d2574306ef
+    EXTRACT_DIR
+    ${THIRD_PARTY_PREFIX})
+
+  download_and_extract(
+    URL
+    https://quvision.oss-cn-beijing.aliyuncs.com/qufacesdk/v1-releases/QuFaceSDK-latest-hisi-rp-dv300.tar.gz
     FILENAME
     ${DOWNLOAD_DIR}/QuFaceSDK-latest-hisi-rp-dv300.tar.gz
     HASH_TYPE
@@ -142,6 +145,13 @@ if(DOWNLOAD_DEPENDENCY)
     EXTRACT_DIR
     ${TEMPERATURE_SDK_PREFIX})
 else()
+  foreach(prefix ${PREFIX_LIST})
+    if(NOT EXISTS ${prefix})
+      message(STATUS "HINTS:     set DOWNLOAD_DEPENDENCY to ON")
+      message(FATAL_ERROR "${prefix}: not exists!")
+    endif()
+  endforeach()
+
   if(NOT EXISTS ${QT_SDK_PREFIX})
     message(STATUS "HINTS:     set DOWNLOAD_DEPENDENCY to ON")
     message(FATAL_ERROR "QT_SDK_PREFIX: ${QT_SDK_PREFIX} not exists!")
