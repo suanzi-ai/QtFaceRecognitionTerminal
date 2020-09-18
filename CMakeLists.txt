@@ -218,13 +218,7 @@ endif()
 
 configure_file(i18n/translations.qrc ${PROJECT_BINARY_DIR} COPYONLY)
 
-add_executable(main main.cpp resource.qrc
-                    ${PROJECT_BINARY_DIR}/translations.qrc)
-target_link_libraries(main PRIVATE ui)
-install(TARGETS main DESTINATION .)
-
-add_executable(smoke-test smoke-test.cpp resource.qrc
-                          ${PROJECT_BINARY_DIR}/translations.qrc)
-target_link_libraries(smoke-test PRIVATE ui)
-
-install(DIRECTORY ${RESOURCE_PREFIX}/models/ DESTINATION .)
+add_executable(face-terminal main.cpp resource.qrc
+               ${PROJECT_BINARY_DIR}/translations.qrc)
+target_link_libraries(face-terminal PRIVATE ui)
+install(TARGETS face-terminal DESTINATION .)
