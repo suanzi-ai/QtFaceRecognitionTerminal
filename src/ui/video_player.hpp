@@ -17,10 +17,12 @@
 #include "upload_task.hpp"
 
 #include "detect_tip_widget.hpp"
+#include "outline_widget.hpp"
 #include "recognize_tip_widget.hpp"
 #include "screen_saver_widget.hpp"
+#include "status_banner.hpp"
 #include "temperature_task.hpp"
-#include "isp_hist_widget.hpp"
+// #include "isp_hist_widget.hpp"
 
 namespace suanzi {
 
@@ -35,20 +37,30 @@ class VideoPlayer : public QWidget {
   ~VideoPlayer();
 
  protected:
+  void init_workflow();
+  void init_widgets();
+
   void paintEvent(QPaintEvent *event) override;
 
  private slots:
-  void init_widgets();
   void update_ip_and_version();
 
  private:
+  FaceDatabasePtr db_;
+  FaceDetectorPtr detector_;
+  FacePoseEstimatorPtr pose_estimator_;
+  FaceExtractorPtr extractor_;
+  FaceAntiSpoofingPtr anti_spoofing_;
+
   DetectTipWidget *detect_tip_widget_bgr_;
   DetectTipWidget *detect_tip_widget_nir_;
   RecognizeTipWidget *recognize_tip_widget_;
 
   ScreenSaverWidget *screen_saver_;
-  //HeatMapWidget *heat_map_widget_;
-  ISPHistWidget *isp_hist_widget_;
+  OutlineWidget *outline_widget_;
+  StatusBanner *status_banner_;
+  // HeatMapWidget *heat_map_widget_;
+  // ISPHistWidget *isp_hist_widget_;
 
   CameraReader *camera_reader_;
 

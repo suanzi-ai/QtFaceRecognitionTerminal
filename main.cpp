@@ -5,15 +5,18 @@
 #include "face_server.hpp"
 #include "http_server.hpp"
 #include "video_player.hpp"
+
 using namespace suanzi;
 
-int main(int argc, char* argv[]) {
-  QApplication app(argc, argv);
-
-  auto engine = Engine::instance();
-
+Config* read_cfg(int argc, char* argv[]) {
+  // 基础配置文件，默认：config.json
   std::string cfg_file = "config.json";
+
+  // 动态加载配置文件，默认：config.override.json
   std::string cfg_override_file = "config.override.json";
+
+  // 读取命令行参数，格式为
+  // ./face-terminal --config config.json --override-config config.override.json
   for (int i = 1; i < argc; i++) {
     auto arg = std::string(argv[i]);
     if (i < argc - 1) {
@@ -27,29 +30,25 @@ int main(int argc, char* argv[]) {
     }
   }
 
+  // 加载配置文件
   auto config = Config::get_instance();
-  SZ_RETCODE ret = config->load_from_file(cfg_file, cfg_override_file);
-  if (ret != SZ_RETCODE_OK) {
-    return -1;
-  }
+  if (SZ_RETCODE_OK == config->load_from_file(cfg_file, cfg_override_file))
+    return config;
+  else
+    return NULL;
+}
 
-  std::string lang = Config::get_user().lang;
-  if (lang != "zh_CN") {
-    QTranslator translator;
-    QString new_lang_file = (":facescope_"+lang).c_str();
-    if (!translator.load(new_lang_file)) {
-      SZ_LOG_WARN("translator load failed for lang={}", lang);
-    }
-    app.installTranslator(&translator);
-  }
+Engine* create_engine() {
+  // 读取屏幕类型
+  LCDScreenType lcd_screen_type;
+  if (!Config::load_screen_type(lcd_screen_type)) return NULL;
 
-  auto app_cfg = Config::get_app();
+  // 读取摄像头参数
   auto bgr_cam = Config::get_camera(CAMERA_BGR);
   auto nir_cam = Config::get_camera(CAMERA_NIR);
-  LCDScreenType lcd_screen_type;
-  if (!Config::load_screen_type(lcd_screen_type)) {
-    return -1;
-  }
+
+  // 读取应用参数
+  auto app_cfg = Config::get_app();
 
   EngineOption opt = {
       .bgr =
@@ -130,17 +129,16 @@ int main(int argc, char* argv[]) {
       .secondary_win_percent =
           (SecondaryWinPercent)app_cfg.infrared_window_percent,
   };
+
+  auto engine = Engine::instance();
   engine->set_option(opt);
 
-  QFile file(":asserts/background.jpg");
-  file.open(QIODevice::ReadOnly);
+  return engine;
+}
 
-  auto data = file.readAll();
-  std::vector<SZ_BYTE> img(data.begin(), data.end());
-  engine->start_boot_ui(img);
-
+VideoPlayer* create_gui() {
+  // 加载 Quface 算法模块
   auto quface = Config::get_quface();
-
   auto detector = std::make_shared<FaceDetector>(quface.model_file_path);
   auto extractor = std::make_shared<FaceExtractor>(quface.model_file_path);
   auto pose_estimator =
@@ -148,6 +146,8 @@ int main(int argc, char* argv[]) {
   auto anti_spoof = std::make_shared<FaceAntiSpoofing>(quface.model_file_path);
   auto db = std::make_shared<FaceDatabase>(quface.db_name);
 
+  // 加载 Web 服务模块
+  auto app_cfg = Config::get_app();
   auto person_service = PersonService::make_shared(
       app_cfg.person_service_base_url, app_cfg.image_store_path);
   auto face_service =
@@ -161,14 +161,29 @@ int main(int argc, char* argv[]) {
       [&]() { http_server->run(app_cfg.server_port, app_cfg.server_host); });
   t.detach();
 
-  qRegisterMetaType<PersonData>("PersonData");
-  qRegisterMetaType<DetectionRatio>("DetectionRatio");
+  VideoPlayer* player = new VideoPlayer(db, detector, pose_estimator, extractor,
+                                        anti_spoof, person_service);
+  return player;
+}
 
-  engine->stop_boot_ui();
+int main(int argc, char* argv[]) {
+  QApplication app(argc, argv);
 
-  VideoPlayer player(db, detector, pose_estimator, extractor, anti_spoof,
-                     person_service);
-  player.show();
+  auto config = read_cfg(argc, argv);
+  if (config == NULL) return -1;
+
+  auto engine = create_engine();
+  if (engine == NULL) return -1;
+
+  // 播放开机画面
+  // engine->start_boot_ui(":asserts/background.jpg");
+
+  auto gui = create_gui();
+  if (gui == NULL) return -1;
+  gui->show();
+
+  // 关闭开机画面
+  // engine->stop_boot_ui();
 
   return app.exec();
 }

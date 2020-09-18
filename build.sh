@@ -112,7 +112,7 @@ popd
 
 if [[ $USER_SCP_COPY_TO ]]; then
     echo "Copy to $USER_SCP_COPY_TO"
-    scp $build_dir/main $USER_SCP_COPY_TO
+    scp $build_dir/face-terminal $USER_SCP_COPY_TO
 else
     echo -e "\n#####################################################\n"
     echo -e "请将下面的文件夹内容拷贝至开发板后，手动运行程序即可: "

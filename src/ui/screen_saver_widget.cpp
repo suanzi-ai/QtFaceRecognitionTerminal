@@ -36,13 +36,8 @@ void ScreenSaverWidget::paintEvent(QPaintEvent *event) {
   const int h = height();
 
   // draw background
-  //painter.drawPixmap(QRect(0, 0, w, h), background_, QRect());
-
   QPixmap pixmapToShow = QPixmap::fromImage(background_);
   painter.drawPixmap(QRect(0, 0, w, h), pixmapToShow, QRect());
-
-
-  
 
   // draw datetime
   QDateTime now = QDateTime::currentDateTime().toUTC().addSecs(8 * 3600);

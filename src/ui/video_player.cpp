@@ -7,7 +7,6 @@
 #include <QTimer>
 
 #include "config.hpp"
-#include "temperature_task.hpp"
 
 using namespace suanzi;
 
@@ -16,57 +15,41 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
                          FaceExtractorPtr extractor,
                          FaceAntiSpoofingPtr anti_spoofing,
                          PersonService::ptr person_service, QWidget *parent)
-    : person_service_(person_service), QWidget(parent) {
-  // Initialize QT widget
-  QPalette pal = palette();
-  pal.setColor(QPalette::Background, Qt::transparent);
-  pal.setColor(QPalette::Foreground, Qt::green);
-  setPalette(pal);
+    : db_(db),
+      detector_(detector),
+      pose_estimator_(pose_estimator),
+      extractor_(extractor),
+      anti_spoofing_(anti_spoofing),
+      person_service_(person_service),
+      QWidget(parent) {
+  // 初始化工作流
+  init_workflow();
 
-  auto app = Config::get_app();
-  auto quface = Config::get_quface();
+  // 初始化QT控件
+  init_widgets();
 
+  // 启动摄像头读取数据
+  camera_reader_->start_sample();
+}
+
+VideoPlayer::~VideoPlayer() {}
+
+void VideoPlayer::paintEvent(QPaintEvent *event) {
+  QPainter painter(this);
+
+  detect_tip_widget_bgr_->paint(&painter);
+  detect_tip_widget_nir_->paint(&painter);
+
+  outline_widget_->paint(&painter);
+  status_banner_->paint(&painter);
+}
+
+void VideoPlayer::init_workflow() {
+  // 创建摄像头读取对象
   camera_reader_ = new CameraReader(this);
 
-  int screen_width, screen_height;
-  if (!camera_reader_->get_screen_size(screen_width, screen_height)) {
-    SZ_LOG_ERROR("Get screen size error");
-  } else {
-    SZ_LOG_INFO("Get screen w={}, h={}", screen_width, screen_height);
-  }
-
-  isp_hist_widget_ = new ISPHistWidget(this);
-  isp_hist_widget_->hide();
-
-  detect_tip_widget_bgr_ =
-      new DetectTipWidget(0, 0, screen_width, screen_height, this);
-  detect_tip_widget_bgr_->hide();
-
-  int pip_win_percent = app.infrared_window_percent;
-  detect_tip_widget_nir_ =
-      new DetectTipWidget(screen_width - screen_width * pip_win_percent / 100,
-                          0, screen_width * pip_win_percent / 100,
-                          screen_height * pip_win_percent / 100, this);
-  detect_tip_widget_nir_->hide();
-
-  recognize_tip_widget_ = new RecognizeTipWidget(nullptr);
-  recognize_tip_widget_->hide();
-
-  screen_saver_ = new ScreenSaverWidget(screen_width, screen_height, nullptr);
-  screen_saver_->hide();
-
-  // Initialize QThreads
-  detect_task_ = new DetectTask(detector, pose_estimator, nullptr, this);
-  recognize_task_ =
-      new RecognizeTask(db, extractor, anti_spoofing, nullptr, this);
-  record_task_ = new RecordTask(person_service, db, nullptr, this);
-  face_timer_ = new FaceTimer(nullptr, this);
-
-  // IO Tasks
-  upload_task_ = new UploadTask(person_service, nullptr, this);
-  audio_task_ = new AudioTask(nullptr, this);
-
-  // Connect camera_reader to detect_task
+  // 创建人脸检测线程
+  detect_task_ = new DetectTask(detector_, pose_estimator_, nullptr, this);
   connect((const QObject *)camera_reader_,
           SIGNAL(tx_frame(PingPangBuffer<ImagePackage> *)),
           (const QObject *)detect_task_,
@@ -74,7 +57,9 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
   connect((const QObject *)detect_task_, SIGNAL(tx_finish()),
           (const QObject *)camera_reader_, SLOT(rx_finish()));
 
-  // Connect detect_task to recognize_task
+  // 创建人脸识别线程
+  recognize_task_ =
+      new RecognizeTask(db_, extractor_, anti_spoofing_, nullptr, this);
   connect((const QObject *)detect_task_,
           SIGNAL(tx_frame(PingPangBuffer<DetectionData> *)),
           (const QObject *)recognize_task_,
@@ -82,7 +67,8 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
   connect((const QObject *)recognize_task_, SIGNAL(tx_finish()),
           (const QObject *)detect_task_, SLOT(rx_finish()));
 
-  // Connect recognize_task to record_task
+  // 创建人脸查询线程
+  record_task_ = new RecordTask(person_service_, db_, nullptr, this);
   connect((const QObject *)recognize_task_,
           SIGNAL(tx_frame(PingPangBuffer<RecognizeData> *)),
           (const QObject *)record_task_,
@@ -94,131 +80,103 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
   connect((const QObject *)record_task_, SIGNAL(tx_bgr_finish(bool)),
           (const QObject *)recognize_task_, SLOT(rx_bgr_finish(bool)));
 
-  // Connect detect_task to face_timer
+  // 创建人脸记录线程
+  upload_task_ = new UploadTask(person_service_, nullptr, this);
+  connect((const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool)),
+          (const QObject *)upload_task_, SLOT(rx_upload(PersonData, bool)));
+
+  // 创建人脸计时器线程
+  face_timer_ = new FaceTimer(nullptr, this);
   connect((const QObject *)detect_task_,
           SIGNAL(tx_frame(PingPangBuffer<DetectionData> *)),
           (const QObject *)face_timer_,
           SLOT(rx_frame(PingPangBuffer<DetectionData> *)));
 
-  //   // Connect face_timer to record_task
-  //   connect((const QObject *)face_timer_, SIGNAL(tx_face_disappear(int)),
-  //           (const QObject *)record_task_, SLOT(rx_reset()));
-
-  // Connect detect_task to detect_tip_widget
-  connect((const QObject *)detect_task_,
-          SIGNAL(tx_bgr_display(DetectionRatio, bool, bool)),
-          (const QObject *)detect_tip_widget_bgr_,
-          SLOT(rx_display(DetectionRatio, bool, bool)));
-  if (Config::get_app().show_infrared_window) {
-    connect((const QObject *)detect_task_,
-            SIGNAL(tx_nir_display(DetectionRatio, bool, bool)),
-            (const QObject *)detect_tip_widget_nir_,
-            SLOT(rx_display(DetectionRatio, bool, bool)));
-  }
-
-  // Connect record_task to recognize_tip_widget
-  connect((const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool)),
-          (const QObject *)recognize_tip_widget_,
-          SLOT(rx_display(PersonData, bool)));
-
-  // Connect record_task to upload_task_
-  connect((const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool)),
-          (const QObject *)upload_task_, SLOT(rx_upload(PersonData, bool)));
-
+  // 创建语音播报线程
+  audio_task_ = new AudioTask(nullptr, this);
   connect((const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool)),
           (const QObject *)audio_task_, SLOT(rx_display(PersonData, bool)));
 
-  // Connect face_timer to screen_saver
-  connect((const QObject *)face_timer_, SIGNAL(tx_face_disappear(int)),
-          (const QObject *)screen_saver_, SLOT(rx_display(int)));
-  connect((const QObject *)face_timer_, SIGNAL(tx_face_appear(int)),
-          (const QObject *)screen_saver_, SLOT(rx_hide()));
-
-  // Connect temperature to record_task
-  if (!Config::get_user().disabled_temperature) {
-    auto temperature = Config::get_temperature();
-    temperature_task_ = new TemperatureTask(
-        (io::TemperatureManufacturer)temperature.manufacturer);
-    connect((const QObject *)temperature_task_, SIGNAL(tx_temperature(float)),
-            (const QObject *)record_task_, SLOT(rx_temperature(float)));
-    connect((const QObject *)detect_task_,
-            SIGNAL(tx_enable_read_temperature(bool)),
-            (const QObject *)temperature_task_,
-            SLOT(rx_enable_read_temperature(bool)));
-  }
-
-  camera_reader_->start_sample();
-
-  QTimer::singleShot(1, this, SLOT(init_widgets()));
-
-  static QTimer updateIpTimer;
-  connect(&updateIpTimer, SIGNAL(timeout()), this,
-          SLOT(update_ip_and_version()));
-  updateIpTimer.start(1000);
-
-  /*
-  static Otpa16TempTask otpa16_task;
-  connect((const QObject *)&otpa16_task, SIGNAL(tx_display(OtpaTempData)),
-             (const QObject *)heat_map_widget_,
-  SLOT(rx_display(OtpaTempData)));*/
-}
-
-VideoPlayer::~VideoPlayer() {}
-
-void VideoPlayer::paintEvent(QPaintEvent *event) {
-  QPainter painter(this);
-  auto temperature = Config::get_temperature();
-  auto user = Config::get_user();
-  int screen_width, screen_height;
-  camera_reader_->get_screen_size(screen_width, screen_height);
-
-  painter.drawText(20, 40, QString(ip_.c_str()));
-  painter.drawText(screen_width - 230, 40, QString(version_.c_str()));
-
-  if (!user.disabled_temperature) {
-    int device_body_start_angle, device_body_open_angle;
-    float x, y, face_width, face_height;
-    x = (float)(temperature.device_face_x * screen_width);
-    y = (float)(temperature.device_face_y * screen_height);
-    face_width = (float)(temperature.device_face_width * screen_width);
-    face_height = (float)(temperature.device_face_height * screen_height);
-    device_body_start_angle = temperature.device_body_start_angle;
-    device_body_open_angle = temperature.device_body_open_angle;
-    painter.setPen(QPen(Qt::white, 5, Qt::SolidLine));
-    painter.drawEllipse(x, y, face_width, face_height);
-    painter.drawChord(
-        x / 1.2, y + face_height + 25, face_width * 1.2,
-        face_height,  // +40是身体与头部的间距 *1.2是身体要比头宽一点
-        device_body_start_angle, device_body_open_angle);
-  }
-
-  detect_tip_widget_bgr_->paint(&painter);
-  detect_tip_widget_nir_->paint(&painter);
-
-  if (Config::get_app().show_isp_hist_window) {
-    isp_hist_widget_->show();
-    isp_hist_widget_->paint(&painter);
-  } else {
-    isp_hist_widget_->hide();
-  }
+  // 创建人体测温线程
+  temperature_task_ = new TemperatureTask(
+      (io::TemperatureManufacturer)Config::get_temperature().manufacturer);
+  connect((const QObject *)temperature_task_, SIGNAL(tx_temperature(float)),
+          (const QObject *)record_task_, SLOT(rx_temperature(float)));
+  connect((const QObject *)detect_task_,
+          SIGNAL(tx_enable_read_temperature(bool)),
+          (const QObject *)temperature_task_,
+          SLOT(rx_enable_read_temperature(bool)));
 }
 
 void VideoPlayer::init_widgets() {
   auto app = Config::get_app();
 
   int screen_width, screen_height;
-  camera_reader_->get_screen_size(screen_width, screen_height);
+  if (!camera_reader_->get_screen_size(screen_width, screen_height)) {
+    SZ_LOG_ERROR("Get screen size error");
+    throw std::runtime_error("Get screen size error");
+  } else {
+    SZ_LOG_INFO("Get screen w={}, h={}", screen_width, screen_height);
+  }
 
+  qRegisterMetaType<DetectionRatio>("DetectionRatio");
+  qRegisterMetaType<PersonData>("PersonData");
+
+  // 初始化QT
+  QPalette pal = palette();
+  pal.setColor(QPalette::Background, Qt::transparent);
+  setPalette(pal);
+
+  // 创建BGR人脸检测框控件
+  detect_tip_widget_bgr_ =
+      new DetectTipWidget(0, 0, screen_width, screen_height, this);
+  detect_tip_widget_bgr_->hide();
+  connect((const QObject *)detect_task_,
+          SIGNAL(tx_bgr_display(DetectionRatio, bool, bool)),
+          (const QObject *)detect_tip_widget_bgr_,
+          SLOT(rx_display(DetectionRatio, bool, bool)));
+
+  // 创建红外人脸检测框控件
+  int pip_win_percent = app.infrared_window_percent;
+  detect_tip_widget_nir_ =
+      new DetectTipWidget(screen_width - screen_width * pip_win_percent / 100,
+                          0, screen_width * pip_win_percent / 100,
+                          screen_height * pip_win_percent / 100, this);
+  detect_tip_widget_nir_->hide();
+  if (app.show_infrared_window) {
+    connect((const QObject *)detect_task_,
+            SIGNAL(tx_nir_display(DetectionRatio, bool, bool)),
+            (const QObject *)detect_tip_widget_nir_,
+            SLOT(rx_display(DetectionRatio, bool, bool)));
+  }
+
+  // 创建人脸识别记录控件
   int x = 0;
   int y = screen_height * app.recognize_tip_top_percent / 100;
   int w = screen_width;
   int h = screen_height - y;
 
+  recognize_tip_widget_ = new RecognizeTipWidget(nullptr);
+  recognize_tip_widget_->hide();
   recognize_tip_widget_->setFixedSize(w, h);
   recognize_tip_widget_->move(x, y);
+  connect((const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool)),
+          (const QObject *)recognize_tip_widget_,
+          SLOT(rx_display(PersonData, bool)));
 
-  isp_hist_widget_->setFixedSize(300, 225);
-  isp_hist_widget_->move(0, 0);
+  // 创建屏保控件
+  screen_saver_ = new ScreenSaverWidget(screen_width, screen_height, nullptr);
+  screen_saver_->hide();
+  connect((const QObject *)face_timer_, SIGNAL(tx_face_disappear(int)),
+          (const QObject *)screen_saver_, SLOT(rx_display(int)));
+  connect((const QObject *)face_timer_, SIGNAL(tx_face_appear(int)),
+          (const QObject *)screen_saver_, SLOT(rx_hide()));
+
+  // 创建人体轮廓控件
+  outline_widget_ = new OutlineWidget(screen_width, screen_height, nullptr);
+
+  // 创建顶部状态栏控件
+  status_banner_ = new StatusBanner(screen_width, screen_height, nullptr);
 }
 
 void VideoPlayer::update_ip_and_version() {
