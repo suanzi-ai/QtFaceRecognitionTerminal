@@ -40,7 +40,7 @@ void ScreenSaverWidget::paintEvent(QPaintEvent *event) {
   painter.drawPixmap(QRect(0, 0, w, h), pixmapToShow, QRect());
 
   // draw datetime
-  QDateTime now = QDateTime::currentDateTime().toUTC().addSecs(8 * 3600);
+  QDateTime now = QDateTime::currentDateTime();
 
   QString time = now.toString(tr("hh   mm"));
   QString date = now.toString(tr("yyyy年MM月dd日"));
