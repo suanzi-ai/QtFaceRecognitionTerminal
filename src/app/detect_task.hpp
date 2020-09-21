@@ -35,9 +35,6 @@ class DetectTask : QObject {
 
   // for recognition
   void tx_frame(PingPangBuffer<DetectionData> *buffer);
-  
-  //start read temperature
-  void tx_enable_read_temperature(bool enable_read_temperature);
 
  private:
   bool detect_and_select(const MmzImage *image, DetectionRatio &detection,

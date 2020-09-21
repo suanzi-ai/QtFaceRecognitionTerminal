@@ -18,13 +18,13 @@ TemperatureTask::TemperatureTask(TemperatureManufacturer m) {
 
 TemperatureTask::~TemperatureTask() {}
 
-void TemperatureTask::rx_enable_read_temperature(bool enable_read_temperature) {
-  enable_read_temperature_ = enable_read_temperature;
-}
+void TemperatureTask::rx_enable() { is_enabled_ = true; }
+
+void TemperatureTask::rx_disable() { is_enabled_ = false; }
 
 void TemperatureTask::run() {
   while (true) {
-    if (enable_read_temperature_) {
+    if (is_enabled_) {
       float temperature;
       SZ_RETCODE ret = temperature_reader_->read(temperature);
       if (ret == SZ_RETCODE_OK) {

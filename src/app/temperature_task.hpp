@@ -20,14 +20,15 @@ class TemperatureTask : public QThread {
   void tx_temperature(float temperature);
 
  private slots:
-  void rx_enable_read_temperature(bool enable_read_temperature);
+  void rx_enable();
+  void rx_disable();
 
  private:
   void run();
 
  private:
   TemperatureReader::ptr temperature_reader_;
-  bool enable_read_temperature_;
+  bool is_enabled_;
 };
 
 }  // namespace suanzi

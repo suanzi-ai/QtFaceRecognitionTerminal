@@ -101,11 +101,11 @@ void VideoPlayer::init_workflow() {
   temperature_task_ = new TemperatureTask(
       (io::TemperatureManufacturer)Config::get_temperature().manufacturer);
   connect((const QObject *)temperature_task_, SIGNAL(tx_temperature(float)),
-          (const QObject *)record_task_, SLOT(rx_temperature(float)));
-  connect((const QObject *)detect_task_,
-          SIGNAL(tx_enable_read_temperature(bool)),
-          (const QObject *)temperature_task_,
-          SLOT(rx_enable_read_temperature(bool)));
+          (const QObject *)record_task_, SLOT(rx_temperature(float)));  
+  connect((const QObject *)face_timer_, SIGNAL(tx_face_disappear(int)),
+          (const QObject *)temperature_task_, SLOT(rx_disable()));
+  connect((const QObject *)face_timer_, SIGNAL(tx_face_appear(int)),
+          (const QObject *)temperature_task_, SLOT(rx_enable()));
 }
 
 void VideoPlayer::init_widgets() {
