@@ -19,6 +19,7 @@ class AudioTask : QObject {
   void rx_reset();
 
  private:
+  void load_audio();
   bool read_audio(const std::string& name, std::vector<SZ_BYTE>& audio);
   bool if_playing_;
 

@@ -13,10 +13,9 @@ AudioTask::AudioTask(QThread* thread, QObject* parent) : if_playing_(false) {
   auto engine = io::Engine::instance();
   engine->audio_set_volume(100);
 
-  read_audio(":asserts/success.aac", success_audio_);
-  read_audio(":asserts/fail.aac", fail_audio_);
-  read_audio(":asserts/temperature_normal.aac", temp_normal_audio_);
-  read_audio(":asserts/temperature_abnormal.aac", temp_abnormal_audio_);
+  load_audio();
+
+  Config::get_instance()->appendListener("reload", [&]() { load_audio(); });
 
   // Create thread
   if (thread == nullptr) {
@@ -30,6 +29,18 @@ AudioTask::AudioTask(QThread* thread, QObject* parent) : if_playing_(false) {
 }
 
 AudioTask::~AudioTask() {}
+
+void AudioTask::load_audio() {
+  std::string lang = Config::get_user().lang;
+  std::string prefix = ":asserts/" + lang;
+
+  SZ_LOG_INFO("Load audio for lang={}", lang);
+
+  read_audio(prefix + "/recognition_succeed.aac", success_audio_);
+  read_audio(prefix + "/recognition_failed.aac", fail_audio_);
+  read_audio(prefix + "/temperature_normal.aac", temp_normal_audio_);
+  read_audio(prefix + "/temperature_abnormal.aac", temp_abnormal_audio_);
+}
 
 bool AudioTask::read_audio(const std::string& name,
                            std::vector<SZ_BYTE>& audio) {
