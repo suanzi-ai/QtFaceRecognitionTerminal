@@ -1,6 +1,6 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
-    <file>face_terminal_zh_CN.qm</file>
+    <file>face_terminal_zh-CN.qm</file>
 </qresource>
 <qresource>
     <file>face_terminal_en.qm</file>

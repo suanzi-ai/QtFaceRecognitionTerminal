@@ -9,7 +9,11 @@
 using namespace suanzi;
 
 void load_translator(QApplication& app) {
-  std::string lang = Config::get_user().lang;
+  std::string lang = Config::get_user_lang();
+
+  if (lang.find_first_of("en") == 0) {
+    lang = "en";
+  }
 
   SZ_LOG_INFO("Load translator for lang={}", lang);
 

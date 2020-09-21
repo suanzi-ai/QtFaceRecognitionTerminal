@@ -220,6 +220,7 @@ class Config : public ConfigEventEmitter {
   static const LivenessConfig &get_liveness();
   static const ISPGlobalConfig &get_isp();
 
+  static std::string get_user_lang();
   static bool enable_anti_spoofing();
 
  private:

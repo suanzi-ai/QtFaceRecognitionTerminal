@@ -261,7 +261,7 @@ void Config::load_defaults(ConfigData &c) {
   };
 
   c.user = {
-      .lang = "zh_CN",
+      .lang = "zh-CN",
       .blacklist_policy = "alarm",
       .liveness_policy = "alarm",
       .detect_level = "medium",
@@ -681,6 +681,18 @@ const ConfigData &Config::get_all() {
 const UserConfig &Config::get_user() {
   std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
   return instance_.cfg_data_.user;
+}
+
+std::string Config::get_user_lang() {
+  std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
+  std::string lang = instance_.cfg_data_.user.lang;
+  if (lang.find_first_of("en") == 0) {
+    lang = "en";
+  }
+  if (lang.size() > 2 && lang[2] == '_') {
+    lang[2] = '-';
+  }
+  return lang;
 }
 
 const TemperatureConfig &Config::get_temperature() {

@@ -205,7 +205,7 @@ add_subdirectory(src/lib)
 add_subdirectory(src/ui)
 add_subdirectory(src/service)
 
-set(TRANSLATION_TS_FILES i18n/face_terminal_en.ts i18n/face_terminal_zh_CN.ts)
+set(TRANSLATION_TS_FILES i18n/face_terminal_en.ts i18n/face_terminal_zh-CN.ts)
 if(GENERATE_QT_TS_FILES)
   set(TRANSLATION_SRC_FILES
       src/ui/recognize_tip_widget.cpp src/ui/screen_saver_widget.cpp
@@ -219,6 +219,6 @@ endif()
 configure_file(i18n/translations.qrc ${PROJECT_BINARY_DIR} COPYONLY)
 
 add_executable(face-terminal main.cpp resource.qrc
-               ${PROJECT_BINARY_DIR}/translations.qrc)
+                             ${PROJECT_BINARY_DIR}/translations.qrc)
 target_link_libraries(face-terminal PRIVATE ui)
 install(TARGETS face-terminal DESTINATION .)
