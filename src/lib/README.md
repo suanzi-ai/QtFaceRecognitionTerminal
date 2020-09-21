@@ -15,6 +15,6 @@ src/lib 是数据对象和全局配置的封装。
 * recongize_data: 人脸识别结果数据对象
 
     封装了彩色图像的人脸识别和红外图像的活体识别结果；
-* pingpang_buffer: Qt线程直接的数据缓冲队列
+* pingpang_buffer: Qt线程之间的数据缓冲队列
 
     src/app中核心线程之间通信的数据缓冲队列，用于缓存`ImagePackage`、`DetectionData`和`RecongizeData`数据。
