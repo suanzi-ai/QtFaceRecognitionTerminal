@@ -43,10 +43,21 @@ supervisord ctl start face-terminal
 reboot
 ```
 
-## SDK文档
+## 代码模块说明
+该项目一共包含4个模块，分别是
+* [app模块](src/app)
+* [ui模块](src/ui)
+* [lib模块](src/lib)
+* [service模块](src/service)
+
+## 第三方SDK文档
 人脸识别终端的代码依赖两个SDK，分别是quface和quface-io。
 
-人脸识别算法SDK：quface [[在线文档]](http://cdn.suanzi.ai/docs/quface/index.html)
+* 人脸识别算法SDK：quface [[在线文档]](http://cdn.suanzi.ai/docs/quface/index.html)
 
-底层硬件控制SDK：quface-io [[在线文档]](http://cdn.suanzi.ai/docs/quface-io/index.html)
+* 底层硬件控制SDK：quface-io [[在线文档]](http://cdn.suanzi.ai/docs/quface-io/index.html)
 
+## Web后台API文档
+人脸识别终端主程序，通过Web API与Web后台进行通信。
+
+用户同样可以使用Web API，完成与远程云服务器的通信。[[在线文档]](https://cdn.suanzi.ai/docs/api)
