@@ -42,6 +42,8 @@ typedef struct {
   float temperature_max;
   float temperature_min;
   bool enable_audio;
+  std::string boot_image_path;
+  std::string screensaver_image_path;
 } UserConfig;
 
 void to_json(json &j, const UserConfig &c);

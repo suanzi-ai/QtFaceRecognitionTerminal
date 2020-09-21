@@ -1,21 +1,30 @@
 #include "screen_saver_widget.hpp"
 
 #include <QDateTime>
+#include <QFile>
 #include <QPaintEvent>
 #include <QPainter>
 
 #include <quface/logger.hpp>
 
+#include "config.hpp"
+
 using namespace suanzi;
 
 ScreenSaverWidget::ScreenSaverWidget(int width, int height, QWidget *parent)
-    : QWidget(parent), background_(":asserts/background.jpg") {
+    : QWidget(parent) {
   QPalette palette = this->palette();
   palette.setColor(QPalette::Background, Qt::transparent);
   setPalette(palette);
 
   move(0, 0);
   setFixedSize(width, height);
+
+  std::string filename = Config::get_user().screensaver_image_path;
+  if (QFile(filename.c_str()).exists())
+    background_.load(filename.c_str());
+  else
+    background_.load(":asserts/background.jpg");
   background_.scaled(width, height);
 }
 
@@ -54,8 +63,7 @@ void ScreenSaverWidget::paintEvent(QPaintEvent *event) {
   painter.drawText(w * 25 / 100, h * 33 / 100, time);
 
   bool flag = (now.currentMSecsSinceEpoch() / 500) % 2;
-  if (flag)
-    painter.drawText(w * 47 / 100, h * 33 / 100, ":");
+  if (flag) painter.drawText(w * 47 / 100, h * 33 / 100, ":");
 
   font.setPixelSize(base_font_size * 2);
   painter.setFont(font);

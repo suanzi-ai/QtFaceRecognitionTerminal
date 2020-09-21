@@ -6,6 +6,9 @@
     <file>asserts/background.jpg</file>
 </qresource>
 <qresource>
+    <file>asserts/boot.jpg</file>
+</qresource>
+<qresource>
     <file>asserts/zh-CN/recognition_succeed.aac</file>
 </qresource>
 <qresource>
