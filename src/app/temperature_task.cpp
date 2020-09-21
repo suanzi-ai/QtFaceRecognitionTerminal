@@ -28,6 +28,8 @@ void TemperatureTask::run() {
       float temperature;
       SZ_RETCODE ret = temperature_reader_->read(temperature);
       if (ret == SZ_RETCODE_OK) {
+        temperature = ((float)((int)((temperature + 0.005) * 100))) /
+                      100; // set fixed point of 2
         tx_temperature(temperature);
       }
     }
