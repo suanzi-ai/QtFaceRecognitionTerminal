@@ -42,9 +42,6 @@ class VideoPlayer : public QWidget {
 
   void paintEvent(QPaintEvent *event) override;
 
- private slots:
-  void update_ip_and_version();
-
  private:
   FaceDatabasePtr db_;
   FaceDetectorPtr detector_;
@@ -74,8 +71,6 @@ class VideoPlayer : public QWidget {
 
   TemperatureTask *temperature_task_;
   PersonService::ptr person_service_;
-  std::string ip_;
-  std::string version_;
 };
 
 }  // namespace suanzi

@@ -176,10 +176,6 @@ void VideoPlayer::init_widgets() {
   outline_widget_ = new OutlineWidget(screen_width, screen_height, nullptr);
 
   // 创建顶部状态栏控件
-  status_banner_ = new StatusBanner(screen_width, screen_height, nullptr);
-}
-
-void VideoPlayer::update_ip_and_version() {
-  ip_ = person_service_->get_local_ip();
-  version_ = person_service_->get_system_version();
+  status_banner_ =
+      new StatusBanner(person_service_, screen_width, screen_height, nullptr);
 }
