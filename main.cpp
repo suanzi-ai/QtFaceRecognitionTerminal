@@ -178,32 +178,36 @@ VideoPlayer* create_gui() {
       [&]() { http_server->run(app_cfg.server_port, app_cfg.server_host); });
   t.detach();
 
+  auto engine = Engine::instance();
+  engine->stop_boot_ui();
   VideoPlayer* player = new VideoPlayer(db, detector, pose_estimator, extractor,
                                         anti_spoof, person_service);
   return player;
 }
 
 int main(int argc, char* argv[]) {
-  QApplication app(argc, argv);
 
   auto config = read_cfg(argc, argv);
   if (config == NULL) return -1;
 
+  auto engine = create_engine();
+  if (engine == NULL) return -1;
+  
+  QApplication app(argc, argv);
+
   load_translator(app);
   config->appendListener("reload", [&app]() { load_translator(app); });
 
-  auto engine = create_engine();
-  if (engine == NULL) return -1;
-
   // 播放开机画面
-  // engine->start_boot_ui(":asserts/background.jpg");
+  std::string filename = "background.jpg";
+  engine->start_boot_ui(filename);
 
   auto gui = create_gui();
   if (gui == NULL) return -1;
   gui->show();
 
   // 关闭开机画面
-  // engine->stop_boot_ui();
+  
 
   return app.exec();
 }
