@@ -148,13 +148,13 @@ VideoPlayer* create_gui() {
 
   // 加载 Web 服务模块
   auto app_cfg = Config::get_app();
-  auto person_service = PersonService::make_shared(
+  static auto person_service = PersonService::make_shared(
       app_cfg.person_service_base_url, app_cfg.image_store_path);
-  auto face_service =
+  static auto face_service =
       std::make_shared<FaceService>(db, detector, pose_estimator, extractor,
                                     person_service, app_cfg.image_store_path);
-  auto face_server = std::make_shared<FaceServer>(face_service);
-  auto http_server = std::make_shared<HTTPServer>();
+  static auto face_server = std::make_shared<FaceServer>(face_service);
+  static auto http_server = std::make_shared<HTTPServer>();
   face_server->add_event_source(http_server);
 
   std::thread t(
