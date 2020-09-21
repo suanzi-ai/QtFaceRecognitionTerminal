@@ -20,7 +20,7 @@ ScreenSaverWidget::ScreenSaverWidget(int width, int height, QWidget *parent)
   move(0, 0);
   setFixedSize(width, height);
 
-  std::string filename = Config::get_user().screensaver_image_path;
+  std::string filename = Config::get_app().screensaver_image_path;
   if (QFile(filename.c_str()).exists())
     background_.load(filename.c_str());
   else

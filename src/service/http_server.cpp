@@ -129,6 +129,42 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
     res.set_content(data.dump(), "application/json");
   });
 
+  server_->Post("/background", [&](const Request& req, Response& res) {
+    if (!req.is_multipart_form_data()) {
+      json data = {{"ok", false}, {"message", "invalid content type"}};
+      res.set_content(data.dump(), "application/json");
+      return;
+    }
+
+    auto type = req.get_file_value("type");
+    auto file = req.get_file_value("file");
+
+    auto app = Config::get_app();
+
+    std::string image_name;
+    if (type.content == "boot") {
+      image_name = app.boot_image_path;
+    } else if (type.content == "screen-saver") {
+      image_name = app.screensaver_image_path;
+    } else {
+      json data = {{"ok", false}, {"message", "unknown type " + type.content}};
+      res.set_content(data.dump(), "application/json");
+      return;
+    }
+
+    std::ofstream fd(image_name, std::ios::binary);
+    if (!fd.is_open()) {
+      json data = {{"ok", false}, {"message", "open file failed"}};
+      res.set_content(data.dump(), "application/json");
+      return;
+    }
+
+    fd << file.content;
+
+    json data = {{"ok", true}, {"message", "ok"}};
+    res.set_content(data.dump(), "application/json");
+  });
+
   server_->Get("/isp/exposure-info", [&](const Request& req, Response& res) {
     auto cam_type = CAMERA_BGR;
     if (req.has_param("cam")) {

@@ -18,8 +18,6 @@ void suanzi::to_json(json &j, const UserConfig &c) {
   SAVE_JSON_TO(j, "temperature_max", c.temperature_max);
   SAVE_JSON_TO(j, "temperature_min", c.temperature_min);
   SAVE_JSON_TO(j, "enable_audio", c.enable_audio);
-  SAVE_JSON_TO(j, "boot_image_path", c.boot_image_path);
-  SAVE_JSON_TO(j, "screensaver_image_path", c.screensaver_image_path);
 }
 
 void suanzi::from_json(const json &j, UserConfig &c) {
@@ -35,8 +33,6 @@ void suanzi::from_json(const json &j, UserConfig &c) {
   LOAD_JSON_TO(j, "temperature_max", c.temperature_max);
   LOAD_JSON_TO(j, "temperature_min", c.temperature_min);
   LOAD_JSON_TO(j, "enable_audio", c.enable_audio);
-  LOAD_JSON_TO(j, "boot_image_path", c.boot_image_path);
-  LOAD_JSON_TO(j, "screensaver_image_path", c.screensaver_image_path);
 }
 
 void suanzi::to_json(json &j, const AppConfig &c) {
@@ -49,6 +45,8 @@ void suanzi::to_json(json &j, const AppConfig &c) {
   SAVE_JSON_TO(j, "show_infrared_window", c.show_infrared_window);
   SAVE_JSON_TO(j, "infrared_window_percent", c.infrared_window_percent);
   SAVE_JSON_TO(j, "show_isp_hist_window", c.show_isp_hist_window);
+  SAVE_JSON_TO(j, "boot_image_path", c.boot_image_path);
+  SAVE_JSON_TO(j, "screensaver_image_path", c.screensaver_image_path);
 }
 
 void suanzi::from_json(const json &j, AppConfig &c) {
@@ -61,6 +59,8 @@ void suanzi::from_json(const json &j, AppConfig &c) {
   LOAD_JSON_TO(j, "show_infrared_window", c.show_infrared_window);
   LOAD_JSON_TO(j, "infrared_window_percent", c.infrared_window_percent);
   LOAD_JSON_TO(j, "show_isp_hist_window", c.show_isp_hist_window);
+  LOAD_JSON_TO(j, "boot_image_path", c.boot_image_path);
+  LOAD_JSON_TO(j, "screensaver_image_path", c.screensaver_image_path);
 }
 
 void suanzi::to_json(json &j, const TemperatureConfig &c) {
@@ -251,6 +251,8 @@ void Config::load_defaults(ConfigData &c) {
       .show_infrared_window = false,
       .infrared_window_percent = 25,
       .show_isp_hist_window = false,
+      .boot_image_path = "boot.jpg",
+      .screensaver_image_path = "background.jpg",
   };
 
   c.temperature = {
@@ -277,8 +279,6 @@ void Config::load_defaults(ConfigData &c) {
       .temperature_max = 37.3,
       .temperature_min = 35.0,
       .enable_audio = true,
-      .boot_image_path = "boot.jpg",
-      .screensaver_image_path = "background.jpg",
   };
 
   c.quface = {

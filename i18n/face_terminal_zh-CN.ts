@@ -47,12 +47,12 @@
 <context>
     <name>suanzi::ScreenSaverWidget</name>
     <message>
-        <location filename="../src/ui/screen_saver_widget.cpp" line="45"/>
+        <location filename="../src/ui/screen_saver_widget.cpp" line="54"/>
         <source>hh   mm</source>
         <translation>hh   mm</translation>
     </message>
     <message>
-        <location filename="../src/ui/screen_saver_widget.cpp" line="46"/>
+        <location filename="../src/ui/screen_saver_widget.cpp" line="55"/>
         <source>yyyy年MM月dd日</source>
         <translation>yyyy年MM月dd日</translation>
     </message>

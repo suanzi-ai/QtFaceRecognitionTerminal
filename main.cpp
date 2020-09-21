@@ -202,7 +202,7 @@ int main(int argc, char* argv[]) {
   config->appendListener("reload", [&app]() { load_translator(app); });
 
   // Step 5: 播放自定义开机画面
-  std::string filename = Config().get_user().boot_image_path;
+  std::string filename = Config().get_app().boot_image_path;
   if (QFile(filename.c_str()).exists())
     engine->start_boot_ui(filename);
   else {
