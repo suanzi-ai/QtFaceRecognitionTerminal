@@ -63,7 +63,8 @@ void AudioTask::rx_display(PersonData person, bool if_duplicated) {
         engine->audio_play(temp_normal_audio_);
     }
 
-    QTimer::singleShot(1000, this, SLOT(rx_reset()));
+    if (if_duplicated) QTimer::singleShot(4000, this, SLOT(rx_reset()));
+    else rx_reset();
   }
 }
 
