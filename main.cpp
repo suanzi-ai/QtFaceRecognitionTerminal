@@ -8,6 +8,19 @@
 
 using namespace suanzi;
 
+void load_translator(QApplication& app) {
+  std::string lang = Config::get_user().lang;
+
+  SZ_LOG_INFO("Load translator for lang={}", lang);
+
+  static QTranslator translator;
+  QString new_lang_file = (":face_terminal_" + lang).c_str();
+  if (!translator.load(new_lang_file)) {
+    SZ_LOG_WARN("translator load failed for lang={}", lang);
+  }
+  app.installTranslator(&translator);
+}
+
 Config* read_cfg(int argc, char* argv[]) {
   // 基础配置文件，默认：config.json
   std::string cfg_file = "config.json";
@@ -171,6 +184,9 @@ int main(int argc, char* argv[]) {
 
   auto config = read_cfg(argc, argv);
   if (config == NULL) return -1;
+
+  load_translator(app);
+  config->appendListener("reload", [&app]() { load_translator(app); });
 
   auto engine = create_engine();
   if (engine == NULL) return -1;

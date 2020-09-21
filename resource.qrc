@@ -6,15 +6,27 @@
     <file>asserts/background.jpg</file>
 </qresource>
 <qresource>
-    <file>asserts/success.aac</file>
+    <file>asserts/zh_CN/recognition_succeed.aac</file>
 </qresource>
 <qresource>
-    <file>asserts/fail.aac</file>
+    <file>asserts/zh_CN/recognition_failed.aac</file>
 </qresource>
 <qresource>
-    <file>asserts/temperature_abnormal.aac</file>
+    <file>asserts/zh_CN/temperature_abnormal.aac</file>
 </qresource>
 <qresource>
-    <file>asserts/temperature_normal.aac</file>
+    <file>asserts/zh_CN/temperature_normal.aac</file>
+</qresource>
+<qresource>
+    <file>asserts/en/recognition_succeed.aac</file>
+</qresource>
+<qresource>
+    <file>asserts/en/recognition_failed.aac</file>
+</qresource>
+<qresource>
+    <file>asserts/en/temperature_abnormal.aac</file>
+</qresource>
+<qresource>
+    <file>asserts/en/temperature_normal.aac</file>
 </qresource>
 </RCC>
