@@ -1,4 +1,4 @@
-#include <QMetaType>
+#include <QFile>
 #include <QTranslator>
 #include <QtWidgets/QApplication>
 
@@ -186,28 +186,37 @@ VideoPlayer* create_gui() {
 }
 
 int main(int argc, char* argv[]) {
-
+  // Step 1: 加载配置文件
   auto config = read_cfg(argc, argv);
   if (config == NULL) return -1;
 
+  // Step 2: 必须先创建Engine
   auto engine = create_engine();
   if (engine == NULL) return -1;
-  
+
+  // Step 3: 初始化QT（必须在Engine初始化之后）
   QApplication app(argc, argv);
 
+  // Step 4: 多语言支持
   load_translator(app);
   config->appendListener("reload", [&app]() { load_translator(app); });
 
-  // 播放开机画面
+  // Step 5: 播放自定义开机画面
   std::string filename = "background.jpg";
-  engine->start_boot_ui(filename);
+  if (QFile(filename.c_str()).exists())
+    engine->start_boot_ui(filename);
+  else {
+    QFile file(":asserts/background.jpg");
+    file.open(QIODevice::ReadOnly);
+    auto data = file.readAll();
+    std::vector<SZ_BYTE> img(data.begin(), data.end());
+    engine->start_boot_ui(img);
+  }
 
+  // Step 6: 启动主程序UI
   auto gui = create_gui();
   if (gui == NULL) return -1;
   gui->show();
-
-  // 关闭开机画面
-  
 
   return app.exec();
 }
