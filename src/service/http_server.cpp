@@ -1,5 +1,6 @@
 #include "http_server.hpp"
 
+#include <cstdio>
 #include <quface-io/engine.hpp>
 
 #include "static_config.hpp"
@@ -123,6 +124,25 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
                    {"message", "save error " + std::to_string(ret)}};
       res.set_content(data.dump(), "application/json");
       return;
+    }
+
+    json data = {{"ok", true}, {"message", "ok"}};
+    res.set_content(data.dump(), "application/json");
+  });
+
+  server_->Post("/background/-/reset", [&](const Request& req, Response& res) {
+    auto app = Config::get_app();
+
+    if (std::remove(app.boot_image_path.c_str())) {
+      SZ_LOG_ERROR("Remove {} failed", app.boot_image_path);
+    } else {
+      SZ_LOG_INFO("Remove {} succeed", app.boot_image_path);
+    }
+
+    if (std::remove(app.screensaver_image_path.c_str())) {
+      SZ_LOG_ERROR("Remove {} failed", app.screensaver_image_path);
+    } else {
+      SZ_LOG_INFO("Remove {} succeed", app.screensaver_image_path);
     }
 
     json data = {{"ok", true}, {"message", "ok"}};
