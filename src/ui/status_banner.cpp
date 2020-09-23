@@ -2,6 +2,8 @@
 
 #include <QPainter>
 
+#include "system.hpp"
+
 using namespace suanzi;
 
 StatusBanner::StatusBanner(PersonService::ptr person_service, int width,
@@ -22,8 +24,11 @@ StatusBanner::StatusBanner(PersonService::ptr person_service, int width,
 StatusBanner::~StatusBanner() { timer_->stop(); }
 
 void StatusBanner::rx_update() {
-  ip_address_ = person_service_->get_local_ip();
-  version_ = person_service_->get_system_version();
+  std::string ip, name;
+  System::get_current_network(name, ip);
+  ip_address_ = name + " " + ip;
+
+  System::get_release_version(version_);
 }
 
 void StatusBanner::paint(QPainter *painter) {

@@ -52,9 +52,6 @@ class PersonService {
       : client_(scheme_host_port.c_str()),
         image_store_path_(image_store_path) {}
 
-  std::string get_local_ip();
-  std::string get_system_version();
-
   SZ_RETCODE get_person(SZ_UINT32 id, PersonData &person);
 
   SZ_RETCODE upload_image(const std::string &type,
