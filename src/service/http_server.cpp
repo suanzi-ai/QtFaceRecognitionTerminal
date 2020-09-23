@@ -71,7 +71,7 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
 
   server_->Get("/version", [&](const Request& req, Response& res) {
     json body = {
-        {"version", GIT_DESCRIBE},
+        {"version", APP_VERSION},
         {"quface_sdk_version", QuFaceSDK_VERSION},
         {"quface_io_sdk_version", QuFaceIOSDK_VERSION},
     };
