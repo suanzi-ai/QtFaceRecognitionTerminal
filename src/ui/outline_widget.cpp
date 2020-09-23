@@ -19,6 +19,9 @@ OutlineWidget::OutlineWidget(int width, int height, QWidget *parent)
 OutlineWidget::~OutlineWidget() {}
 
 void OutlineWidget::paint(QPainter *painter) {
+  if (Config::get_user().disabled_temperature)
+    return;
+
   const int w = width();
   const int h = height();
 
@@ -38,4 +41,5 @@ void OutlineWidget::paint(QPainter *painter) {
                     face_y + face_height + 25,  // 25是身体与头部的间距
                     face_width * 1.2,  // 1.2是身体要比头宽一点
                     face_height, start_angle, open_angle);
+
 }
