@@ -21,7 +21,7 @@
     <message>
         <location filename="../src/ui/recognize_tip_widget.cpp" line="120"/>
         <source>温度: </source>
-        <translation>Temperature: </translation>
+        <translation>Temp: </translation>
     </message>
 </context>
 <context>
