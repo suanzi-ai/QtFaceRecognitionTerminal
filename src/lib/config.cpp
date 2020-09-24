@@ -692,7 +692,7 @@ const UserConfig &Config::get_user() {
 std::string Config::get_user_lang() {
   std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
   std::string lang = instance_.cfg_data_.user.lang;
-  if (lang.find_first_of("en") == 0) {
+  if (lang.find("en") == 0) {
     lang = "en";
   }
   if (lang.size() > 2 && lang[2] == '_') {
