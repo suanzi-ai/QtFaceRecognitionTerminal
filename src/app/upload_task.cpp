@@ -30,18 +30,26 @@ void UploadTask::rx_upload(PersonData person, bool if_duplicated) {
     SZ_LOG_DEBUG("upload snapshots");
     auto engine = Engine::instance();
 
-    SZ_RETCODE bgr_encode_result = engine->encode_jpeg(
-        bgr_image_buffer, person.bgr_face_snapshot.data,
-        person.bgr_face_snapshot.cols, person.bgr_face_snapshot.rows);
+    SZ_RETCODE bgr_encode_result;
+    if (person.bgr_face_snapshot.cols > person.bgr_face_snapshot.rows)
+      bgr_encode_result = SZ_RETCODE_FAILED;
+    else
+      bgr_encode_result = engine->encode_jpeg(
+          bgr_image_buffer, person.bgr_face_snapshot.data,
+          person.bgr_face_snapshot.cols, person.bgr_face_snapshot.rows);
 
-    SZ_RETCODE nir_encode_result = engine->encode_jpeg(
-        nir_image_buffer, person.nir_face_snapshot.data,
-        person.nir_face_snapshot.cols, person.nir_face_snapshot.rows);
-    if (nir_encode_result != SZ_RETCODE_OK) {
+    SZ_RETCODE nir_encode_result;
+    if (person.nir_face_snapshot.cols > person.nir_face_snapshot.rows)
+      nir_encode_result = SZ_RETCODE_FAILED;
+    else
+      nir_encode_result = engine->encode_jpeg(
+          nir_image_buffer, person.nir_face_snapshot.data,
+          person.nir_face_snapshot.cols, person.nir_face_snapshot.rows);
+    if (nir_encode_result != SZ_RETCODE_OK)
       SZ_LOG_ERROR("Encode nir jpg failed");
-    }
 
-    if (bgr_encode_result == SZ_RETCODE_OK)
+    if (SZ_RETCODE_OK == bgr_encode_result &&
+        SZ_RETCODE_OK == nir_encode_result)
       person_service_->report_face_record(person.id, bgr_image_buffer,
                                           nir_image_buffer, person.status,
                                           person.temperature);
