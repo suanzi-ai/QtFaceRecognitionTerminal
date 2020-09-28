@@ -148,7 +148,7 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
       SZ_LOG_INFO("Record: id={}, staff={}, score={:.2f}, status={}", person.id,
                   person.number, person.score, person.status);
 
-    emit tx_display(person, duplicated);
+    if (is_live) emit tx_display(person, duplicated);
   }
 
   emit tx_finish();

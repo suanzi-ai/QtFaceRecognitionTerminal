@@ -127,7 +127,7 @@ bool RecognizeTask::is_live(DetectionData *detection) {
     if (SZ_RETCODE_OK !=
         anti_spoofing_->validate(
             (const SVP_IMAGE_S *)detection->img_nir_large->pImplData,
-            face_detection, ret))
+            face_detection, pose, ret))
       return false;
     return ret == SZ_TRUE;
   } else
