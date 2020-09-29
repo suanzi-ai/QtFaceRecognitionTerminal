@@ -152,6 +152,8 @@ SZ_RETCODE PersonService::report_face_record(
       {"irImagePath", nir_file_path},    {"status", status},
       {"temperature", body_temperature},
   };
+  if (Config::get_user().disabled_temperature) j.erase("temperature");
+
   std::string path = "/api/v1/faceRecords";
   auto res = client_.Post(path.c_str(), j.dump(), "application/json");
   if (!res) {
