@@ -87,11 +87,11 @@ void RecognizeTipWidget::paintEvent(QPaintEvent *event) {
   font.setPixelSize(base_font_size * 5);
   painter.setFont(font);
   painter.setPen(Qt::white);
-  painter.drawText(w * 8.25 / 100, h * 50 / 100, time);
+  painter.drawText(w * 7 / 100, h * 50 / 100, time);
 
   font.setPixelSize(base_font_size * 2);
   painter.setFont(font);
-  painter.drawText(w * 6 / 100, h * 70 / 100, date);
+  painter.drawText(w * 7 / 100, h * 70 / 100, date);
 
   // draw person info and avatar
   QString name, staff_number, avatar_path;
