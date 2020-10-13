@@ -123,13 +123,13 @@ if(DOWNLOAD_DEPENDENCY)
 
   download_and_extract(
     URL
-    https://quvision.oss-cn-beijing.aliyuncs.com/qufacesdk/hisi/rp-dv300-sdk.tgz
+    https://quvision.oss-cn-beijing.aliyuncs.com/qufacesdk/hisi/rp-hi3516dv300-sdk.tgz
     FILENAME
-    ${DOWNLOAD_DIR}/rp-dv300-sdk.tgz
+    ${DOWNLOAD_DIR}/rp-hi3516dv300-sdk.tgz
     HASH_TYPE
     SHA256
     HASH
-    f9075af18adbb95a21789f6d79ca98fa1f92fee0696a2d156a88425fa4efdbcb
+    af60f8f9fef1a2931880fb2dfc67ca807d2d778b4905e3b8b0a3bd79c33a165a
     EXTRACT_DIR
     ${HISI_SDK_PREFIX})
 
@@ -151,21 +151,6 @@ else()
       message(FATAL_ERROR "${prefix}: not exists!")
     endif()
   endforeach()
-
-  if(NOT EXISTS ${QT_SDK_PREFIX})
-    message(STATUS "HINTS:     set DOWNLOAD_DEPENDENCY to ON")
-    message(FATAL_ERROR "QT_SDK_PREFIX: ${QT_SDK_PREFIX} not exists!")
-  endif()
-  if(NOT EXISTS ${HISI_SDK_PREFIX})
-    message(STATUS "HINTS:     set DOWNLOAD_DEPENDENCY to ON")
-    message(FATAL_ERROR "HISI_SDK_PREFIX: ${HISI_SDK_PREFIX} not exists!")
-  endif()
-  if(NOT EXISTS ${TEMPERATURE_SDK_PREFIX})
-    message(STATUS "HINTS:     set DOWNLOAD_DEPENDENCY to ON")
-    message(
-      FATAL_ERROR
-        "TEMPERATURE_SDK_PREFIX: ${TEMPERATURE_SDK_PREFIX} not exists!")
-  endif()
 endif()
 
 find_package(QuFaceSDK REQUIRED)
