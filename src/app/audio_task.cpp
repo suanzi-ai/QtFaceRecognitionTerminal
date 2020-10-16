@@ -86,7 +86,9 @@ void AudioTask::rx_report(PersonData person) {
   else
     play_audio(success_audio_);
 
-  if (!user.disabled_temperature) {
+  if (user.disabled_temperature)
+    QThread::msleep(1000);
+  else {
     if (!person.is_temperature_normal())
       play_audio(temp_abnormal_audio_);
     else
