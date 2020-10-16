@@ -21,6 +21,9 @@
     <file>asserts/zh-CN/temperature_normal.aac</file>
 </qresource>
 <qresource>
+    <file>asserts/zh-CN/get_closer.aac</file>
+</qresource>
+<qresource>
     <file>asserts/en/recognition_succeed.aac</file>
 </qresource>
 <qresource>
@@ -31,5 +34,8 @@
 </qresource>
 <qresource>
     <file>asserts/en/temperature_normal.aac</file>
+</qresource>
+<qresource>
+    <file>asserts/en/get_closer.aac</file>
 </qresource>
 </RCC>
