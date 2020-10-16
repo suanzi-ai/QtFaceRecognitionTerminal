@@ -234,7 +234,7 @@ bool DetectTask::check(DetectionRatio detection, bool is_bgr) {
     static int invalid_count = 0;
     if (!detection.is_valid_position() || !detection.is_valid_size()) {
       if (!Config::get_user().disabled_temperature) { 
-        if (invalid_count++ > 30 && audio_finished_) {
+        if (audio_finished_ && invalid_count++ > 20) {
           audio_finished_ = false;
           invalid_count = 0;
           emit tx_warn();
