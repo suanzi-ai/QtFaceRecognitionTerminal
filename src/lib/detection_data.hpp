@@ -18,10 +18,12 @@ struct DetectionRatio {
   float pitch;
   float roll;
 
-  void scale(int x_scale, int y_scale, FaceDetection &detection, FacePose &pose);
+  void scale(int x_scale, int y_scale, FaceDetection &detection,
+             FacePose &pose);
   bool is_overlap(DetectionRatio other);
-  bool is_valid();
-
+  bool is_valid_pose();
+  bool is_valid_position();
+  bool is_valid_size();
 };
 
 class DetectionData : public ImagePackage {
@@ -46,6 +48,8 @@ class DetectionData : public ImagePackage {
   bool bgr_face_detected_;
   bool nir_face_detected_;
 
+  bool bgr_face_valid_;
+  bool nir_face_valid_;
 };
 
 }  // namespace suanzi

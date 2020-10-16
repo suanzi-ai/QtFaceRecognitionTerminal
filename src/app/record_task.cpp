@@ -16,6 +16,7 @@ RecordTask::RecordTask(PersonService::ptr person_service, FaceDatabasePtr db,
   unknown_database_ = std::make_shared<FaceDatabase>("_UNKNOWN_DB_");
   reset_counter_ = 0;
   body_temperature_ = 0;
+  audio_finished_ = true;
 
   // Create thread
   if (thread == nullptr) {
@@ -149,6 +150,10 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
                   person.number, person.score, person.status);
 
     if (is_live) emit tx_display(person, duplicated);
+    if (audio_finished_) {
+      audio_finished_ = false;
+      emit tx_audio(person);
+    }
   }
 
   emit tx_finish();
@@ -162,6 +167,8 @@ void RecordTask::rx_reset() {
   emit tx_nir_finish(false);
   emit tx_bgr_finish(false);
 }
+
+void RecordTask::rx_audio_finish() { audio_finished_ = true; }
 
 bool RecordTask::if_new(const FaceFeature &feature) {
   bool ret;
@@ -299,7 +306,6 @@ bool RecordTask::if_duplicated(const SZ_UINT32 &face_id, float &temperature) {
       known_temperature_[face_id] = temperature;
       return false;
     } else {
-
       if (std::abs(temperature - known_temperature_[face_id]) < 1)
         temperature = known_temperature_[face_id];
       else
@@ -347,7 +353,6 @@ bool RecordTask::if_duplicated(const FaceFeature &feature, float &temperature) {
       unknown_temperature_[face_id] = temperature;
       return false;
     } else {
-
       if (std::abs(temperature - unknown_temperature_[face_id]) < 1)
         temperature = unknown_temperature_[face_id];
       else

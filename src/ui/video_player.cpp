@@ -94,8 +94,14 @@ void VideoPlayer::init_workflow() {
 
   // 创建语音播报线程
   audio_task_ = new AudioTask(nullptr, this);
-  connect((const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool)),
-          (const QObject *)audio_task_, SLOT(rx_display(PersonData, bool)));
+  connect((const QObject *)record_task_, SIGNAL(tx_audio(PersonData)),
+          (const QObject *)audio_task_, SLOT(rx_report(PersonData)));
+  connect((const QObject *)audio_task_, SIGNAL(tx_finish()),
+          (const QObject *)record_task_, SLOT(rx_audio_finish()));
+  connect((const QObject *)detect_task_, SIGNAL(tx_warn()),
+          (const QObject *)audio_task_, SLOT(rx_warn()));
+  connect((const QObject *)audio_task_, SIGNAL(tx_warn_finish()),
+          (const QObject *)detect_task_, SLOT(rx_audio_finish()));
 
   // 创建人体测温线程
   temperature_task_ = new TemperatureTask(
@@ -132,9 +138,9 @@ void VideoPlayer::init_widgets() {
       new DetectTipWidget(0, 0, screen_width, screen_height, this);
   detect_tip_widget_bgr_->hide();
   connect((const QObject *)detect_task_,
-          SIGNAL(tx_bgr_display(DetectionRatio, bool, bool)),
+          SIGNAL(tx_bgr_display(DetectionRatio, bool, bool, bool)),
           (const QObject *)detect_tip_widget_bgr_,
-          SLOT(rx_display(DetectionRatio, bool, bool)));
+          SLOT(rx_display(DetectionRatio, bool, bool, bool)));
 
   // 创建红外人脸检测框控件
   int pip_win_percent = app.infrared_window_percent;
@@ -145,9 +151,9 @@ void VideoPlayer::init_widgets() {
   detect_tip_widget_nir_->hide();
   if (app.show_infrared_window) {
     connect((const QObject *)detect_task_,
-            SIGNAL(tx_nir_display(DetectionRatio, bool, bool)),
+            SIGNAL(tx_nir_display(DetectionRatio, bool, bool, bool)),
             (const QObject *)detect_tip_widget_nir_,
-            SLOT(rx_display(DetectionRatio, bool, bool)));
+            SLOT(rx_display(DetectionRatio, bool, bool, bool)));
   }
 
   // 创建人脸识别记录控件

@@ -22,9 +22,8 @@ class DetectTipWidget : public QWidget {
   void paint(QPainter *painter);
 
  private slots:
-  void rx_display(DetectionRatio detection, bool to_clear, bool is_bgr);
-
-  bool decide_valid(DetectionRatio detection);
+  void rx_display(DetectionRatio detection, bool to_clear, bool valid,
+                  bool is_bgr);
 
  private:
   static constexpr int MAX_RECT_COUNT = 10;
@@ -43,7 +42,6 @@ class DetectTipWidget : public QWidget {
 
   bool is_valid_;
   int valid_count_;
-
 };
 
 }  // namespace suanzi

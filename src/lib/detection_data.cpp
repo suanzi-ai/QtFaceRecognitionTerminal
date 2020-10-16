@@ -50,47 +50,61 @@ bool DetectionRatio::is_overlap(DetectionRatio other) {
   return ret;
 }
 
-bool DetectionRatio::is_valid() {
+bool DetectionRatio::is_valid_pose() {
   auto detect = Config::get_detect();
+  return !std::isnan(yaw) && !std::isnan(pitch) && !std::isnan(roll) &&
+         detect.min_yaw < yaw && yaw < detect.max_yaw &&
+         detect.min_pitch < pitch && pitch < detect.max_pitch &&
+         detect.min_roll < roll && roll < detect.max_roll;
+}
+
+bool DetectionRatio::is_valid_position() {
+  auto user = Config::get_user();
+  auto temperature = Config::get_temperature();
+
+  float min_x, min_y, max_x, max_y;
+  if (user.disabled_temperature) {
+    min_x = min_y = 0.01;
+    max_x = max_y = 0.99;
+  } else {
+    min_x = temperature.device_face_x;
+    min_y = temperature.device_face_y;
+    max_x = min_x + temperature.device_face_width;
+    max_y = min_y + temperature.device_face_height + 0.05;
+  }
+
+  return x > min_x && y > min_y && x + width < max_x && y + height < max_y;
+}
+
+bool DetectionRatio::is_valid_size() {
   auto temperature = Config::get_temperature();
   auto user = Config::get_user();
-  bool pose_valid = !std::isnan(yaw) && !std::isnan(pitch) &&
-                    !std::isnan(roll) && detect.min_yaw < yaw &&
-                    yaw < detect.max_yaw && detect.min_pitch < pitch &&
-                    pitch < detect.max_pitch && detect.min_roll < roll &&
-                    roll < detect.max_roll;
-  bool position_valid;
-
   if (user.disabled_temperature)
-    position_valid =
-        x > 0.01 && y > 0.01 && x + width < 0.99 && y + height < 0.99;
+    return true;
   else {
-    float face_width, face_height, face_x, face_y, distance;
+    float min_width =
+        temperature.device_face_width * temperature.temperature_distance;
+    float min_height =
+        temperature.device_face_height * temperature.temperature_distance;
 
-    face_width = temperature.device_face_width;
-    face_height = temperature.device_face_height;
-    face_x = temperature.device_face_x;
-    face_y = temperature.device_face_y;
-    distance = temperature.temperature_distance;
-
-    position_valid =
-        x > face_x && y > face_y && x + width < face_x + face_width &&
-        y + height - 0.04 < face_height + face_y &&
-        width > face_width * distance &&
-        height >
-            face_height * distance;  // 补偿0.04，以让人脸完全进入框中也能识别
+    return width > min_width && height > min_height;
   }
-  return pose_valid && position_valid;
 }
 
 DetectionData::DetectionData() {
   bgr_face_detected_ = false;
   nir_face_detected_ = false;
+
+  bgr_face_valid_ = false;
+  nir_face_valid_ = false;
 }
 
 DetectionData::DetectionData(const ImagePackage *pkg) : ImagePackage(pkg) {
   bgr_face_detected_ = false;
   nir_face_detected_ = false;
+
+  bgr_face_valid_ = false;
+  nir_face_valid_ = false;
 }
 
 DetectionData::DetectionData(Size size_bgr_large, Size size_bgr_small,
@@ -99,6 +113,9 @@ DetectionData::DetectionData(Size size_bgr_large, Size size_bgr_small,
                    size_nir_small) {
   bgr_face_detected_ = false;
   nir_face_detected_ = false;
+
+  bgr_face_valid_ = false;
+  nir_face_valid_ = false;
 }
 
 DetectionData::~DetectionData() {}
@@ -108,47 +125,10 @@ bool DetectionData::bgr_face_detected() { return bgr_face_detected_; }
 bool DetectionData::nir_face_detected() { return nir_face_detected_; }
 
 bool DetectionData::bgr_face_valid() {
-  bool ret = false;
-  if (bgr_face_detected() && bgr_detection_.is_valid()) {
-    static float x1 = 0;
-    static float y1 = 0;
-    static float w1 = 0;
-    static float h1 = 0;
-
-    static int stable_counter = 0;
-
-    auto cfg = Config::get_detect();
-
-    float x2 = bgr_detection_.x, y2 = bgr_detection_.y;
-    float w2 = bgr_detection_.width, h2 = bgr_detection_.height;
-
-    if (x1 > x2 + w2 || y1 > y2 + h2 || x1 + w1 < x2 || y1 + h1 < y2)
-      ret = false;
-    else {
-      float overlay_w = std::min(x1 + w1, x2 + w2) - std::max(x1, x2);
-      float overlay_h = std::min(y1 + h1, y2 + h2) - std::max(y1, y2);
-      float iou = overlay_w * overlay_h / (w1 * h1 + w2 * h2) * 2;
-
-      ret = iou >= cfg.min_tracking_iou;
-    }
-
-    x1 = x2;
-    y1 = y2;
-    w1 = w2;
-    h1 = h2;
-
-    if (ret)
-      stable_counter++;
-    else
-      stable_counter = 0;
-
-    ret = stable_counter >= cfg.min_tracking_number;
-  }
-
-  return ret;
+  return bgr_face_detected_ && bgr_face_valid_;
 }
 
 bool DetectionData::nir_face_valid() {
-  return bgr_face_detected() && nir_face_detected() &&
+  return bgr_face_detected_ && nir_face_detected_ &&
          nir_detection_.is_overlap(bgr_detection_);
 }

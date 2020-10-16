@@ -24,6 +24,7 @@ class RecordTask : QObject {
   void rx_frame(PingPangBuffer<RecognizeData> *buffer);
   void rx_reset();
   void rx_temperature(float body_temperature);
+  void rx_audio_finish();
 
  signals:
   void tx_finish();
@@ -33,6 +34,7 @@ class RecordTask : QObject {
 
   // for display
   void tx_display(PersonData person, bool if_duplicated);
+  void tx_audio(PersonData person);
 
  private:
   bool if_new(const FaceFeature &feature);
@@ -59,6 +61,8 @@ class RecordTask : QObject {
 
   int reset_counter_;
   float body_temperature_;
+
+  bool audio_finished_;
 
   FaceFeature last_feature_;
 };
