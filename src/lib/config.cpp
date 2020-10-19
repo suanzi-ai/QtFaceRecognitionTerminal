@@ -658,11 +658,16 @@ bool Config::load_screen_type(LCDScreenType &lcd_screen_type) {
         // 0: mipi-7inch-1024x600(default)
         // 1: mipi-8inch-800x1280
         // 2: mipi-10inch-800x1280
+        // 3: rh-9881-8inch-800x1280
         // 4: mipi-5inch-480x854
 
         if (lcd_type == "1") {
           lcd_screen_type = SML_LCD_MIPI_8INCH_800X1280;
           SZ_LOG_INFO("Load screen type SML_LCD_MIPI_8INCH_800X1280");
+          return true;
+        } else if (lcd_type == "3") {
+          lcd_screen_type = RH_9881_8INCH_800X1280;
+          SZ_LOG_INFO("Load screen type RH_9881_8INCH_800X1280");
           return true;
         } else if (lcd_type == "4") {
           lcd_screen_type = SML_LCD_MIPI_5INCH_480X854;
