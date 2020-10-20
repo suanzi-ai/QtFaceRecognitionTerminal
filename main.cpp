@@ -72,7 +72,7 @@ Engine* create_engine() {
                   {
                       {
                           .index = 0,
-                          .rotate = 0,
+                          .rotate = 1,
                           .size =
                               {
                                   .width = 1920,
@@ -107,7 +107,7 @@ Engine* create_engine() {
                   {
                       {
                           .index = 0,
-                          .rotate = 0,
+                          .rotate = 1,
                           .size =
                               {
                                   .width = 1920,
