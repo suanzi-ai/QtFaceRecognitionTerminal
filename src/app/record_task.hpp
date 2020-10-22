@@ -34,7 +34,10 @@ class RecordTask : QObject {
 
   // for display
   void tx_display(PersonData person, bool if_duplicated);
-  void tx_audio(PersonData person);
+
+  // for audio report
+  void tx_report_person(PersonData person);
+  void tx_report_mask();
 
  private:
   bool if_new(const FaceFeature &feature);
@@ -42,6 +45,7 @@ class RecordTask : QObject {
   bool sequence_query(const std::vector<QueryResult> &history,
                       SZ_UINT32 &face_id, SZ_FLOAT &score);
   bool sequence_antispoof(const std::vector<bool> &history);
+  bool sequence_mask_detecting(const std::vector<bool> &history);
 
   bool if_duplicated(const SZ_UINT32 &face_id, float &temperature);
   bool if_duplicated(const FaceFeature &feature, float &temperature);
@@ -51,6 +55,7 @@ class RecordTask : QObject {
   FaceDatabasePtr db_, unknown_database_;
 
   std::vector<QueryResult> person_history_;
+  std::vector<bool> mask_history_;
   std::map<SZ_UINT32, std::chrono::steady_clock::time_point> query_clock_;
   std::map<SZ_UINT32, float> known_temperature_;
 

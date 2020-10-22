@@ -157,6 +157,7 @@ VideoPlayer* create_gui() {
   auto pose_estimator =
       std::make_shared<FacePoseEstimator>(quface.model_file_path);
   auto anti_spoof = std::make_shared<FaceAntiSpoofing>(quface.model_file_path);
+  auto mask_detector = std::make_shared<MaskDetector>(quface.model_file_path);
   auto db = std::make_shared<FaceDatabase>(quface.db_name);
 
   // 加载 Web 服务模块
@@ -176,8 +177,9 @@ VideoPlayer* create_gui() {
 
   auto engine = Engine::instance();
   engine->stop_boot_ui();
-  VideoPlayer* player = new VideoPlayer(db, detector, pose_estimator, extractor,
-                                        anti_spoof, person_service);
+  VideoPlayer* player =
+      new VideoPlayer(db, detector, pose_estimator, extractor, anti_spoof,
+                      mask_detector, person_service);
   return player;
 }
 

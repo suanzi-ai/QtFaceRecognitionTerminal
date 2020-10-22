@@ -76,9 +76,10 @@ void DetectTipWidget::paint(QPainter *painter) {
 
 #ifdef DEBUG
     if (pose_.length() > 0) {
-      painter->setPen(Qt::white);
-      painter->drawPoints(landmarks_);
+      painter->setPen(Qt::red);
       painter->drawText(top_x, top_y - 20, pose_);
+      for (size_t i = 0; i < SZ_LANDMARK_NUM; i++)
+        painter->drawEllipse(landmarks_[i], 2, 2);
     }
 #endif
   }

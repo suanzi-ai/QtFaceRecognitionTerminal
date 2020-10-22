@@ -67,11 +67,17 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
   if (is_live || live_history_.size() == live_size) emit tx_nir_finish(true);
 
   // receive recognize data
-  if (input->has_person_info) person_history_.push_back(input->person_info);
+  if (input->has_person_info) {
+    mask_history_.push_back(input->has_mask);
+    person_history_.push_back(input->person_info);
+  }
 
-  if (person_history_.size() > person_size)
+  if (person_history_.size() > person_size) {
+    mask_history_.erase(mask_history_.begin() + person_size,
+                        mask_history_.end());
     person_history_.erase(person_history_.begin() + person_size,
                           person_history_.end());
+  }
 
   if (person_history_.size() == person_size) emit tx_bgr_finish(true);
 
@@ -91,68 +97,78 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
     memcpy(person.nir_face_snapshot.data, input->img_nir_large->pData,
            width * height * 3 / 2);
 
-    // query person info
-    SZ_UINT32 face_id;
-    if (!sequence_query(person_history_, face_id, person.score) ||
-        SZ_RETCODE_OK != person_service_->get_person(face_id, person)) {
-      person.id = 0;
-      person.score = 0;
-      person.name = tr("访客").toStdString();
-      person.face_path = ":asserts/avatar_unknown.jpg";
-      person.status = person_service_->get_status(PersonStatus::Stranger);
-    }
-
-    // decide fake or live
-    if (!is_live) {
-      if (Config::get_user().liveness_policy == "alarm") {
-        person.name = tr("活体失败").toStdString();
-      } else {  // stranger
-        person.name = tr("访客").toStdString();
+    // check whether has mask
+    if (sequence_mask_detecting(mask_history_)) {
+      if (audio_finished_) {
+        audio_finished_ = false;
+        SZ_LOG_WARN("Mask detected");
+        rx_reset();
+        emit tx_report_mask();
       }
-      person.id = 0;
-      person.score = 0;
-      person.face_path = ":asserts/avatar_unknown.jpg";
-      person.status = person_service_->get_status(PersonStatus::Fake);
-    }
-
-    if (person.is_status_blacklist()) {
-      if (Config::get_user().blacklist_policy == "alarm") {
-        person.name = tr("黑名单").toStdString();
-      } else {  // stranger
-        person.name = tr("访客").toStdString();
-      }
-      person.id = 0;
-      person.score = 0;
-      person.face_path = ":asserts/avatar_unknown.jpg";
-    }
-
-    // decide duplicate
-    bool duplicated;
-    person.temperature = body_temperature_;
-    if (!person.is_status_normal()) {
-      duplicated = if_duplicated(input->person_feature, person.temperature);
     } else {
-      duplicated = if_duplicated(face_id, person.temperature);
+      // query person info
+      SZ_UINT32 face_id;
+      if (!sequence_query(person_history_, face_id, person.score) ||
+          SZ_RETCODE_OK != person_service_->get_person(face_id, person)) {
+        person.id = 0;
+        person.score = 0;
+        person.name = tr("访客").toStdString();
+        person.face_path = ":asserts/avatar_unknown.jpg";
+        person.status = person_service_->get_status(PersonStatus::Stranger);
+      }
 
-      // Update face feature
-      if (person.score < 0.9) db_->add(face_id, input->person_feature, 0.1);
-    }
+      // decide fake or live
+      if (!is_live) {
+        if (Config::get_user().liveness_policy == "alarm") {
+          person.name = tr("活体失败").toStdString();
+        } else {  // stranger
+          person.name = tr("访客").toStdString();
+        }
+        person.id = 0;
+        person.score = 0;
+        person.face_path = ":asserts/avatar_unknown.jpg";
+        person.status = person_service_->get_status(PersonStatus::Fake);
+      }
 
-    // output
-    rx_reset();
-    if (!Config::get_user().disabled_temperature)
-      SZ_LOG_INFO(
-          "Record: id={}, staff={}, score={:.2f}, status={}, temperature={}",
-          person.id, person.number, person.score, person.status,
-          person.temperature);
-    else
-      SZ_LOG_INFO("Record: id={}, staff={}, score={:.2f}, status={}", person.id,
-                  person.number, person.score, person.status);
+      if (person.is_status_blacklist()) {
+        if (Config::get_user().blacklist_policy == "alarm") {
+          person.name = tr("黑名单").toStdString();
+        } else {  // stranger
+          person.name = tr("访客").toStdString();
+        }
+        person.id = 0;
+        person.score = 0;
+        person.face_path = ":asserts/avatar_unknown.jpg";
+      }
 
-    if (is_live) emit tx_display(person, duplicated);
-    if (audio_finished_) {
-      audio_finished_ = false;
-      emit tx_audio(person);
+      // decide duplicate
+      bool duplicated;
+      person.temperature = body_temperature_;
+      if (!person.is_status_normal()) {
+        duplicated = if_duplicated(input->person_feature, person.temperature);
+      } else {
+        duplicated = if_duplicated(face_id, person.temperature);
+
+        // Update face feature
+        if (person.score < 0.9) db_->add(face_id, input->person_feature, 0.1);
+      }
+
+      // output
+      rx_reset();
+      if (!Config::get_user().disabled_temperature)
+        SZ_LOG_INFO(
+            "Record: id={}, staff={}, score={:.2f}, status={}, temperature={}",
+            person.id, person.number, person.score, person.status,
+            person.temperature);
+      else
+        SZ_LOG_INFO("Record: id={}, staff={}, score={:.2f}, status={}",
+                    person.id, person.number, person.score, person.status);
+
+      if (is_live) emit tx_display(person, duplicated);
+      if (audio_finished_) {
+        audio_finished_ = false;
+        emit tx_report_person(person);
+      }
     }
   }
 
@@ -160,6 +176,7 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
 }
 
 void RecordTask::rx_reset() {
+  mask_history_.clear();
   person_history_.clear();
   live_history_.clear();
   reset_counter_ = 0;
@@ -288,6 +305,17 @@ bool RecordTask::sequence_antispoof(const std::vector<bool> &history) {
                  history.size());
 
   return ret;
+}
+
+bool RecordTask::sequence_mask_detecting(const std::vector<bool> &history) {
+  if (history.size() == 0) return false;
+
+  int count = 0;
+  for (auto has_mask : history) {
+    if (has_mask) count++;
+  }
+
+  return count >= (history.size() - count);
 }
 
 bool RecordTask::if_duplicated(const SZ_UINT32 &face_id, float &temperature) {

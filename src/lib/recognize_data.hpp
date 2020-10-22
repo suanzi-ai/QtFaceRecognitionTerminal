@@ -22,6 +22,7 @@ class RecognizeData : public DetectionData {
   bool has_person_info;
   QueryResult person_info;
   FaceFeature person_feature;
+  bool has_mask;
 };
 
 }  // namespace suanzi

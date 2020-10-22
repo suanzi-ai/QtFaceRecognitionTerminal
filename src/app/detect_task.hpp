@@ -36,7 +36,7 @@ class DetectTask : QObject {
   void tx_nir_display(DetectionRatio detection, bool to_clear, bool valid,
                       bool show_pose);
   // for audio warning
-  void tx_warn();
+  void tx_warn_distance();
 
   // for recognition
   void tx_frame(PingPangBuffer<DetectionData> *buffer);

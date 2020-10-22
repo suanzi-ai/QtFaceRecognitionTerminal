@@ -39,20 +39,23 @@ void AudioTask::load_audio() {
 
   std::string prefix = ":asserts/" + lang;
   read_audio(prefix + "/recognition_succeed.aac", success_audio_);
-  read_audio(prefix + "/get_closer.aac", warn_audio_);
+  read_audio(prefix + "/get_closer.aac", warn_distance_audio_);
+  read_audio(prefix + "/report_mask.aac", report_mask_audio_);
   read_audio(prefix + "/recognition_failed.aac", fail_audio_);
   read_audio(prefix + "/temperature_normal.aac", temp_normal_audio_);
   read_audio(prefix + "/temperature_abnormal.aac", temp_abnormal_audio_);
 
   if (lang == "en") {
     success_audio_.duration = 1500;
-    warn_audio_.duration = 1500;
+    warn_distance_audio_.duration = 1500;
+    report_mask_audio_.duration = 2500;
     fail_audio_.duration = 1500;
     temp_normal_audio_.duration = 1000;
     temp_abnormal_audio_.duration = 1500;
   } else if (lang == "zh-CN") {
     success_audio_.duration = 1000;
-    warn_audio_.duration = 2000;
+    warn_distance_audio_.duration = 2000;
+    report_mask_audio_.duration = 3000;
     fail_audio_.duration = 1000;
     temp_normal_audio_.duration = 2000;
     temp_abnormal_audio_.duration = 2000;
@@ -75,7 +78,7 @@ void AudioTask::play_audio(Audio& audio) {
   QThread::msleep(audio.duration);
 }
 
-void AudioTask::rx_report(PersonData person) {
+void AudioTask::rx_report_person(PersonData person) {
   auto user = Config::get_user();
   if (!user.enable_audio) return;
 
@@ -95,14 +98,26 @@ void AudioTask::rx_report(PersonData person) {
       play_audio(temp_normal_audio_);
   }
 
-  emit tx_finish();
+  emit tx_report_finish();
   is_reporting_ = false;
 }
 
-void AudioTask::rx_warn() {
+void AudioTask::rx_report_mask() {
+  auto user = Config::get_user();
+  if (!user.enable_audio) return;
+
+  is_reporting_ = true;
+
+  play_audio(report_mask_audio_);
+
+  emit tx_report_finish();
+  is_reporting_ = false;
+}
+
+void AudioTask::rx_warn_distance() {
   auto user = Config::get_user();
   if (user.enable_audio && !user.disabled_temperature && !is_reporting_) {
-    play_audio(warn_audio_);
+    play_audio(warn_distance_audio_);
   }
 
   emit tx_warn_finish();

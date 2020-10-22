@@ -23,11 +23,13 @@ class AudioTask : QObject {
   ~AudioTask();
 
  private slots:
-  void rx_report(PersonData person);
-  void rx_warn();
+  void rx_report_person(PersonData person);
+  void rx_report_mask();
+
+  void rx_warn_distance();
 
  signals:
-  void tx_finish();
+  void tx_report_finish();
   void tx_warn_finish();
 
  private:
@@ -36,7 +38,8 @@ class AudioTask : QObject {
   void play_audio(Audio& audio);
 
   Audio success_audio_;
-  Audio warn_audio_;
+  Audio warn_distance_audio_;
+  Audio report_mask_audio_;
   Audio fail_audio_;
   Audio temp_normal_audio_;
   Audio temp_abnormal_audio_;

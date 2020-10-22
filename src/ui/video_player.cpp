@@ -14,12 +14,14 @@ VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
                          FacePoseEstimatorPtr pose_estimator,
                          FaceExtractorPtr extractor,
                          FaceAntiSpoofingPtr anti_spoofing,
+                         MaskDetectorPtr mask_detector,
                          PersonService::ptr person_service, QWidget *parent)
     : db_(db),
       detector_(detector),
       pose_estimator_(pose_estimator),
       extractor_(extractor),
       anti_spoofing_(anti_spoofing),
+      mask_detector_(mask_detector),
       person_service_(person_service),
       QWidget(parent) {
   // 初始化工作流
@@ -58,8 +60,8 @@ void VideoPlayer::init_workflow() {
           (const QObject *)camera_reader_, SLOT(rx_finish()));
 
   // 创建人脸识别线程
-  recognize_task_ =
-      new RecognizeTask(db_, extractor_, anti_spoofing_, nullptr, this);
+  recognize_task_ = new RecognizeTask(db_, extractor_, anti_spoofing_,
+                                      mask_detector_, nullptr, this);
   connect((const QObject *)detect_task_,
           SIGNAL(tx_frame(PingPangBuffer<DetectionData> *)),
           (const QObject *)recognize_task_,
@@ -94,12 +96,14 @@ void VideoPlayer::init_workflow() {
 
   // 创建语音播报线程
   audio_task_ = new AudioTask(nullptr, this);
-  connect((const QObject *)record_task_, SIGNAL(tx_audio(PersonData)),
-          (const QObject *)audio_task_, SLOT(rx_report(PersonData)));
-  connect((const QObject *)audio_task_, SIGNAL(tx_finish()),
+  connect((const QObject *)record_task_, SIGNAL(tx_report_person(PersonData)),
+          (const QObject *)audio_task_, SLOT(rx_report_person(PersonData)));
+  connect((const QObject *)record_task_, SIGNAL(tx_report_mask()),
+          (const QObject *)audio_task_, SLOT(rx_report_mask()));
+  connect((const QObject *)audio_task_, SIGNAL(tx_report_finish()),
           (const QObject *)record_task_, SLOT(rx_audio_finish()));
-  connect((const QObject *)detect_task_, SIGNAL(tx_warn()),
-          (const QObject *)audio_task_, SLOT(rx_warn()));
+  connect((const QObject *)detect_task_, SIGNAL(tx_warn_distance()),
+          (const QObject *)audio_task_, SLOT(rx_warn_distance()));
   connect((const QObject *)audio_task_, SIGNAL(tx_warn_finish()),
           (const QObject *)detect_task_, SLOT(rx_audio_finish()));
 
@@ -107,7 +111,7 @@ void VideoPlayer::init_workflow() {
   temperature_task_ = new TemperatureTask(
       (io::TemperatureManufacturer)Config::get_temperature().manufacturer);
   connect((const QObject *)temperature_task_, SIGNAL(tx_temperature(float)),
-          (const QObject *)record_task_, SLOT(rx_temperature(float)));  
+          (const QObject *)record_task_, SLOT(rx_temperature(float)));
   connect((const QObject *)face_timer_, SIGNAL(tx_face_disappear(int)),
           (const QObject *)temperature_task_, SLOT(rx_disable()));
   connect((const QObject *)face_timer_, SIGNAL(tx_face_appear(int)),

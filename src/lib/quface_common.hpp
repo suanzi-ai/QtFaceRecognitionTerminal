@@ -11,4 +11,5 @@ typedef std::shared_ptr<FaceExtractor> FaceExtractorPtr;
 typedef std::shared_ptr<FaceDatabase> FaceDatabasePtr;
 typedef std::shared_ptr<FacePoseEstimator> FacePoseEstimatorPtr;
 typedef std::shared_ptr<FaceAntiSpoofing> FaceAntiSpoofingPtr;
+typedef std::shared_ptr<MaskDetector> MaskDetectorPtr;
 }  // namespace suanzi

@@ -11,11 +11,13 @@
 using namespace suanzi;
 
 RecognizeTask::RecognizeTask(FaceDatabasePtr db, FaceExtractorPtr extractor,
-                             FaceAntiSpoofingPtr anti_spoofing, QThread *thread,
+                             FaceAntiSpoofingPtr anti_spoofing,
+                             MaskDetectorPtr mask_detector, QThread *thread,
                              QObject *parent)
     : face_database_(db),
       face_extractor_(extractor),
-      anti_spoofing_(anti_spoofing) {
+      anti_spoofing_(anti_spoofing),
+      mask_detector_(mask_detector) {
   // Initialize PINGPANG buffer
   Size size_bgr_1 = VPSS_CH_SIZES_BGR[1];
   Size size_bgr_2 = VPSS_CH_SIZES_BGR[2];
@@ -88,8 +90,11 @@ void RecognizeTask::rx_frame(PingPangBuffer<DetectionData> *buffer) {
       else
         output->is_live = is_live(input);
     }
-    if (output->has_person_info)
-      extract_and_query(input, output->person_feature, output->person_info);
+    if (output->has_person_info) {
+      output->has_mask = has_mask(input);
+      if (!output->has_mask)
+        extract_and_query(input, output->person_feature, output->person_info);
+    }
   } else {
     output->has_live = false;
     output->has_person_info = false;
@@ -131,6 +136,25 @@ bool RecognizeTask::is_live(DetectionData *detection) {
       return false;
     return ret == SZ_TRUE;
   } else
+    return false;
+}
+
+bool RecognizeTask::has_mask(DetectionData *detection) {
+  int width = detection->img_bgr_large->width;
+  int height = detection->img_bgr_large->height;
+
+  suanzi::FaceDetection face_detection;
+  suanzi::FacePose pose;
+  detection->bgr_detection_.scale(width, height, face_detection, pose);
+
+  SZ_BOOL has_mask;
+  SZ_RETCODE ret = mask_detector_->classify(
+      (const SVP_IMAGE_S *)detection->img_bgr_large->pImplData, face_detection,
+      has_mask, 0.9);
+
+  if (SZ_RETCODE_OK == ret && has_mask == SZ_TRUE)
+    return true;
+  else
     return false;
 }
 

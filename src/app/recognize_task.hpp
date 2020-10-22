@@ -14,7 +14,8 @@ class RecognizeTask : QObject {
   Q_OBJECT
  public:
   RecognizeTask(FaceDatabasePtr db, FaceExtractorPtr extractor,
-                FaceAntiSpoofingPtr anti_spoofing, QThread *thread = nullptr,
+                FaceAntiSpoofingPtr anti_spoofing,
+                MaskDetectorPtr mask_detector, QThread *thread = nullptr,
                 QObject *parent = nullptr);
   ~RecognizeTask();
 
@@ -32,6 +33,7 @@ class RecognizeTask : QObject {
 
  private:
   bool is_live(DetectionData *detection);
+  bool has_mask(DetectionData *detection);
   void extract_and_query(DetectionData *detection, FaceFeature &feature,
                          QueryResult &person_info);
 
@@ -52,6 +54,7 @@ class RecognizeTask : QObject {
   FaceDatabasePtr face_database_;
   FaceExtractorPtr face_extractor_;
   FaceAntiSpoofingPtr anti_spoofing_;
+  MaskDetectorPtr mask_detector_;
 
   RecognizeData *buffer_ping_, *buffer_pang_;
   PingPangBuffer<RecognizeData> *pingpang_buffer_;

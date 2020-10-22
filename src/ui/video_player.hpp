@@ -32,7 +32,7 @@ class VideoPlayer : public QWidget {
  public:
   VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
               FacePoseEstimatorPtr pose_estimator, FaceExtractorPtr extractor,
-              FaceAntiSpoofingPtr anti_spoofing,
+              FaceAntiSpoofingPtr anti_spoofing, MaskDetectorPtr mask_detector,
               PersonService::ptr person_service, QWidget *parent = nullptr);
   ~VideoPlayer();
 
@@ -48,6 +48,7 @@ class VideoPlayer : public QWidget {
   FacePoseEstimatorPtr pose_estimator_;
   FaceExtractorPtr extractor_;
   FaceAntiSpoofingPtr anti_spoofing_;
+  MaskDetectorPtr mask_detector_;
 
   DetectTipWidget *detect_tip_widget_bgr_;
   DetectTipWidget *detect_tip_widget_nir_;
