@@ -216,5 +216,8 @@ int main(int argc, char* argv[]) {
   if (gui == NULL) return -1;
   gui->show();
 
+  // Step 7: 启动实时视频流
+  engine->start_live_streaming();
+
   return app.exec();
 }
