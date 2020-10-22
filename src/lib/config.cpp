@@ -684,6 +684,33 @@ bool Config::load_screen_type(LCDScreenType &lcd_screen_type) {
   return false;
 }
 
+bool Config::read_audio_volume(int &volume_percent) {
+  volume_percent = 100;
+  std::ifstream volume_cfg_in("/etc/audio-volume");
+  if (!volume_cfg_in.is_open()) {
+    std::ofstream volume_cfg_out("/etc/audio-volume");
+    if (!volume_cfg_out.is_open()) {
+      SZ_LOG_ERROR("write volume failed");
+      return false;
+    }
+    volume_cfg_out << volume_percent;
+  } else {
+    volume_cfg_in >> volume_percent;
+  }
+  return true;
+}
+
+bool Config::write_audio_volume(int volume_percent) {
+  std::ofstream volume_cfg_out("/etc/audio-volume");
+  if (!volume_cfg_out.is_open()) {
+    SZ_LOG_ERROR("write volume failed");
+    return false;
+  }
+  volume_cfg_out << volume_percent;
+
+  return true;
+}
+
 const ConfigData &Config::get_all() {
   std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
   return instance_.cfg_data_;

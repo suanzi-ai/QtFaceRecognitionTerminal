@@ -11,8 +11,14 @@
 using namespace suanzi;
 
 AudioTask::AudioTask(QThread* thread, QObject* parent) {
+  int volume_percent = 100;
+  if (!Config::read_audio_volume(volume_percent)) {
+    SZ_LOG_ERROR("Read audio failed");
+  }
+
+  SZ_LOG_ERROR("Set audio volume {}", volume_percent);
   auto engine = io::Engine::instance();
-  engine->audio_set_volume(100);
+  engine->audio_set_volume(volume_percent);
 
   load_audio();
   Config::get_instance()->appendListener("reload", [&]() { load_audio(); });
@@ -102,6 +108,7 @@ void AudioTask::rx_report_person(PersonData person) {
   is_reporting_ = false;
 }
 
+<<<<<<< HEAD
 void AudioTask::rx_report_mask() {
   auto user = Config::get_user();
   if (!user.enable_audio) return;
@@ -112,6 +119,13 @@ void AudioTask::rx_report_mask() {
 
   emit tx_report_finish();
   is_reporting_ = false;
+=======
+    if (if_duplicated)
+      QTimer::singleShot(4000, this, SLOT(rx_reset()));
+    else
+      rx_reset();
+  }
+>>>>>>> 394bc5e... feat(app/audio): volume api
 }
 
 void AudioTask::rx_warn_distance() {

@@ -8,6 +8,16 @@
 using namespace suanzi;
 using namespace suanzi::io;
 
+void response_failed(Response& res, const std::string& message) {
+  json data = {{"ok", false}, {"message", message}};
+  res.set_content(data.dump(), "application/json");
+}
+
+void response_ok(Response& res) {
+  json data = {{"ok", true}, {"message", "ok"}};
+  res.set_content(data.dump(), "application/json");
+}
+
 HTTPServer::HTTPServer() {
   server_ = std::make_shared<Server>();
 
@@ -183,6 +193,49 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
 
     json data = {{"ok", true}, {"message", "ok"}};
     res.set_content(data.dump(), "application/json");
+  });
+
+  server_->Get("/audio-volume", [&](const Request& req, Response& res) {
+    int volume_percent = 100;
+    if (!Config::read_audio_volume(volume_percent)) {
+      response_failed(res, "read volume failed");
+      return;
+    }
+
+    json body = {
+        {"percent", volume_percent},
+    };
+    res.set_content(body.dump(), "application/json");
+  });
+
+  server_->Post("/audio-volume", [&](const Request& req, Response& res) {
+    try {
+      auto cfg = Config::get_instance();
+      SZ_RETCODE ret;
+      auto j = json::parse(req.body);
+
+      int volume_percent = j["percent"];
+      if (volume_percent < 0 || volume_percent > 100) {
+        response_failed(res, "volume invalid");
+        return;
+      }
+
+      if (!Config::write_audio_volume(volume_percent)) {
+        response_failed(res, "write volume failed");
+        return;
+      }
+
+      ret = Engine::instance()->audio_set_volume(volume_percent);
+      if (ret != SZ_RETCODE_OK) {
+        response_failed(res, "set volume failed");
+        return;
+      }
+
+      response_ok(res);
+    } catch (const std::exception& exc) {
+      SZ_LOG_ERROR("Message err: {}", exc.what());
+      response_failed(res, exc.what());
+    }
   });
 
   server_->Get("/isp/exposure-info", [&](const Request& req, Response& res) {

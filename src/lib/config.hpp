@@ -211,6 +211,9 @@ class Config : public ConfigEventEmitter {
   SZ_RETCODE reset();
   static bool load_screen_type(io::LCDScreenType &lcd_screen_type);
 
+  static bool write_audio_volume(int volume_percent);
+  static bool read_audio_volume(int &volume_percent);
+
   static const ConfigData &get_all();
   static const UserConfig &get_user();
   static const TemperatureConfig &get_temperature();
