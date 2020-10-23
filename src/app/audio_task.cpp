@@ -108,7 +108,6 @@ void AudioTask::rx_report_person(PersonData person) {
   is_reporting_ = false;
 }
 
-<<<<<<< HEAD
 void AudioTask::rx_report_mask() {
   auto user = Config::get_user();
   if (!user.enable_audio) return;
@@ -119,13 +118,6 @@ void AudioTask::rx_report_mask() {
 
   emit tx_report_finish();
   is_reporting_ = false;
-=======
-    if (if_duplicated)
-      QTimer::singleShot(4000, this, SLOT(rx_reset()));
-    else
-      rx_reset();
-  }
->>>>>>> 394bc5e... feat(app/audio): volume api
 }
 
 void AudioTask::rx_warn_distance() {
