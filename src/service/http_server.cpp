@@ -8,23 +8,15 @@
 using namespace suanzi;
 using namespace suanzi::io;
 
-void response_failed(Response& res, const std::string& message) {
-  json data = {{"ok", false}, {"message", message}};
-  res.set_content(data.dump(), "application/json");
-}
-
-void response_ok(Response& res) {
-  json data = {{"ok", true}, {"message", "ok"}};
-  res.set_content(data.dump(), "application/json");
-}
-
-HTTPServer::HTTPServer() {
+HTTPServer::HTTPServer(bool enable_logger) {
   server_ = std::make_shared<Server>();
 
-  server_->set_logger([](const Request& req, const Response& res) {
-    // SZ_LOG_INFO("HTTP {} {} {} {}", req.method, req.path, req.content_length,
-    //             res.status);
-  });
+  if (enable_logger) {
+    server_->set_logger([](const Request& req, const Response& res) {
+      SZ_LOG_INFO("HTTP {} {} {} {}", req.method, req.path, req.content_length,
+                  res.status);
+    });
+  }
 
   server_->set_error_handler([](const Request& req, Response& res) {
     auto fmt = "<p>Error Status: <span style='color:red;'>%d</span></p>";
@@ -34,19 +26,26 @@ HTTPServer::HTTPServer() {
   });
 }
 
+void HTTPServer::response_failed(Response& res, const std::string& message) {
+  json data = {{"ok", false}, {"message", message}};
+  res.set_content(data.dump(), "application/json");
+}
+
+void HTTPServer::response_ok(Response& res) {
+  json data = {{"ok", true}, {"message", "ok"}};
+  res.set_content(data.dump(), "application/json");
+}
+
 void HTTPServer::run(uint16_t port, const std::string& host) {
   SZ_LOG_INFO("Http server license on port {}", port);
 
   auto handler = [&](const Request& req, Response& res) {
     if (!req.has_header("Content-Type")) {
-      json data = {{"ok", false}, {"message", "Content-Type missing"}};
-      res.set_content(data.dump(), "application/json");
+      response_failed(res, "Content-Type missing");
       return;
     }
     if (req.get_header_value("Content-Type") != "application/json") {
-      json data = {{"ok", false},
-                   {"message", "content type shoule be application/json"}};
-      res.set_content(data.dump(), "application/json");
+      response_failed(res, "content type shoule be application/json");
       return;
     }
 
@@ -61,8 +60,7 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
     try {
       body = json::parse(bodyStr);
     } catch (const std::exception& exc) {
-      json data = {{"ok", false}, {"message", exc.what()}};
-      res.set_content(data.dump(), "application/json");
+      response_failed(res, exc.what());
       return;
     }
 
@@ -95,26 +93,20 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
       auto j = json::parse(req.body);
       ret = cfg->save_diff(j);
       if (ret != SZ_RETCODE_OK) {
-        json data = {{"ok", false},
-                     {"message", "save error " + std::to_string(ret)}};
-        res.set_content(data.dump(), "application/json");
+        response_failed(res, "save error " + std::to_string(ret));
         return;
       }
 
       ret = cfg->reload();
       if (ret != SZ_RETCODE_OK) {
-        json data = {{"ok", false},
-                     {"message", "reload error " + std::to_string(ret)}};
-        res.set_content(data.dump(), "application/json");
+        response_failed(res, "reload error " + std::to_string(ret));
         return;
       }
 
-      json data = {{"ok", true}, {"message", "ok"}};
-      res.set_content(data.dump(), "application/json");
+      response_ok(res);
     } catch (const std::exception& exc) {
       SZ_LOG_ERROR("Message err: {}", exc.what());
-      json data = {{"ok", false}, {"message", exc.what()}};
-      res.set_content(data.dump(), "application/json");
+      response_failed(res, exc.what());
     }
   });
 
@@ -130,14 +122,11 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
 
     SZ_RETCODE ret = cfg->reset();
     if (ret != SZ_RETCODE_OK) {
-      json data = {{"ok", false},
-                   {"message", "save error " + std::to_string(ret)}};
-      res.set_content(data.dump(), "application/json");
+      response_failed(res, "save error " + std::to_string(ret));
       return;
     }
 
-    json data = {{"ok", true}, {"message", "ok"}};
-    res.set_content(data.dump(), "application/json");
+    response_ok(res);
   });
 
   server_->Post("/background/-/reset", [&](const Request& req, Response& res) {
@@ -155,14 +144,12 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
       SZ_LOG_INFO("Remove {} succeed", app.screensaver_image_path);
     }
 
-    json data = {{"ok", true}, {"message", "ok"}};
-    res.set_content(data.dump(), "application/json");
+    response_ok(res);
   });
 
   server_->Post("/background", [&](const Request& req, Response& res) {
     if (!req.is_multipart_form_data()) {
-      json data = {{"ok", false}, {"message", "invalid content type"}};
-      res.set_content(data.dump(), "application/json");
+      response_failed(res, "invalid content type");
       return;
     }
 
@@ -177,22 +164,19 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
     } else if (type.content == "screen-saver") {
       image_name = app.screensaver_image_path;
     } else {
-      json data = {{"ok", false}, {"message", "unknown type " + type.content}};
-      res.set_content(data.dump(), "application/json");
+      response_failed(res, "unknown type " + type.content);
       return;
     }
 
     std::ofstream fd(image_name, std::ios::binary);
     if (!fd.is_open()) {
-      json data = {{"ok", false}, {"message", "open file failed"}};
-      res.set_content(data.dump(), "application/json");
+      response_failed(res, "open file failed");
       return;
     }
 
     fd << file.content;
 
-    json data = {{"ok", true}, {"message", "ok"}};
-    res.set_content(data.dump(), "application/json");
+    response_ok(res);
   });
 
   server_->Get("/audio-volume", [&](const Request& req, Response& res) {
@@ -252,8 +236,7 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
     SZ_RETCODE ret =
         Engine::instance()->isp_query_exposure_info(cam_type, &exp_info);
     if (ret != SZ_RETCODE_OK) {
-      json body = {{"ok", false}, {"message", "get exp info failed"}};
-      res.set_content(body.dump(), "application/json");
+      response_failed(res, "get exp info failed");
       return;
     }
 
@@ -274,8 +257,7 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
     ISPWBInfo wb_info;
     SZ_RETCODE ret = Engine::instance()->isp_query_wb_info(cam_type, &wb_info);
     if (ret != SZ_RETCODE_OK) {
-      json body = {{"ok", false}, {"message", "get wb info failed"}};
-      res.set_content(body.dump(), "application/json");
+      response_failed(res, "get wb info failed");
       return;
     }
 
@@ -297,8 +279,7 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
     SZ_RETCODE ret = Engine::instance()->isp_query_inner_state_info(
         cam_type, &inner_state_info);
     if (ret != SZ_RETCODE_OK) {
-      json body = {{"ok", false}, {"message", "get inner state failed"}};
-      res.set_content(body.dump(), "application/json");
+      response_failed(res, "get inner state failed");
       return;
     }
 
