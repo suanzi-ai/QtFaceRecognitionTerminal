@@ -684,6 +684,66 @@ bool Config::load_screen_type(LCDScreenType &lcd_screen_type) {
   return false;
 }
 
+bool Config::load_sensor_type(SensorType &sensor0_type,
+                               SensorType &sensor1_type) {
+  std::string conf_filename = "/userdata/user.conf";
+  std::ifstream conf(conf_filename);
+  if (!conf.is_open()) {
+    SZ_LOG_ERROR("Can't open {}", conf_filename);
+    return false;
+  }
+
+  std::string line;
+  std::regex reg("^SNS(\\d)_TYPE=(\\d+).+", std::regex_constants::ECMAScript |
+                                                std::regex_constants::icase);
+  std::smatch matches;
+  while (std::getline(conf, line)) {
+    if (std::regex_match(line, matches, reg)) {
+      if (matches.size() == 3) {
+        std::string sensor_id = matches[1].str();
+        std::string sensor_type = matches[2].str();
+
+        /**
+         * SONY_IMX327_2L_MIPI_2M_30FPS_12BIT = 4
+         * SONY_IMX327_2L_MIPI_2M_30FPS_12BIT_WDR2TO1 = 6
+         * C2395_2L_MIPI_2M_25FPS_10BIT = 5
+         * C2395_2L_MIPI_2M_25FPS_10BIT_WDR2TO1 = 7
+         */
+
+        SensorType type;
+        if (sensor_type == "4") {
+          type = SONY_IMX327_2L_MIPI_2M_30FPS_12BIT;
+          SZ_LOG_INFO("Load sensor type SONY_IMX327_2L_MIPI_2M_30FPS_12BIT");
+        } else if (sensor_type == "5") {
+          type = C2395_2L_MIPI_2M_25FPS_10BIT;
+          SZ_LOG_INFO("Load sensor type C2395_2L_MIPI_2M_25FPS_10BIT");
+        } else if (sensor_type == "6") {
+          type = SONY_IMX327_2L_MIPI_2M_30FPS_12BIT_WDR2TO1;
+          SZ_LOG_INFO(
+              "Load sensor type SONY_IMX327_2L_MIPI_2M_30FPS_12BIT_WDR2TO1");
+        } else if (sensor_type == "7") {
+          type = C2395_2L_MIPI_2M_25FPS_10BIT_WDR2TO1;
+          SZ_LOG_INFO("Load sensor type C2395_2L_MIPI_2M_25FPS_10BIT_WDR2TO1");
+        } else {
+          SZ_LOG_ERROR("sensor unknown type {}", sensor_type);
+          return false;
+        }
+
+        if (sensor_id == "0") {
+          sensor0_type = type;
+        } else if (sensor_id == "1") {
+          sensor1_type = type;
+        } else {
+          SZ_LOG_ERROR("sensor unknown id {}", sensor_id);
+          return false;
+        }
+      }
+    }
+  }
+
+  return true;
+}
+
 bool Config::read_audio_volume(int &volume_percent) {
   volume_percent = 100;
   std::ifstream volume_cfg_in("/etc/audio-volume");

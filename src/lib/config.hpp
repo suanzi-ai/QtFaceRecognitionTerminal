@@ -210,6 +210,7 @@ class Config : public ConfigEventEmitter {
   SZ_RETCODE save_diff(const json &target);
   SZ_RETCODE reset();
   static bool load_screen_type(io::LCDScreenType &lcd_screen_type);
+  static bool load_sensor_type(io::SensorType &sensor0_type, io::SensorType &sensor1_type);
 
   static bool write_audio_volume(int volume_percent);
   static bool read_audio_volume(int &volume_percent);

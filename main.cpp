@@ -56,6 +56,10 @@ Engine* create_engine() {
   LCDScreenType lcd_screen_type;
   if (!Config::load_screen_type(lcd_screen_type)) return NULL;
 
+  SensorType sensor0_type = SONY_IMX327_2L_MIPI_2M_30FPS_12BIT;
+  SensorType sensor1_type = SONY_IMX327_2L_MIPI_2M_30FPS_12BIT;
+  if (!Config::load_sensor_type(sensor0_type, sensor1_type)) return NULL;
+
   // 读取摄像头参数
   auto bgr_cam = Config::get_camera(CAMERA_BGR);
   auto nir_cam = Config::get_camera(CAMERA_NIR);
@@ -66,6 +70,7 @@ Engine* create_engine() {
   EngineOption opt = {
       .bgr =
           {
+              .sensor_type = sensor0_type,
               .dev = bgr_cam.index,
               .flip = true,
               .channels =
@@ -101,6 +106,7 @@ Engine* create_engine() {
           },
       .nir =
           {
+              .sensor_type = sensor1_type,
               .dev = nir_cam.index,
               .flip = true,
               .channels =
