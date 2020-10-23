@@ -168,6 +168,12 @@ bool DetectTask::detect_and_select(const MmzImage *image,
                                    DetectionRatio &detection, bool is_bgr) {
   auto cfg = Config::get_detect();
 
+  // skip broken image
+  int width = ((const SVP_IMAGE_S *)image->pImplData)->u32Width;
+  int height = ((const SVP_IMAGE_S *)image->pImplData)->u32Height;
+
+  if (width > height) return false;
+
   // detect faces: 256x256  7ms
   static std::vector<suanzi::FaceDetection> detections;
   suanzi::FacePose pose;
