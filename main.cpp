@@ -216,8 +216,23 @@ int main(int argc, char* argv[]) {
   if (gui == NULL) return -1;
   gui->show();
 
-  // Step 7: 启动实时视频流
-  engine->start_live_streaming();
+  std::thread([&]() {
+    RTSPOption option = {
+        .enable_auth = false,
+        .enable_rtsp_over_http = false,
+        .http_port = 8000,
+        .rtsp_port = 554,
+        .max_packet_size = 1456,
+        .max_buffer_size = 2 * 1024 * 1024,
+    };
+
+    auto server = engine->start_live_streaming(option);
+    if (server) {
+      server->run();
+
+      server->stop();
+    }
+  }).detach();
 
   return app.exec();
 }
