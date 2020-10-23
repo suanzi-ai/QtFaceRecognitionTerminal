@@ -249,7 +249,6 @@ bool DetectTask::check(DetectionRatio detection, bool is_bgr) {
 }
 
 bool DetectTask::is_stable(DetectionRatio detection) {
-  static int valid_count = 0;
   static int stable_counter = 0;
 
   static float x1 = 0;
@@ -280,9 +279,5 @@ bool DetectTask::is_stable(DetectionRatio detection) {
   w1 = w2;
   h1 = h2;
 
-  if (stable_counter >= cfg.min_tracking_number) {
-    valid_count = 10;
-    return true;
-  } else
-    return --valid_count > 0;
+  return stable_counter >= cfg.min_tracking_number;
 }
