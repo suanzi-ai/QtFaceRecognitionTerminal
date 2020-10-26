@@ -29,6 +29,16 @@ void suanzi::to_json(json &j, const UserConfig &c) {
   SAVE_JSON_TO(j, "screensaver_timeout", c.screensaver_timeout);
   SAVE_JSON_TO(j, "upload_known_person", c.upload_known_person);
   SAVE_JSON_TO(j, "upload_unknown_person", c.upload_unknown_person);
+  SAVE_JSON_TO(j, "alpha", c.alpha);
+  SAVE_JSON_TO(j, "red", c.red);
+  SAVE_JSON_TO(j, "green", c.green);
+  SAVE_JSON_TO(j, "blue", c.blue);
+  SAVE_JSON_TO(j, "h1", c.h1);
+  SAVE_JSON_TO(j, "h2", c.h2);
+  SAVE_JSON_TO(j, "font_size", c.font_size);
+  SAVE_JSON_TO(j, "font_weight", c.font_weight);
+  SAVE_JSON_TO(j, "font_x", c.font_x);
+  SAVE_JSON_TO(j, "font_y", c.font_y);
 }
 
 void suanzi::from_json(const json &j, UserConfig &c) {
@@ -57,6 +67,16 @@ void suanzi::from_json(const json &j, UserConfig &c) {
   LOAD_JSON_TO(j, "screensaver_timeout", c.screensaver_timeout);
   LOAD_JSON_TO(j, "upload_known_person", c.upload_known_person);
   LOAD_JSON_TO(j, "upload_unknown_person", c.upload_unknown_person);
+  LOAD_JSON_TO(j, "alpha", c.alpha);
+  LOAD_JSON_TO(j, "red", c.red);
+  LOAD_JSON_TO(j, "green", c.green);
+  LOAD_JSON_TO(j, "blue", c.blue);
+  LOAD_JSON_TO(j, "h1", c.h1);
+  LOAD_JSON_TO(j, "h2", c.h2);
+  LOAD_JSON_TO(j, "font_size", c.font_size);
+  LOAD_JSON_TO(j, "font_weight", c.font_weight);
+  LOAD_JSON_TO(j, "font_x", c.font_x);
+  LOAD_JSON_TO(j, "font_y", c.font_y);
 }
 
 void suanzi::to_json(json &j, const AppConfig &c) {
@@ -314,6 +334,16 @@ void Config::load_defaults(ConfigData &c) {
       .screensaver_timeout = 60,
       .upload_known_person = true,
       .upload_unknown_person = true,
+      .alpha = 150,
+      .red = 10,
+      .green = 10,
+      .blue = 10,
+      .h1 = 40,
+      .h2 = 200,
+      .font_size = 10,
+      .font_x = 10,
+      .font_y = 50,
+      .font_weight = 0,
   };
 
   c.quface = {

@@ -3,6 +3,8 @@
 
 #include <QTimer>
 #include <QWidget>
+#include <QFont>
+#include <QPixmap>
 
 #include "person_service.hpp"
 
@@ -26,6 +28,14 @@ class StatusBanner : public QWidget {
 
   PersonService::ptr person_service_;
   QTimer *timer_;
+  QFont font_;
+  QPixmap icon_;
+  QPixmap icon2_;
+  QPixmap icon3_;
+  QPixmap icon4_;
+  QPixmap icon5_;
+  QPixmap icon6_;
+  QPixmap icon7_;
 };
 
 }  // namespace suanzi
