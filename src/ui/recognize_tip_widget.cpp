@@ -99,6 +99,7 @@ void RecognizeTipWidget::paintEvent(QPaintEvent *event) {
 
   // draw person info
   font.setPixelSize(base_font_size * 3);
+  std::cout << font.family().toStdString() << std::endl;
   painter.setFont(font);
   painter.setPen(Qt::white);
   painter.drawText(w * 72.5 / 100, h * 46.42 / 100, name);

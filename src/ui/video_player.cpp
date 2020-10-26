@@ -159,10 +159,10 @@ void VideoPlayer::init_widgets() {
   // 创建屏保控件
   screen_saver_ = new ScreenSaverWidget(screen_width, screen_height, nullptr);
   screen_saver_->hide();
-  connect((const QObject *)face_timer_, SIGNAL(tx_face_disappear(int)),
-          (const QObject *)screen_saver_, SLOT(rx_display(int)));
-  connect((const QObject *)face_timer_, SIGNAL(tx_face_appear(int)),
-          (const QObject *)screen_saver_, SLOT(rx_hide()));
+//   connect((const QObject *)face_timer_, SIGNAL(tx_face_disappear(int)),
+//           (const QObject *)screen_saver_, SLOT(rx_display(int)));
+//   connect((const QObject *)face_timer_, SIGNAL(tx_face_appear(int)),
+//           (const QObject *)screen_saver_, SLOT(rx_hide()));
 
   // 创建人体轮廓控件
   outline_widget_ = new OutlineWidget(screen_width, screen_height, nullptr);

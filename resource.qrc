@@ -44,4 +44,7 @@
 <qresource>
     <file>asserts/en/get_closer.aac</file>
 </qresource>
+<qresource>
+    <file>asserts/AnjaliOldLipi.ttf</file>
+</qresource>
 </RCC>

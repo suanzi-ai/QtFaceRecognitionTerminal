@@ -58,6 +58,16 @@ typedef struct {
   SZ_UINT16 screensaver_timeout;
   bool upload_known_person;
   bool upload_unknown_person;
+  SZ_UINT32 alpha;
+  SZ_UINT32 red;
+  SZ_UINT32 green;
+  SZ_UINT32 blue;
+  SZ_UINT32 h1;
+  SZ_UINT32 h2;
+  SZ_UINT32 font_size;
+  SZ_UINT32 font_x;
+  SZ_UINT32 font_y;
+  SZ_UINT32 font_weight;
 } UserConfig;
 
 void to_json(json &j, const UserConfig &c);

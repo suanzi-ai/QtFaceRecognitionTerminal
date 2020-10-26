@@ -22,6 +22,7 @@ void OutlineWidget::paint(QPainter *painter) {
   if (!Config::get_user().enable_temperature)
     return;
 
+  return;
   const int w = width();
   const int h = height();
 
