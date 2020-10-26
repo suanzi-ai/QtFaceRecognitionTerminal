@@ -95,17 +95,13 @@ void VideoPlayer::init_workflow() {
           SLOT(rx_frame(PingPangBuffer<DetectionData> *)));
 
   // 创建语音播报线程
-  audio_task_ = new AudioTask(nullptr, this);
+  audio_task_ = AudioTask::get_instance();
   connect((const QObject *)record_task_, SIGNAL(tx_report_person(PersonData)),
           (const QObject *)audio_task_, SLOT(rx_report_person(PersonData)));
-  connect((const QObject *)record_task_, SIGNAL(tx_report_mask()),
-          (const QObject *)audio_task_, SLOT(rx_report_mask()));
-  connect((const QObject *)audio_task_, SIGNAL(tx_report_finish()),
-          (const QObject *)record_task_, SLOT(rx_audio_finish()));
+  connect((const QObject *)record_task_, SIGNAL(tx_warn_mask()),
+          (const QObject *)audio_task_, SLOT(rx_warn_mask()));
   connect((const QObject *)detect_task_, SIGNAL(tx_warn_distance()),
           (const QObject *)audio_task_, SLOT(rx_warn_distance()));
-  connect((const QObject *)audio_task_, SIGNAL(tx_warn_finish()),
-          (const QObject *)detect_task_, SLOT(rx_audio_finish()));
 
   // 创建人体测温线程
   temperature_task_ = new TemperatureTask(

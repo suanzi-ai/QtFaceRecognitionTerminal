@@ -1,10 +1,13 @@
 #include "record_task.hpp"
 
-#include <QThread>
 #include <chrono>
-#include <quface/logger.hpp>
 #include <string>
 
+#include <QThread>
+
+#include <quface/logger.hpp>
+
+#include "audio_task.hpp"
 #include "config.hpp"
 
 using namespace suanzi;
@@ -16,7 +19,6 @@ RecordTask::RecordTask(PersonService::ptr person_service, FaceDatabasePtr db,
   unknown_database_ = std::make_shared<FaceDatabase>("_UNKNOWN_DB_");
   reset_counter_ = 0;
   body_temperature_ = 0;
-  audio_finished_ = true;
 
   // Create thread
   if (thread == nullptr) {
@@ -99,12 +101,8 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
 
     // check whether has mask
     if (sequence_mask_detecting(mask_history_)) {
-      if (audio_finished_) {
-        audio_finished_ = false;
-        SZ_LOG_WARN("Mask detected");
-        rx_reset();
-        emit tx_report_mask();
-      }
+      rx_reset();
+      if (AudioTask::idle()) emit tx_warn_mask();
     } else {
       // query person info
       SZ_UINT32 face_id;
@@ -166,10 +164,7 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
 
       if (is_live) {
         emit tx_display(person, duplicated);
-        if (audio_finished_) {
-          audio_finished_ = false;
-          emit tx_report_person(person);
-        }
+        if (AudioTask::idle()) emit tx_report_person(person);
       }
     }
   }
@@ -186,8 +181,6 @@ void RecordTask::rx_reset() {
   emit tx_nir_finish(false);
   emit tx_bgr_finish(false);
 }
-
-void RecordTask::rx_audio_finish() { audio_finished_ = true; }
 
 bool RecordTask::if_new(const FaceFeature &feature) {
   bool ret;

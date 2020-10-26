@@ -10,16 +10,25 @@
 
 using namespace suanzi;
 
-AudioTask::AudioTask(QThread* thread, QObject* parent) {
+AudioTask* AudioTask::get_instance() {
+  static AudioTask instance;
+  return &instance;
+}
+
+bool AudioTask::idle() { return !get_instance()->is_running_; }
+
+AudioTask::AudioTask(QThread* thread, QObject* parent) : is_running_(false) {
+  // Load volume
   int volume_percent = 100;
   if (!Config::read_audio_volume(volume_percent)) {
     SZ_LOG_ERROR("Read audio failed");
   }
 
-  SZ_LOG_ERROR("Set audio volume {}", volume_percent);
+  SZ_LOG_INFO("Set audio volume {}", volume_percent);
   auto engine = io::Engine::instance();
   engine->audio_set_volume(volume_percent);
 
+  // Load audio resources
   load_audio();
   Config::get_instance()->appendListener("reload", [&]() { load_audio(); });
 
@@ -32,39 +41,42 @@ AudioTask::AudioTask(QThread* thread, QObject* parent) {
     moveToThread(thread);
     thread->start();
   }
-
-  is_reporting_ = false;
 }
 
 AudioTask::~AudioTask() {}
 
 void AudioTask::load_audio() {
   std::string lang = Config::get_user_lang();
-
+  std::string prefix = ":asserts/" + lang;
   SZ_LOG_INFO("Load audio for lang={}", lang);
 
-  std::string prefix = ":asserts/" + lang;
   read_audio(prefix + "/recognition_succeed.aac", success_audio_);
-  read_audio(prefix + "/get_closer.aac", warn_distance_audio_);
-  read_audio(prefix + "/report_mask.aac", report_mask_audio_);
   read_audio(prefix + "/recognition_failed.aac", fail_audio_);
-  read_audio(prefix + "/temperature_normal.aac", temp_normal_audio_);
-  read_audio(prefix + "/temperature_abnormal.aac", temp_abnormal_audio_);
+
+  read_audio(prefix + "/temperature_normal.aac", temperature_normal_audio_);
+  read_audio(prefix + "/temperature_abnormal.aac", temperature_abnormal_audio_);
+
+  read_audio(prefix + "/get_closer.aac", warn_distance_audio_);
+  read_audio(prefix + "/take_off_mask.aac", warn_mask_audio_);
 
   if (lang == "en") {
     success_audio_.duration = 1500;
-    warn_distance_audio_.duration = 1500;
-    report_mask_audio_.duration = 2500;
     fail_audio_.duration = 1500;
-    temp_normal_audio_.duration = 1000;
-    temp_abnormal_audio_.duration = 1500;
+
+    temperature_normal_audio_.duration = 1000;
+    temperature_abnormal_audio_.duration = 1500;
+
+    warn_distance_audio_.duration = 1500;
+    warn_mask_audio_.duration = 2500;
   } else if (lang == "zh-CN") {
     success_audio_.duration = 1000;
-    warn_distance_audio_.duration = 2000;
-    report_mask_audio_.duration = 3000;
     fail_audio_.duration = 1000;
-    temp_normal_audio_.duration = 2000;
-    temp_abnormal_audio_.duration = 2000;
+
+    temperature_normal_audio_.duration = 2000;
+    temperature_abnormal_audio_.duration = 2000;
+
+    warn_distance_audio_.duration = 2000;
+    warn_mask_audio_.duration = 3000;
   }
 }
 
@@ -88,7 +100,7 @@ void AudioTask::rx_report_person(PersonData person) {
   auto user = Config::get_user();
   if (!user.enable_audio) return;
 
-  is_reporting_ = true;
+  is_running_ = true;
 
   if (!person.is_status_normal())
     play_audio(fail_audio_);
@@ -99,32 +111,28 @@ void AudioTask::rx_report_person(PersonData person) {
     QThread::msleep(1000);
   else {
     if (!person.is_temperature_normal())
-      play_audio(temp_abnormal_audio_);
+      play_audio(temperature_abnormal_audio_);
     else
-      play_audio(temp_normal_audio_);
+      play_audio(temperature_normal_audio_);
   }
 
-  emit tx_report_finish();
-  is_reporting_ = false;
+  is_running_ = false;
 }
 
-void AudioTask::rx_report_mask() {
+void AudioTask::rx_warn_mask() {
   auto user = Config::get_user();
   if (!user.enable_audio) return;
 
-  is_reporting_ = true;
-
-  play_audio(report_mask_audio_);
-
-  emit tx_report_finish();
-  is_reporting_ = false;
+  is_running_ = true;
+  play_audio(warn_mask_audio_);
+  is_running_ = false;
 }
 
 void AudioTask::rx_warn_distance() {
   auto user = Config::get_user();
-  if (user.enable_audio && !user.disabled_temperature && !is_reporting_) {
-    play_audio(warn_distance_audio_);
-  }
+  if (!user.enable_audio || user.disabled_temperature) return;
 
-  emit tx_warn_finish();
+  is_running_ = true;
+  play_audio(warn_distance_audio_);
+  is_running_ = false;
 }

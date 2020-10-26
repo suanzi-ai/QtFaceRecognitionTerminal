@@ -1,9 +1,9 @@
 #ifndef RECORD_TASK_H
 #define RECORD_TASK_H
 
-#include <QObject>
-
 #include <chrono>
+
+#include <QObject>
 
 #include "person_service.hpp"
 #include "pingpang_buffer.hpp"
@@ -24,7 +24,6 @@ class RecordTask : QObject {
   void rx_frame(PingPangBuffer<RecognizeData> *buffer);
   void rx_reset();
   void rx_temperature(float body_temperature);
-  void rx_audio_finish();
 
  signals:
   void tx_finish();
@@ -37,7 +36,7 @@ class RecordTask : QObject {
 
   // for audio report
   void tx_report_person(PersonData person);
-  void tx_report_mask();
+  void tx_warn_mask();
 
  private:
   bool if_new(const FaceFeature &feature);
@@ -66,8 +65,6 @@ class RecordTask : QObject {
 
   int reset_counter_;
   float body_temperature_;
-
-  bool audio_finished_;
 
   FaceFeature last_feature_;
 };

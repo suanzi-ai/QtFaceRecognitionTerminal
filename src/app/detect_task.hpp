@@ -25,7 +25,6 @@ class DetectTask : QObject {
  private slots:
   void rx_frame(PingPangBuffer<ImagePackage> *buffer);
   void rx_finish();
-  void rx_audio_finish();
 
  signals:
   void tx_finish();
@@ -48,7 +47,6 @@ class DetectTask : QObject {
   bool is_stable(DetectionRatio detection);
 
   bool rx_finished_;
-  bool audio_finished_;
 
   FaceDetectorPtr face_detector_;
   FacePoseEstimatorPtr pose_estimator_;

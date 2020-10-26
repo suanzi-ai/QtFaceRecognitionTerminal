@@ -1,15 +1,18 @@
 #include "detect_task.hpp"
 
-#include <QRect>
-#include <QThread>
 #include <chrono>
 #include <ctime>
 #include <iostream>
-#include <quface-io/engine.hpp>
 #include <string>
 
-#include "quface/common.hpp"
-#include "quface/face.hpp"
+#include <QRect>
+#include <QThread>
+
+#include <quface-io/engine.hpp>
+#include <quface/common.hpp>
+#include <quface/face.hpp>
+
+#include "audio_task.hpp"
 
 using namespace suanzi;
 
@@ -30,7 +33,6 @@ DetectTask::DetectTask(FaceDetectorPtr detector,
   }
 
   rx_finished_ = true;
-  audio_finished_ = true;
 }
 
 DetectTask::~DetectTask() {
@@ -162,8 +164,6 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
 
 void DetectTask::rx_finish() { rx_finished_ = true; }
 
-void DetectTask::rx_audio_finish() { audio_finished_ = true; }
-
 bool DetectTask::detect_and_select(const MmzImage *image,
                                    DetectionRatio &detection, bool is_bgr) {
   auto cfg = Config::get_detect();
@@ -240,8 +240,7 @@ bool DetectTask::check(DetectionRatio detection, bool is_bgr) {
     static int invalid_count = 0;
     if (!detection.is_valid_position() || !detection.is_valid_size()) {
       if (!Config::get_user().disabled_temperature) {
-        if (audio_finished_ && invalid_count++ > 20) {
-          audio_finished_ = false;
+        if (AudioTask::idle() && invalid_count++ > 20) {
           invalid_count = 0;
           emit tx_warn_distance();
         }

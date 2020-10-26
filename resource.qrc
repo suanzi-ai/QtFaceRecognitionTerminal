@@ -15,7 +15,7 @@
     <file>asserts/zh-CN/recognition_failed.aac</file>
 </qresource>
 <qresource>
-    <file>asserts/zh-CN/report_mask.aac</file>
+    <file>asserts/zh-CN/take_off_mask.aac</file>
 </qresource>
 <qresource>
     <file>asserts/zh-CN/temperature_abnormal.aac</file>
@@ -33,7 +33,7 @@
     <file>asserts/en/recognition_failed.aac</file>
 </qresource>
 <qresource>
-    <file>asserts/en/report_mask.aac</file>
+    <file>asserts/en/take_off_mask.aac</file>
 </qresource>
 <qresource>
     <file>asserts/en/temperature_abnormal.aac</file>

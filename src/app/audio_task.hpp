@@ -19,32 +19,31 @@ struct Audio {
 class AudioTask : QObject {
   Q_OBJECT
  public:
-  AudioTask(QThread* thread = nullptr, QObject* parent = nullptr);
-  ~AudioTask();
+  static AudioTask* get_instance();
+  static bool idle();
 
  private slots:
   void rx_report_person(PersonData person);
-  void rx_report_mask();
 
+  void rx_warn_mask();
   void rx_warn_distance();
 
- signals:
-  void tx_report_finish();
-  void tx_warn_finish();
-
  private:
+  AudioTask(QThread* thread = nullptr, QObject* parent = nullptr);
+  ~AudioTask();
+
   void load_audio();
   bool read_audio(const std::string& name, Audio& audio);
   void play_audio(Audio& audio);
 
   Audio success_audio_;
-  Audio warn_distance_audio_;
-  Audio report_mask_audio_;
   Audio fail_audio_;
-  Audio temp_normal_audio_;
-  Audio temp_abnormal_audio_;
+  Audio temperature_normal_audio_;
+  Audio temperature_abnormal_audio_;
+  Audio warn_distance_audio_;
+  Audio warn_mask_audio_;
 
-  bool is_reporting_;
+  bool is_running_;
 };
 
 }  // namespace suanzi
