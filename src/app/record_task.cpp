@@ -12,9 +12,17 @@
 
 using namespace suanzi;
 
-RecordTask::RecordTask(PersonService::ptr person_service, FaceDatabasePtr db,
-                       QThread *thread, QObject *parent)
-    : person_service_(person_service), db_(db) {
+RecordTask *RecordTask::get_instance() {
+  static RecordTask instance;
+  return &instance;
+}
+
+bool RecordTask::idle() { return !get_instance()->is_running_; }
+
+RecordTask::RecordTask(QThread *thread, QObject *parent) : is_running_(false) {
+  person_service_ = PersonService::get_instance();
+  db_ = std::make_shared<FaceDatabase>(Config::get_quface().db_name);
+
   // Create db for unknown faces
   unknown_database_ = std::make_shared<FaceDatabase>("_UNKNOWN_DB_");
   reset_counter_ = 0;
@@ -41,6 +49,8 @@ RecordTask::~RecordTask() {
 }
 
 void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
+  is_running_ = true;
+
   buffer->switch_buffer();
   RecognizeData *input = buffer->get_pang();
 
@@ -48,7 +58,7 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
   if (!input->has_live && !input->has_person_info) {
     if (++reset_counter_ > Config::get_extract().max_lost_age) rx_reset();
 
-    emit tx_finish();
+    is_running_ = false;
     return;
   }
 
@@ -154,7 +164,7 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
     }
     rx_reset();
   }
-  emit tx_finish();
+  is_running_ = false;
 }
 
 void RecordTask::rx_reset() {

@@ -1,12 +1,15 @@
 #include "recognize_task.hpp"
 
-#include <QThread>
 #include <chrono>
 #include <ctime>
 #include <iostream>
 #include <string>
 
+#include <QThread>
+
 #include <quface/logger.hpp>
+
+#include "record_task.hpp"
 
 using namespace suanzi;
 
@@ -58,7 +61,6 @@ RecognizeTask::RecognizeTask(FaceDatabasePtr db, FaceExtractorPtr extractor,
     thread->start();
   }
 
-  rx_finished_ = true;
   rx_nir_finished_ = false;
   rx_bgr_finished_ = false;
 }
@@ -100,16 +102,13 @@ void RecognizeTask::rx_frame(PingPangBuffer<DetectionData> *buffer) {
     output->has_person_info = false;
   }
 
-  if (rx_finished_) {
-    rx_finished_ = false;
+  if (RecordTask::idle())
     emit tx_frame(pingpang_buffer_);
-  } else {
+  else
     QThread::usleep(10);
-  }
+
   emit tx_finish();
 }
-
-void RecognizeTask::rx_finish() { rx_finished_ = true; }
 
 void RecognizeTask::rx_nir_finish(bool if_finished) {
   rx_nir_finished_ = if_finished;

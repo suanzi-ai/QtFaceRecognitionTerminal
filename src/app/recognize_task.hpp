@@ -21,7 +21,6 @@ class RecognizeTask : QObject {
 
  private slots:
   void rx_frame(PingPangBuffer<DetectionData> *buffer);
-  void rx_finish();
   void rx_nir_finish(bool if_finished);
   void rx_bgr_finish(bool if_finished);
 
@@ -47,7 +46,6 @@ class RecognizeTask : QObject {
   const int CH_INDEXES_NIR[3] = {0, 1, 2};
   const bool CH_ROTATES_NIR[3] = {false, true, true};
 
-  bool rx_finished_;
   bool rx_nir_finished_;
   bool rx_bgr_finished_;
 

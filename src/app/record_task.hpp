@@ -15,10 +15,8 @@ namespace suanzi {
 class RecordTask : QObject {
   Q_OBJECT
  public:
-  RecordTask(PersonService::ptr person_service, FaceDatabasePtr db,
-             QThread *thread = nullptr, QObject *parent = nullptr);
-
-  ~RecordTask();
+  static RecordTask* get_instance();
+  static bool idle();
 
  private slots:
   void rx_frame(PingPangBuffer<RecognizeData> *buffer);
@@ -26,8 +24,6 @@ class RecordTask : QObject {
   void rx_temperature(float body_temperature);
 
  signals:
-  void tx_finish();
-
   void tx_nir_finish(bool if_finished);
   void tx_bgr_finish(bool if_finished);
 
@@ -39,6 +35,9 @@ class RecordTask : QObject {
   void tx_warn_mask();
 
  private:
+  RecordTask(QThread *thread = nullptr, QObject *parent = nullptr);
+  ~RecordTask();
+
   bool if_fresh(const FaceFeature &feature);
 
   bool sequence_query(const std::vector<QueryResult> &history,
@@ -48,6 +47,8 @@ class RecordTask : QObject {
 
   bool if_duplicated(const SZ_UINT32 &face_id, float &temperature);
   bool if_duplicated(const FaceFeature &feature, float &temperature);
+
+  bool is_running_;
 
   PersonService::ptr person_service_;
 

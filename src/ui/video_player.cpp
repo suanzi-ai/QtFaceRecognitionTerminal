@@ -70,13 +70,11 @@ void VideoPlayer::init_workflow() {
           (const QObject *)detect_task_, SLOT(rx_finish()));
 
   // 创建人脸查询线程
-  record_task_ = new RecordTask(person_service_, db_, nullptr, this);
+  record_task_ = RecordTask::get_instance();
   connect((const QObject *)recognize_task_,
           SIGNAL(tx_frame(PingPangBuffer<RecognizeData> *)),
           (const QObject *)record_task_,
           SLOT(rx_frame(PingPangBuffer<RecognizeData> *)));
-  connect((const QObject *)record_task_, SIGNAL(tx_finish()),
-          (const QObject *)recognize_task_, SLOT(rx_finish()));
   connect((const QObject *)record_task_, SIGNAL(tx_nir_finish(bool)),
           (const QObject *)recognize_task_, SLOT(rx_nir_finish(bool)));
   connect((const QObject *)record_task_, SIGNAL(tx_bgr_finish(bool)),
