@@ -12,10 +12,8 @@ class TemperatureTask : public QThread {
   Q_OBJECT
 
  public:
-  TemperatureTask(TemperatureManufacturer m);
-  ~TemperatureTask();
+  static TemperatureTask* get_instance();
 
- protected:
  signals:
   void tx_temperature(float temperature);
 
@@ -24,6 +22,9 @@ class TemperatureTask : public QThread {
   void rx_disable();
 
  private:
+  TemperatureTask(TemperatureManufacturer m);
+  ~TemperatureTask();
+
   void run();
 
  private:

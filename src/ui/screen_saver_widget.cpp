@@ -31,7 +31,7 @@ ScreenSaverWidget::ScreenSaverWidget(int width, int height, QWidget *parent)
 ScreenSaverWidget::~ScreenSaverWidget() {}
 
 void ScreenSaverWidget::rx_display(int disappear_seconds) {
-  if (disappear_seconds > 60) {
+  if (disappear_seconds > 10) {
     hide();
     show();
   }

@@ -2,8 +2,16 @@
 
 #include <quface-io/engine.hpp>
 
+#include "config.hpp"
+
 using namespace suanzi;
 using namespace suanzi::io;
+
+TemperatureTask* TemperatureTask::get_instance() {
+  static TemperatureTask instance(
+      (io::TemperatureManufacturer)Config::get_temperature().manufacturer);
+  return &instance;
+}
 
 TemperatureTask::TemperatureTask(TemperatureManufacturer m) {
   auto engine = Engine::instance();
@@ -29,7 +37,7 @@ void TemperatureTask::run() {
       SZ_RETCODE ret = temperature_reader_->read(temperature);
       if (ret == SZ_RETCODE_OK) {
         temperature = ((float)((int)((temperature + 0.005) * 100))) /
-                      100; // set fixed point of 2
+                      100;  // set fixed point of 2
         tx_temperature(temperature);
       }
     }

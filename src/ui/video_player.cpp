@@ -104,8 +104,7 @@ void VideoPlayer::init_workflow() {
           (const QObject *)audio_task_, SLOT(rx_warn_distance()));
 
   // 创建人体测温线程
-  temperature_task_ = new TemperatureTask(
-      (io::TemperatureManufacturer)Config::get_temperature().manufacturer);
+  temperature_task_ = TemperatureTask::get_instance();
   connect((const QObject *)temperature_task_, SIGNAL(tx_temperature(float)),
           (const QObject *)record_task_, SLOT(rx_temperature(float)));
   connect((const QObject *)face_timer_, SIGNAL(tx_face_disappear(int)),
