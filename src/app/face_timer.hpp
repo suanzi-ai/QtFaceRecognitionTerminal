@@ -13,8 +13,7 @@ namespace suanzi {
 class FaceTimer : QObject {
   Q_OBJECT
  public:
-  FaceTimer(QThread *thread = nullptr, QObject *parent = nullptr);
-  ~FaceTimer();
+  static FaceTimer* get_instance();
 
  private slots:
   void rx_frame(PingPangBuffer<DetectionData> *buffer);
@@ -27,6 +26,9 @@ class FaceTimer : QObject {
   void tx_face_appear(int disappear_duration);
 
  private:
+  FaceTimer(QThread *thread = nullptr, QObject *parent = nullptr);
+  ~FaceTimer();
+
   int disappear_counter_;
   int disappear_duration_;
   std::chrono::steady_clock::time_point disappear_begin_;

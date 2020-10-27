@@ -7,6 +7,11 @@
 using namespace suanzi;
 using namespace suanzi::io;
 
+FaceTimer* FaceTimer::get_instance() {
+  static FaceTimer instance;
+  return &instance;
+}
+
 FaceTimer::FaceTimer(QThread *thread, QObject *parent) {
   // Create thread
   if (thread == nullptr) {

@@ -88,7 +88,7 @@ void VideoPlayer::init_workflow() {
           (const QObject *)upload_task_, SLOT(rx_upload(PersonData, bool)));
 
   // 创建人脸计时器线程
-  face_timer_ = new FaceTimer(nullptr, this);
+  face_timer_ = FaceTimer::get_instance();
   connect((const QObject *)detect_task_,
           SIGNAL(tx_frame(PingPangBuffer<DetectionData> *)),
           (const QObject *)face_timer_,
