@@ -58,6 +58,16 @@ bool PersonData::is_temperature_normal() {
          temperature <= user.temperature_max;
 }
 
+PersonService::ptr PersonService::get_instance() {
+  static PersonService instance(Config::get_app().person_service_base_url,
+                                Config::get_app().image_store_path);
+  return PersonService::ptr(&instance);
+}
+
+PersonService::PersonService(const std::string &scheme_host_port,
+                             const std::string &image_store_path)
+    : client_(scheme_host_port.c_str()), image_store_path_(image_store_path) {}
+
 SZ_RETCODE PersonService::get_person(SZ_UINT32 id, PersonData &person) {
   std::string path = "/api/v1/persons/" + std::to_string(id);
   auto res = client_.Get(path.c_str());

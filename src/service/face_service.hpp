@@ -23,18 +23,8 @@ class FaceService {
  public:
   typedef std::shared_ptr<FaceService> ptr;
 
-  FaceService(FaceDatabasePtr db, FaceDetectorPtr detector,
-              FacePoseEstimatorPtr pose_estimator, FaceExtractorPtr extractor,
-              PersonService::ptr person_service,
-              const std::string &image_store_dir, bool store_image = false)
-      : db_(db),
-        detector_(detector),
-        pose_estimator_(pose_estimator),
-        extractor_(extractor),
-        person_service_(person_service),
-        image_store_dir_(image_store_dir),
-        store_image_(store_image) {}
-  ~FaceService() {}
+  FaceService(PersonService::ptr person_service, bool store_image = false);
+  ~FaceService();
 
   json db_add(const json &body);
   json db_add_many(const json &body);

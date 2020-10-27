@@ -47,10 +47,7 @@ class PersonService {
     return std::make_shared<PersonService>(std::forward<Args>(args)...);
   }
 
-  PersonService(const std::string &scheme_host_port,
-                const std::string &image_store_path)
-      : client_(scheme_host_port.c_str()),
-        image_store_path_(image_store_path) {}
+  static PersonService::ptr get_instance();
 
   SZ_RETCODE get_person(SZ_UINT32 id, PersonData &person);
 
@@ -73,9 +70,13 @@ class PersonService {
 
   static std::string get_status(PersonStatus s);
 
- private:
-  httplib::Client client_;
   std::string image_store_path_;
+
+ private:
+  PersonService(const std::string &scheme_host_port,
+                const std::string &image_store_path);
+
+  httplib::Client client_;
 };
 }  // namespace suanzi
 

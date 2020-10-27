@@ -1,12 +1,14 @@
 #include "face_service.hpp"
 
-#include <stdlib.h>
-
 #include <algorithm>
+#include <cstdlib>
+
 #include <opencv2/opencv.hpp>
 
-#include "base64.hpp"
 #include <quface/logger.hpp>
+
+#include "base64.hpp"
+#include "config.hpp"
 
 #define MAX_PERSON_INFO_SIZE 1024
 
@@ -36,6 +38,19 @@ void suanzi::from_json(const json &j, PersonImageInfo &p) {
 }
 
 using namespace suanzi;
+
+FaceService::FaceService(PersonService::ptr person_service, bool store_image)
+    : person_service_(person_service),
+      image_store_dir_(person_service->image_store_path_),
+      store_image_(store_image) {
+  auto quface = Config::get_quface();
+  db_ = std::make_shared<FaceDatabase>(quface.db_name);
+
+  detector_ = std::make_shared<FaceDetector>(quface.model_file_path);
+  extractor_ = std::make_shared<FaceExtractor>(quface.model_file_path);
+  pose_estimator_ = std::make_shared<FacePoseEstimator>(quface.model_file_path);
+}
+FaceService::~FaceService() {}
 
 std::string FaceService::get_image_file_name(SZ_UINT32 face_id) {
   return std::to_string(face_id) + ".jpg";
