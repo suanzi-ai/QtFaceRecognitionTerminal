@@ -12,7 +12,7 @@ RecognizeData::RecognizeData(Size size_bgr_large, Size size_bgr_small,
                              Size size_nir_large, Size size_nir_small)
     : DetectionData(size_bgr_large, size_bgr_small, size_nir_large,
                     size_nir_small) {
-  
+
   has_live = false;
   is_live = false;
 

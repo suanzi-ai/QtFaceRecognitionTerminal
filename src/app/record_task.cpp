@@ -44,131 +44,116 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
   buffer->switch_buffer();
   RecognizeData *input = buffer->get_pang();
 
-  if (!input->has_live && !input->has_person_info &&
-      ++reset_counter_ > Config::get_extract().max_lost_age) {
-    rx_reset();
+  // handle person disappear
+  if (!input->has_live && !input->has_person_info) {
+    if (++reset_counter_ > Config::get_extract().max_lost_age) rx_reset();
+
     emit tx_finish();
     return;
   }
 
-  // reset if new person appear
-  if (input->has_person_info && !if_new(input->person_feature)) rx_reset();
+  bool bgr_finished = false;
+  bool nir_finished = false;
 
-  int live_size = Config::get_liveness().history_size;
-  int person_size = Config::get_extract().history_size;
-
-  // receive liveness data
-  if (input->has_live) live_history_.push_back(input->is_live);
-
-  // do sequence anti_spoof
-  bool is_live = sequence_antispoof(live_history_);
-
-  if (live_history_.size() > live_size)
-    live_history_.erase(live_history_.begin() + live_size, live_history_.end());
-
-  if (is_live || live_history_.size() == live_size) emit tx_nir_finish(true);
-
-  // receive recognize data
+  int max_person = Config::get_extract().history_size;
   if (input->has_person_info) {
+    // reset if new person appear
+    if (if_fresh(input->person_feature)) rx_reset();
+
+    // add person info
     mask_history_.push_back(input->has_mask);
+    if (mask_history_.size() > max_person)
+      mask_history_.erase(mask_history_.begin() + max_person,
+                          mask_history_.end());
+
     person_history_.push_back(input->person_info);
+    if (person_history_.size() > max_person)
+      person_history_.erase(person_history_.begin() + max_person,
+                            person_history_.end());
+
+    bgr_finished = (person_history_.size() == max_person);
   }
 
-  if (person_history_.size() > person_size) {
-    mask_history_.erase(mask_history_.begin() + person_size,
-                        mask_history_.end());
-    person_history_.erase(person_history_.begin() + person_size,
-                          person_history_.end());
+  bool is_live = false;
+  int max_live = Config::get_liveness().history_size;
+  if (input->has_live) {
+    // add antispoofing data
+    live_history_.push_back(input->is_live);
+    if (live_history_.size() > max_live)
+      live_history_.erase(live_history_.begin() + max_live,
+                          live_history_.end());
+
+    // do sequence antispoofing
+    is_live = sequence_antispoof(live_history_);
+    nir_finished = (is_live || live_history_.size() == max_live);
   }
 
-  if (person_history_.size() == person_size) emit tx_bgr_finish(true);
-
-  // do sequence inference
-  if ((is_live || live_history_.size() == live_size) &&
-      person_history_.size() == person_size) {
-    PersonData person;
-    int width = input->img_bgr_large->width;
-    int height = input->img_bgr_large->height;
-    person.bgr_face_snapshot.create(height, width, CV_8UC3);
-    memcpy(person.bgr_face_snapshot.data, input->img_bgr_large->pData,
-           width * height * 3 / 2);
-
-    width = input->img_nir_large->width;
-    height = input->img_nir_large->height;
-    person.nir_face_snapshot.create(height, width, CV_8UC3);
-    memcpy(person.nir_face_snapshot.data, input->img_nir_large->pData,
-           width * height * 3 / 2);
-
-    // check whether has mask
+  if (bgr_finished && nir_finished) {
+    // do sequence mask detecting
     if (sequence_mask_detecting(mask_history_)) {
-      rx_reset();
       if (AudioTask::idle()) emit tx_warn_mask();
-    } else {
-      // query person info
-      SZ_UINT32 face_id;
-      if (!sequence_query(person_history_, face_id, person.score) ||
-          SZ_RETCODE_OK != person_service_->get_person(face_id, person)) {
-        person.id = 0;
-        person.score = 0;
-        person.name = tr("访客").toStdString();
-        person.face_path = ":asserts/avatar_unknown.jpg";
-        person.status = person_service_->get_status(PersonStatus::Stranger);
-      }
-
-      // decide fake or live
-      if (!is_live) {
-        if (Config::get_user().liveness_policy == "alarm") {
-          person.name = tr("活体失败").toStdString();
-        } else {  // stranger
-          person.name = tr("访客").toStdString();
-        }
-        person.id = 0;
-        person.score = 0;
-        person.face_path = ":asserts/avatar_unknown.jpg";
-        person.status = person_service_->get_status(PersonStatus::Fake);
-      }
-
-      if (person.is_status_blacklist()) {
-        if (Config::get_user().blacklist_policy == "alarm") {
-          person.name = tr("黑名单").toStdString();
-        } else {  // stranger
-          person.name = tr("访客").toStdString();
-        }
-        person.id = 0;
-        person.score = 0;
-        person.face_path = ":asserts/avatar_unknown.jpg";
-      }
-
-      // decide duplicate
-      bool duplicated;
-      person.temperature = body_temperature_;
-      if (!person.is_status_normal()) {
-        duplicated = if_duplicated(input->person_feature, person.temperature);
-      } else {
-        duplicated = if_duplicated(face_id, person.temperature);
-
-        // Update face feature
-        if (person.score < 0.9) db_->add(face_id, input->person_feature, 0.1);
-      }
-
-      // output
-      rx_reset();
-      if (!Config::get_user().disabled_temperature)
-        SZ_LOG_INFO(
-            "Record: id={}, staff={}, score={:.2f}, status={}, temperature={}",
-            person.id, person.number, person.score, person.status,
-            person.temperature);
-      else
-        SZ_LOG_INFO("Record: id={}, staff={}, score={:.2f}, status={}",
-                    person.id, person.number, person.score, person.status);
-
-      if (is_live) {
-        emit tx_display(person, duplicated);
-        if (AudioTask::idle()) emit tx_report_person(person);
-      }
     }
-  }
+    // do sequence recognizing
+    else if (is_live) {
+      SZ_UINT32 face_id;
+      PersonData person;
+      PersonStatus status = PersonStatus::Stranger;
+      if (sequence_query(person_history_, face_id, person.score)) {
+        if (person.score < 0.9) db_->add(face_id, input->person_feature, 0.1);
 
+        if (SZ_RETCODE_OK == person_service_->get_person(face_id, person)) {
+          if (person.is_status_normal()) status = PersonStatus::Normal;
+          if (person.is_status_blacklist()) status = PersonStatus::Blacklist;
+        }
+      }
+
+      // record person info
+      person.temperature = body_temperature_;
+
+      bool duplicated;
+      switch (status) {
+        case PersonStatus::Blacklist:
+          if (Config::get_user().blacklist_policy == "alarm")
+            person.name = tr("黑名单").toStdString();
+          else {
+            person.name = tr("访客").toStdString();
+            person.number = "";
+          }
+          person.face_path = ":asserts/avatar_unknown.jpg";
+        case PersonStatus::Normal:
+          duplicated = if_duplicated(face_id, person.temperature);
+          break;
+        default:  // PersonStatus::Stranger
+          duplicated = if_duplicated(input->person_feature, person.temperature);
+          person.name = tr("访客").toStdString();
+          person.id = 0;
+          person.score = 0;
+          person.number = "";
+          person.face_path = ":asserts/avatar_unknown.jpg";
+          person.status = person_service_->get_status(PersonStatus::Stranger);
+          break;
+      }
+      SZ_LOG_INFO("Record: id={}, staff={}, score={:.2f}, status={}", person.id,
+                  person.number, person.score, person.status);
+
+      // record snapshots
+      int width = input->img_bgr_large->width;
+      int height = input->img_bgr_large->height;
+      person.bgr_face_snapshot.create(height, width, CV_8UC3);
+      memcpy(person.bgr_face_snapshot.data, input->img_bgr_large->pData,
+             width * height * 3 / 2);
+
+      width = input->img_nir_large->width;
+      height = input->img_nir_large->height;
+      person.nir_face_snapshot.create(height, width, CV_8UC3);
+      memcpy(person.nir_face_snapshot.data, input->img_nir_large->pData,
+             width * height * 3 / 2);
+
+      if (AudioTask::idle()) emit tx_report_person(person);
+      emit tx_display(person, duplicated);
+    }
+    rx_reset();
+  }
   emit tx_finish();
 }
 
@@ -182,7 +167,7 @@ void RecordTask::rx_reset() {
   emit tx_bgr_finish(false);
 }
 
-bool RecordTask::if_new(const FaceFeature &feature) {
+bool RecordTask::if_fresh(const FaceFeature &feature) {
   bool ret;
   if (person_history_.size() == 0) {
     ret = true;
@@ -223,7 +208,7 @@ bool RecordTask::if_new(const FaceFeature &feature) {
       score += feature.value[k] * last_feature_.value[k];
 #endif
 
-    ret = score / 2 + 0.5f > 0.9;
+    ret = score / 2 + 0.5f < 0.9;
   }
   memcpy(last_feature_.value, feature.value, SZ_FEATURE_NUM * sizeof(SZ_FLOAT));
 

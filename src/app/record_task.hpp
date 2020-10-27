@@ -39,7 +39,7 @@ class RecordTask : QObject {
   void tx_warn_mask();
 
  private:
-  bool if_new(const FaceFeature &feature);
+  bool if_fresh(const FaceFeature &feature);
 
   bool sequence_query(const std::vector<QueryResult> &history,
                       SZ_UINT32 &face_id, SZ_FLOAT &score);
