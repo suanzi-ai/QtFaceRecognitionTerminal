@@ -298,7 +298,7 @@ void Config::load_defaults(ConfigData &c) {
 
   c.normal = {
       .index = 1,
-      .rotate = 0,
+      .rotate = 1,
       .flip = 1,
       .isp =
           {
@@ -355,7 +355,7 @@ void Config::load_defaults(ConfigData &c) {
 
   c.infrared = {
       .index = 0,
-      .rotate = 0,
+      .rotate = 1,
       .flip = 1,
       .isp =
           {
@@ -714,7 +714,7 @@ bool Config::load_sensor_type(SensorType &sensor0_type,
         if (sensor_type == "4") {
           type = SONY_IMX327_2L_MIPI_2M_30FPS_12BIT;
           SZ_LOG_INFO("Load sensor type SONY_IMX327_2L_MIPI_2M_30FPS_12BIT");
-        } else if (sensor_type == "5") {
+        } else if (sensor_type == "32") {
           type = C2395_2L_MIPI_2M_25FPS_10BIT;
           SZ_LOG_INFO("Load sensor type C2395_2L_MIPI_2M_25FPS_10BIT");
         } else if (sensor_type == "6") {

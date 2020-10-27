@@ -77,7 +77,7 @@ Engine* create_engine() {
                   {
                       {
                           .index = 0,
-                          .rotate = 1,
+                          .rotate = bgr_cam.rotate,
                           .size =
                               {
                                   .width = 1920,
@@ -86,7 +86,7 @@ Engine* create_engine() {
                       },
                       {
                           .index = 1,
-                          .rotate = 1,
+                          .rotate = bgr_cam.rotate,
                           .size =
                               {
                                   .width = 1080,
@@ -95,7 +95,7 @@ Engine* create_engine() {
                       },
                       {
                           .index = 2,
-                          .rotate = 1,
+                          .rotate = bgr_cam.rotate,
                           .size =
                               {
                                   .width = 320,
@@ -113,7 +113,7 @@ Engine* create_engine() {
                   {
                       {
                           .index = 0,
-                          .rotate = 1,
+                          .rotate = nir_cam.rotate,
                           .size =
                               {
                                   .width = 1920,
@@ -122,7 +122,7 @@ Engine* create_engine() {
                       },
                       {
                           .index = 1,
-                          .rotate = 1,
+                          .rotate = nir_cam.rotate,
                           .size =
                               {
                                   .width = 1080,
@@ -131,7 +131,7 @@ Engine* create_engine() {
                       },
                       {
                           .index = 2,
-                          .rotate = 1,
+                          .rotate = nir_cam.rotate,
                           .size =
                               {
                                   .width = 320,
