@@ -10,17 +10,27 @@
 #include <quface/logger.hpp>
 
 #include "record_task.hpp"
+#include "config.hpp"
 
 using namespace suanzi;
 
-RecognizeTask::RecognizeTask(FaceDatabasePtr db, FaceExtractorPtr extractor,
-                             FaceAntiSpoofingPtr anti_spoofing,
-                             MaskDetectorPtr mask_detector, QThread *thread,
-                             QObject *parent)
-    : face_database_(db),
-      face_extractor_(extractor),
-      anti_spoofing_(anti_spoofing),
-      mask_detector_(mask_detector) {
+RecognizeTask* RecognizeTask::get_instance() {
+  static RecognizeTask instance;
+  return &instance;
+}
+
+bool RecognizeTask::idle() { return !get_instance()->is_running_; }
+
+RecognizeTask::RecognizeTask(QThread *thread, QObject *parent)
+    : is_running_(false) {
+
+  auto cfg = Config::get_quface();
+  face_database_ = std::make_shared<FaceDatabase>(cfg.db_name);
+
+  face_extractor_ = std::make_shared<FaceExtractor>(cfg.model_file_path);
+  anti_spoofing_ = std::make_shared<FaceAntiSpoofing>(cfg.model_file_path);
+  mask_detector_ = std::make_shared<MaskDetector>(cfg.model_file_path);
+
   // Initialize PINGPANG buffer
   Size size_bgr_1 = VPSS_CH_SIZES_BGR[1];
   Size size_bgr_2 = VPSS_CH_SIZES_BGR[2];
@@ -72,6 +82,8 @@ RecognizeTask::~RecognizeTask() {
 }
 
 void RecognizeTask::rx_frame(PingPangBuffer<DetectionData> *buffer) {
+  is_running_ = true;
+
   // copy from input to output
   buffer->switch_buffer();
   DetectionData *input = buffer->get_pang();
@@ -107,7 +119,7 @@ void RecognizeTask::rx_frame(PingPangBuffer<DetectionData> *buffer) {
   else
     QThread::usleep(10);
 
-  emit tx_finish();
+  is_running_ = false;
 }
 
 void RecognizeTask::rx_nir_finish(bool if_finished) {

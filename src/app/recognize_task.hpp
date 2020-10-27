@@ -13,11 +13,8 @@ namespace suanzi {
 class RecognizeTask : QObject {
   Q_OBJECT
  public:
-  RecognizeTask(FaceDatabasePtr db, FaceExtractorPtr extractor,
-                FaceAntiSpoofingPtr anti_spoofing,
-                MaskDetectorPtr mask_detector, QThread *thread = nullptr,
-                QObject *parent = nullptr);
-  ~RecognizeTask();
+  static RecognizeTask* get_instance();
+  static bool idle();
 
  private slots:
   void rx_frame(PingPangBuffer<DetectionData> *buffer);
@@ -25,12 +22,13 @@ class RecognizeTask : QObject {
   void rx_bgr_finish(bool if_finished);
 
  signals:
-  void tx_finish();
-
   // for output
   void tx_frame(PingPangBuffer<RecognizeData> *buffer);
 
  private:
+  RecognizeTask(QThread *thread = nullptr, QObject *parent = nullptr);
+  ~RecognizeTask();
+
   bool is_live(DetectionData *detection);
   bool has_mask(DetectionData *detection);
   void extract_and_query(DetectionData *detection, FaceFeature &feature,
@@ -45,6 +43,8 @@ class RecognizeTask : QObject {
   const bool CH_ROTATES_BGR[3] = {false, true, true};
   const int CH_INDEXES_NIR[3] = {0, 1, 2};
   const bool CH_ROTATES_NIR[3] = {false, true, true};
+
+  bool is_running_;
 
   bool rx_nir_finished_;
   bool rx_bgr_finished_;

@@ -13,6 +13,7 @@
 #include <quface/face.hpp>
 
 #include "audio_task.hpp"
+#include "recognize_task.hpp"
 
 using namespace suanzi;
 
@@ -31,8 +32,6 @@ DetectTask::DetectTask(FaceDetectorPtr detector,
     moveToThread(thread);
     thread->start();
   }
-
-  rx_finished_ = true;
 }
 
 DetectTask::~DetectTask() {
@@ -152,17 +151,13 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
     SZ_LOG_ERROR("Adjust isp failed");
   }
 
-  if (rx_finished_) {
-    rx_finished_ = false;
+  if (RecognizeTask::idle())
     emit tx_frame(pingpang_buffer_);
-  } else {
+  else
     QThread::usleep(10);
-  }
 
   emit tx_finish();
 }
-
-void DetectTask::rx_finish() { rx_finished_ = true; }
 
 bool DetectTask::detect_and_select(const MmzImage *image,
                                    DetectionRatio &detection, bool is_bgr) {
