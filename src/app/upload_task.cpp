@@ -6,9 +6,14 @@
 using namespace suanzi;
 using namespace suanzi::io;
 
-UploadTask::UploadTask(PersonService::ptr person_service, QThread *thread,
-                       QObject *parent)
-    : person_service_(person_service) {
+UploadTask* UploadTask::get_instance() {
+  static UploadTask instance;
+  return &instance;
+}
+
+UploadTask::UploadTask(QThread *thread, QObject *parent) {
+  person_service_ = PersonService::get_instance();
+
   // Create thread
   if (thread == nullptr) {
     static QThread new_thread;

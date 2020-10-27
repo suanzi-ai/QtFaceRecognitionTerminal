@@ -83,7 +83,7 @@ void VideoPlayer::init_workflow() {
           (const QObject *)recognize_task_, SLOT(rx_bgr_finish(bool)));
 
   // 创建人脸记录线程
-  upload_task_ = new UploadTask(person_service_, nullptr, this);
+  upload_task_ = UploadTask::get_instance();
   connect((const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool)),
           (const QObject *)upload_task_, SLOT(rx_upload(PersonData, bool)));
 

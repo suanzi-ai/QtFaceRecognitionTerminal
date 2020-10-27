@@ -10,14 +10,15 @@ namespace suanzi {
 class UploadTask : QObject {
   Q_OBJECT
  public:
-  UploadTask(PersonService::ptr person_service, QThread *thread = nullptr,
-             QObject *parent = nullptr);
-  ~UploadTask();
+  static UploadTask* get_instance();
 
  private slots:
   void rx_upload(PersonData person, bool if_duplicated);
 
  private:
+  UploadTask(QThread *thread = nullptr, QObject *parent = nullptr);
+  ~UploadTask();
+
   PersonService::ptr person_service_;
 };
 
