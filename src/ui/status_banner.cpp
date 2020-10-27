@@ -6,9 +6,11 @@
 
 using namespace suanzi;
 
-StatusBanner::StatusBanner(PersonService::ptr person_service, int width,
-                           int height, QWidget *parent)
-    : person_service_(person_service), QWidget(parent) {
+StatusBanner::StatusBanner(int width, int height, QWidget *parent)
+    : QWidget(parent) {
+
+  person_service_ = PersonService::get_instance();
+
   QPalette palette = this->palette();
   palette.setColor(QPalette::Background, Qt::transparent);
   setPalette(palette);

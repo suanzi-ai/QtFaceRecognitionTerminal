@@ -30,10 +30,7 @@ class VideoPlayer : public QWidget {
   Q_OBJECT
 
  public:
-  VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
-              FacePoseEstimatorPtr pose_estimator, FaceExtractorPtr extractor,
-              FaceAntiSpoofingPtr anti_spoofing, MaskDetectorPtr mask_detector,
-              PersonService::ptr person_service, QWidget *parent = nullptr);
+  VideoPlayer(QWidget *parent = nullptr);
   ~VideoPlayer();
 
  protected:
@@ -43,13 +40,6 @@ class VideoPlayer : public QWidget {
   void paintEvent(QPaintEvent *event) override;
 
  private:
-  FaceDatabasePtr db_;
-  FaceDetectorPtr detector_;
-  FacePoseEstimatorPtr pose_estimator_;
-  FaceExtractorPtr extractor_;
-  FaceAntiSpoofingPtr anti_spoofing_;
-  MaskDetectorPtr mask_detector_;
-
   DetectTipWidget *detect_tip_widget_bgr_;
   DetectTipWidget *detect_tip_widget_nir_;
   RecognizeTipWidget *recognize_tip_widget_;
@@ -71,7 +61,6 @@ class VideoPlayer : public QWidget {
   AudioTask *audio_task_;
 
   TemperatureTask *temperature_task_;
-  PersonService::ptr person_service_;
 };
 
 }  // namespace suanzi

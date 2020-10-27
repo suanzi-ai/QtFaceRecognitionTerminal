@@ -12,8 +12,7 @@ class StatusBanner : public QWidget {
   Q_OBJECT
 
  public:
-  StatusBanner(PersonService::ptr person_service, int width, int height,
-               QWidget *parent = nullptr);
+  StatusBanner(int width, int height, QWidget *parent = nullptr);
   ~StatusBanner() override;
 
   void paint(QPainter *painter);

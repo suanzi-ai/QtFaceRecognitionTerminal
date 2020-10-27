@@ -156,15 +156,14 @@ Engine* create_engine() {
 }
 
 VideoPlayer* create_gui() {
-  // 加载 Quface 算法模块
+  // 预加载 Quface 算法模块
   auto quface = Config::get_quface();
-  auto detector = std::make_shared<FaceDetector>(quface.model_file_path);
-  auto extractor = std::make_shared<FaceExtractor>(quface.model_file_path);
-  auto pose_estimator =
-      std::make_shared<FacePoseEstimator>(quface.model_file_path);
-  auto anti_spoof = std::make_shared<FaceAntiSpoofing>(quface.model_file_path);
-  auto mask_detector = std::make_shared<MaskDetector>(quface.model_file_path);
-  auto db = std::make_shared<FaceDatabase>(quface.db_name);
+  std::make_shared<FaceDetector>(quface.model_file_path);
+  std::make_shared<FaceExtractor>(quface.model_file_path);
+  std::make_shared<FacePoseEstimator>(quface.model_file_path);
+  std::make_shared<FaceAntiSpoofing>(quface.model_file_path);
+  std::make_shared<MaskDetector>(quface.model_file_path);
+  std::make_shared<FaceDatabase>(quface.db_name);
 
   // 加载 Web 服务模块
   static auto person_service = PersonService::get_instance();
@@ -180,10 +179,8 @@ VideoPlayer* create_gui() {
 
   auto engine = Engine::instance();
   engine->stop_boot_ui();
-  VideoPlayer* player =
-      new VideoPlayer(db, detector, pose_estimator, extractor, anti_spoof,
-                      mask_detector, person_service);
-  return player;
+
+  return new VideoPlayer();
 }
 
 int main(int argc, char* argv[]) {

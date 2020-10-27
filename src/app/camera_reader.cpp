@@ -5,10 +5,13 @@
 #include <iostream>
 #include <regex>
 
-#include "detect_task.hpp"
-
 using namespace suanzi;
 using namespace suanzi::io;
+
+CameraReader *CameraReader::get_instance() {
+  static CameraReader instance;
+  return &instance;
+}
 
 CameraReader::CameraReader(QObject *parent) {
   auto app = Config::get_app();

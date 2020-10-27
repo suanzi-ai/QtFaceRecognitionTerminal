@@ -10,20 +10,7 @@
 
 using namespace suanzi;
 
-VideoPlayer::VideoPlayer(FaceDatabasePtr db, FaceDetectorPtr detector,
-                         FacePoseEstimatorPtr pose_estimator,
-                         FaceExtractorPtr extractor,
-                         FaceAntiSpoofingPtr anti_spoofing,
-                         MaskDetectorPtr mask_detector,
-                         PersonService::ptr person_service, QWidget *parent)
-    : db_(db),
-      detector_(detector),
-      pose_estimator_(pose_estimator),
-      extractor_(extractor),
-      anti_spoofing_(anti_spoofing),
-      mask_detector_(mask_detector),
-      person_service_(person_service),
-      QWidget(parent) {
+VideoPlayer::VideoPlayer(QWidget *parent) : QWidget(parent) {
   // 初始化工作流
   init_workflow();
 
@@ -48,7 +35,7 @@ void VideoPlayer::paintEvent(QPaintEvent *event) {
 
 void VideoPlayer::init_workflow() {
   // 创建摄像头读取对象
-  camera_reader_ = new CameraReader(this);
+  camera_reader_ = CameraReader::get_instance();
 
   // 创建人脸检测线程
   detect_task_ = DetectTask::get_instance();
@@ -176,6 +163,5 @@ void VideoPlayer::init_widgets() {
   outline_widget_ = new OutlineWidget(screen_width, screen_height, nullptr);
 
   // 创建顶部状态栏控件
-  status_banner_ =
-      new StatusBanner(person_service_, screen_width, screen_height, nullptr);
+  status_banner_ = new StatusBanner(screen_width, screen_height, nullptr);
 }

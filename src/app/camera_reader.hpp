@@ -17,8 +17,7 @@ class CameraReader : QThread {
   Q_OBJECT
 
  public:
-  CameraReader(QObject *parent = nullptr);
-  ~CameraReader();
+  static CameraReader *get_instance();
 
   void start_sample();
 
@@ -31,6 +30,9 @@ class CameraReader : QThread {
   void tx_frame(PingPangBuffer<ImagePackage> *buffer);
 
  private:
+  CameraReader(QObject *parent = nullptr);
+  ~CameraReader();
+
   void run();
   bool capture_frame(ImagePackage *pkg);
   bool isp_update();
