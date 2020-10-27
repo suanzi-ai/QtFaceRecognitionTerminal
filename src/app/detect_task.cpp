@@ -13,16 +13,22 @@
 #include <quface/face.hpp>
 
 #include "audio_task.hpp"
+#include "config.hpp"
 #include "recognize_task.hpp"
 
 using namespace suanzi;
 
-DetectTask::DetectTask(FaceDetectorPtr detector,
-                       FacePoseEstimatorPtr pose_estimator, QThread *thread,
-                       QObject *parent)
-    : face_detector_(detector),
-      pose_estimator_(pose_estimator),
-      buffer_inited_(false) {
+DetectTask *DetectTask::get_instance() {
+  static DetectTask instance;
+  return &instance;
+}
+
+DetectTask::DetectTask(QThread *thread, QObject *parent)
+    : buffer_inited_(false) {
+  auto cfg = Config::get_quface();
+  face_detector_ = std::make_shared<FaceDetector>(cfg.model_file_path);
+  pose_estimator_ = std::make_shared<FacePoseEstimator>(cfg.model_file_path);
+
   // Create thread
   if (thread == nullptr) {
     static QThread new_thread;

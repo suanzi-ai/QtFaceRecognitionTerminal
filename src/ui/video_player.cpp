@@ -51,7 +51,7 @@ void VideoPlayer::init_workflow() {
   camera_reader_ = new CameraReader(this);
 
   // 创建人脸检测线程
-  detect_task_ = new DetectTask(detector_, pose_estimator_, nullptr, this);
+  detect_task_ = DetectTask::get_instance();
   connect((const QObject *)camera_reader_,
           SIGNAL(tx_frame(PingPangBuffer<ImagePackage> *)),
           (const QObject *)detect_task_,

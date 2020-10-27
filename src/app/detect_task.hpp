@@ -1,9 +1,10 @@
 #ifndef DETECT_TASK_H
 #define DETECT_TASK_H
 
+#include <atomic>
+
 #include <QObject>
 #include <QRect>
-#include <atomic>
 
 #include "config.hpp"
 #include "detection_data.hpp"
@@ -16,9 +17,7 @@ namespace suanzi {
 class DetectTask : QObject {
   Q_OBJECT
  public:
-  DetectTask(FaceDetectorPtr detector, FacePoseEstimatorPtr pose_estimator,
-             QThread *thread = nullptr, QObject *parent = nullptr);
-  ~DetectTask();
+  static DetectTask *get_instance();
 
   SZ_RETCODE adjust_isp_by_detection(const DetectionData *output);
 
@@ -40,6 +39,9 @@ class DetectTask : QObject {
   void tx_frame(PingPangBuffer<DetectionData> *buffer);
 
  private:
+  DetectTask(QThread *thread = nullptr, QObject *parent = nullptr);
+  ~DetectTask();
+
   bool detect_and_select(const MmzImage *image, DetectionRatio &detection,
                          bool is_bgr);
   bool check(DetectionRatio detection, bool is_bgr);

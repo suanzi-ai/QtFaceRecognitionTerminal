@@ -1,10 +1,11 @@
 #include "camera_reader.hpp"
 
-#include <QDebug>
 #include <chrono>
 #include <ctime>
 #include <iostream>
 #include <regex>
+
+#include "detect_task.hpp"
 
 using namespace suanzi;
 using namespace suanzi::io;
