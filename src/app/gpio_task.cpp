@@ -15,8 +15,7 @@ GPIOTask* GPIOTask::get_instance() {
   return &instance;
 }
 
-GPIOTask::GPIOTask(QThread* thread, QObject* parent)
-    : event_count_(0) {
+GPIOTask::GPIOTask(QThread* thread, QObject* parent) : event_count_(0) {
   // Create thread
   if (thread == nullptr) {
     static QThread new_thread;
@@ -36,7 +35,7 @@ void GPIOTask::rx_trigger(PersonData person, bool if_duplicated) {
   bool open_door = true;
   if (user.door_open_cond & DoorOpenCond::Status)
     open_door = open_door && person.is_status_normal();
-  if (!user.disabled_temperature &&
+  if (user.enable_temperature &&
       (user.door_open_cond & DoorOpenCond::Temperature))
     open_door = open_door && person.is_temperature_normal();
 

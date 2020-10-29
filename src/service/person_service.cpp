@@ -52,7 +52,7 @@ bool PersonData::is_status_blacklist() {
 
 bool PersonData::is_temperature_normal() {
   auto user = Config::get_user();
-  if (user.disabled_temperature) return true;
+  if (!user.enable_temperature) return true;
 
   return temperature >= user.temperature_min &&
          temperature <= user.temperature_max;
@@ -162,7 +162,7 @@ SZ_RETCODE PersonService::report_face_record(
       {"irImagePath", nir_file_path},    {"status", status},
       {"temperature", body_temperature},
   };
-  if (Config::get_user().disabled_temperature) j.erase("temperature");
+  if (!Config::get_user().enable_temperature) j.erase("temperature");
 
   std::string path = "/api/v1/faceRecords";
   auto res = client_.Post(path.c_str(), j.dump(), "application/json");

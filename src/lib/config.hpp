@@ -41,7 +41,7 @@ typedef struct {
   SZ_UINT32 door_open_cond;
   bool door_unopen_state;
   SZ_UINT16 door_open_timeout;
-  bool disabled_temperature;
+  bool enable_temperature;
   float temperature_max;
   float temperature_min;
   bool enable_audio;

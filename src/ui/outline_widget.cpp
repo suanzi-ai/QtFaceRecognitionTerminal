@@ -19,7 +19,7 @@ OutlineWidget::OutlineWidget(int width, int height, QWidget *parent)
 OutlineWidget::~OutlineWidget() {}
 
 void OutlineWidget::paint(QPainter *painter) {
-  if (Config::get_user().disabled_temperature)
+  if (!Config::get_user().enable_temperature)
     return;
 
   const int w = width();

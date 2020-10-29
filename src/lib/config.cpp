@@ -16,7 +16,7 @@ void suanzi::to_json(json &j, const UserConfig &c) {
   SAVE_JSON_TO(j, "door_open_cond", c.door_open_cond);
   SAVE_JSON_TO(j, "door_unopen_state", c.door_unopen_state);
   SAVE_JSON_TO(j, "door_open_timeout", c.door_open_timeout);
-  SAVE_JSON_TO(j, "disabled_temperature", c.disabled_temperature);
+  SAVE_JSON_TO(j, "disabled_temperature", !c.enable_temperature);
   SAVE_JSON_TO(j, "temperature_max", c.temperature_max);
   SAVE_JSON_TO(j, "temperature_min", c.temperature_min);
   SAVE_JSON_TO(j, "enable_audio", c.enable_audio);
@@ -42,7 +42,9 @@ void suanzi::from_json(const json &j, UserConfig &c) {
   LOAD_JSON_TO(j, "door_open_cond", c.door_open_cond);
   LOAD_JSON_TO(j, "door_unopen_state", c.door_unopen_state);
   LOAD_JSON_TO(j, "door_open_timeout", c.door_open_timeout);
-  LOAD_JSON_TO(j, "disabled_temperature", c.disabled_temperature);
+  bool disabled_temperature;
+  LOAD_JSON_TO(j, "disabled_temperature", disabled_temperature);
+  c.enable_temperature = !disabled_temperature;
   LOAD_JSON_TO(j, "temperature_max", c.temperature_max);
   LOAD_JSON_TO(j, "temperature_min", c.temperature_min);
   LOAD_JSON_TO(j, "enable_audio", c.enable_audio);
@@ -299,7 +301,7 @@ void Config::load_defaults(ConfigData &c) {
       .door_open_cond = 3,
       .door_unopen_state = false,
       .door_open_timeout = 10,
-      .disabled_temperature = true,
+      .enable_temperature = false,
       .temperature_max = 37.3,
       .temperature_min = 35.0,
       .enable_audio = true,

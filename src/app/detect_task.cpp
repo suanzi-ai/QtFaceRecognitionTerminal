@@ -240,7 +240,7 @@ bool DetectTask::check(DetectionRatio detection, bool is_bgr) {
 
     static int invalid_count = 0;
     if (!detection.is_valid_position() || !detection.is_valid_size()) {
-      if (!Config::get_user().disabled_temperature) {
+      if (Config::get_user().enable_temperature) {
         if (AudioTask::idle() && invalid_count++ > 20) {
           invalid_count = 0;
           emit tx_warn_distance();

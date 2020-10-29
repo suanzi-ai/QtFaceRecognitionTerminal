@@ -63,7 +63,7 @@ bool DetectionRatio::is_valid_position() {
   auto temperature = Config::get_temperature();
 
   float min_x, min_y, max_x, max_y;
-  if (user.disabled_temperature) {
+  if (!user.enable_temperature) {
     min_x = min_y = 0.01;
     max_x = max_y = 0.99;
   } else {
@@ -79,7 +79,7 @@ bool DetectionRatio::is_valid_position() {
 bool DetectionRatio::is_valid_size() {
   auto temperature = Config::get_temperature();
   auto user = Config::get_user();
-  if (user.disabled_temperature)
+  if (!user.enable_temperature)
     return true;
   else {
     float min_width =
