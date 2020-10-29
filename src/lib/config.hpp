@@ -42,6 +42,7 @@ typedef struct {
   float temperature_max;
   float temperature_min;
   bool enable_audio;
+  bool enable_led;
 } UserConfig;
 
 void to_json(json &j, const UserConfig &c);

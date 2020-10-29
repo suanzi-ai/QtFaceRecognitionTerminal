@@ -7,7 +7,7 @@
 using namespace suanzi;
 using namespace suanzi::io;
 
-FaceTimer* FaceTimer::get_instance() {
+FaceTimer *FaceTimer::get_instance() {
   static FaceTimer instance;
   return &instance;
 }
@@ -48,7 +48,8 @@ void FaceTimer::rx_frame(PingPangBuffer<DetectionData> *buffer) {
   } else {
     if (disappear_counter_ >= Config::get_extract().max_lost_age) {
       emit tx_face_appear(disappear_duration_);
-      Engine::instance()->gpio_set(GpioPinLightBox, true);
+      Engine::instance()->gpio_set(GpioPinLightBox,
+                                   Config::get_user().enable_led);
 
       disappear_counter_ = 0;
       disappear_duration_ = 0;
