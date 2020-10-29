@@ -1,17 +1,16 @@
 #ifndef CONFIG_HPP
 #define CONFIG_HPP
 
+#include <eventpp/eventdispatcher.h>
+
 #include <fstream>
 #include <mutex>
-#include <string>
-
-#include <eventpp/eventdispatcher.h>
 #include <nlohmann/json.hpp>
-
 #include <quface-io/isp_option.hpp>
 #include <quface-io/option.hpp>
 #include <quface/common.hpp>
 #include <quface/logger.hpp>
+#include <string>
 
 #define APP_DIR_PREFIX "/user/quface-app"
 
@@ -25,10 +24,15 @@
 namespace suanzi {
 using json = nlohmann::json;
 
-typedef enum DoorOpenCond {
+typedef enum RelaySwitchCond {
   Status = 1,
   Temperature = 2,
-} DoorOpenCond;
+} RelaySwitchCond;
+
+typedef enum RelayState {
+  Low = 0,
+  High = 1,
+} RelayState;
 
 typedef struct {
   std::string lang;
@@ -38,9 +42,9 @@ typedef struct {
   std::string extract_level;
   std::string liveness_level;
   SZ_UINT16 duplication_interval;
-  SZ_UINT32 door_open_cond;
-  bool door_unopen_state;
-  SZ_UINT16 door_open_timeout;
+  SZ_UINT32 relay_switch_cond;
+  RelayState relay_default_state;
+  SZ_UINT16 relay_restore_time;
   bool enable_temperature;
   float temperature_max;
   float temperature_min;

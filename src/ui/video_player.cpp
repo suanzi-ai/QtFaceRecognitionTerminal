@@ -67,7 +67,7 @@ void VideoPlayer::init_workflow() {
   // 创建继电器开关线程
   gpio_task_ = GPIOTask::get_instance();
   connect((const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool)),
-          (const QObject *)upload_task_, SLOT(rx_trigger(PersonData, bool)));
+          (const QObject *)gpio_task_, SLOT(rx_trigger(PersonData, bool)));
 
   // 创建人脸记录线程
   upload_task_ = UploadTask::get_instance();

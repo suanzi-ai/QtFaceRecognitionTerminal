@@ -13,10 +13,11 @@ void suanzi::to_json(json &j, const UserConfig &c) {
   SAVE_JSON_TO(j, "extract_level", c.extract_level);
   SAVE_JSON_TO(j, "liveness_level", c.liveness_level);
   SAVE_JSON_TO(j, "duplication_interval", c.duplication_interval);
-  SAVE_JSON_TO(j, "door_open_cond", c.door_open_cond);
-  SAVE_JSON_TO(j, "door_unopen_state", c.door_unopen_state);
-  SAVE_JSON_TO(j, "door_open_timeout", c.door_open_timeout);
+  SAVE_JSON_TO(j, "relay_switch_cond", c.relay_switch_cond);
+  SAVE_JSON_TO(j, "relay_default_state", c.relay_default_state);
+  SAVE_JSON_TO(j, "relay_restore_time", c.relay_restore_time);
   SAVE_JSON_TO(j, "disabled_temperature", !c.enable_temperature);
+  SAVE_JSON_TO(j, "enable_temperature", c.enable_temperature);
   SAVE_JSON_TO(j, "temperature_max", c.temperature_max);
   SAVE_JSON_TO(j, "temperature_min", c.temperature_min);
   SAVE_JSON_TO(j, "enable_audio", c.enable_audio);
@@ -39,12 +40,16 @@ void suanzi::from_json(const json &j, UserConfig &c) {
   LOAD_JSON_TO(j, "extract_level", c.extract_level);
   LOAD_JSON_TO(j, "liveness_level", c.liveness_level);
   LOAD_JSON_TO(j, "duplication_interval", c.duplication_interval);
-  LOAD_JSON_TO(j, "door_open_cond", c.door_open_cond);
-  LOAD_JSON_TO(j, "door_unopen_state", c.door_unopen_state);
-  LOAD_JSON_TO(j, "door_open_timeout", c.door_open_timeout);
-  bool disabled_temperature;
-  LOAD_JSON_TO(j, "disabled_temperature", disabled_temperature);
-  c.enable_temperature = !disabled_temperature;
+  LOAD_JSON_TO(j, "relay_switch_cond", c.relay_switch_cond);
+  LOAD_JSON_TO(j, "relay_default_state", c.relay_default_state);
+  LOAD_JSON_TO(j, "relay_restore_time", c.relay_restore_time);
+  if (j.contains("disabled_temperature")) {
+    bool disabled_temperature;
+    LOAD_JSON_TO(j, "disabled_temperature", disabled_temperature);
+    c.enable_temperature = !disabled_temperature;
+  } else {
+    LOAD_JSON_TO(j, "enable_temperature", c.enable_temperature);
+  }
   LOAD_JSON_TO(j, "temperature_max", c.temperature_max);
   LOAD_JSON_TO(j, "temperature_min", c.temperature_min);
   LOAD_JSON_TO(j, "enable_audio", c.enable_audio);
@@ -298,9 +303,9 @@ void Config::load_defaults(ConfigData &c) {
       .extract_level = "medium",
       .liveness_level = "medium",
       .duplication_interval = 60,
-      .door_open_cond = 3,
-      .door_unopen_state = false,
-      .door_open_timeout = 10,
+      .relay_switch_cond = 3,
+      .relay_default_state = RelayState::Low,
+      .relay_restore_time = 10,
       .enable_temperature = false,
       .temperature_max = 37.3,
       .temperature_min = 35.0,

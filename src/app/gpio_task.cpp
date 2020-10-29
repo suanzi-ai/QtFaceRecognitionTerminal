@@ -1,7 +1,6 @@
 #include "gpio_task.hpp"
 
 #include <QTimer>
-
 #include <quface-io/engine.hpp>
 #include <quface/logger.hpp>
 
@@ -32,25 +31,32 @@ GPIOTask::~GPIOTask() {}
 void GPIOTask::rx_trigger(PersonData person, bool if_duplicated) {
   auto user = Config::get_user();
 
-  bool open_door = true;
-  if (user.door_open_cond & DoorOpenCond::Status)
-    open_door = open_door && person.is_status_normal();
+  bool switch_relay = true;
+  if (user.relay_switch_cond & RelaySwitchCond::Status)
+    switch_relay = switch_relay && person.is_status_normal();
   if (user.enable_temperature &&
-      (user.door_open_cond & DoorOpenCond::Temperature))
-    open_door = open_door && person.is_temperature_normal();
+      (user.relay_switch_cond & RelaySwitchCond::Temperature))
+    switch_relay = switch_relay && person.is_temperature_normal();
 
   // Open door GPIO
-  if (open_door) {
-    Engine::instance()->gpio_set(GpioPinDOOR, !user.door_unopen_state);
+  if (switch_relay) {
+    if (user.relay_default_state == RelayState::Low) {
+      Engine::instance()->gpio_set(GpioPinDOOR, true);
+    } else {
+      Engine::instance()->gpio_set(GpioPinDOOR, false);
+    }
     event_count_ += 1;
-    QTimer::singleShot(user.door_open_timeout * 1000, this, SLOT(rx_reset()));
+    QTimer::singleShot(user.relay_restore_time * 1000, this, SLOT(rx_reset()));
   }
 }
 
 void GPIOTask::rx_reset() {
   if (--event_count_ <= 0) {
     event_count_ = 0;
-    Engine::instance()->gpio_set(GpioPinDOOR,
-                                 Config::get_user().door_unopen_state);
+    if (Config::get_user().relay_default_state == RelayState::Low) {
+      Engine::instance()->gpio_set(GpioPinDOOR, false);
+    } else {
+      Engine::instance()->gpio_set(GpioPinDOOR, true);
+    }
   }
 }
