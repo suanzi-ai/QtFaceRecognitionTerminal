@@ -1,8 +1,8 @@
 #ifndef RECOGNIZETIPWIDGET_H
 #define RECOGNIZETIPWIDGET_H
 
-#include <QBitmap>
-#include <QImage>
+#include <QFont>
+#include <QPixmap>
 #include <QTimer>
 #include <QWidget>
 
@@ -26,7 +26,11 @@ class RecognizeTipWidget : public QWidget {
  private:
   PersonData person_;
 
+  QFont font_;
+  QPixmap icon_;
   QTimer timer_;
+
+  bool has_info_;
 };
 
 }  // namespace suanzi

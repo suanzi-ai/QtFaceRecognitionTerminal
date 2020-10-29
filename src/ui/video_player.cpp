@@ -31,6 +31,7 @@ void VideoPlayer::paintEvent(QPaintEvent *event) {
 
   outline_widget_->paint(&painter);
   status_banner_->paint(&painter);
+  recognize_tip_widget_->paint(&painter);
 }
 
 void VideoPlayer::init_workflow() {
@@ -143,15 +144,7 @@ void VideoPlayer::init_widgets() {
   }
 
   // 创建人脸识别记录控件
-  int x = 0;
-  int y = screen_height * app.recognize_tip_top_percent / 100;
-  int w = screen_width;
-  int h = screen_height - y;
-
-  recognize_tip_widget_ = new RecognizeTipWidget(nullptr);
-  recognize_tip_widget_->hide();
-  recognize_tip_widget_->setFixedSize(w, h);
-  recognize_tip_widget_->move(x, y);
+  recognize_tip_widget_ = new RecognizeTipWidget(screen_width, screen_height, nullptr);
   connect((const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool)),
           (const QObject *)recognize_tip_widget_,
           SLOT(rx_display(PersonData, bool)));
@@ -159,10 +152,10 @@ void VideoPlayer::init_widgets() {
   // 创建屏保控件
   screen_saver_ = new ScreenSaverWidget(screen_width, screen_height, nullptr);
   screen_saver_->hide();
-//   connect((const QObject *)face_timer_, SIGNAL(tx_face_disappear(int)),
-//           (const QObject *)screen_saver_, SLOT(rx_display(int)));
-//   connect((const QObject *)face_timer_, SIGNAL(tx_face_appear(int)),
-//           (const QObject *)screen_saver_, SLOT(rx_hide()));
+  connect((const QObject *)face_timer_, SIGNAL(tx_face_disappear(int)),
+          (const QObject *)screen_saver_, SLOT(rx_display(int)));
+  connect((const QObject *)face_timer_, SIGNAL(tx_face_appear(int)),
+          (const QObject *)screen_saver_, SLOT(rx_hide()));
 
   // 创建人体轮廓控件
   outline_widget_ = new OutlineWidget(screen_width, screen_height, nullptr);

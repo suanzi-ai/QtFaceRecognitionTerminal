@@ -1,25 +1,29 @@
 #include "recognize_tip_widget.hpp"
 
 #include <QDateTime>
-#include <QDebug>
-#include <QPaintEvent>
+#include <QFontDatabase>
 #include <QPainter>
+#include <QLocale>
+#include <QStringList>
 #include <QTimer>
-#include <quface-io/engine.hpp>
-#include <quface/logger.hpp>
 
 #include "config.hpp"
 
 using namespace suanzi;
 using namespace suanzi::io;
 
-RecognizeTipWidget::RecognizeTipWidget(int width, int height, QWidget *parent) : QWidget(parent) {
+RecognizeTipWidget::RecognizeTipWidget(int width, int height, QWidget *parent)
+    : QWidget(parent), icon_(":asserts/location.png"), has_info_(false) {
   QPalette palette = this->palette();
   palette.setColor(QPalette::Background, Qt::transparent);
   setPalette(palette);
 
   move(0, 0);
   setFixedSize(width, height);
+
+  font_.setFamily(QFontDatabase::applicationFontFamilies(
+                      QFontDatabase::addApplicationFont(":asserts/clock.ttf"))
+                      .at(0));
 
   timer_.setInterval(2000);
   timer_.setSingleShot(true);
@@ -31,96 +35,73 @@ RecognizeTipWidget::~RecognizeTipWidget() {}
 
 void RecognizeTipWidget::rx_display(PersonData person, bool if_duplicated) {
   person_ = person;
-
-  hide();
-  show();
+  has_info_ = true;
 
   timer_.stop();
   timer_.start();
 }
 
-void RecognizeTipWidget::rx_reset() {
-  hide();
-}
+void RecognizeTipWidget::rx_reset() { has_info_ = false; }
 
-void RecognizeTipWidget::paintEvent(QPaintEvent *event) {
-  QPainter painter(this);
+void RecognizeTipWidget::paint(QPainter *painter) {
   const int w = width();
   const int h = height();
 
-  const QRect RECOGNIZE_TIP_BOX = {0, 0, w, h};
+  auto lang = Config::get_user_lang();
 
   // draw background
-  painter.fillRect(RECOGNIZE_TIP_BOX, QColor(0, 0, 10, 150));
+  painter->fillRect(QRect(0, 0.84375 * h, w, 0.171875 * h),
+                    QColor(5, 0, 20, 150));
 
   // draw border and seperator
-  painter.setPen(QPen(QColor(0, 0, 255, 128), 5));
-  painter.drawRect(RECOGNIZE_TIP_BOX);
-  painter.drawLine(w * 40 / 100, 50, w * 40 / 100, h - 50);
+  painter->setPen(QPen(QColor(150, 100, 0, 150), 2));
+  painter->drawLine(0, 0, w, 0);
+  painter->setPen(QPen(QColor(255, 255, 255, 200), 2));
+  painter->drawLine(0.27875 * w, 0.8828125 * h, 0.27875 * w, 0.921875 * h);
 
   // draw datetime
+  QLocale locale;
+  QString format = "ddd";
+  if (lang == "zh-CN")
+    locale = QLocale::Chinese;
+  if (lang == "en")
+    locale = QLocale::English;
+  if (lang == "jp") {
+    locale = QLocale::Japanese;
+    format = "ddd曜日";
+  }
   QDateTime now = QDateTime::currentDateTime();
-  QString time = now.toString(tr("hh : mm"));
+  QString time = now.toString("hh mm");
   QString date = now.toString(tr("yyyy年MM月dd日"));
+  QString weekday = locale.toString(now, format);
 
-  int base_font_size = h * 5 / 100;
+  QFont font = painter->font();
+  font_.setPointSize(0.0625 * w);
+  painter->setFont(font_);
+  painter->drawText(0.0375 * w, 0.9203125 * h, time);
+  font_.setPointSize(0.05 * w);
+  painter->setFont(font_);
+  painter->drawText(0.135 * w, 0.9203125 * h, ":");
 
-  QFont font = painter.font();
-  font.setPixelSize(base_font_size * 5);
-  painter.setFont(font);
-  painter.setPen(Qt::white);
-  painter.drawText(w * 7 / 100, h * 50 / 100, time);
+  font_.setPointSize(0.02125 * w);
+  painter->setFont(font_);
+  painter->drawText(0.29375 * w, 0.896875 * h, date);
+  font_.setPointSize(0.02 * w);
+  painter->setFont(font_);
+  painter->drawText(0.29375 * w, 0.9203125 * h, weekday);
 
-  font.setPixelSize(base_font_size * 2);
-  painter.setFont(font);
-  painter.drawText(w * 7 / 100, h * 70 / 100, date);
+  // draw SN and version
+  font_.setPointSize(0.02125 * w);
+  painter->setFont(font_);
+  painter->drawText(0.05625 * w, 0.984375 * h, "SN:2020060229 FW:1.9.8");
+  painter->setFont(font);
 
-  // draw person info and avatar
-  QString name, staff_number, avatar_path;
-  name = person_.name.c_str();
-  avatar_path = person_.face_path.c_str();
-  if (person_.number.length() > 0)
-    staff_number = (tr("工号: ").toStdString() + person_.number).c_str();
-  else
-    staff_number = "";
+  // draw icon
+  painter->drawPixmap(
+      QRect(0.05375 * w, 0.9390625 * h, 0.025 * w, 0.021875 * h), icon_,
+      QRect());
 
-  QPixmap avatar(avatar_path);
-  avatar = avatar.scaled(mask_.size());
-  avatar.setMask(mask_);
-  painter.drawPixmap(
-      QRect(w * 50 / 100, h * 23.2 / 100, w * 18.75 / 100, h * 53.57 / 100),
-      avatar, QRect());
-
-  // draw person info
-  font.setPixelSize(base_font_size * 3);
-  std::cout << font.family().toStdString() << std::endl;
-  painter.setFont(font);
-  painter.setPen(Qt::white);
-  painter.drawText(w * 72.5 / 100, h * 46.42 / 100, name);
-
-  bool enable_temperature = Config::get_user().enable_temperature;
-  std::stringstream ss;
-  ss << tr("温度: ").toStdString() << std::setprecision(3) << person_.temperature << "°C";
-  QString body_temperature = ss.str().c_str();
-
-  font.setPixelSize(base_font_size * 2);
-  painter.setFont(font);
-  if (staff_number.length() > 0) {
-    painter.drawText(w * 72.5 / 100, h * 71.43 / 100, staff_number);
-    if (enable_temperature) {
-      // draw temperature
-      if (!person_.is_temperature_normal())
-        painter.setPen(Qt::red);
-      else
-        painter.setPen(Qt::white);
-      painter.drawText(w * 72.5 / 100, h * 96.44 / 100, body_temperature);
-    }
-  } else if (enable_temperature) {
-    // draw temperature
-    if (!person_.is_temperature_normal())
-      painter.setPen(Qt::red);
-    else
-      painter.setPen(Qt::white);
-    painter.drawText(w * 72.5 / 100, h * 71.43 / 100, body_temperature);
+  if (has_info_) {
+    // TODO: draw avatar here
   }
 }

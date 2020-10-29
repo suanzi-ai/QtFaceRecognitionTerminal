@@ -27,6 +27,12 @@
     <file>asserts/file.png</file>
 </qresource>
 <qresource>
+    <file>asserts/location.png</file>
+</qresource>
+<qresource>
+    <file>asserts/clock.ttf</file>
+</qresource>
+<qresource>
     <file>asserts/zh-CN/recognition_succeed.aac</file>
 </qresource>
 <qresource>
@@ -61,8 +67,5 @@
 </qresource>
 <qresource>
     <file>asserts/en/get_closer.aac</file>
-</qresource>
-<qresource>
-    <file>asserts/AnjaliOldLipi.ttf</file>
 </qresource>
 </RCC>

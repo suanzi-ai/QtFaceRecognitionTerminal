@@ -24,8 +24,6 @@ class StatusBanner : public QWidget {
   void rx_update();
 
  private:
-  std::string ip_address_;
-  std::string version_;
   SZ_UINT32 db_size_;
 
   PersonService::ptr person_service_;

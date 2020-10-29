@@ -190,7 +190,8 @@ add_subdirectory(src/lib)
 add_subdirectory(src/ui)
 add_subdirectory(src/service)
 
-set(TRANSLATION_TS_FILES i18n/face_terminal_en.ts i18n/face_terminal_zh-CN.ts)
+set(TRANSLATION_TS_FILES i18n/face_terminal_en.ts i18n/face_terminal_zh-CN.ts
+                         i18n/face_terminal_jp.ts)
 if(GENERATE_QT_TS_FILES)
   set(TRANSLATION_SRC_FILES
       src/ui/recognize_tip_widget.cpp src/ui/screen_saver_widget.cpp

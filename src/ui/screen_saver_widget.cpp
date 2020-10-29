@@ -55,7 +55,7 @@ void ScreenSaverWidget::paintEvent(QPaintEvent *event) {
     // draw datetime
     QDateTime now = QDateTime::currentDateTime();
 
-    QString time = now.toString(tr("hh   mm"));
+    QString time = now.toString("hh   mm");
     QString date = now.toString(tr("yyyy年MM月dd日"));
 
     int base_font_size = h * 2 / 100;
