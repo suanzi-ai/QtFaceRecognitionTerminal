@@ -12,6 +12,21 @@
     <file>asserts/outline.png</file>
 </qresource>
 <qresource>
+    <file>asserts/people.png</file>
+</qresource>
+<qresource>
+    <file>asserts/temperature.png</file>
+</qresource>
+<qresource>
+    <file>asserts/earth.png</file>
+</qresource>
+<qresource>
+    <file>asserts/face.png</file>
+</qresource>
+<qresource>
+    <file>asserts/file.png</file>
+</qresource>
+<qresource>
     <file>asserts/zh-CN/recognition_succeed.aac</file>
 </qresource>
 <qresource>

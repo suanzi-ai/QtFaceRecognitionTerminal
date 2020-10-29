@@ -6,6 +6,7 @@
 #include <QFont>
 #include <QPixmap>
 
+#include "quface_common.hpp"
 #include "person_service.hpp"
 
 namespace suanzi {
@@ -25,17 +26,17 @@ class StatusBanner : public QWidget {
  private:
   std::string ip_address_;
   std::string version_;
+  SZ_UINT32 db_size_;
 
   PersonService::ptr person_service_;
+  FaceDatabasePtr db_;
+
   QTimer *timer_;
-  QFont font_;
-  QPixmap icon_;
+  QPixmap icon1_;
   QPixmap icon2_;
   QPixmap icon3_;
   QPixmap icon4_;
   QPixmap icon5_;
-  QPixmap icon6_;
-  QPixmap icon7_;
 };
 
 }  // namespace suanzi
