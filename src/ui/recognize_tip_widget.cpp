@@ -13,21 +13,15 @@
 using namespace suanzi;
 using namespace suanzi::io;
 
-RecognizeTipWidget::RecognizeTipWidget(QWidget *parent) : QWidget(parent) {
+RecognizeTipWidget::RecognizeTipWidget(int width, int height, QWidget *parent) : QWidget(parent) {
   QPalette palette = this->palette();
   palette.setColor(QPalette::Background, Qt::transparent);
   setPalette(palette);
 
-  int wh = height() * 50 / 100;
-  mask_ = QBitmap(wh, wh);
-  QPainter painter(&mask_);
-  painter.setRenderHint(QPainter::Antialiasing);
-  painter.setRenderHint(QPainter::SmoothPixmapTransform);
-  painter.fillRect(mask_.rect(), Qt::white);
-  painter.setBrush(QColor(0, 0, 0));
-  painter.drawRoundedRect(mask_.rect(), wh / 2, wh / 2);
+  move(0, 0);
+  setFixedSize(width, height);
 
-  timer_.setInterval(1000);
+  timer_.setInterval(2000);
   timer_.setSingleShot(true);
   connect((const QObject *)&timer_, SIGNAL(timeout()), (const QObject *)this,
           SLOT(rx_reset()));
