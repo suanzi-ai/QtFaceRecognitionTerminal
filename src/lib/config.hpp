@@ -43,6 +43,8 @@ typedef struct {
   float temperature_min;
   bool enable_audio;
   bool enable_led;
+  bool enable_screensaver;
+  SZ_UINT16 screensaver_timeout;
 } UserConfig;
 
 void to_json(json &j, const UserConfig &c);

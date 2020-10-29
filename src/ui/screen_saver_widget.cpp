@@ -31,7 +31,8 @@ ScreenSaverWidget::ScreenSaverWidget(int width, int height, QWidget *parent)
 ScreenSaverWidget::~ScreenSaverWidget() {}
 
 void ScreenSaverWidget::rx_display(int disappear_seconds) {
-  if (disappear_seconds > 10) {
+  auto cfg = Config::get_user();
+  if (cfg.enable_screensaver && disappear_seconds > cfg.screensaver_timeout) {
     hide();
     show();
   }
@@ -40,32 +41,36 @@ void ScreenSaverWidget::rx_display(int disappear_seconds) {
 void ScreenSaverWidget::rx_hide() { hide(); }
 
 void ScreenSaverWidget::paintEvent(QPaintEvent *event) {
-  QPainter painter(this);
-  const int w = width();
-  const int h = height();
+  if (!Config::get_user().enable_screensaver)
+    hide();
+  else {
+    QPainter painter(this);
+    const int w = width();
+    const int h = height();
 
-  // draw background
-  QPixmap pixmapToShow = QPixmap::fromImage(background_);
-  painter.drawPixmap(QRect(0, 0, w, h), pixmapToShow, QRect());
+    // draw background
+    QPixmap pixmapToShow = QPixmap::fromImage(background_);
+    painter.drawPixmap(QRect(0, 0, w, h), pixmapToShow, QRect());
 
-  // draw datetime
-  QDateTime now = QDateTime::currentDateTime();
+    // draw datetime
+    QDateTime now = QDateTime::currentDateTime();
 
-  QString time = now.toString(tr("hh   mm"));
-  QString date = now.toString(tr("yyyy年MM月dd日"));
+    QString time = now.toString(tr("hh   mm"));
+    QString date = now.toString(tr("yyyy年MM月dd日"));
 
-  int base_font_size = h * 2 / 100;
+    int base_font_size = h * 2 / 100;
 
-  QFont font = painter.font();
-  font.setPixelSize(base_font_size * 5);
-  painter.setFont(font);
-  painter.setPen(Qt::white);
-  painter.drawText(w * 25 / 100, h * 33 / 100, time);
+    QFont font = painter.font();
+    font.setPixelSize(base_font_size * 5);
+    painter.setFont(font);
+    painter.setPen(Qt::white);
+    painter.drawText(w * 25 / 100, h * 33 / 100, time);
 
-  bool flag = (now.currentMSecsSinceEpoch() / 500) % 2;
-  if (flag) painter.drawText(w * 47 / 100, h * 33 / 100, ":");
+    bool flag = (now.currentMSecsSinceEpoch() / 500) % 2;
+    if (flag) painter.drawText(w * 47 / 100, h * 33 / 100, ":");
 
-  font.setPixelSize(base_font_size * 2);
-  painter.setFont(font);
-  painter.drawText(w * 26 / 100, h * 40 / 100, date);
+    font.setPixelSize(base_font_size * 2);
+    painter.setFont(font);
+    painter.drawText(w * 26 / 100, h * 40 / 100, date);
+  }
 }
