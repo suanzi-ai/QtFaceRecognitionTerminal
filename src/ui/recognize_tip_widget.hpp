@@ -14,11 +14,10 @@ class RecognizeTipWidget : public QWidget {
   Q_OBJECT
 
  public:
-  RecognizeTipWidget(QWidget *parent = nullptr);
+  RecognizeTipWidget(int width, int height, QWidget *parent = nullptr);
   ~RecognizeTipWidget() override;
 
- protected:
-  void paintEvent(QPaintEvent *event);
+  void paint(QPainter *painter);
 
  private slots:
   void rx_display(PersonData person, bool if_duplicated);
@@ -26,7 +25,6 @@ class RecognizeTipWidget : public QWidget {
 
  private:
   PersonData person_;
-  QBitmap mask_;
 
   QTimer timer_;
 };
