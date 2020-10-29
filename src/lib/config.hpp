@@ -45,6 +45,10 @@ typedef struct {
   float temperature_max;
   float temperature_min;
   bool enable_audio;
+  bool enable_record_audio;
+  bool enable_temperature_audio;
+  bool enable_mask_audio;
+  bool enable_distance_audio;
   bool enable_led;
   bool enable_screensaver;
   SZ_UINT16 screensaver_timeout;

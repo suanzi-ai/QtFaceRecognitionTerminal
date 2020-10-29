@@ -102,26 +102,27 @@ void AudioTask::rx_report_person(PersonData person) {
 
   is_running_ = true;
 
-  if (!person.is_status_normal())
-    play_audio(fail_audio_);
-  else
-    play_audio(success_audio_);
+  if (user.enable_record_audio) {
+    if (!person.is_status_normal())
+      play_audio(fail_audio_);
+    else
+      play_audio(success_audio_);
+  }
 
-  if (user.disabled_temperature)
-    QThread::msleep(1000);
-  else {
+  if (user.enable_temperature_audio && !user.disabled_temperature) {
     if (!person.is_temperature_normal())
       play_audio(temperature_abnormal_audio_);
     else
       play_audio(temperature_normal_audio_);
   }
 
+  QThread::msleep(1000);
   is_running_ = false;
 }
 
 void AudioTask::rx_warn_mask() {
   auto user = Config::get_user();
-  if (!user.enable_audio) return;
+  if (!user.enable_audio || !user.enable_mask_audio) return;
 
   is_running_ = true;
   play_audio(warn_mask_audio_);
@@ -130,7 +131,9 @@ void AudioTask::rx_warn_mask() {
 
 void AudioTask::rx_warn_distance() {
   auto user = Config::get_user();
-  if (!user.enable_audio || user.disabled_temperature) return;
+  if (!user.enable_audio || !user.enable_distance_audio ||
+      user.disabled_temperature)
+    return;
 
   is_running_ = true;
   play_audio(warn_distance_audio_);

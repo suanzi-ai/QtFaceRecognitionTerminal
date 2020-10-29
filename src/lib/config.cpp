@@ -20,6 +20,10 @@ void suanzi::to_json(json &j, const UserConfig &c) {
   SAVE_JSON_TO(j, "temperature_max", c.temperature_max);
   SAVE_JSON_TO(j, "temperature_min", c.temperature_min);
   SAVE_JSON_TO(j, "enable_audio", c.enable_audio);
+  SAVE_JSON_TO(j, "enable_record_audio", c.enable_record_audio);
+  SAVE_JSON_TO(j, "enable_temperature_audio", c.enable_temperature_audio);
+  SAVE_JSON_TO(j, "enable_mask_audio", c.enable_mask_audio);
+  SAVE_JSON_TO(j, "enable_distance_audio", c.enable_distance_audio);
   SAVE_JSON_TO(j, "enable_led", c.enable_led);
   SAVE_JSON_TO(j, "enable_screensaver", c.enable_screensaver);
   SAVE_JSON_TO(j, "screensaver_timeout", c.screensaver_timeout);
@@ -42,6 +46,10 @@ void suanzi::from_json(const json &j, UserConfig &c) {
   LOAD_JSON_TO(j, "temperature_max", c.temperature_max);
   LOAD_JSON_TO(j, "temperature_min", c.temperature_min);
   LOAD_JSON_TO(j, "enable_audio", c.enable_audio);
+  LOAD_JSON_TO(j, "enable_record_audio", c.enable_record_audio);
+  LOAD_JSON_TO(j, "enable_temperature_audio", c.enable_temperature_audio);
+  LOAD_JSON_TO(j, "enable_mask_audio", c.enable_mask_audio);
+  LOAD_JSON_TO(j, "enable_distance_audio", c.enable_distance_audio);
   LOAD_JSON_TO(j, "enable_led", c.enable_led);
   LOAD_JSON_TO(j, "enable_screensaver", c.enable_screensaver);
   LOAD_JSON_TO(j, "screensaver_timeout", c.screensaver_timeout);
@@ -295,6 +303,10 @@ void Config::load_defaults(ConfigData &c) {
       .temperature_max = 37.3,
       .temperature_min = 35.0,
       .enable_audio = true,
+      .enable_record_audio = true,
+      .enable_temperature_audio = true,
+      .enable_mask_audio = true,
+      .enable_distance_audio = true,
       .enable_led = true,
       .enable_screensaver = true,
       .screensaver_timeout = 60,
@@ -706,7 +718,7 @@ bool Config::load_screen_type(LCDScreenType &lcd_screen_type) {
 }
 
 bool Config::load_sensor_type(SensorType &sensor0_type,
-                               SensorType &sensor1_type) {
+                              SensorType &sensor1_type) {
   std::string conf_filename = "/userdata/user.conf";
   std::ifstream conf(conf_filename);
   if (!conf.is_open()) {
