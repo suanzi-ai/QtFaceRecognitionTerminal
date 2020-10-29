@@ -42,7 +42,8 @@ class FaceService {
   bool load_image(SZ_UINT32 faceId, std::vector<SZ_BYTE> &buffer);
   SZ_RETCODE extract_image_feature(SZ_UINT32 faceId,
                                    std::vector<SZ_BYTE> &imgBuf,
-                                   FaceFeature &pFeature);
+                                   FaceFeature &pFeature,
+                                   std::string &error_message);
   SZ_RETCODE read_image_as_base64(SZ_UINT32 id, std::string &result);
 
   FaceDatabasePtr db_;

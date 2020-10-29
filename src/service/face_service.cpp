@@ -87,7 +87,8 @@ bool FaceService::load_image(SZ_UINT32 face_id, std::vector<SZ_BYTE> &buffer) {
 
 SZ_RETCODE FaceService::extract_image_feature(SZ_UINT32 face_id,
                                               std::vector<SZ_BYTE> &buffer,
-                                              FaceFeature &feature) {
+                                              FaceFeature &feature,
+                                              std::string &error_message) {
   cv::Mat raw_data(1, buffer.size(), CV_8UC1, (void *)buffer.data());
   cv::Mat decoded_image = cv::imdecode(raw_data, cv::IMREAD_COLOR);
   if (decoded_image.empty()) {
@@ -109,31 +110,45 @@ SZ_RETCODE FaceService::extract_image_feature(SZ_UINT32 face_id,
   do {
     ret = detector_->detect(bgr, width, height, detections);
     if (ret != SZ_RETCODE_OK) {
-      SZ_LOG_ERROR("face detect failed!");
+      error_message = "assert detector_->detect == SZ_RETCODE_OK failed";
+      SZ_LOG_ERROR(error_message);
       break;
     }
 
     if (detections.size() == 0) {
-      SZ_LOG_ERROR("no faces!");
+      error_message = "no face";
+      SZ_LOG_ERROR(error_message);
       ret = SZ_RETCODE_FAILED;
       break;
     }
 
     if (detections.size() > 1) {
-      SZ_LOG_ERROR("more than one faces!");
+      error_message = "more than one face";
+      SZ_LOG_ERROR(error_message);
       ret = SZ_RETCODE_FAILED;
       break;
     }
 
     ret = pose_estimator_->estimate(bgr, width, height, detections[0], pose);
     if (ret != SZ_RETCODE_OK) {
-      SZ_LOG_ERROR("estimator.estimate failed! low face quality");
+      error_message =
+          "assert pose_estimator_->estimate == SZ_RETCODE_OK failed";
+      SZ_LOG_ERROR(error_message);
+      break;
+    }
+    auto cfg = Config::get_detect();
+    if (!(cfg.min_yaw <= pose.yaw && pose.yaw <= cfg.max_yaw &&
+          cfg.min_pitch <= pose.pitch && pose.pitch <= cfg.max_pitch &&
+          cfg.min_roll <= pose.roll && pose.roll <= cfg.max_roll)) {
+      error_message = "large pose face";
+      SZ_LOG_ERROR(error_message);
       break;
     }
 
     ret = extractor_->extract(bgr, width, height, detections[0], pose, feature);
     if (ret != SZ_RETCODE_OK) {
-      SZ_LOG_ERROR("extractor.extractFeature failed!");
+      error_message = "assert extractor_->extract == SZ_RETCODE_OK failed";
+      SZ_LOG_ERROR(error_message);
       break;
     }
 
@@ -232,12 +247,12 @@ json FaceService::db_add(const json &body) {
       };
     }
 
-    ret = extract_image_feature(face.id, buffer, feature);
+    std::string error_message;
+    ret = extract_image_feature(face.id, buffer, feature, error_message);
     if (ret != SZ_RETCODE_OK) {
       return {
           {"ok", false},
-          {"message",
-           "extract face failed, no face? more than one? bad quality?"},
+          {"message", error_message},
           {"code", "EXTRACT_FACE_FAILED"},
       };
     }
@@ -317,10 +332,12 @@ json FaceService::db_add_many(const json &body) {
         };
       }
 
-      ret = extract_image_feature(face.id, buffer, feature);
+      std::string error_message;
+      ret = extract_image_feature(face.id, buffer, feature, error_message);
       if (ret != SZ_RETCODE_OK) {
         failedPersons.push_back(
-            json({{"id", face.id}, {"reason", "EXTRACT_FACE_FAILED"}}));
+            json({{"id", face.id},
+                  {"reason", "EXTRACT_FACE_FAILED: " + error_message}}));
         SZ_LOG_WARN("[Add many] failed face id: {} reason: {}", face.id,
                     "EXTRACT_FACE_FAILED");
         continue;
