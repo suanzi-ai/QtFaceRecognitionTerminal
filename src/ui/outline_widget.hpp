@@ -13,6 +13,9 @@ class OutlineWidget : public QWidget {
   ~OutlineWidget() override;
 
   void paint(QPainter *painter);
+
+ private:
+  QPixmap outline_;
 };
 
 }  // namespace suanzi
