@@ -11,16 +11,14 @@
 using namespace suanzi;
 
 StatusBanner::StatusBanner(int width, int height, QWidget *parent)
-    : icon_("loc.png"),
-      icon2_("people.png"),
-      icon3_("outline.png"),
-      icon4_("temperature.png"),
-      icon5_("earth.png"),
-      icon6_("face.png"),
-      icon7_("file.png"),
-      QWidget(parent) {
-
+    : QWidget(parent),
+      icon1_(":asserts/people.png"),
+      icon2_(":asserts/temperature.png"),
+      icon3_(":asserts/earth.png"),
+      icon4_(":asserts/face.png"),
+      icon5_(":asserts/file.png") {
   person_service_ = PersonService::get_instance();
+  db_ = std::make_shared<FaceDatabase>(Config::get_quface().db_name);
 
   QPalette palette = this->palette();
   palette.setColor(QPalette::Background, Qt::transparent);
@@ -32,11 +30,6 @@ StatusBanner::StatusBanner(int width, int height, QWidget *parent)
   timer_ = new QTimer(this);
   connect(timer_, SIGNAL(timeout()), this, SLOT(rx_update()));
   timer_->start(1000);
-
-  int fontId = QFontDatabase::addApplicationFont("number.ttf");
-  QStringList fontFamilies = QFontDatabase::applicationFontFamilies(fontId);
-
-  font_.setFamily(fontFamilies.at(0));
 }
 
 StatusBanner::~StatusBanner() { timer_->stop(); }
@@ -47,6 +40,8 @@ void StatusBanner::rx_update() {
   ip_address_ = name + " " + ip;
 
   System::get_release_version(version_);
+
+  if (SZ_RETCODE_OK != db_->size(db_size_)) db_size_ = 0;
 }
 
 void StatusBanner::paint(QPainter *painter) {
@@ -55,60 +50,28 @@ void StatusBanner::paint(QPainter *painter) {
 
   auto cfg = Config::get_user();
 
-  painter->fillRect(QRect(0, 0, w, 35), QColor(5, 0, 20, 150));
-  painter->fillRect(QRect(0, h - 220, w, 220), QColor(5, 0, 20, 150));
-  painter->setPen(QPen(QColor(150, 100, 0, 150), 2));
-  painter->drawLine(0, h - 220, w, h - 220);
-  // painter.drawLine(w * 40 / 100, 50, w * 40 / 100, h - 50);
+  // draw background
+  painter->fillRect(QRect(0, 0, w, 0.02734375 * h), QColor(5, 0, 20, 150));
 
-  // draw datetime
-  QDateTime now = QDateTime::currentDateTime();
-  QString time = now.toString("hh mm");
-  QString date = now.toString("yyyy年MM月dd日");
-
-  // int base_font_size = h * 5 / 100;
-
-  painter->setPen(QPen(QColor(255, 255, 255, 200), 2));
+  // draw person count
   QFont font = painter->font();
-  font_.setPointSize(50);
-  painter->setFont(font_);
-  painter->drawText(30, h - 105, time);
-  font_.setPointSize(40);
-  painter->setFont(font_);
-  painter->drawText(108, h - 105, ":");
-
-  painter->drawLine(223, h - 100, 223, h - 150);
-
-  font_.setPointSize(17);
-  painter->setFont(font_);
-  painter->drawText(235, h - 132, date);
-  font_.setPointSize(16);
-  painter->setFont(font_);
-  painter->drawText(235, h - 102, "土曜日");
-
-  font_.setPointSize(17);
-  painter->setFont(font_);
-  painter->drawText(45, h - 20, "SN:2020060229 FW:1.9.8");
+  font.setPointSize(17);
   painter->setFont(font);
+  painter->setPen(QPen(QColor(255, 255, 255, 200), 2));
+  painter->drawText(0.04125 * w, 0.01953125 * h, QString(db_size_));
 
-  font_.setPointSize(17);
-  painter->setFont(font_);
-  painter->drawText(33, 25, "1");
-
-  painter->drawPixmap(QRect(43, h - 78, 20, 28), icon_, QRect());
-
-  painter->drawPixmap(QRect(8, 10, 20, 18), icon2_, QRect());
-  painter->drawPixmap(QRect(0, 240, 800, 790), icon3_, QRect());
-  painter->drawPixmap(QRect(700, 3, 30, 30), icon4_, QRect());
-  painter->drawPixmap(QRect(768, 7, 22, 22), icon5_, QRect());
-  painter->drawPixmap(QRect(735, 7, 22, 22), icon6_, QRect());
-  painter->drawPixmap(QRect(672, 5, 25, 23), icon7_, QRect());
-
-  // font->setPixelSize(base_font_size * 2);
-  // painter->setFont(font);
-  // painter->drawText(w * 7 / 100, h - 150, date);
-
-  // painter->setPen(Qt::green);
-  // painter->drawText(20, 40, QString(ip_address_.c_str()));
-  // painter->drawText(w - version_.length() * 9, 40, QString(version_.c_str()));
+  painter->drawPixmap(QRect(0.01 * w, 0.0078125 * h, 0.025 * w, 0.0140625 * h),
+                      icon1_, QRect());
+  painter->drawPixmap(
+      QRect(0.875 * w, 0.00234375 * h, 0.0375 * w, 0.0234375 * h), icon2_,
+      QRect());
+  painter->drawPixmap(
+      QRect(0.96 * w, 0.00546875 * h, 0.0275 * w, 0.0171875 * h), icon3_,
+      QRect());
+  painter->drawPixmap(
+      QRect(0.91875 * w, 0.00546875 * h, 0.0275 * w, 0.0171875 * h), icon4_,
+      QRect());
+  painter->drawPixmap(
+      QRect(0.84 * w, 0.00390625 * h, 0.03125 * w, 0.01796875 * h), icon5_,
+      QRect());
 }
