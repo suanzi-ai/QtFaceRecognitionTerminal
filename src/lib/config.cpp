@@ -14,6 +14,8 @@ void suanzi::to_json(json &j, const UserConfig &c) {
   SAVE_JSON_TO(j, "liveness_level", c.liveness_level);
   SAVE_JSON_TO(j, "duplication_interval", c.duplication_interval);
   SAVE_JSON_TO(j, "door_open_cond", c.door_open_cond);
+  SAVE_JSON_TO(j, "door_unopen_state", c.door_unopen_state);
+  SAVE_JSON_TO(j, "door_open_timeout", c.door_open_timeout);
   SAVE_JSON_TO(j, "disabled_temperature", c.disabled_temperature);
   SAVE_JSON_TO(j, "temperature_max", c.temperature_max);
   SAVE_JSON_TO(j, "temperature_min", c.temperature_min);
@@ -34,6 +36,8 @@ void suanzi::from_json(const json &j, UserConfig &c) {
   LOAD_JSON_TO(j, "liveness_level", c.liveness_level);
   LOAD_JSON_TO(j, "duplication_interval", c.duplication_interval);
   LOAD_JSON_TO(j, "door_open_cond", c.door_open_cond);
+  LOAD_JSON_TO(j, "door_unopen_state", c.door_unopen_state);
+  LOAD_JSON_TO(j, "door_open_timeout", c.door_open_timeout);
   LOAD_JSON_TO(j, "disabled_temperature", c.disabled_temperature);
   LOAD_JSON_TO(j, "temperature_max", c.temperature_max);
   LOAD_JSON_TO(j, "temperature_min", c.temperature_min);
@@ -285,6 +289,8 @@ void Config::load_defaults(ConfigData &c) {
       .liveness_level = "medium",
       .duplication_interval = 60,
       .door_open_cond = 3,
+      .door_unopen_state = false,
+      .door_open_timeout = 10,
       .disabled_temperature = true,
       .temperature_max = 37.3,
       .temperature_min = 35.0,

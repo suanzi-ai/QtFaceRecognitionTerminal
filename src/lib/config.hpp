@@ -39,6 +39,8 @@ typedef struct {
   std::string liveness_level;
   SZ_UINT16 duplication_interval;
   SZ_UINT32 door_open_cond;
+  bool door_unopen_state;
+  SZ_UINT16 door_open_timeout;
   bool disabled_temperature;
   float temperature_max;
   float temperature_min;

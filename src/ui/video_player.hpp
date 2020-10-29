@@ -12,8 +12,10 @@
 #include "camera_reader.hpp"
 #include "detect_task.hpp"
 #include "face_timer.hpp"
+#include "gpio_task.hpp"
 #include "recognize_task.hpp"
 #include "record_task.hpp"
+#include "temperature_task.hpp"
 #include "upload_task.hpp"
 
 #include "detect_tip_widget.hpp"
@@ -21,8 +23,6 @@
 #include "recognize_tip_widget.hpp"
 #include "screen_saver_widget.hpp"
 #include "status_banner.hpp"
-#include "temperature_task.hpp"
-// #include "isp_hist_widget.hpp"
 
 namespace suanzi {
 
@@ -47,8 +47,6 @@ class VideoPlayer : public QWidget {
   ScreenSaverWidget *screen_saver_;
   OutlineWidget *outline_widget_;
   StatusBanner *status_banner_;
-  // HeatMapWidget *heat_map_widget_;
-  // ISPHistWidget *isp_hist_widget_;
 
   CameraReader *camera_reader_;
 
@@ -59,6 +57,7 @@ class VideoPlayer : public QWidget {
 
   UploadTask *upload_task_;
   AudioTask *audio_task_;
+  GPIOTask *gpio_task_;
 
   TemperatureTask *temperature_task_;
 };

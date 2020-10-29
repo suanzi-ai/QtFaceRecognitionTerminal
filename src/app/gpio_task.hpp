@@ -1,0 +1,24 @@
+#include <QObject>
+#include <QThread>
+
+#include "person_service.hpp"
+
+namespace suanzi {
+
+class GPIOTask : QObject {
+  Q_OBJECT
+ public:
+  static GPIOTask* get_instance();
+
+ private slots:
+  void rx_trigger(PersonData person, bool if_duplicated);
+  void rx_reset();
+
+ private:
+  GPIOTask(QThread* thread = nullptr, QObject* parent = nullptr);
+  ~GPIOTask();
+
+  int event_count_;
+};
+
+}  // namespace suanzi

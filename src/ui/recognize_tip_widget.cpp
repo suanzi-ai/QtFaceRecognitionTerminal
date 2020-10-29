@@ -38,17 +38,6 @@ RecognizeTipWidget::~RecognizeTipWidget() {}
 void RecognizeTipWidget::rx_display(PersonData person, bool if_duplicated) {
   person_ = person;
 
-  auto user = Config::get_user();
-
-  bool open_door = true;
-  if (user.door_open_cond & DoorOpenCond::Status)
-    open_door = open_door && person.is_status_normal();
-  if (user.door_open_cond & DoorOpenCond::Temperature)
-    open_door = open_door && person.is_temperature_normal();
-
-  // Open door GPIO
-  if (open_door) Engine::instance()->gpio_set(GpioPinDOOR, true);
-
   hide();
   show();
 
@@ -58,7 +47,6 @@ void RecognizeTipWidget::rx_display(PersonData person, bool if_duplicated) {
 
 void RecognizeTipWidget::rx_reset() {
   hide();
-  Engine::instance()->gpio_set(GpioPinDOOR, false);
 }
 
 void RecognizeTipWidget::paintEvent(QPaintEvent *event) {
