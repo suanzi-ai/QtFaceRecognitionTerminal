@@ -43,7 +43,7 @@ void GPIOTask::rx_trigger(PersonData person, bool if_duplicated) {
   if (open_door) {
     Engine::instance()->gpio_set(GpioPinDOOR, !user.door_unopen_state);
     event_count_ += 1;
-    QTimer::singleShot(user.door_open_timeout, this, SLOT(rx_reset()));
+    QTimer::singleShot(user.door_open_timeout * 1000, this, SLOT(rx_reset()));
   }
 }
 
