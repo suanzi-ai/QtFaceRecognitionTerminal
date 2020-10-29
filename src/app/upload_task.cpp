@@ -1,12 +1,15 @@
 #include "upload_task.hpp"
 
 #include <QThread>
+
 #include <quface-io/engine.hpp>
+
+#include "config.hpp"
 
 using namespace suanzi;
 using namespace suanzi::io;
 
-UploadTask* UploadTask::get_instance() {
+UploadTask *UploadTask::get_instance() {
   static UploadTask instance;
   return &instance;
 }
@@ -31,7 +34,19 @@ void UploadTask::rx_upload(PersonData person, bool if_duplicated) {
   static std::vector<SZ_UINT8> bgr_image_buffer;
   static std::vector<SZ_UINT8> nir_image_buffer;
 
+  auto cfg = Config::get_user();
   if (!if_duplicated) {
+    // whether is known person
+    if ((person.status == PersonService::get_status(PersonStatus::Normal) ||
+         person.status == PersonService::get_status(PersonStatus::Blacklist)) &&
+        !cfg.upload_known_person)
+      return;
+
+    // whether is unknown person
+    if (person.status == PersonService::get_status(PersonStatus::Stranger) &&
+        !cfg.upload_unknown_person)
+      return;
+
     SZ_LOG_DEBUG("upload snapshots");
     auto engine = Engine::instance();
 
