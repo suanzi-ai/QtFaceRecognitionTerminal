@@ -4,7 +4,7 @@
 <context>
     <name>suanzi::RecognizeTipWidget</name>
     <message>
-        <location filename="../src/ui/recognize_tip_widget.cpp" line="75"/>
+        <location filename="../src/ui/recognize_tip_widget.cpp" line="89"/>
         <source>yyyy年MM月dd日</source>
         <translation>yyyy-MM-dd</translation>
     </message>
@@ -12,13 +12,13 @@
 <context>
     <name>suanzi::RecordTask</name>
     <message>
-        <location filename="../src/app/record_task.cpp" line="127"/>
+        <location filename="../src/app/record_task.cpp" line="131"/>
         <source>黑名单</source>
         <translation>Blacklist</translation>
     </message>
     <message>
-        <location filename="../src/app/record_task.cpp" line="129"/>
-        <location filename="../src/app/record_task.cpp" line="138"/>
+        <location filename="../src/app/record_task.cpp" line="133"/>
+        <location filename="../src/app/record_task.cpp" line="142"/>
         <source>访客</source>
         <translation>Visitor</translation>
     </message>

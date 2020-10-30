@@ -25,12 +25,15 @@ class RecognizeTipWidget : public QWidget {
 
  private:
   PersonData person_;
+  QPixmap snapshot_;
+  QPixmap avatar_;
 
   QFont font_;
   QPixmap icon_;
   QTimer timer_;
 
   bool has_info_;
+  std::string last_person_;
 };
 
 }  // namespace suanzi

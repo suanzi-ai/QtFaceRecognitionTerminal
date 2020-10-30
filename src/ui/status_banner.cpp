@@ -58,9 +58,10 @@ void StatusBanner::paint(QPainter *painter) {
 
   painter->drawPixmap(QRect(0.01 * w, 0.0078125 * h, 0.025 * w, 0.0140625 * h),
                       icon1_, QRect());
-  painter->drawPixmap(
-      QRect(0.875 * w, 0.00234375 * h, 0.0375 * w, 0.0234375 * h), icon2_,
-      QRect());
+  if (cfg.enable_temperature)
+    painter->drawPixmap(
+        QRect(0.875 * w, 0.00234375 * h, 0.0375 * w, 0.0234375 * h), icon2_,
+        QRect());
   painter->drawPixmap(
       QRect(0.96 * w, 0.00546875 * h, 0.0275 * w, 0.0171875 * h), icon3_,
       QRect());

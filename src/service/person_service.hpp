@@ -25,8 +25,9 @@ struct PersonData {
   float temperature;
   std::string face_url;
   std::string face_path;
-  cv::Mat bgr_face_snapshot;
-  cv::Mat nir_face_snapshot;
+  cv::Mat bgr_snapshot;
+  cv::Mat nir_snapshot;
+  cv::Mat face_snapshot;
   bool is_status_normal();
   bool is_status_blacklist();
   bool is_temperature_normal();

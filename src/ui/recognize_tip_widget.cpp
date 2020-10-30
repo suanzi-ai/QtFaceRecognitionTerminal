@@ -2,10 +2,13 @@
 
 #include <QDateTime>
 #include <QFontDatabase>
-#include <QPainter>
+#include <QImage>
 #include <QLocale>
+#include <QPainter>
 #include <QStringList>
 #include <QTimer>
+
+#include <opencv2/opencv.hpp>
 
 #include "config.hpp"
 
@@ -34,11 +37,23 @@ RecognizeTipWidget::RecognizeTipWidget(int width, int height, QWidget *parent)
 RecognizeTipWidget::~RecognizeTipWidget() {}
 
 void RecognizeTipWidget::rx_display(PersonData person, bool if_duplicated) {
-  person_ = person;
-  has_info_ = true;
+  avatar_.load(person_.face_path.c_str());
+
+  if ((!has_info_ || person_.face_path != person.face_path) &&
+      !person.face_snapshot.empty()) {
+    cv::cvtColor(person.face_snapshot, person.face_snapshot, CV_BGR2RGB);
+    snapshot_ = QPixmap::fromImage(QImage(
+        (unsigned char *)person.face_snapshot.data, person.face_snapshot.cols,
+        person.face_snapshot.rows, QImage::Format_RGB888));
+
+    last_person_ = person.face_path;
+  }
 
   timer_.stop();
   timer_.start();
+
+  has_info_ = true;
+  person_ = person;
 }
 
 void RecognizeTipWidget::rx_reset() { has_info_ = false; }
@@ -62,10 +77,8 @@ void RecognizeTipWidget::paint(QPainter *painter) {
   // draw datetime
   QLocale locale;
   QString format = "ddd";
-  if (lang == "zh-CN")
-    locale = QLocale::Chinese;
-  if (lang == "en")
-    locale = QLocale::English;
+  if (lang == "zh-CN") locale = QLocale::Chinese;
+  if (lang == "en") locale = QLocale::English;
   if (lang == "jp") {
     locale = QLocale::Japanese;
     format = "ddd曜日";
@@ -101,7 +114,15 @@ void RecognizeTipWidget::paint(QPainter *painter) {
       QRect(0.05375 * w, 0.9390625 * h, 0.025 * w, 0.021875 * h), icon_,
       QRect());
 
+  // draw avatar here
   if (has_info_) {
-    // TODO: draw avatar here
+    auto cfg = Config::get_user();
+    painter->drawPixmap(
+        QRect(0.8125 * w, 0.8828125 * h, 0.1375 * w, 0.0859375 * h), snapshot_,
+        QRect());
+    if (person_.is_status_normal())
+      painter->drawPixmap(
+          QRect(0.625 * w, 0.8828125 * h, 0.1375 * w, 0.0859375 * h), avatar_,
+          QRect());
   }
 }

@@ -5,12 +5,16 @@
 
 #include <QThread>
 
+#include <opencv2/opencv.hpp>
+
+#include <quface-io/engine.hpp>
 #include <quface/logger.hpp>
 
 #include "audio_task.hpp"
 #include "config.hpp"
 
 using namespace suanzi;
+using namespace suanzi::io;
 
 RecordTask *RecordTask::get_instance() {
   static RecordTask instance;
@@ -149,14 +153,26 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
       // record snapshots
       int width = input->img_bgr_large->width;
       int height = input->img_bgr_large->height;
-      person.bgr_face_snapshot.create(height, width, CV_8UC3);
-      memcpy(person.bgr_face_snapshot.data, input->img_bgr_large->pData,
+      person.bgr_snapshot.create(height, width, CV_8UC3);
+      memcpy(person.bgr_snapshot.data, input->img_bgr_large->pData,
              width * height * 3 / 2);
+
+      if (input->bgr_face_detected_ && width < height) {
+        auto engine = Engine::instance();
+        static std::vector<SZ_BYTE> buffer;
+        buffer.clear();
+
+        if (SZ_RETCODE_OK == engine->encode_jpeg(buffer,
+                                                 person.bgr_snapshot.data,
+                                                 width, height))
+          person.face_snapshot = cv::imdecode(buffer, CV_LOAD_IMAGE_COLOR);
+      } else
+        person.face_snapshot = cv::Mat();
 
       width = input->img_nir_large->width;
       height = input->img_nir_large->height;
-      person.nir_face_snapshot.create(height, width, CV_8UC3);
-      memcpy(person.nir_face_snapshot.data, input->img_nir_large->pData,
+      person.nir_snapshot.create(height, width, CV_8UC3);
+      memcpy(person.nir_snapshot.data, input->img_nir_large->pData,
              width * height * 3 / 2);
 
       if (AudioTask::idle()) emit tx_report_person(person);
