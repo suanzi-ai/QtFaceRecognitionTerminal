@@ -207,3 +207,7 @@ add_executable(face-terminal main.cpp resource.qrc
                              ${PROJECT_BINARY_DIR}/translations.qrc)
 target_link_libraries(face-terminal PRIVATE ui)
 install(TARGETS face-terminal DESTINATION .)
+
+add_executable(smoke-test smoke-test.cpp resource.qrc)
+target_link_libraries(smoke-test PRIVATE PUBLIC lib)
+install(TARGETS smoke-test DESTINATION .)

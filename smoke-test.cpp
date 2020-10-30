@@ -6,9 +6,10 @@
 #include <string>
 #include <thread>
 #include <vector>
-
+#include "config.hpp"
 #include "mpi_sys.h"
 
+using namespace suanzi;
 using namespace suanzi::io;
 
 LCDScreenType load_screen_type() {
@@ -50,11 +51,19 @@ LCDScreenType load_screen_type() {
 }
 
 void test() {
-  auto screen_type = load_screen_type();
+  //auto screen_type = load_screen_type();
+  LCDScreenType screen_type = RH_9881_8INCH_800X1280;
+  if (!Config::load_screen_type(screen_type)) return;
 
+  SensorType sensor0_type = SONY_IMX327_2L_MIPI_2M_30FPS_12BIT;
+  SensorType sensor1_type = SONY_IMX327_2L_MIPI_2M_30FPS_12BIT;
+  if (!Config::load_sensor_type(sensor0_type, sensor1_type)) return;
+
+  
   EngineOption opt = {
       .bgr =
           {
+          	  .sensor_type = sensor0_type,
               .dev = 0,
               .flip = true,
               .channels =
@@ -72,6 +81,7 @@ void test() {
           },
       .nir =
           {
+          	  .sensor_type = sensor1_type,
               .dev = 1,
               .flip = true,
               .channels =
@@ -112,7 +122,7 @@ void test() {
   }
 
   {
-    std::string name = ":asserts/success.aac";
+    std::string name = ":asserts/zh-CN/recognition_succeed.aac";
     std::vector<SZ_BYTE> audio;
     QFile audio_file(name.c_str());
     if (!audio_file.open(QIODevice::ReadOnly)) {
