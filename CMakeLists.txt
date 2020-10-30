@@ -123,13 +123,13 @@ if(DOWNLOAD_DEPENDENCY)
 
   download_and_extract(
     URL
-    https://quvision.oss-cn-beijing.aliyuncs.com/qufacesdk/hisi/rp-hi3516dv300-sdk.tgz
+    https://quvision.oss-cn-beijing.aliyuncs.com/qufacesdk/hisi/rp-hi3516dv300-sdk-v2.tgz
     FILENAME
-    ${DOWNLOAD_DIR}/rp-hi3516dv300-sdk.tgz
+    ${DOWNLOAD_DIR}/rp-hi3516dv300-sdk-v2.tgz
     HASH_TYPE
     SHA256
     HASH
-    af60f8f9fef1a2931880fb2dfc67ca807d2d778b4905e3b8b0a3bd79c33a165a
+    0f50828123c0c0b682354e667d25e4aef4f05df2f3b956cc7ab3c597e4ba1bbb
     EXTRACT_DIR
     ${HISI_SDK_PREFIX})
 
@@ -209,5 +209,8 @@ target_link_libraries(face-terminal PRIVATE ui)
 install(TARGETS face-terminal DESTINATION .)
 
 add_executable(smoke-test smoke-test.cpp resource.qrc)
-target_link_libraries(smoke-test PRIVATE PUBLIC lib)
+target_link_libraries(
+  smoke-test
+  PRIVATE
+  PUBLIC lib)
 install(TARGETS smoke-test DESTINATION .)
