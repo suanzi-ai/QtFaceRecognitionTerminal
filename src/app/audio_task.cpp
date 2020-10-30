@@ -77,6 +77,15 @@ void AudioTask::load_audio() {
 
     warn_distance_audio_.duration = 2000;
     warn_mask_audio_.duration = 3000;
+  } else if (lang == "jp") {
+    success_audio_.duration = 1500;
+    fail_audio_.duration = 2000;
+
+    temperature_normal_audio_.duration = 2000;
+    temperature_abnormal_audio_.duration = 2000;
+
+    warn_distance_audio_.duration = 3000;
+    warn_mask_audio_.duration = 2000;
   }
 }
 

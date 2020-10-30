@@ -80,4 +80,22 @@
 <qresource>
     <file>asserts/en/get_closer.aac</file>
 </qresource>
+<qresource>
+    <file>asserts/jp/recognition_succeed.aac</file>
+</qresource>
+<qresource>
+    <file>asserts/jp/recognition_failed.aac</file>
+</qresource>
+<qresource>
+    <file>asserts/jp/take_off_mask.aac</file>
+</qresource>
+<qresource>
+    <file>asserts/jp/temperature_abnormal.aac</file>
+</qresource>
+<qresource>
+    <file>asserts/jp/temperature_normal.aac</file>
+</qresource>
+<qresource>
+    <file>asserts/jp/get_closer.aac</file>
+</qresource>
 </RCC>
