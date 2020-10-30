@@ -245,6 +245,7 @@ bool DetectTask::check(DetectionRatio detection, bool is_bgr) {
           invalid_count = 0;
           emit tx_warn_distance();
         }
+        emit tx_display_rectangle();
       }
       return false;
     }

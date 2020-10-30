@@ -159,6 +159,8 @@ void VideoPlayer::init_widgets() {
 
   // 创建人体轮廓控件
   outline_widget_ = new OutlineWidget(screen_width, screen_height, nullptr);
+  connect((const QObject *)detect_task_, SIGNAL(tx_display_rectangle()),
+          (const QObject *)outline_widget_, SLOT(rx_warn_distance()));
 
   // 创建顶部状态栏控件
   status_banner_ = new StatusBanner(screen_width, screen_height, nullptr);

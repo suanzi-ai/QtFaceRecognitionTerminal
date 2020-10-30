@@ -35,6 +35,8 @@ class DetectTask : QObject {
   // for audio warning
   void tx_warn_distance();
 
+  void tx_display_rectangle();
+
   // for recognition
   void tx_frame(PingPangBuffer<DetectionData> *buffer);
 

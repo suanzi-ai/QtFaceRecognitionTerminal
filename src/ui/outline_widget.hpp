@@ -1,6 +1,7 @@
 #ifndef OUTLINE_WIDGET_H
 #define OUTLINE_WIDGET_H
 
+#include <QTimer>
 #include <QWidget>
 
 namespace suanzi {
@@ -14,8 +15,15 @@ class OutlineWidget : public QWidget {
 
   void paint(QPainter *painter);
 
+ private slots:
+  void rx_warn_distance();
+  void rx_reset();
+
  private:
   QPixmap outline_;
+  QTimer timer_;
+
+  bool show_valid_rect_;
 };
 
 }  // namespace suanzi
