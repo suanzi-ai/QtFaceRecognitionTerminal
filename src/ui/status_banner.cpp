@@ -10,13 +10,21 @@
 
 using namespace suanzi;
 
+static void trim(std::string &s) {
+  s.erase(0, s.find_first_not_of(" "));
+  s.erase(s.find_last_not_of(" ") + 1);
+  s.erase(s.find_last_not_of("\n") + 1);
+}
+
 StatusBanner::StatusBanner(int width, int height, QWidget *parent)
     : QWidget(parent),
       icon1_(":asserts/people.png"),
       icon2_(":asserts/temperature.png"),
-      icon3_(":asserts/earth.png"),
+      icon3_(":asserts/wired_network.png"),
       icon4_(":asserts/face.png"),
-      icon5_(":asserts/file.png") {
+      icon5_(":asserts/file.png"),
+      icon6_(":asserts/wireless_network.png"),
+      icon7_(":asserts/no_network.png") {
   person_service_ = PersonService::get_instance();
   db_ = std::make_shared<FaceDatabase>(Config::get_quface().db_name);
   db_->size(db_size_);
@@ -28,6 +36,7 @@ StatusBanner::StatusBanner(int width, int height, QWidget *parent)
   move(0, 0);
   setFixedSize(width, height);
 
+  rx_update();
   timer_ = new QTimer(this);
   connect(timer_, SIGNAL(timeout()), this, SLOT(rx_update()));
   timer_->start(1000);
@@ -36,6 +45,11 @@ StatusBanner::StatusBanner(int width, int height, QWidget *parent)
 StatusBanner::~StatusBanner() { timer_->stop(); }
 
 void StatusBanner::rx_update() {
+  System::get_current_network(name_, ip_);
+
+  trim(name_);
+  trim(ip_);
+
   if (SZ_RETCODE_OK != db_->size(db_size_)) db_size_ = 0;
 }
 
@@ -62,9 +76,14 @@ void StatusBanner::paint(QPainter *painter) {
     painter->drawPixmap(
         QRect(0.875 * w, 0.00234375 * h, 0.0375 * w, 0.0234375 * h), icon2_,
         QRect());
+
+  QPixmap network_icon = icon7_;
+  if (name_ == "eth0") network_icon = icon3_;
+  if (name_ == "wlan0") network_icon = icon6_;
   painter->drawPixmap(
-      QRect(0.96 * w, 0.00546875 * h, 0.0275 * w, 0.0171875 * h), icon3_,
+      QRect(0.96 * w, 0.00546875 * h, 0.0275 * w, 0.0171875 * h), network_icon,
       QRect());
+
   painter->drawPixmap(
       QRect(0.91875 * w, 0.00546875 * h, 0.0275 * w, 0.0171875 * h), icon4_,
       QRect());

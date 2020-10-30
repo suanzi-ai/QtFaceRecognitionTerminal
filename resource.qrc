@@ -18,7 +18,13 @@
     <file>asserts/temperature.png</file>
 </qresource>
 <qresource>
-    <file>asserts/earth.png</file>
+    <file>asserts/wired_network.png</file>
+</qresource>
+<qresource>
+    <file>asserts/wireless_network.png</file>
+</qresource>
+<qresource>
+    <file>asserts/no_network.png</file>
 </qresource>
 <qresource>
     <file>asserts/face.png</file>

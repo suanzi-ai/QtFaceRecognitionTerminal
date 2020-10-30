@@ -35,6 +35,10 @@ class StatusBanner : public QWidget {
   QPixmap icon3_;
   QPixmap icon4_;
   QPixmap icon5_;
+  QPixmap icon6_;
+  QPixmap icon7_;
+
+  std::string name_, ip_;
 };
 
 }  // namespace suanzi
