@@ -2,6 +2,7 @@
 #define RECOGNIZETIPWIDGET_H
 
 #include <QFont>
+#include <QPainterPath>
 #include <QPixmap>
 #include <QTimer>
 #include <QWidget>
@@ -30,6 +31,9 @@ class RecognizeTipWidget : public QWidget {
 
   QFont font_;
   QPixmap icon_;
+  QPixmap icon_good_;
+  QPixmap icon_bad_;
+  QPainterPath temperature_rect_;
   QTimer timer_;
 
   bool has_info_;

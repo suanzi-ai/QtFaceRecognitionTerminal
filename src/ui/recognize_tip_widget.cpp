@@ -16,7 +16,11 @@ using namespace suanzi;
 using namespace suanzi::io;
 
 RecognizeTipWidget::RecognizeTipWidget(int width, int height, QWidget *parent)
-    : QWidget(parent), icon_(":asserts/location.png"), has_info_(false) {
+    : QWidget(parent),
+      icon_(":asserts/location.png"),
+      icon_good_(":asserts/tick.png"),
+      icon_bad_(":asserts/cross.png"),
+      has_info_(false) {
   QPalette palette = this->palette();
   palette.setColor(QPalette::Background, Qt::transparent);
   setPalette(palette);
@@ -27,6 +31,11 @@ RecognizeTipWidget::RecognizeTipWidget(int width, int height, QWidget *parent)
   font_.setFamily(QFontDatabase::applicationFontFamilies(
                       QFontDatabase::addApplicationFont(":asserts/clock.ttf"))
                       .at(0));
+
+  int w = width, h = height;
+  temperature_rect_.addRoundedRect(
+      QRect(0.25625 * w, 0.109375 * h, 0.4875 * w, 0.05078125 * h), 0.04375 * w,
+      0.02734375 * h);
 
   timer_.setInterval(2000);
   timer_.setSingleShot(true);
@@ -107,7 +116,6 @@ void RecognizeTipWidget::paint(QPainter *painter) {
   font_.setPointSize(0.02125 * w);
   painter->setFont(font_);
   painter->drawText(0.05625 * w, 0.984375 * h, "SN:2020060229 FW:1.9.8");
-  painter->setFont(font);
 
   // draw icon
   painter->drawPixmap(
@@ -124,5 +132,35 @@ void RecognizeTipWidget::paint(QPainter *painter) {
       painter->drawPixmap(
           QRect(0.625 * w, 0.8828125 * h, 0.1375 * w, 0.0859375 * h), avatar_,
           QRect());
+
+    if (Config::get_user().enable_temperature) {
+      char temperature_value[10];
+      sprintf(temperature_value, ":%.1f°C", person_.temperature);
+
+      painter->setRenderHint(QPainter::Antialiasing);
+
+      auto cfg = Config::get_user();
+
+      QColor color;
+      if (person_.is_temperature_normal()) {
+        color = QColor(0, 100, 0, 180);
+        painter->drawPixmap(
+            QRect(0.275 * w, 0.11796875 * h, 0.05625 * w, 0.03515625 * h),
+            icon_good_, QRect());
+      } else {
+        color = QColor(cfg.red, cfg.green, cfg.blue, cfg.alpha);
+        painter->drawPixmap(
+            QRect(0.275 * w, 0.11796875 * h, 0.05625 * w, 0.03515625 * h),
+            icon_bad_, QRect());
+      }
+      painter->fillPath(temperature_rect_, color);
+
+      font_.setPointSize(0.02875 * w);
+      painter->setFont(font_);
+      painter->drawText(0.35 * w, 0.14453125 * h,
+                        tr("体温") + temperature_value);
+    }
   }
+
+  painter->setFont(font);
 }

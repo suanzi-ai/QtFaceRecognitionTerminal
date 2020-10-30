@@ -30,6 +30,12 @@
     <file>asserts/location.png</file>
 </qresource>
 <qresource>
+    <file>asserts/tick.png</file>
+</qresource>
+<qresource>
+    <file>asserts/cross.png</file>
+</qresource>
+<qresource>
     <file>asserts/clock.ttf</file>
 </qresource>
 <qresource>

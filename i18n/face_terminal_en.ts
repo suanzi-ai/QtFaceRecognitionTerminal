@@ -4,9 +4,14 @@
 <context>
     <name>suanzi::RecognizeTipWidget</name>
     <message>
-        <location filename="../src/ui/recognize_tip_widget.cpp" line="89"/>
+        <location filename="../src/ui/recognize_tip_widget.cpp" line="97"/>
         <source>yyyy年MM月dd日</source>
         <translation>yyyy-MM-dd</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/recognize_tip_widget.cpp" line="162"/>
+        <source>体温</source>
+        <translation>Temper</translation>
     </message>
 </context>
 <context>
