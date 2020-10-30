@@ -182,7 +182,7 @@ void RecognizeTipWidget::paint(QPainter *painter) {
             QRect(0.275 * w, 0.11796875 * h, 0.05625 * w, 0.03515625 * h),
             icon_good_, QRect());
       } else {
-        color = QColor(cfg.red, cfg.green, cfg.blue, cfg.alpha);
+        color = QColor(220, 0, 0, 150);
         painter->drawPixmap(
             QRect(0.275 * w, 0.11796875 * h, 0.05625 * w, 0.03515625 * h),
             icon_bad_, QRect());
