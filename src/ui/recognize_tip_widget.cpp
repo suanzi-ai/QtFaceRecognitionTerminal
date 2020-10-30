@@ -1,5 +1,8 @@
 #include "recognize_tip_widget.hpp"
 
+#include <algorithm>
+#include <sstream>
+
 #include <QDateTime>
 #include <QFontDatabase>
 #include <QImage>
@@ -11,9 +14,16 @@
 #include <opencv2/opencv.hpp>
 
 #include "config.hpp"
+#include "system.hpp"
 
 using namespace suanzi;
 using namespace suanzi::io;
+
+static void trim(std::string &s) {
+  s.erase(0, s.find_first_not_of(" "));
+  s.erase(s.find_last_not_of(" ") + 1);
+  s.erase(s.find_last_not_of("\n") + 1);
+}
 
 RecognizeTipWidget::RecognizeTipWidget(int width, int height, QWidget *parent)
     : QWidget(parent),
@@ -37,10 +47,15 @@ RecognizeTipWidget::RecognizeTipWidget(int width, int height, QWidget *parent)
       QRect(0.25625 * w, 0.109375 * h, 0.4875 * w, 0.05078125 * h), 0.04375 * w,
       0.02734375 * h);
 
-  timer_.setInterval(2000);
-  timer_.setSingleShot(true);
-  connect((const QObject *)&timer_, SIGNAL(timeout()), (const QObject *)this,
-          SLOT(rx_reset()));
+  reset_timer_.setInterval(2000);
+  reset_timer_.setSingleShot(true);
+  connect((const QObject *)&reset_timer_, SIGNAL(timeout()),
+          (const QObject *)this, SLOT(rx_reset()));
+
+  rx_update();
+  connect((const QObject *)&ip_timer_, SIGNAL(timeout()), (const QObject *)this,
+          SLOT(rx_update()));
+  ip_timer_.start(1000);
 }
 
 RecognizeTipWidget::~RecognizeTipWidget() {}
@@ -54,15 +69,32 @@ void RecognizeTipWidget::rx_display(PersonData person, bool if_duplicated) {
     snapshot_ = QPixmap::fromImage(QImage(
         (unsigned char *)person.face_snapshot.data, person.face_snapshot.cols,
         person.face_snapshot.rows, QImage::Format_RGB888));
-
-    last_person_ = person.face_path;
   }
 
-  timer_.stop();
-  timer_.start();
+  reset_timer_.stop();
+  reset_timer_.start();
 
   has_info_ = true;
   person_ = person;
+}
+
+void RecognizeTipWidget::rx_update() {
+  System::get_current_network(name_, ip_);
+
+  trim(name_);
+  trim(ip_);
+
+  if (name_ == "eth0" || name_ == "wlan0") {
+    std::istringstream sin(ip_);
+    std::string seg;
+    std::ostringstream sout;
+    while (std::getline(sin, seg, '.')) {
+      int value = atoi(seg.c_str());
+      sout << std::setfill('0') << std::setw(2) << std::hex << value;
+    }
+    ip_ = sout.str();
+  }
+  std::transform(ip_.begin(), ip_.end(), ip_.begin(), ::toupper);
 }
 
 void RecognizeTipWidget::rx_reset() { has_info_ = false; }
@@ -112,10 +144,12 @@ void RecognizeTipWidget::paint(QPainter *painter) {
   painter->setFont(font_);
   painter->drawText(0.29375 * w, 0.9203125 * h, weekday);
 
-  // draw SN and version
+  // draw SN, FW and ip
+  char buffer[100];
+  sprintf(buffer, "SN:2020060229 FW:1.9.8%s", ip_.c_str());
   font_.setPointSize(0.02125 * w);
   painter->setFont(font_);
-  painter->drawText(0.05625 * w, 0.984375 * h, "SN:2020060229 FW:1.9.8");
+  painter->drawText(0.05625 * w, 0.984375 * h, buffer);
 
   // draw icon
   painter->drawPixmap(

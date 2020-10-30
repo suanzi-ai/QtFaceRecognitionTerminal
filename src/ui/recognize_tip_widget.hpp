@@ -22,6 +22,7 @@ class RecognizeTipWidget : public QWidget {
 
  private slots:
   void rx_display(PersonData person, bool if_duplicated);
+  void rx_update();
   void rx_reset();
 
  private:
@@ -34,10 +35,12 @@ class RecognizeTipWidget : public QWidget {
   QPixmap icon_good_;
   QPixmap icon_bad_;
   QPainterPath temperature_rect_;
-  QTimer timer_;
+  QTimer reset_timer_;
+  QTimer ip_timer_;
 
   bool has_info_;
-  std::string last_person_;
+
+  std::string ip_, name_;
 };
 
 }  // namespace suanzi
