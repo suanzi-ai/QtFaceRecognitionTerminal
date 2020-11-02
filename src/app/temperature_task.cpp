@@ -13,7 +13,11 @@ TemperatureTask* TemperatureTask::get_instance() {
   return &instance;
 }
 
-TemperatureTask::TemperatureTask(TemperatureManufacturer m) {
+bool TemperatureTask::idle() { return !get_instance()->is_running_; }
+
+TemperatureTask::TemperatureTask(TemperatureManufacturer m, QThread* thread,
+                                 QObject* parent)
+    : is_running_(false) {
   auto engine = Engine::instance();
   temperature_reader_ = engine->get_temperature_reader(m);
   if (temperature_reader_ == nullptr) {
@@ -21,26 +25,26 @@ TemperatureTask::TemperatureTask(TemperatureManufacturer m) {
     return;
   }
 
-  start();
+  if (thread == nullptr) {
+    static QThread new_thread;
+    moveToThread(&new_thread);
+    new_thread.start();
+  } else {
+    moveToThread(thread);
+    thread->start();
+  }
 }
 
 TemperatureTask::~TemperatureTask() {}
 
-void TemperatureTask::rx_enable() { is_enabled_ = true; }
+void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
+  is_running_ = true;
 
-void TemperatureTask::rx_disable() { is_enabled_ = false; }
-
-void TemperatureTask::run() {
-  while (true) {
-    if (is_enabled_) {
-      float temperature;
-      SZ_RETCODE ret = temperature_reader_->read(temperature);
-      if (ret == SZ_RETCODE_OK) {
-        temperature = ((float)((int)((temperature + 0.005) * 100))) /
-                      100;  // set fixed point of 2
-        tx_temperature(temperature);
-      }
-    }
-    usleep(250000);
+  static TemperatureMatrix mat;
+  while (SZ_RETCODE_OK != temperature_reader_->read(mat)) {
+    QThread::msleep(50);
   }
+  emit tx_heatmap(mat);
+
+  is_running_ = false;
 }

@@ -32,6 +32,10 @@ class DetectTask : QObject {
                       bool show_pose);
   void tx_nir_display(DetectionRatio detection, bool to_clear, bool valid,
                       bool show_pose);
+
+  // for read temperature
+  void tx_temperature_target(DetectionRatio detection, bool to_clear);
+
   // for audio warning
   void tx_warn_distance();
 

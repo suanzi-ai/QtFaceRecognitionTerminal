@@ -147,8 +147,8 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
           person.status = person_service_->get_status(PersonStatus::Stranger);
           break;
       }
-      SZ_LOG_INFO("Record: id={}, staff={}, score={:.2f}, status={}", person.id,
-                  person.number, person.score, person.status);
+      // SZ_LOG_INFO("Record: id={}, staff={}, score={:.2f}, status={}", person.id,
+      //             person.number, person.score, person.status);
 
       // record snapshots
       int width = input->img_bgr_large->width;

@@ -209,6 +209,10 @@ add_executable(face-terminal main.cpp resource.qrc
 target_link_libraries(face-terminal PRIVATE ui)
 install(TARGETS face-terminal DESTINATION .)
 
+add_executable(temperature_task temperature_task.cpp resource.qrc)
+target_link_libraries(temperature_task PRIVATE ui)
+install(TARGETS temperature_task DESTINATION .)
+
 add_executable(smoke-test smoke-test.cpp resource.qrc)
 target_link_libraries(
   smoke-test

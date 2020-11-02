@@ -9,6 +9,7 @@
 #include "config.hpp"
 
 using namespace suanzi;
+using namespace suanzi::io;
 
 VideoPlayer::VideoPlayer(QWidget *parent) : QWidget(parent) {
   // 初始化工作流
@@ -93,12 +94,12 @@ void VideoPlayer::init_workflow() {
 
   // 创建人体测温线程
   temperature_task_ = TemperatureTask::get_instance();
-  connect((const QObject *)temperature_task_, SIGNAL(tx_temperature(float)),
-          (const QObject *)record_task_, SLOT(rx_temperature(float)));
-  connect((const QObject *)face_timer_, SIGNAL(tx_face_disappear(int)),
-          (const QObject *)temperature_task_, SLOT(rx_disable()));
-  connect((const QObject *)face_timer_, SIGNAL(tx_face_appear(int)),
-          (const QObject *)temperature_task_, SLOT(rx_enable()));
+  connect((const QObject *)detect_task_,
+          SIGNAL(tx_temperature_target(DetectionRatio, bool)),
+          (const QObject *)temperature_task_,
+          SLOT(rx_update(DetectionRatio, bool)));
+//   connect((const QObject *)temperature_task_, SIGNAL(tx_temperature(float)),
+//           (const QObject *)record_task_, SLOT(rx_temperature(float)));
 }
 
 void VideoPlayer::init_widgets() {
@@ -144,7 +145,8 @@ void VideoPlayer::init_widgets() {
   }
 
   // 创建人脸识别记录控件
-  recognize_tip_widget_ = new RecognizeTipWidget(screen_width, screen_height, nullptr);
+  recognize_tip_widget_ =
+      new RecognizeTipWidget(screen_width, screen_height, nullptr);
   connect((const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool)),
           (const QObject *)recognize_tip_widget_,
           SLOT(rx_display(PersonData, bool)));
