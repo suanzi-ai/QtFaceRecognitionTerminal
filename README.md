@@ -7,8 +7,17 @@
 可以直接[下载](https://github.com/suanzi-ai/QtFaceRecognitionTerminal/archive/master.zip)代码压缩包。或者也可以直接克隆方式：
 
 ```bash
-sudo apt install git
+sudo apt install git git-lfs
 git clone https://github.com/suanzi-ai/QtFaceRecognitionTerminal.git
+```
+
+如果克隆了项目之前没有安装 git-lfs，则需要按如下拉取：
+
+```bash
+sudo apt install git-lfs
+cd QtFaceRecognitionTerminal
+git lfs install
+git lfs pull
 ```
 
 ## 交叉编译
