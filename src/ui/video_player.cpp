@@ -33,6 +33,7 @@ void VideoPlayer::paintEvent(QPaintEvent *event) {
   outline_widget_->paint(&painter);
   status_banner_->paint(&painter);
   recognize_tip_widget_->paint(&painter);
+  heatmap_widget_->paint(&painter);
 }
 
 void VideoPlayer::init_workflow() {
@@ -98,8 +99,9 @@ void VideoPlayer::init_workflow() {
           SIGNAL(tx_temperature_target(DetectionRatio, bool)),
           (const QObject *)temperature_task_,
           SLOT(rx_update(DetectionRatio, bool)));
-//   connect((const QObject *)temperature_task_, SIGNAL(tx_temperature(float)),
-//           (const QObject *)record_task_, SLOT(rx_temperature(float)));
+  //   connect((const QObject *)temperature_task_,
+  //   SIGNAL(tx_temperature(float)),
+  //           (const QObject *)record_task_, SLOT(rx_temperature(float)));
 }
 
 void VideoPlayer::init_widgets() {
@@ -115,6 +117,7 @@ void VideoPlayer::init_widgets() {
 
   qRegisterMetaType<DetectionRatio>("DetectionRatio");
   qRegisterMetaType<PersonData>("PersonData");
+  qRegisterMetaType<TemperatureMatrix>("TemperatureMatrix");
 
   // 初始化QT
   QPalette pal = palette();
@@ -166,4 +169,11 @@ void VideoPlayer::init_widgets() {
 
   // 创建顶部状态栏控件
   status_banner_ = new StatusBanner(screen_width, screen_height, nullptr);
+
+  // 创建热力图控件
+  heatmap_widget_ = new HeatmapWidget(screen_width, screen_height, nullptr);
+  connect((const QObject *)temperature_task_,
+          SIGNAL(tx_heatmap(TemperatureMatrix, DetectionRatio, float, float)),
+          (const QObject *)heatmap_widget_,
+          SLOT(rx_update(TemperatureMatrix, DetectionRatio, float, float)));
 }
