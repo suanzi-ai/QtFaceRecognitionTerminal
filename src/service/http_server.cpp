@@ -222,6 +222,31 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
     }
   });
 
+  server_->Post("/audio-play", [&](const Request& req, Response& res) {
+    try {
+      if (!req.is_multipart_form_data()) {
+        response_failed(res, "invalid content type");
+        return;
+      }
+
+      auto file = req.get_file_value("file");
+
+      auto data =
+          std::vector<SZ_UINT8>(file.content.begin(), file.content.end());
+      SZ_RETCODE ret;
+      ret = Engine::instance()->audio_play(data);
+      if (ret != SZ_RETCODE_OK) {
+        response_failed(res, "audio play failed");
+        return;
+      }
+
+      response_ok(res);
+    } catch (const std::exception& exc) {
+      SZ_LOG_ERROR("Message err: {}", exc.what());
+      response_failed(res, exc.what());
+    }
+  });
+
   server_->Get("/isp/exposure-info", [&](const Request& req, Response& res) {
     auto cam_type = CAMERA_BGR;
     if (req.has_param("cam")) {
