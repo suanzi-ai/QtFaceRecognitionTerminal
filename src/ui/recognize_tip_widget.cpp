@@ -30,7 +30,8 @@ RecognizeTipWidget::RecognizeTipWidget(int width, int height, QWidget *parent)
       icon_(":asserts/location.png"),
       icon_good_(":asserts/tick.png"),
       icon_bad_(":asserts/cross.png"),
-      has_info_(false) {
+      has_info_(false),
+      latest_temperature_(0) {
   QPalette palette = this->palette();
   palette.setColor(QPalette::Background, Qt::transparent);
   setPalette(palette);
@@ -97,7 +98,10 @@ void RecognizeTipWidget::rx_update() {
   std::transform(ip_.begin(), ip_.end(), ip_.begin(), ::toupper);
 }
 
-void RecognizeTipWidget::rx_reset() { has_info_ = false; }
+void RecognizeTipWidget::rx_reset() {
+  has_info_ = false;
+  latest_temperature_ = 0;
+}
 
 void RecognizeTipWidget::paint(QPainter *painter) {
   const int w = width();
@@ -167,9 +171,12 @@ void RecognizeTipWidget::paint(QPainter *painter) {
           QRect(0.625 * w, 0.8828125 * h, 0.1375 * w, 0.0859375 * h), avatar_,
           QRect());
 
-    if (Config::get_user().enable_temperature) {
+    if (Config::get_user().enable_temperature &&
+        (person_.temperature > 0 || latest_temperature_ > 0)) {
+      if (person_.temperature > 0) latest_temperature_ = person_.temperature;
+
       char temperature_value[10];
-      sprintf(temperature_value, ":%.1f°C", person_.temperature);
+      sprintf(temperature_value, ":%.1f°C", latest_temperature_);
 
       painter->setRenderHint(QPainter::Antialiasing);
 

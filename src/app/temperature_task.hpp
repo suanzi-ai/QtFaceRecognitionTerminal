@@ -17,6 +17,7 @@ class TemperatureTask : public QObject {
  public:
   static TemperatureTask* get_instance();
   static bool idle();
+  static bool ready();
 
  signals:
   void tx_temperature(float temperature);
@@ -38,6 +39,7 @@ class TemperatureTask : public QObject {
   bool is_running_;
 
   float ambient_temperature_;
+  float face_temperature_;
 };
 
 }  // namespace suanzi

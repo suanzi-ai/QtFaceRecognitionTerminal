@@ -39,6 +39,7 @@ class RecognizeTipWidget : public QWidget {
   QTimer ip_timer_;
 
   bool has_info_;
+  float latest_temperature_;
 
   std::string ip_, name_;
 };

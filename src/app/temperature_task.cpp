@@ -17,7 +17,7 @@ bool TemperatureTask::idle() { return !get_instance()->is_running_; }
 
 TemperatureTask::TemperatureTask(TemperatureManufacturer m, QThread* thread,
                                  QObject* parent)
-    : m_(m), is_running_(false), ambient_temperature_(0) {
+    : m_(m), is_running_(false), ambient_temperature_(0), face_temperature_(0) {
   auto engine = Engine::instance();
   temperature_reader_ = engine->get_temperature_reader(m);
   if (temperature_reader_ == nullptr) {
@@ -43,16 +43,18 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
   static TemperatureMatrix mat;
   int trial = 0;
   while (SZ_RETCODE_OK != temperature_reader_->read(mat)) {
-    QThread::msleep(100);
+    QThread::msleep(200);
     trial += 1;
 
-    if (trial > 20) {
+    if (trial >= 20) {
       SZ_LOG_WARN("temperature_reader_->read failed for {} times", trial);
-      SZ_LOG_INFO("reconnect temperature_reader_");
-
-      trial = 0;
+      SZ_LOG_INFO("reconnect temperature_reader_ after 10 seconds");
       temperature_reader_.reset();
       temperature_reader_ = nullptr;
+      trial = 0;
+      QThread::msleep(10000);
+
+      SZ_LOG_INFO("reconnect");
       auto engine = Engine::instance();
       while (temperature_reader_ == nullptr) {
         temperature_reader_ = engine->get_temperature_reader(m_);
@@ -92,11 +94,27 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
       ambient_temperature_ = max_temperature;
     else
       ambient_temperature_ = ambient_temperature_ * 0.9 + max_temperature * 0.1;
-  } else
-    emit tx_temperature(max_temperature);
+    face_temperature_ = 0;
+  } else {
+    static int stable = 0;
+    float latest_temperature = face_temperature_;
+    if (face_temperature_ == 0)
+      face_temperature_ = max_temperature;
+    else
+      face_temperature_ = 0.25 * face_temperature_ + 0.75 * max_temperature;
+
+    if (std::abs(latest_temperature - face_temperature_) < 0.25) {
+      if (++stable >= 2) {
+        latest_temperature = (latest_temperature + face_temperature_) / 2;
+        SZ_LOG_INFO("ambient={:.2f}°C, face={:.2f}°C", ambient_temperature_,
+                    latest_temperature);
+        emit tx_temperature(latest_temperature);
+      }
+    } else
+      stable = 0;
+  }
 
   emit tx_heatmap(mat, detection, max_x, max_y);
 
-  // SZ_LOG_INFO("max temperature={:.2f}", max_temperature);
   is_running_ = false;
 }

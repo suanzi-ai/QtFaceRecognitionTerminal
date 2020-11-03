@@ -123,6 +123,7 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
 
       // record person info
       person.temperature = body_temperature_;
+      body_temperature_ = 0;
 
       bool duplicated;
       switch (status) {
