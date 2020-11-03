@@ -35,6 +35,8 @@ class TemperatureTask : public QObject {
   TemperatureReader::ptr temperature_reader_;
 
   bool is_running_;
+
+  float ambient_temperature_;
 };
 
 }  // namespace suanzi

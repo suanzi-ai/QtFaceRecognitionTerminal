@@ -17,7 +17,7 @@ bool TemperatureTask::idle() { return !get_instance()->is_running_; }
 
 TemperatureTask::TemperatureTask(TemperatureManufacturer m, QThread* thread,
                                  QObject* parent)
-    : m_(m), is_running_(false) {
+    : m_(m), is_running_(false), ambient_temperature_(0) {
   auto engine = Engine::instance();
   temperature_reader_ = engine->get_temperature_reader(m);
   if (temperature_reader_ == nullptr) {
@@ -84,8 +84,15 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
     }
   }
 
-  if (to_clear)
+  if (to_clear) {
     max_x = max_y = 0.5;
+
+    // update ambient temperature if no detection
+    if (ambient_temperature_ == 0)
+      ambient_temperature_ = max_temperature;
+    else
+      ambient_temperature_ = ambient_temperature_ * 0.9 + max_temperature * 0.1;
+  }
 
   emit tx_heatmap(mat, detection, max_x, max_y);
 
