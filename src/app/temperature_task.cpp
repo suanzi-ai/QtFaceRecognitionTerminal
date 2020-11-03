@@ -92,10 +92,11 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
       ambient_temperature_ = max_temperature;
     else
       ambient_temperature_ = ambient_temperature_ * 0.9 + max_temperature * 0.1;
-  }
+  } else
+    emit tx_temperature(max_temperature);
 
   emit tx_heatmap(mat, detection, max_x, max_y);
 
-  SZ_LOG_INFO("max temperature={:.2f}", max_temperature);
+  // SZ_LOG_INFO("max temperature={:.2f}", max_temperature);
   is_running_ = false;
 }

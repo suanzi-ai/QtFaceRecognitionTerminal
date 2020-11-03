@@ -19,6 +19,7 @@ class TemperatureTask : public QObject {
   static bool idle();
 
  signals:
+  void tx_temperature(float temperature);
   void tx_heatmap(TemperatureMatrix mat, DetectionRatio detection, float x,
                   float y);
 

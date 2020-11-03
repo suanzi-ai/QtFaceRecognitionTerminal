@@ -99,9 +99,8 @@ void VideoPlayer::init_workflow() {
           SIGNAL(tx_temperature_target(DetectionRatio, bool)),
           (const QObject *)temperature_task_,
           SLOT(rx_update(DetectionRatio, bool)));
-  //   connect((const QObject *)temperature_task_,
-  //   SIGNAL(tx_temperature(float)),
-  //           (const QObject *)record_task_, SLOT(rx_temperature(float)));
+  connect((const QObject *)temperature_task_, SIGNAL(tx_temperature(float)),
+          (const QObject *)record_task_, SLOT(rx_temperature(float)));
 }
 
 void VideoPlayer::init_widgets() {
