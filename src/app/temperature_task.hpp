@@ -31,6 +31,7 @@ class TemperatureTask : public QObject {
   ~TemperatureTask();
 
  private:
+  TemperatureManufacturer m_;
   TemperatureReader::ptr temperature_reader_;
 
   bool is_running_;

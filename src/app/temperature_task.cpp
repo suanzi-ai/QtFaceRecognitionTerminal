@@ -17,7 +17,7 @@ bool TemperatureTask::idle() { return !get_instance()->is_running_; }
 
 TemperatureTask::TemperatureTask(TemperatureManufacturer m, QThread* thread,
                                  QObject* parent)
-    : is_running_(false) {
+    : m_(m), is_running_(false) {
   auto engine = Engine::instance();
   temperature_reader_ = engine->get_temperature_reader(m);
   if (temperature_reader_ == nullptr) {
@@ -41,9 +41,23 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
   is_running_ = true;
 
   static TemperatureMatrix mat;
+  int trial = 0;
   while (SZ_RETCODE_OK != temperature_reader_->read(mat)) {
     QThread::msleep(100);
-    // SZ_LOG_WARN("temperature_reader_->read failed");
+    trial += 1;
+
+    if (trial > 20) {
+      SZ_LOG_WARN("temperature_reader_->read failed for {} times", trial);
+      SZ_LOG_INFO("reconnect temperature_reader_");
+
+      trial = 0;
+      temperature_reader_.reset();
+      temperature_reader_ = nullptr;
+      auto engine = Engine::instance();
+      while (temperature_reader_ == nullptr) {
+        temperature_reader_ = engine->get_temperature_reader(m_);
+      }
+    }
   }
 
   if (!to_clear) {
