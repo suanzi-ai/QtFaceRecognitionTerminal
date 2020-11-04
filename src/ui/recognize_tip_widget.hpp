@@ -42,6 +42,7 @@ class RecognizeTipWidget : public QWidget {
   float latest_temperature_;
 
   std::string ip_, name_, mac_;
+  std::string hostname_;
 };
 
 }  // namespace suanzi

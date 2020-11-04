@@ -98,3 +98,8 @@ SZ_RETCODE System::get_release_version(std::string& version) {
   version = data["version"];
   return SZ_RETCODE_OK;
 }
+
+SZ_RETCODE System::get_hostname(std::string& hostname) {
+  hostname = "";
+  return exec("hostname", hostname);
+}

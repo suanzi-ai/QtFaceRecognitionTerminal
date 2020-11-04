@@ -74,6 +74,7 @@ void RecognizeTipWidget::rx_display(PersonData person, bool if_duplicated) {
 
 void RecognizeTipWidget::rx_update() {
   System::get_current_network(name_, ip_, mac_);
+  System::get_hostname(hostname_);
 
   if (name_ == "eth0" || name_ == "wlan0") {
     std::istringstream sin(ip_);
@@ -151,6 +152,9 @@ void RecognizeTipWidget::paint(QPainter *painter) {
   painter->drawPixmap(
       QRect(0.05375 * w, 0.9390625 * h, 0.025 * w, 0.021875 * h), icon_,
       QRect());
+
+  auto cfg = Config::get_user();
+  painter->drawText(0.09375 * w, 0.95703125 * h, hostname_.c_str());
 
   // draw avatar here
   if (has_info_) {
