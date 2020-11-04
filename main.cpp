@@ -223,7 +223,7 @@ int main(int argc, char* argv[]) {
         .http_port = 8000,
         .rtsp_port = 554,
         .max_packet_size = 1456,
-        .max_buffer_size = 2 * 1024 * 1024,
+        .max_buffer_size = 400000,
     };
 
     auto server = engine->start_live_streaming(option);
