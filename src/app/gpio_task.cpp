@@ -31,12 +31,24 @@ GPIOTask::~GPIOTask() {}
 void GPIOTask::rx_trigger(PersonData person, bool if_duplicated) {
   auto user = Config::get_user();
 
-  bool switch_relay = true;
-  if (user.relay_switch_cond & RelaySwitchCond::Status)
-    switch_relay = switch_relay && person.is_status_normal();
-  if (user.enable_temperature &&
-      (user.relay_switch_cond & RelaySwitchCond::Temperature))
-    switch_relay = switch_relay && person.is_temperature_normal();
+  bool switch_relay;
+  if (user.gpio_mode == RelayMode::GateMode) {
+    switch_relay = true;
+    if (user.relay_switch_cond & RelaySwitchCond::Status)
+      switch_relay = switch_relay && person.is_status_normal();
+    if (user.enable_temperature &&
+        (user.relay_switch_cond & RelaySwitchCond::Temperature))
+      switch_relay = switch_relay && person.is_temperature_normal();
+  }
+  // user.gpio_mode == RelayMode::AlertMode
+  else {
+    switch_relay = false;
+    if (user.relay_switch_cond & RelaySwitchCond::Status)
+      switch_relay = switch_relay || !person.is_status_normal();
+    if (user.enable_temperature &&
+        (user.relay_switch_cond & RelaySwitchCond::Temperature))
+      switch_relay = switch_relay || !person.is_temperature_normal();
+  }
 
   // Open door GPIO
   if (switch_relay) {
