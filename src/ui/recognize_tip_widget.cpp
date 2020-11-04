@@ -1,6 +1,5 @@
 #include "recognize_tip_widget.hpp"
 
-#include <algorithm>
 #include <sstream>
 
 #include <QDateTime>
@@ -18,12 +17,6 @@
 
 using namespace suanzi;
 using namespace suanzi::io;
-
-static void trim(std::string &s) {
-  s.erase(0, s.find_first_not_of(" "));
-  s.erase(s.find_last_not_of(" ") + 1);
-  s.erase(s.find_last_not_of("\n") + 1);
-}
 
 RecognizeTipWidget::RecognizeTipWidget(int width, int height, QWidget *parent)
     : QWidget(parent),
@@ -80,10 +73,7 @@ void RecognizeTipWidget::rx_display(PersonData person, bool if_duplicated) {
 }
 
 void RecognizeTipWidget::rx_update() {
-  System::get_current_network(name_, ip_);
-
-  trim(name_);
-  trim(ip_);
+  System::get_current_network(name_, ip_, mac_);
 
   if (name_ == "eth0" || name_ == "wlan0") {
     std::istringstream sin(ip_);
@@ -96,6 +86,7 @@ void RecognizeTipWidget::rx_update() {
     ip_ = sout.str();
   }
   std::transform(ip_.begin(), ip_.end(), ip_.begin(), ::toupper);
+  std::transform(mac_.begin(), mac_.end(), mac_.begin(), ::toupper);
 }
 
 void RecognizeTipWidget::rx_reset() {
@@ -150,7 +141,8 @@ void RecognizeTipWidget::paint(QPainter *painter) {
 
   // draw SN, FW and ip
   char buffer[100];
-  sprintf(buffer, "SN:2020060229 FW:1.9.8%s", ip_.c_str());
+  sprintf(buffer, "SN:20200602%s FW:1.9.8%s", mac_.substr(0, 2).c_str(),
+          ip_.c_str());
   font_.setPointSize(0.02125 * w);
   painter->setFont(font_);
   painter->drawText(0.05625 * w, 0.984375 * h, buffer);

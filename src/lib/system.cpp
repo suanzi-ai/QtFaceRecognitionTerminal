@@ -1,13 +1,21 @@
 #include "system.hpp"
 
+#include <algorithm>
 #include <cstdio>
 #include <fstream>
+
 #include <nlohmann/json.hpp>
 #include <quface/logger.hpp>
 
 using json = nlohmann::json;
 
 using namespace suanzi;
+
+static void trim(std::string& s) {
+  s.erase(0, s.find_first_not_of(" "));
+  s.erase(s.find_last_not_of(" ") + 1);
+  s.erase(s.find_last_not_of("\n") + 1);
+}
 
 SZ_RETCODE System::exec(const char* cmd, std::string& result) {
   std::array<char, 128> buffer;
@@ -16,17 +24,20 @@ SZ_RETCODE System::exec(const char* cmd, std::string& result) {
     SZ_LOG_ERROR("popen() failed!");
     return SZ_RETCODE_FAILED;
   }
+  result = "";
   while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
     result += buffer.data();
   }
   return SZ_RETCODE_OK;
 }
 
-SZ_RETCODE System::get_current_network(std::string& name, std::string& ip) {
+SZ_RETCODE System::get_current_network(std::string& name, std::string& ip,
+                                       std::string& mac_address) {
   std::string result;
 
   name = "none";
   ip = "none";
+  mac_address = "none";
 
   // 8.8.8.8 via 192.168.2.1 dev eth0  src 192.168.2.12
   SZ_RETCODE ret = exec("ip route get 8.8.8.8", result);
@@ -51,6 +62,21 @@ SZ_RETCODE System::get_current_network(std::string& name, std::string& ip) {
 
   name = result.substr(dev_idx, src_idx - dev_idx - 6 + 1);
   ip = result.substr(src_idx, result.length() - src_idx);
+
+  trim(name);
+  trim(ip);
+
+  char cmd[100];
+  sprintf(cmd, "cat /sys/class/net/%s/address", name.c_str());
+  ret = exec(cmd, mac_address);
+  if (ret != SZ_RETCODE_OK) {
+    SZ_LOG_ERROR("/sys/class/net/{}/address not exists", name);
+    return ret;
+  }
+
+  trim(mac_address);
+  mac_address.erase(std::remove(mac_address.begin(), mac_address.end(), ':'),
+                    mac_address.end());
 
   return SZ_RETCODE_OK;
 }

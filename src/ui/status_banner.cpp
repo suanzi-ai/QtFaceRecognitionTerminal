@@ -10,12 +10,6 @@
 
 using namespace suanzi;
 
-static void trim(std::string &s) {
-  s.erase(0, s.find_first_not_of(" "));
-  s.erase(s.find_last_not_of(" ") + 1);
-  s.erase(s.find_last_not_of("\n") + 1);
-}
-
 StatusBanner::StatusBanner(int width, int height, QWidget *parent)
     : QWidget(parent),
       icon1_(":asserts/people.png"),
@@ -45,10 +39,7 @@ StatusBanner::StatusBanner(int width, int height, QWidget *parent)
 StatusBanner::~StatusBanner() { timer_->stop(); }
 
 void StatusBanner::rx_update() {
-  System::get_current_network(name_, ip_);
-
-  trim(name_);
-  trim(ip_);
+  System::get_current_network(name_, ip_, mac_);
 
   if (SZ_RETCODE_OK != db_->size(db_size_)) db_size_ = 0;
 }
