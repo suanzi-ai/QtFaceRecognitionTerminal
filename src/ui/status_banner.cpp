@@ -78,7 +78,7 @@ void StatusBanner::paint(QPainter *painter) {
   painter->drawPixmap(
       QRect(0.91875 * w, 0.00546875 * h, 0.0275 * w, 0.0171875 * h), icon4_,
       QRect());
-  painter->drawPixmap(
-      QRect(0.84 * w, 0.0046875 * h, 0.03125 * w, 0.01796875 * h), icon5_,
-      QRect());
+  // painter->drawPixmap(
+  //     QRect(0.84 * w, 0.0046875 * h, 0.03125 * w, 0.01796875 * h), icon5_,
+  //     QRect());
 }
