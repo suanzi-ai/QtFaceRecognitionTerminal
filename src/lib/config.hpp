@@ -51,7 +51,7 @@ typedef struct {
   SZ_UINT32 relay_switch_cond;
   RelayState relay_default_state;
   SZ_UINT16 relay_restore_time;
-  RelayMode gpio_mode;
+  RelayMode relay_mode;
   bool enable_temperature;
   float temperature_max;
   float temperature_min;
