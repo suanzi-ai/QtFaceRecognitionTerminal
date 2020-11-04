@@ -35,10 +35,10 @@ typedef enum RelayState {
   High = 1,
 } RelayState;
 
-typedef enum RelayMode {
-  GateMode = 0,
-  AlertMode = 1,
-} RelayMode;
+typedef enum RelaySwitchMode {
+  AllPass = 0,
+  AnyNotPass = 1,
+} RelaySwitchMode;
 
 typedef struct {
   std::string lang;
@@ -49,9 +49,9 @@ typedef struct {
   std::string liveness_level;
   SZ_UINT16 duplication_interval;
   SZ_UINT32 relay_switch_cond;
+  RelaySwitchMode relay_switch_mode;
   RelayState relay_default_state;
   SZ_UINT16 relay_restore_time;
-  RelayMode relay_mode;
   bool enable_temperature;
   float temperature_max;
   float temperature_min;

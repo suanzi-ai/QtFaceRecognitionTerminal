@@ -16,7 +16,7 @@ void suanzi::to_json(json &j, const UserConfig &c) {
   SAVE_JSON_TO(j, "relay_switch_cond", c.relay_switch_cond);
   SAVE_JSON_TO(j, "relay_default_state", c.relay_default_state);
   SAVE_JSON_TO(j, "relay_restore_time", c.relay_restore_time);
-  SAVE_JSON_TO(j, "relay_mode", c.relay_mode);
+  SAVE_JSON_TO(j, "relay_switch_mode", c.relay_switch_mode);
   SAVE_JSON_TO(j, "disabled_temperature", !c.enable_temperature);
   SAVE_JSON_TO(j, "enable_temperature", c.enable_temperature);
   SAVE_JSON_TO(j, "temperature_max", c.temperature_max);
@@ -44,7 +44,7 @@ void suanzi::from_json(const json &j, UserConfig &c) {
   LOAD_JSON_TO(j, "relay_switch_cond", c.relay_switch_cond);
   LOAD_JSON_TO(j, "relay_default_state", c.relay_default_state);
   LOAD_JSON_TO(j, "relay_restore_time", c.relay_restore_time);
-  LOAD_JSON_TO(j, "relay_mode", c.relay_mode);
+  LOAD_JSON_TO(j, "relay_switch_mode", c.relay_switch_mode);
   if (j.contains("disabled_temperature")) {
     bool disabled_temperature;
     LOAD_JSON_TO(j, "disabled_temperature", disabled_temperature);
@@ -306,9 +306,9 @@ void Config::load_defaults(ConfigData &c) {
       .liveness_level = "medium",
       .duplication_interval = 60,
       .relay_switch_cond = 3,
+      .relay_switch_mode = RelaySwitchMode::AllPass,
       .relay_default_state = RelayState::Low,
       .relay_restore_time = 10,
-      .relay_mode = RelayMode::GateMode,
       .enable_temperature = false,
       .temperature_max = 37.3,
       .temperature_min = 35.0,
