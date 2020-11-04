@@ -23,14 +23,17 @@ RecordTask *RecordTask::get_instance() {
 
 bool RecordTask::idle() { return !get_instance()->is_running_; }
 
-RecordTask::RecordTask(QThread *thread, QObject *parent) : is_running_(false) {
+RecordTask::RecordTask(QThread *thread, QObject *parent)
+    : is_running_(false),
+      is_measuring_temperature_(false),
+      max_temperature_(0),
+      temperature_timer_(nullptr) {
   person_service_ = PersonService::get_instance();
   db_ = std::make_shared<FaceDatabase>(Config::get_quface().db_name);
 
   // Create db for unknown faces
   unknown_database_ = std::make_shared<FaceDatabase>("_UNKNOWN_DB_");
   reset_counter_ = 0;
-  body_temperature_ = 0;
 
   // Create thread
   if (thread == nullptr) {
@@ -48,6 +51,7 @@ RecordTask::~RecordTask() {
 
   person_history_.clear();
   live_history_.clear();
+  temperature_history_.clear();
   query_clock_.clear();
   unknown_query_clock_.clear();
 }
@@ -60,7 +64,10 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
 
   // handle person disappear
   if (!input->has_live && !input->has_person_info) {
-    if (++reset_counter_ > Config::get_extract().max_lost_age) rx_reset();
+    if (++reset_counter_ > Config::get_extract().max_lost_age) {
+      rx_reset_temperature();
+      rx_reset_recognizing();
+    }
 
     is_running_ = false;
     return;
@@ -72,7 +79,11 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
   int max_person = Config::get_extract().history_size;
   if (input->has_person_info) {
     // reset if new person appear
-    if (if_fresh(input->person_feature)) rx_reset();
+    bool fresh = if_fresh(input->person_feature);
+    if (fresh || person_history_.size() == 0) rx_reset_recognizing();
+    if (is_measuring_temperature_ && fresh && person_history_.size() > 0) {
+      rx_reset_temperature();
+    }
 
     // add person info
     mask_history_.push_back(input->has_mask);
@@ -122,8 +133,8 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
       }
 
       // record person info
-      person.temperature = body_temperature_;
-      body_temperature_ = 0;
+      person.temperature = max_temperature_;
+      max_temperature_ = 0;
 
       bool duplicated;
       switch (status) {
@@ -148,7 +159,8 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
           person.status = person_service_->get_status(PersonStatus::Stranger);
           break;
       }
-      // SZ_LOG_INFO("Record: id={}, staff={}, score={:.2f}, status={}", person.id,
+      // SZ_LOG_INFO("Record: id={}, staff={}, score={:.2f}, status={}",
+      // person.id,
       //             person.number, person.score, person.status);
 
       // record snapshots
@@ -176,15 +188,27 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
       memcpy(person.nir_snapshot.data, input->img_nir_large->pData,
              width * height * 3 / 2);
 
-      if (AudioTask::idle()) emit tx_report_person(person);
+      if (AudioTask::idle()) {
+        if (person.temperature == 0) {
+          if (!Config::get_user().enable_temperature ||
+              !is_measuring_temperature_)
+            emit tx_report_person(person);
+        }
+        if (person.temperature > 0) emit tx_report_temperature(person);
+      }
+      if (person.temperature > 0)
+        SZ_LOG_INFO("temp={:.2f}", person.temperature);
+
+      // start temperature
+      if (!is_measuring_temperature_) rx_start_temperature();
       emit tx_display(person, duplicated);
     }
-    rx_reset();
+    rx_reset_recognizing();
   }
   is_running_ = false;
 }
 
-void RecordTask::rx_reset() {
+void RecordTask::rx_reset_recognizing() {
   mask_history_.clear();
   person_history_.clear();
   live_history_.clear();
@@ -195,51 +219,45 @@ void RecordTask::rx_reset() {
 }
 
 bool RecordTask::if_fresh(const FaceFeature &feature) {
-  bool ret;
-  if (person_history_.size() == 0) {
-    ret = true;
-  } else {
-    float score = 0.0;
+  float score = 0.0;
 
 #if __ARM_NEON
-    assert(SZ_FEATURE_NUM % 16 == 0);
-    int dim = SZ_FEATURE_NUM;
+  assert(SZ_FEATURE_NUM % 16 == 0);
+  int dim = SZ_FEATURE_NUM;
 
-    const float *com_feat = feature.value;
-    const float *q_feat = last_feature_.value;
-    float32x4_t out = vmovq_n_f32(0.0);
-    float32x4_t f1, f2;
-    float outTmp[4];
-    for (int k = 0; k < dim; k += 16) {
-      f1 = vld1q_f32(com_feat + k);
-      f2 = vld1q_f32(q_feat + k);
-      out = vmlaq_f32(out, f1, f2);
+  const float *com_feat = feature.value;
+  const float *q_feat = last_feature_.value;
+  float32x4_t out = vmovq_n_f32(0.0);
+  float32x4_t f1, f2;
+  float outTmp[4];
+  for (int k = 0; k < dim; k += 16) {
+    f1 = vld1q_f32(com_feat + k);
+    f2 = vld1q_f32(q_feat + k);
+    out = vmlaq_f32(out, f1, f2);
 
-      f1 = vld1q_f32(com_feat + k + 4);
-      f2 = vld1q_f32(q_feat + k + 4);
-      out = vmlaq_f32(out, f1, f2);
+    f1 = vld1q_f32(com_feat + k + 4);
+    f2 = vld1q_f32(q_feat + k + 4);
+    out = vmlaq_f32(out, f1, f2);
 
-      f1 = vld1q_f32(com_feat + k + 8);
-      f2 = vld1q_f32(q_feat + k + 8);
-      out = vmlaq_f32(out, f1, f2);
+    f1 = vld1q_f32(com_feat + k + 8);
+    f2 = vld1q_f32(q_feat + k + 8);
+    out = vmlaq_f32(out, f1, f2);
 
-      f1 = vld1q_f32(com_feat + k + 12);
-      f2 = vld1q_f32(q_feat + k + 12);
-      out = vmlaq_f32(out, f1, f2);
-    }
-    vst1q_f32(outTmp, out);
+    f1 = vld1q_f32(com_feat + k + 12);
+    f2 = vld1q_f32(q_feat + k + 12);
+    out = vmlaq_f32(out, f1, f2);
+  }
+  vst1q_f32(outTmp, out);
 
-    score = outTmp[0] + outTmp[1] + outTmp[2] + outTmp[3];
+  score = outTmp[0] + outTmp[1] + outTmp[2] + outTmp[3];
 #else
-    for (int k = 0; k < SZ_FEATURE_NUM; k++)
-      score += feature.value[k] * last_feature_.value[k];
+  for (int k = 0; k < SZ_FEATURE_NUM; k++)
+    score += feature.value[k] * last_feature_.value[k];
 #endif
 
-    ret = score / 2 + 0.5f < 0.9;
-  }
   memcpy(last_feature_.value, feature.value, SZ_FEATURE_NUM * sizeof(SZ_FLOAT));
 
-  return ret;
+  return score / 2 + 0.5f < 0.9;
 }
 
 bool RecordTask::sequence_query(const std::vector<QueryResult> &history,
@@ -406,5 +424,40 @@ bool RecordTask::if_duplicated(const FaceFeature &feature, float &temperature) {
 }
 
 void RecordTask::rx_temperature(float body_temperature) {
-  body_temperature_ = body_temperature;
+  if (is_measuring_temperature_)
+    temperature_history_.push_back(body_temperature);
+}
+
+void RecordTask::rx_start_temperature() {
+  if (!Config::get_user().enable_temperature) return;
+
+  SZ_LOG_INFO("start temperature");
+  if (!temperature_timer_) {
+    temperature_timer_ = new QTimer();
+    temperature_timer_->setSingleShot(true);
+    connect((const QObject *)temperature_timer_, SIGNAL(timeout()),
+            (const QObject *)this, SLOT(rx_end_temperature()));
+  }
+  temperature_timer_->setInterval(Config::get_temperature().temperature_delay *
+                                  1000);
+  max_temperature_ = 0;
+  is_measuring_temperature_ = true;
+  temperature_timer_->start();
+}
+
+void RecordTask::rx_reset_temperature() {
+  temperature_history_.clear();
+  is_measuring_temperature_ = false;
+  max_temperature_ = 0;
+  if (temperature_timer_) temperature_timer_->stop();
+}
+
+void RecordTask::rx_end_temperature() {
+  SZ_LOG_INFO("end temperature");
+  float max_temperature = 0;
+  for (float temperature : temperature_history_)
+    max_temperature = std::max(max_temperature_, temperature);
+  max_temperature_ = max_temperature;
+  temperature_history_.clear();
+  is_measuring_temperature_ = false;
 }

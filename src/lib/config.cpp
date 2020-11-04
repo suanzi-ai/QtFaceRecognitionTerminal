@@ -102,6 +102,7 @@ void suanzi::to_json(json &j, const TemperatureConfig &c) {
   SAVE_JSON_TO(j, "temperature_distance", c.temperature_distance);
   SAVE_JSON_TO(j, "manufacturer", c.manufacturer);
   SAVE_JSON_TO(j, "toffset", c.toffset);
+  SAVE_JSON_TO(j, "temperature_delay", c.temperature_delay);
 }
 
 void suanzi::from_json(const json &j, TemperatureConfig &c) {
@@ -112,6 +113,7 @@ void suanzi::from_json(const json &j, TemperatureConfig &c) {
   LOAD_JSON_TO(j, "temperature_distance", c.temperature_distance);
   LOAD_JSON_TO(j, "manufacturer", c.manufacturer);
   LOAD_JSON_TO(j, "toffset", c.toffset);
+  LOAD_JSON_TO(j, "temperature_delay", c.temperature_delay);
 }
 
 void suanzi::to_json(json &j, const QufaceConfig &c) {
@@ -291,6 +293,7 @@ void Config::load_defaults(ConfigData &c) {
       .device_face_width = 0.48,
       .temperature_distance = 0.68,
       .toffset = 0,
+      .temperature_delay = 5,
       .manufacturer = 1,
   };
 

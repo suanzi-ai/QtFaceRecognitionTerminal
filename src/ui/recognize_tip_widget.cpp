@@ -65,6 +65,9 @@ void RecognizeTipWidget::rx_display(PersonData person, bool if_duplicated) {
         person.face_snapshot.rows, QImage::Format_RGB888));
   }
 
+  if (person.temperature > 0)
+    SZ_LOG_INFO("temp={:.2f}", person.temperature);
+
   reset_timer_.stop();
   reset_timer_.start();
 

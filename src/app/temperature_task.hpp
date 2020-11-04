@@ -2,6 +2,7 @@
 #define __TEMPERATURE_TASK_HPP__
 
 #include <QThread>
+#include <QTimer>
 
 #include <quface-io/option.hpp>
 #include <quface-io/temperature.hpp>

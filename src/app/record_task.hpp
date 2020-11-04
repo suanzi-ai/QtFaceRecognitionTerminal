@@ -4,6 +4,7 @@
 #include <chrono>
 
 #include <QObject>
+#include <QTimer>
 
 #include "person_service.hpp"
 #include "pingpang_buffer.hpp"
@@ -20,8 +21,11 @@ class RecordTask : QObject {
 
  private slots:
   void rx_frame(PingPangBuffer<RecognizeData> *buffer);
-  void rx_reset();
+  void rx_reset_recognizing();
   void rx_temperature(float body_temperature);
+  void rx_start_temperature();
+  void rx_reset_temperature();
+  void rx_end_temperature();
 
  signals:
   void tx_nir_finish(bool if_finished);
@@ -32,6 +36,7 @@ class RecordTask : QObject {
 
   // for audio report
   void tx_report_person(PersonData person);
+  void tx_report_temperature(PersonData person);
   void tx_warn_mask();
 
  private:
@@ -65,9 +70,13 @@ class RecordTask : QObject {
   std::map<SZ_UINT32, float> unknown_temperature_;
 
   int reset_counter_;
-  float body_temperature_;
 
   FaceFeature last_feature_;
+
+  bool is_measuring_temperature_;
+  std::vector<float> temperature_history_;
+  float max_temperature_;
+  QTimer* temperature_timer_;
 };
 
 }  // namespace suanzi

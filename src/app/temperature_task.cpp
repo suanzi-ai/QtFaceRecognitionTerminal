@@ -38,7 +38,13 @@ TemperatureTask::TemperatureTask(TemperatureManufacturer m, QThread* thread,
 TemperatureTask::~TemperatureTask() {}
 
 void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
+  if (to_clear && ambient_temperature_ > 0)
+    return;
+
   is_running_ = true;
+
+  if (ambient_temperature_ == 0)
+    QThread::msleep(10000);
 
   static TemperatureMatrix mat;
   int trial = 0;
@@ -49,16 +55,10 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
     if (trial >= 20) {
       SZ_LOG_WARN("temperature_reader_->read failed for {} times", trial);
       SZ_LOG_INFO("reconnect temperature_reader_ after 10 seconds");
-      // temperature_reader_.reset();
-      // temperature_reader_ = nullptr;
       trial = 0;
       QThread::msleep(10000);
 
       SZ_LOG_INFO("reconnect");
-      // auto engine = Engine::instance();
-      // while (temperature_reader_ == nullptr) {
-      //   temperature_reader_ = engine->get_temperature_reader(m_);
-      // }
     }
   }
 
@@ -92,28 +92,12 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
     // update ambient temperature if no detection
     if (ambient_temperature_ == 0)
       ambient_temperature_ = max_temperature;
-    else
-      ambient_temperature_ = ambient_temperature_ * 0.9 + max_temperature * 0.1;
     face_temperature_ = 0;
   } else {
-    static int stable = 0;
-    float latest_temperature = face_temperature_;
-    if (face_temperature_ == 0)
-      face_temperature_ = max_temperature;
-    else
-      face_temperature_ = 0.25 * face_temperature_ + 0.75 * max_temperature;
-
-    if (std::abs(latest_temperature - face_temperature_) < 0.25) {
-      if (++stable >= 2) {
-        latest_temperature = (latest_temperature + face_temperature_) / 2 +
-                             TemperatureTask::DEFAULT_OFFSET +
-                             Config::get_temperature().toffset;
-        SZ_LOG_INFO("ambient={:.2f}°C, face={:.2f}°C", ambient_temperature_,
-                    latest_temperature);
-        emit tx_temperature(latest_temperature);
-      }
-    } else
-      stable = 0;
+    face_temperature_ = max_temperature;
+    // SZ_LOG_INFO("ambient={:.2f}°C, face={:.2f}°C", ambient_temperature_,
+    //             face_temperature_);
+    emit tx_temperature(face_temperature_);
   }
 
   emit tx_heatmap(mat, detection, max_x, max_y);
