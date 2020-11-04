@@ -118,6 +118,15 @@ void AudioTask::rx_report_person(PersonData person) {
       play_audio(success_audio_);
   }
 
+  is_running_ = false;
+}
+
+void AudioTask::rx_report_temperature(PersonData person) {
+  auto user = Config::get_user();
+  if (!user.enable_audio) return;
+
+  is_running_ = true;
+
   if (user.enable_temperature_audio && user.enable_temperature) {
     if (!person.is_temperature_normal())
       play_audio(temperature_abnormal_audio_);
@@ -125,7 +134,6 @@ void AudioTask::rx_report_person(PersonData person) {
       play_audio(temperature_normal_audio_);
   }
 
-  QThread::msleep(1000);
   is_running_ = false;
 }
 
