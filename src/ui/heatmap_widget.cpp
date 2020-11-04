@@ -16,6 +16,12 @@ HeatmapWidget::HeatmapWidget(int width, int height, QWidget *parent)
 
   move(0, 0);
   setFixedSize(width, height);
+
+  x_ = y_ = 0.5;
+  detection_.x = 0.45;
+  detection_.y = 0.45;
+  detection_.width = 0.1;
+  detection_.height = 0.1;
 }
 
 HeatmapWidget::~HeatmapWidget() {}

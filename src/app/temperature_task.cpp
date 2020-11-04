@@ -7,6 +7,48 @@
 using namespace suanzi;
 using namespace suanzi::io;
 
+static float surface_to_inner(float temperature) {
+  if (temperature < 33) return temperature + 2.8;
+  if (temperature <= 33.1) return 35.8;
+  if (temperature <= 33.2) return 35.9;
+  if (temperature <= 33.5) return 36;
+  if (temperature <= 33.7) return 36.1;
+  if (temperature <= 34.1) return 36.2;
+  if (temperature <= 34.3) return 36.3;
+  if (temperature <= 34.4) return 36.4;
+  if (temperature <= 34.7) return 36.5;
+  if (temperature <= 34.8) return 36.6;
+  if (temperature <= 35.1) return 36.7;
+  if (temperature <= 35.5) return 36.8;
+  if (temperature <= 35.7) return 36.9;
+  if (temperature <= 36.1) return 37;
+  if (temperature <= 36.3) return 37.1;
+  if (temperature <= 36.4) return 37.2;
+  if (temperature <= 36.5) return 37.3;
+  if (temperature <= 36.6) return 37.5;
+  if (temperature <= 36.8)
+    return 37.6;
+  else
+    return temperature + 0.8;
+}
+
+static float measure_to_surface(float temperature) {
+  if (temperature <= 29.6) return temperature + 5.3;
+  if (temperature <= 29.7) return 35.1;
+  if (temperature <= 29.8) return 35.2;
+  if (temperature <= 30.3) return 35.5;
+  if (temperature <= 30.4) return 35.6;
+  if (temperature <= 30.9) return 35.7;
+  if (temperature <= 31.2) return 35.8;
+  if (temperature <= 31.3) return 36.1;
+  if (temperature <= 31.8) return temperature + 4.8;
+  if (temperature <= 31.9) return 36.7;
+  if (temperature <= 32)
+    return 36.9;
+  else
+    return temperature + 4.9;
+}
+
 TemperatureTask* TemperatureTask::get_instance() {
   static TemperatureTask instance(
       (io::TemperatureManufacturer)Config::get_temperature().manufacturer);
@@ -38,13 +80,11 @@ TemperatureTask::TemperatureTask(TemperatureManufacturer m, QThread* thread,
 TemperatureTask::~TemperatureTask() {}
 
 void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
-  if (to_clear && ambient_temperature_ > 0)
-    return;
+  if (to_clear && ambient_temperature_ > 0) return;
 
   is_running_ = true;
 
-  if (ambient_temperature_ == 0)
-    QThread::msleep(10000);
+  if (ambient_temperature_ == 0) QThread::msleep(10000);
 
   static TemperatureMatrix mat;
   int trial = 0;
@@ -90,13 +130,15 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
     max_x = max_y = 0.5;
 
     // update ambient temperature if no detection
-    if (ambient_temperature_ == 0)
-      ambient_temperature_ = max_temperature;
+    if (ambient_temperature_ == 0) ambient_temperature_ = max_temperature;
     face_temperature_ = 0;
   } else {
     face_temperature_ = max_temperature;
     // SZ_LOG_INFO("ambient={:.2f}°C, face={:.2f}°C", ambient_temperature_,
     //             face_temperature_);
+
+    face_temperature_ = surface_to_inner(measure_to_surface(
+        face_temperature_ + Config::get_temperature().toffset));
     emit tx_temperature(face_temperature_);
   }
 
