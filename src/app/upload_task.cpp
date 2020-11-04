@@ -36,6 +36,10 @@ void UploadTask::rx_upload(PersonData person, bool if_duplicated) {
 
   auto cfg = Config::get_user();
   if (!if_duplicated) {
+    // whether temperature is enabled but no temperature data
+    if (cfg.enable_temperature && person.temperature == 0)
+      return;
+
     // whether is known person
     if ((person.status == PersonService::get_status(PersonStatus::Normal) ||
          person.status == PersonService::get_status(PersonStatus::Blacklist)) &&
@@ -63,8 +67,8 @@ void UploadTask::rx_upload(PersonData person, bool if_duplicated) {
       nir_encode_result = SZ_RETCODE_FAILED;
     else
       nir_encode_result = engine->encode_jpeg(
-          nir_image_buffer, person.nir_snapshot.data,
-          person.nir_snapshot.cols, person.nir_snapshot.rows);
+          nir_image_buffer, person.nir_snapshot.data, person.nir_snapshot.cols,
+          person.nir_snapshot.rows);
     if (nir_encode_result != SZ_RETCODE_OK)
       SZ_LOG_ERROR("Encode nir jpg failed");
 
