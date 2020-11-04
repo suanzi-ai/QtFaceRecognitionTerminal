@@ -175,8 +175,10 @@ void RecognizeTipWidget::paint(QPainter *painter) {
         (person_.temperature > 0 || latest_temperature_ > 0)) {
       if (person_.temperature > 0) latest_temperature_ = person_.temperature;
 
+      person_.temperature = latest_temperature_;
+
       char temperature_value[10];
-      sprintf(temperature_value, ":%.1f°C", latest_temperature_);
+      sprintf(temperature_value, ":%.1f°C", person_.temperature);
 
       painter->setRenderHint(QPainter::Antialiasing);
 

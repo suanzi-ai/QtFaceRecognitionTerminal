@@ -100,9 +100,8 @@ void suanzi::to_json(json &j, const TemperatureConfig &c) {
   SAVE_JSON_TO(j, "device_face_height", c.device_face_height);
   SAVE_JSON_TO(j, "device_face_width", c.device_face_width);
   SAVE_JSON_TO(j, "temperature_distance", c.temperature_distance);
-  SAVE_JSON_TO(j, "device_body_start_angle", c.device_body_start_angle);
-  SAVE_JSON_TO(j, "device_body_open_angle", c.device_body_open_angle);
   SAVE_JSON_TO(j, "manufacturer", c.manufacturer);
+  SAVE_JSON_TO(j, "toffset", c.toffset);
 }
 
 void suanzi::from_json(const json &j, TemperatureConfig &c) {
@@ -111,9 +110,8 @@ void suanzi::from_json(const json &j, TemperatureConfig &c) {
   LOAD_JSON_TO(j, "device_face_height", c.device_face_height);
   LOAD_JSON_TO(j, "device_face_width", c.device_face_width);
   LOAD_JSON_TO(j, "temperature_distance", c.temperature_distance);
-  LOAD_JSON_TO(j, "device_body_start_angle", c.device_body_start_angle);
-  LOAD_JSON_TO(j, "device_body_open_angle", c.device_body_open_angle);
   LOAD_JSON_TO(j, "manufacturer", c.manufacturer);
+  LOAD_JSON_TO(j, "toffset", c.toffset);
 }
 
 void suanzi::to_json(json &j, const QufaceConfig &c) {
@@ -292,8 +290,7 @@ void Config::load_defaults(ConfigData &c) {
       .device_face_height = 0.35,
       .device_face_width = 0.48,
       .temperature_distance = 0.68,
-      .device_body_start_angle = 180,
-      .device_body_open_angle = 2500,
+      .toffset = 0,
       .manufacturer = 1,
   };
 

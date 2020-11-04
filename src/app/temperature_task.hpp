@@ -28,6 +28,8 @@ class TemperatureTask : public QObject {
   void rx_update(DetectionRatio detection, bool to_clear);
 
  private:
+  static constexpr float DEFAULT_OFFSET = 6;
+
   TemperatureTask(TemperatureManufacturer m, QThread* thread = nullptr,
                   QObject* parent = nullptr);
   ~TemperatureTask();

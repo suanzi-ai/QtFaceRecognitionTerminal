@@ -49,16 +49,16 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
     if (trial >= 20) {
       SZ_LOG_WARN("temperature_reader_->read failed for {} times", trial);
       SZ_LOG_INFO("reconnect temperature_reader_ after 10 seconds");
-      temperature_reader_.reset();
-      temperature_reader_ = nullptr;
+      // temperature_reader_.reset();
+      // temperature_reader_ = nullptr;
       trial = 0;
       QThread::msleep(10000);
 
       SZ_LOG_INFO("reconnect");
-      auto engine = Engine::instance();
-      while (temperature_reader_ == nullptr) {
-        temperature_reader_ = engine->get_temperature_reader(m_);
-      }
+      // auto engine = Engine::instance();
+      // while (temperature_reader_ == nullptr) {
+      //   temperature_reader_ = engine->get_temperature_reader(m_);
+      // }
     }
   }
 
@@ -105,7 +105,9 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
 
     if (std::abs(latest_temperature - face_temperature_) < 0.25) {
       if (++stable >= 2) {
-        latest_temperature = (latest_temperature + face_temperature_) / 2;
+        latest_temperature = (latest_temperature + face_temperature_) / 2 +
+                             TemperatureTask::DEFAULT_OFFSET +
+                             Config::get_temperature().toffset;
         SZ_LOG_INFO("ambient={:.2f}°C, face={:.2f}°C", ambient_temperature_,
                     latest_temperature);
         emit tx_temperature(latest_temperature);
