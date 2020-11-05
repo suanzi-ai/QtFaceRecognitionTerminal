@@ -60,13 +60,13 @@ void RecognizeTipWidget::rx_display(PersonData person, bool if_duplicated) {
   if ((!has_info_ || person_.face_path != person.face_path) &&
       !person.face_snapshot.empty()) {
     cv::cvtColor(person.face_snapshot, person.face_snapshot, CV_BGR2RGB);
-    snapshot_ = QPixmap::fromImage(QImage(
-        (unsigned char *)person.face_snapshot.data, person.face_snapshot.cols,
-        person.face_snapshot.rows, QImage::Format_RGB888));
+    snapshot_ = QPixmap::fromImage(
+        QImage((unsigned char *)person.face_snapshot.data,
+               person.face_snapshot.cols, person.face_snapshot.rows,
+               person.face_snapshot.step, QImage::Format_RGB888));
   }
 
-  if (person.temperature > 0)
-    SZ_LOG_INFO("temp={:.2f}", person.temperature);
+  if (person.temperature > 0) SZ_LOG_INFO("temp={:.2f}", person.temperature);
 
   reset_timer_.stop();
   reset_timer_.start();

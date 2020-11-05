@@ -177,8 +177,21 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
 
         if (SZ_RETCODE_OK == engine->encode_jpeg(buffer,
                                                  person.bgr_snapshot.data,
-                                                 width, height))
-          person.face_snapshot = cv::imdecode(buffer, CV_LOAD_IMAGE_COLOR);
+                                                 width, height)) {
+          int crop_x = input->bgr_detection_.x * width;
+          int crop_y = input->bgr_detection_.y * height;
+          int crop_w = input->bgr_detection_.width * width;
+          int crop_h = input->bgr_detection_.height * height;
+
+          crop_x = std::max(0, crop_x - crop_w / 2);
+          crop_y = std::max(0, crop_y - crop_h / 2);
+          crop_w = std::min(width - crop_x - 1, crop_w * 2);
+          crop_h = std::min(height - crop_y - 1, crop_h * 2);
+
+          cv::imdecode(buffer,
+                       CV_LOAD_IMAGE_COLOR)({crop_x, crop_y, crop_w, crop_h})
+              .copyTo(person.face_snapshot);
+        }
       } else
         person.face_snapshot = cv::Mat();
 
@@ -345,8 +358,7 @@ bool RecordTask::sequence_mask_detecting(const std::vector<bool> &history) {
 
 bool RecordTask::if_duplicated(const SZ_UINT32 &face_id, float &temperature) {
   auto cfg = Config::get_user();
-  if (cfg.enable_temperature && temperature == 0)
-    return false;
+  if (cfg.enable_temperature && temperature == 0) return false;
 
   bool ret = false;
 
@@ -378,8 +390,7 @@ bool RecordTask::if_duplicated(const SZ_UINT32 &face_id, float &temperature) {
 
 bool RecordTask::if_duplicated(const FaceFeature &feature, float &temperature) {
   auto cfg = Config::get_user();
-  if (cfg.enable_temperature && temperature == 0)
-    return false;
+  if (cfg.enable_temperature && temperature == 0) return false;
 
   bool ret = false;
 
