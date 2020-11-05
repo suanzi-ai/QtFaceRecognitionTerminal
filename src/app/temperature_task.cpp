@@ -80,27 +80,11 @@ TemperatureTask::TemperatureTask(TemperatureManufacturer m, QThread* thread,
 TemperatureTask::~TemperatureTask() {}
 
 void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
-  if (to_clear && ambient_temperature_ > 0) return;
-
   is_running_ = true;
 
-  if (ambient_temperature_ == 0) QThread::msleep(10000);
-
   static TemperatureMatrix mat;
-  int trial = 0;
-  while (SZ_RETCODE_OK != temperature_reader_->read(mat)) {
-    QThread::msleep(200);
-    trial += 1;
-
-    if (trial >= 20) {
-      SZ_LOG_WARN("temperature_reader_->read failed for {} times", trial);
-      SZ_LOG_INFO("reconnect temperature_reader_ after 10 seconds");
-      trial = 0;
-      QThread::msleep(10000);
-
-      SZ_LOG_INFO("reconnect");
-    }
-  }
+  while (SZ_RETCODE_OK != temperature_reader_->read(mat)) QThread::msleep(200);
+  QThread::msleep(200);
 
   if (!to_clear) {
     detection.x += 0.125f;
@@ -130,7 +114,10 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
     max_x = max_y = 0.5;
 
     // update ambient temperature if no detection
-    if (ambient_temperature_ == 0) ambient_temperature_ = max_temperature;
+    if (ambient_temperature_ == 0)
+      ambient_temperature_ = max_temperature;
+    else
+      ambient_temperature_ = ambient_temperature_ * 0.9 + max_temperature * 0.1;
     face_temperature_ = 0;
   } else {
     face_temperature_ = max_temperature;
