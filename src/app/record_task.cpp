@@ -345,6 +345,9 @@ bool RecordTask::sequence_mask_detecting(const std::vector<bool> &history) {
 
 bool RecordTask::if_duplicated(const SZ_UINT32 &face_id, float &temperature) {
   auto cfg = Config::get_user();
+  if (cfg.enable_temperature && temperature == 0)
+    return false;
+
   bool ret = false;
 
   auto current_query_clock = std::chrono::steady_clock::now();
@@ -375,6 +378,9 @@ bool RecordTask::if_duplicated(const SZ_UINT32 &face_id, float &temperature) {
 
 bool RecordTask::if_duplicated(const FaceFeature &feature, float &temperature) {
   auto cfg = Config::get_user();
+  if (cfg.enable_temperature && temperature == 0)
+    return false;
+
   bool ret = false;
 
   auto current_query_clock = std::chrono::steady_clock::now();
