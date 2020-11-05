@@ -41,9 +41,9 @@ void HeatmapWidget::rx_update(TemperatureMatrix mat, DetectionRatio detection,
 
     float value = mat.value[i];
     float ratio = 2 * (value - min_) / (max_ - min_);
-    int r = std::max(0.f, 255 * (ratio - 1));
-    int b = std::max(0.f, 255 * (1 - ratio));
-    int g = 255 - b - r;
+    int r = std::min(1.f, ratio) * 255;
+    int g = std::min(1.f, 2 - ratio) * 255;
+    int b = 0;
 
     cv::Vec3b &color = raw_.at<cv::Vec3b>(y, x);
     color[0] = r;
