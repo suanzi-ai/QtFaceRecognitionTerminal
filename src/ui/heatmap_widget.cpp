@@ -9,7 +9,7 @@ using namespace suanzi;
 using namespace suanzi::io;
 
 HeatmapWidget::HeatmapWidget(int width, int height, QWidget *parent)
-    : QWidget(parent), raw_(16, 16, CV_8UC3) {
+    : QWidget(parent), raw_(16, 16, CV_8UC3), init_(false) {
   QPalette palette = this->palette();
   palette.setColor(QPalette::Background, Qt::transparent);
   setPalette(palette);
@@ -22,6 +22,10 @@ HeatmapWidget::HeatmapWidget(int width, int height, QWidget *parent)
   detection_.y = 0.45;
   detection_.width = 0.1;
   detection_.height = 0.1;
+
+  raw_ = cv::Scalar(0, 255, 0);
+  heatmap_ = QPixmap::fromImage(
+      QImage((unsigned char *)raw_.data, 16, 16, QImage::Format_RGB888));
 }
 
 HeatmapWidget::~HeatmapWidget() {}
@@ -29,6 +33,7 @@ HeatmapWidget::~HeatmapWidget() {}
 void HeatmapWidget::rx_update(TemperatureMatrix mat, DetectionRatio detection,
                               float x, float y) {
   assert(mat.size == 256);
+  init_ = true;
 
   min_ = max_ = mat.value[0];
   for (size_t i = 1; i < 256; i++) {
@@ -68,20 +73,25 @@ void HeatmapWidget::paint(QPainter *painter) {
   if (Config::get_user().enable_temperature) {
     painter->drawPixmap(target, heatmap_, QRect());
 
-    QRect face(target.x() + target.width() * detection_.x,
-               target.y() + target.height() * detection_.y,
-               target.width() * detection_.width,
-               target.height() * detection_.height);
     painter->setPen(Qt::white);
-    painter->drawRect(face);
+    if (init_) {
+      QRect face(target.x() + target.width() * detection_.x,
+                 target.y() + target.height() * detection_.y,
+                 target.width() * detection_.width,
+                 target.height() * detection_.height);
+      painter->drawRect(face);
 
-    painter->drawLine(target.x() + (x_ - 0.1) * target.width(),
-                      target.y() + y_ * target.height(),
-                      target.x() + (x_ + 0.1) * target.width(),
-                      target.y() + y_ * target.height());
-    painter->drawLine(target.x() + x_ * target.width(),
-                      target.y() + (y_ - 0.1) * target.height(),
-                      target.x() + x_ * target.width(),
-                      target.y() + (y_ + 0.1) * target.height());
+      painter->drawLine(target.x() + (x_ - 0.1) * target.width(),
+                        target.y() + y_ * target.height(),
+                        target.x() + (x_ + 0.1) * target.width(),
+                        target.y() + y_ * target.height());
+      painter->drawLine(target.x() + x_ * target.width(),
+                        target.y() + (y_ - 0.1) * target.height(),
+                        target.x() + x_ * target.width(),
+                        target.y() + (y_ + 0.1) * target.height());
+    } else {
+      painter->drawText(target.x() + 0.15 * target.width(),
+                        target.y() + 0.55 * target.height(), "Loading...");
+    }
   }
 }

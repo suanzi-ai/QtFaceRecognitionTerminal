@@ -36,6 +36,7 @@ class HeatmapWidget : public QWidget {
   float x_, y_;
 
   cv::Mat raw_;
+  bool init_;
   QPixmap heatmap_;
   DetectionRatio detection_;
 };

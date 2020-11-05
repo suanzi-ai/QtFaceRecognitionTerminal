@@ -82,9 +82,11 @@ TemperatureTask::~TemperatureTask() {}
 void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
   is_running_ = true;
 
+  if (ambient_temperature_ == 0) QThread::msleep(10000);
+
   static TemperatureMatrix mat;
-  while (SZ_RETCODE_OK != temperature_reader_->read(mat)) QThread::msleep(200);
-  QThread::msleep(200);
+  while (SZ_RETCODE_OK != temperature_reader_->read(mat)) QThread::msleep(20);
+  QThread::msleep(20);
 
   if (!to_clear) {
     detection.x += 0.125f;
