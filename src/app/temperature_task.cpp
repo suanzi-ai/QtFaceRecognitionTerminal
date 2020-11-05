@@ -59,14 +59,11 @@ bool TemperatureTask::idle() { return !get_instance()->is_running_; }
 
 TemperatureTask::TemperatureTask(TemperatureManufacturer m, QThread* thread,
                                  QObject* parent)
-    : m_(m), is_running_(false), ambient_temperature_(0), face_temperature_(0) {
-  auto engine = Engine::instance();
-  temperature_reader_ = engine->get_temperature_reader(m);
-  if (temperature_reader_ == nullptr) {
-    SZ_LOG_ERROR("Get temperature reader error");
-    return;
-  }
-
+    : m_(m),
+      temperature_reader_(nullptr),
+      is_running_(false),
+      ambient_temperature_(0),
+      face_temperature_(0) {
   if (thread == nullptr) {
     static QThread new_thread;
     moveToThread(&new_thread);
@@ -79,14 +76,55 @@ TemperatureTask::TemperatureTask(TemperatureManufacturer m, QThread* thread,
 
 TemperatureTask::~TemperatureTask() {}
 
+void TemperatureTask::connect() {
+  static TemperatureMatrix mat;
+  int success = 0;
+  do {
+    while (temperature_reader_ == nullptr)
+      temperature_reader_ = Engine::instance()->get_temperature_reader(m_);
+    QThread::msleep(500);
+
+    if (try_reading(mat)) {
+      success++;
+      emit tx_heatmap_init(success);
+    } else {
+      temperature_reader_ = nullptr;
+      SZ_LOG_WARN("re-connecting for successive failure");
+    }
+
+  } while (success < 10);
+}
+
+bool TemperatureTask::try_reading(TemperatureMatrix& mat) {
+  if (temperature_reader_ == nullptr) return false;
+
+  int trial = 0;
+  while (SZ_RETCODE_OK != temperature_reader_->read(mat)) {
+    QThread::msleep(200);
+    if (++trial == 10) {
+      temperature_reader_.reset();
+      temperature_reader_ = nullptr;
+      break;
+    }
+  }
+  QThread::msleep(200);
+  return trial < 100;
+}
+
 void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
   is_running_ = true;
 
-  if (ambient_temperature_ == 0) QThread::msleep(10000);
+  if (ambient_temperature_ == 0) connect();
 
   static TemperatureMatrix mat;
-  while (SZ_RETCODE_OK != temperature_reader_->read(mat)) QThread::msleep(20);
-  QThread::msleep(20);
+  while (!try_reading(mat)) {
+    temperature_reader_ = nullptr;
+    SZ_LOG_WARN("re-connecting for successive failure");
+    while (temperature_reader_ == nullptr) {
+      temperature_reader_ = Engine::instance()->get_temperature_reader(m_);
+    }
+    QThread::msleep(2000);
+  }
 
   if (!to_clear) {
     detection.x += 0.125f;

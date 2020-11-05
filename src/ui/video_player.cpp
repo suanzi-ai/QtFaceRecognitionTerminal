@@ -174,6 +174,8 @@ void VideoPlayer::init_widgets() {
 
   // 创建热力图控件
   heatmap_widget_ = new HeatmapWidget(screen_width, screen_height, nullptr);
+  connect((const QObject *)temperature_task_, SIGNAL(tx_heatmap_init(int)),
+          (const QObject *)heatmap_widget_, SLOT(rx_init(int)));
   connect((const QObject *)temperature_task_,
           SIGNAL(tx_heatmap(TemperatureMatrix, DetectionRatio, float, float)),
           (const QObject *)heatmap_widget_,

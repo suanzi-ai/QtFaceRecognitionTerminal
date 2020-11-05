@@ -9,7 +9,7 @@ using namespace suanzi;
 using namespace suanzi::io;
 
 HeatmapWidget::HeatmapWidget(int width, int height, QWidget *parent)
-    : QWidget(parent), raw_(16, 16, CV_8UC3), init_(false) {
+    : QWidget(parent), raw_(16, 16, CV_8UC3), init_(false), success_(0) {
   QPalette palette = this->palette();
   palette.setColor(QPalette::Background, Qt::transparent);
   setPalette(palette);
@@ -29,6 +29,8 @@ HeatmapWidget::HeatmapWidget(int width, int height, QWidget *parent)
 }
 
 HeatmapWidget::~HeatmapWidget() {}
+
+void HeatmapWidget::rx_init(int success) { success_ = success; }
 
 void HeatmapWidget::rx_update(TemperatureMatrix mat, DetectionRatio detection,
                               float x, float y) {
@@ -90,8 +92,10 @@ void HeatmapWidget::paint(QPainter *painter) {
                         target.x() + x_ * target.width(),
                         target.y() + (y_ + 0.1) * target.height());
     } else {
-      painter->drawText(target.x() + 0.15 * target.width(),
-                        target.y() + 0.55 * target.height(), "Loading...");
+      char progress[100];
+      sprintf(progress, "Loading %d%%", success_ * 10);
+      painter->drawText(target.x() + 0.05 * target.width(),
+                        target.y() + 0.55 * target.height(), progress);
     }
   }
 }

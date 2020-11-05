@@ -25,6 +25,7 @@ class HeatmapWidget : public QWidget {
   void paint(QPainter *painter);
 
  private slots:
+  void rx_init(int success);
   void rx_update(TemperatureMatrix mat, DetectionRatio detection, float x,
                  float y);
 
@@ -39,6 +40,7 @@ class HeatmapWidget : public QWidget {
   bool init_;
   QPixmap heatmap_;
   DetectionRatio detection_;
+  int success_;
 };
 
 }  // namespace suanzi

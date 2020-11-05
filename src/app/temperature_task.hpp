@@ -18,10 +18,10 @@ class TemperatureTask : public QObject {
  public:
   static TemperatureTask* get_instance();
   static bool idle();
-  static bool ready();
 
  signals:
   void tx_temperature(float temperature);
+  void tx_heatmap_init(int success);
   void tx_heatmap(TemperatureMatrix mat, DetectionRatio detection, float x,
                   float y);
 
@@ -36,6 +36,9 @@ class TemperatureTask : public QObject {
   ~TemperatureTask();
 
  private:
+  void connect();
+  bool try_reading(TemperatureMatrix &mat);
+
   TemperatureManufacturer m_;
   TemperatureReader::ptr temperature_reader_;
 
