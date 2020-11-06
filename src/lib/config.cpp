@@ -380,7 +380,7 @@ void Config::load_defaults(ConfigData &c) {
               .gamma =
                   {
                       .enable = true,
-                      .curve_type = 0,
+                      .curve_type = 3,
                   },
               .hlc =
                   {
@@ -437,7 +437,7 @@ void Config::load_defaults(ConfigData &c) {
               .gamma =
                   {
                       .enable = true,
-                      .curve_type = 0,
+                      .curve_type = 3,
                   },
               .hlc =
                   {

@@ -52,8 +52,8 @@ SZ_RETCODE DetectTask::adjust_isp_by_detection(const DetectionData *output) {
   auto bgr_cam = Config::get_camera(CAMERA_BGR);
   auto nir_cam = Config::get_camera(CAMERA_NIR);
 
-  ROICfg bgr_roi_cfg = {0.2, 0.2, 0.4, 0.4};
-  ROICfg nir_roi_cfg = {0.2, 0.2, 0.4, 0.4};
+  ROICfg bgr_roi_cfg = {0.3, 0.3, 0.4, 0.4};
+  ROICfg nir_roi_cfg = {0.3, 0.3, 0.4, 0.4};
 
   SZ_RETCODE ret;
 
