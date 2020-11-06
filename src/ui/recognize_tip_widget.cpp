@@ -55,6 +55,8 @@ RecognizeTipWidget::RecognizeTipWidget(int width, int height, QWidget *parent)
 RecognizeTipWidget::~RecognizeTipWidget() {}
 
 void RecognizeTipWidget::rx_display(PersonData person, bool if_duplicated) {
+  person_ = person;
+
   avatar_.load(person_.face_path.c_str());
 
   if ((!has_info_ || person_.face_path != person.face_path) &&
@@ -72,7 +74,6 @@ void RecognizeTipWidget::rx_display(PersonData person, bool if_duplicated) {
   reset_timer_.start();
 
   has_info_ = true;
-  person_ = person;
 }
 
 void RecognizeTipWidget::rx_update() {
