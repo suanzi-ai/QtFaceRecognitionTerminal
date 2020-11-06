@@ -93,8 +93,10 @@ void DetectTipWidget::rx_display(DetectionRatio detection, bool to_clear,
   int box_h = win_height_ - 1;
 
   // fix screen scale
-  detection.y = detection.y * win_height_ / win_width_ * 1080 / 1920;
-  detection.height = detection.height * win_height_ / win_width_ * 1080 / 1920;
+  float ratio = 1.f * win_height_ / win_width_ * 1080 / 1920;
+  float cy = detection.y + detection.height / 2;
+  detection.y = detection.y * (ratio + cy * (1 - ratio));
+  detection.height = detection.height * (ratio + cy * (1 - ratio));
 
   if (!to_clear) {
     // display pose for debug
