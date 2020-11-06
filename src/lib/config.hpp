@@ -167,6 +167,7 @@ typedef struct {
   int index;
   int rotate;
   int flip;
+  bool wdr;
   ISPConfig isp;
 } CameraConfig;
 

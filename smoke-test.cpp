@@ -27,6 +27,7 @@ void test() {
               .sensor_type = sensor0_type,
               .dev = 0,
               .flip = true,
+              .wdr = false,
               .channels =
                   {
                       {
@@ -45,6 +46,7 @@ void test() {
               .sensor_type = sensor1_type,
               .dev = 1,
               .flip = true,
+              .wdr = false,
               .channels =
                   {
                       {

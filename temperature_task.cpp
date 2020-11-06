@@ -62,6 +62,7 @@ Engine* create_engine() {
               .sensor_type = sensor0_type,
               .dev = bgr_cam.index,
               .flip = true,
+              .wdr = false,
               .channels =
                   {
                       {
@@ -98,6 +99,7 @@ Engine* create_engine() {
               .sensor_type = sensor1_type,
               .dev = nir_cam.index,
               .flip = true,
+              .wdr = false,
               .channels =
                   {
                       {
