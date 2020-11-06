@@ -366,6 +366,19 @@ void Config::load_defaults(ConfigData &c) {
                           1,  // 0: HIGHLIGHT_PRIOR 1: LOWLIGHT_PRIOR
                       .hist_ratio_slope = 0xFFF,  // default: 0x80
                       .max_hist_offset = 0x6,     // default: 0x10
+                      .antiflicker = false,
+                      .antiflicker_frequency = 50,
+                      .antiflicker_mode = 0,
+                  },
+              .wdr_exposure =
+                  {
+                      .exp_radio_type = "manual",
+                      .exp_radio = {3096, 64, 64},
+                      .exp_radio_max = 0x4000,
+                      .exp_radio_min = 0x40,
+                      .tolerance = 0xc,
+                      .speed = 0x20,
+                      .ratio_bias = 0x400,
                   },
               .wb =
                   {
@@ -423,6 +436,19 @@ void Config::load_defaults(ConfigData &c) {
                           1,  // 0: HIGHLIGHT_PRIOR 1: LOWLIGHT_PRIOR
                       .hist_ratio_slope = 0xFFF,  // default: 0x80
                       .max_hist_offset = 0x6,     // default: 0x10
+                      .antiflicker = false,
+                      .antiflicker_frequency = 50,
+                      .antiflicker_mode = 0,
+                  },
+              .wdr_exposure =
+                  {
+                      .exp_radio_type = "manual",
+                      .exp_radio = {3096, 64, 64},
+                      .exp_radio_max = 0x4000,
+                      .exp_radio_min = 0x40,
+                      .tolerance = 0xc,
+                      .speed = 0x20,
+                      .ratio_bias = 0x400,
                   },
               .wb =
                   {
