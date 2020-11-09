@@ -34,6 +34,13 @@ void VideoPlayer::paintEvent(QPaintEvent *event) {
   status_banner_->paint(&painter);
   recognize_tip_widget_->paint(&painter);
   heatmap_widget_->paint(&painter);
+
+  if (Config::get_app().show_isp_hist_window) {
+    isp_hist_widget_->show();
+    isp_hist_widget_->paint(&painter);
+  } else {
+    isp_hist_widget_->hide();
+  }
 }
 
 void VideoPlayer::init_workflow() {
@@ -180,4 +187,6 @@ void VideoPlayer::init_widgets() {
           SIGNAL(tx_heatmap(TemperatureMatrix, DetectionRatio, float, float)),
           (const QObject *)heatmap_widget_,
           SLOT(rx_update(TemperatureMatrix, DetectionRatio, float, float)));
+
+  isp_hist_widget_ = new ISPHistWidget(400, 300, this);
 }

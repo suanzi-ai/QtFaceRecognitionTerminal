@@ -23,7 +23,7 @@ class ISPHistWidget : public QWidget {
   Q_OBJECT
 
  public:
-  ISPHistWidget(QWidget *parent = nullptr);
+  ISPHistWidget(int width, int height, QWidget *parent = nullptr);
   ~ISPHistWidget() override;
 
   void paint(QPainter *painter);
@@ -31,6 +31,7 @@ class ISPHistWidget : public QWidget {
  private slots:
 
  private:
+  QFont font_;
   QChart *chart_;
   QLineSeries *series_;
 };

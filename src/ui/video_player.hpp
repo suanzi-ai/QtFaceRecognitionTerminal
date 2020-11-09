@@ -24,6 +24,7 @@
 #include "screen_saver_widget.hpp"
 #include "status_banner.hpp"
 #include "heatmap_widget.hpp"
+#include "isp_hist_widget.hpp"
 
 namespace suanzi {
 
@@ -49,6 +50,7 @@ class VideoPlayer : public QWidget {
   OutlineWidget *outline_widget_;
   StatusBanner *status_banner_;
   HeatmapWidget *heatmap_widget_;
+  ISPHistWidget *isp_hist_widget_;
 
   CameraReader *camera_reader_;
 
