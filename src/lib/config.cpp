@@ -17,7 +17,6 @@ void suanzi::to_json(json &j, const UserConfig &c) {
   SAVE_JSON_TO(j, "relay_default_state", c.relay_default_state);
   SAVE_JSON_TO(j, "relay_restore_time", c.relay_restore_time);
   SAVE_JSON_TO(j, "relay_switch_mode", c.relay_switch_mode);
-  SAVE_JSON_TO(j, "disabled_temperature", !c.enable_temperature);
   SAVE_JSON_TO(j, "enable_temperature", c.enable_temperature);
   SAVE_JSON_TO(j, "temperature_max", c.temperature_max);
   SAVE_JSON_TO(j, "temperature_min", c.temperature_min);
