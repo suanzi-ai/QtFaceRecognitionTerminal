@@ -94,7 +94,7 @@ typedef struct {
   SZ_FLOAT device_face_width;
   SZ_FLOAT temperature_distance;
   SZ_FLOAT toffset;
-  SZ_UINT16 temperature_delay;
+  SZ_FLOAT temperature_delay;
   int manufacturer;
 } TemperatureConfig;
 
