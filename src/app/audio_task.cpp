@@ -45,6 +45,15 @@ AudioTask::AudioTask(QThread* thread, QObject* parent) : is_running_(false) {
 
 AudioTask::~AudioTask() {}
 
+void AudioTask::beep() {
+  auto user = Config::get_user();
+  if (!user.enable_audio) return;
+
+  is_running_ = true;
+  play_audio(beep_audio_);
+  is_running_ = false;
+}
+
 void AudioTask::load_audio() {
   std::string lang = Config::get_user_lang();
   std::string prefix = ":asserts/" + lang;
@@ -87,6 +96,9 @@ void AudioTask::load_audio() {
     warn_distance_audio_.duration = 3000;
     warn_mask_audio_.duration = 2000;
   }
+
+  read_audio(":asserts/beep.aac", beep_audio_);
+  beep_audio_.duration = 250;
 }
 
 bool AudioTask::read_audio(const std::string& name, Audio& audio) {

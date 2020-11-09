@@ -22,6 +22,8 @@ class AudioTask : QObject {
   static AudioTask* get_instance();
   static bool idle();
 
+  void beep();
+
  private slots:
   void rx_report_person(PersonData person);
   void rx_report_temperature(PersonData person);
@@ -43,6 +45,8 @@ class AudioTask : QObject {
   Audio temperature_abnormal_audio_;
   Audio warn_distance_audio_;
   Audio warn_mask_audio_;
+
+  Audio beep_audio_;
 
   bool is_running_;
 };

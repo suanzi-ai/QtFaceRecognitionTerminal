@@ -8,6 +8,7 @@ target_include_directories(
 target_link_libraries(
   service
   PUBLIC lib
+  PUBLIC app
   PUBLIC httplib::httplib
   PUBLIC QuFaceSDK::face
   PUBLIC QuFaceSDK::database)

@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <quface-io/engine.hpp>
 
+#include "audio_task.hpp"
 #include "static_config.hpp"
 
 using namespace suanzi;
@@ -92,6 +93,7 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
       SZ_RETCODE ret;
       auto j = json::parse(req.body);
       ret = cfg->save_diff(j);
+      // cfg->dispatch("led diff");
       if (ret != SZ_RETCODE_OK) {
         response_failed(res, "save error " + std::to_string(ret));
         return;
@@ -198,7 +200,14 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
       SZ_RETCODE ret;
       auto j = json::parse(req.body);
 
-      int volume_percent = j["percent"];
+      int volume_percent;
+      if (!Config::read_audio_volume(volume_percent)) {
+        response_failed(res, "read volume failed");
+        return;
+      }
+
+      if (volume_percent == j["percent"]) return;
+      volume_percent = j["percent"];
       if (volume_percent < 0 || volume_percent > 100) {
         response_failed(res, "volume invalid");
         return;
@@ -214,6 +223,9 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
         response_failed(res, "set volume failed");
         return;
       }
+
+      auto audio = AudioTask::get_instance();
+      if (audio->idle()) audio->beep();
 
       response_ok(res);
     } catch (const std::exception& exc) {

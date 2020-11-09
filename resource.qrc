@@ -98,4 +98,7 @@
 <qresource>
     <file>asserts/jp/get_closer.aac</file>
 </qresource>
+<qresource>
+    <file>asserts/beep.aac</file>
+</qresource>
 </RCC>
