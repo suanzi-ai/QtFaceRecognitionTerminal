@@ -91,6 +91,9 @@ void VideoPlayer::init_workflow() {
           (const QObject *)face_timer_,
           SLOT(rx_frame(PingPangBuffer<DetectionData> *)));
 
+  // 创建LED线程
+  led_task_ = LEDTask::get_instance();
+
   // 创建语音播报线程
   audio_task_ = AudioTask::get_instance();
   connect((const QObject *)record_task_, SIGNAL(tx_report_person(PersonData)),

@@ -3,6 +3,7 @@
 #include <quface-io/engine.hpp>
 
 #include "config.hpp"
+#include "led_task.hpp"
 
 using namespace suanzi;
 using namespace suanzi::io;
@@ -43,14 +44,12 @@ void FaceTimer::rx_frame(PingPangBuffer<DetectionData> *buffer) {
                                 current_clock - disappear_begin_)
                                 .count();
       emit tx_face_disappear(disappear_duration_);
-      Engine::instance()->gpio_set(GpioPinLightBox, false);
+      LEDTask::get_instance()->turn_off();
     }
   } else {
     if (disappear_counter_ >= Config::get_extract().max_lost_age) {
       emit tx_face_appear(disappear_duration_);
-      Engine::instance()->gpio_set(GpioPinLightBox,
-                                   Config::get_user().enable_led);
-
+      LEDTask::get_instance()->turn_on();
       disappear_counter_ = 0;
       disappear_duration_ = 0;
     }

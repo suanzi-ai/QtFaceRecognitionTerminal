@@ -1,3 +1,6 @@
+#ifndef GPIO_TASK_HPP
+#define GPIO_TASK_HPP
+
 #include <QObject>
 #include <QThread>
 
@@ -22,3 +25,5 @@ class GPIOTask : QObject {
 };
 
 }  // namespace suanzi
+
+#endif

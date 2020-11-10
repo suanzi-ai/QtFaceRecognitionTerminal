@@ -4,6 +4,7 @@
 
 #include "face_server.hpp"
 #include "http_server.hpp"
+#include "led_task.hpp"
 #include "video_player.hpp"
 
 using namespace suanzi;
@@ -19,6 +20,16 @@ void load_translator(QApplication& app) {
     SZ_LOG_WARN("translator load failed for lang={}", lang);
   }
   app.installTranslator(&translator);
+}
+
+void trigger_led() {
+  static bool last_status = Config::get_user().enable_led;
+
+  bool status = Config::get_user().enable_led;
+  if (status && !last_status) LEDTask::get_instance()->turn_on(2000);
+  if (!status) LEDTask::get_instance()->turn_off();
+
+  last_status = status;
 }
 
 Config* read_cfg(int argc, char* argv[]) {
@@ -201,6 +212,9 @@ int main(int argc, char* argv[]) {
   load_translator(app);
   config->appendListener("reload", [&app]() { load_translator(app); });
 
+  // Step 4.1: LED配置修改触发反馈
+  config->appendListener("reload", trigger_led);
+
   // Step 5: 播放自定义开机画面
   std::string filename = Config().get_app().boot_image_path;
   if (QFile(filename.c_str()).exists())
@@ -234,7 +248,8 @@ int main(int argc, char* argv[]) {
 
       server->stop();
     }
-  }).detach();
+  })
+      .detach();
 
   return app.exec();
 }

@@ -13,6 +13,7 @@
 #include "detect_task.hpp"
 #include "face_timer.hpp"
 #include "gpio_task.hpp"
+#include "led_task.hpp"
 #include "recognize_task.hpp"
 #include "record_task.hpp"
 #include "temperature_task.hpp"
@@ -62,6 +63,7 @@ class VideoPlayer : public QWidget {
   UploadTask *upload_task_;
   AudioTask *audio_task_;
   GPIOTask *gpio_task_;
+  LEDTask* led_task_;
 
   TemperatureTask *temperature_task_;
 };
