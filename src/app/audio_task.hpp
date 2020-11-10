@@ -39,6 +39,10 @@ class AudioTask : QObject {
   bool read_audio(const std::string& name, Audio& audio);
   void play_audio(Audio& audio);
 
+  void play_pass(PersonData person);
+
+  Audio pass_audio_;
+
   Audio success_audio_;
   Audio fail_audio_;
   Audio temperature_normal_audio_;

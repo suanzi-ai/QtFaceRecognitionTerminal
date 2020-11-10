@@ -60,6 +60,7 @@ typedef struct {
   bool enable_temperature_audio;
   bool enable_mask_audio;
   bool enable_distance_audio;
+  bool enable_pass_audio;
   bool enable_led;
   bool enable_screensaver;
   SZ_UINT16 screensaver_timeout;

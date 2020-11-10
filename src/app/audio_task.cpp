@@ -87,8 +87,11 @@ void AudioTask::load_audio() {
     warn_distance_audio_.duration = 2000;
     warn_mask_audio_.duration = 3000;
   } else if (lang == "jp") {
+    read_audio(prefix + "/pass.aac", pass_audio_);
+    pass_audio_.duration = 2000;
+
     success_audio_.duration = 1500;
-    fail_audio_.duration = 2000;
+    fail_audio_.duration = 1500;
 
     temperature_normal_audio_.duration = 2000;
     temperature_abnormal_audio_.duration = 2000;
@@ -126,9 +129,13 @@ void AudioTask::rx_report_person(PersonData person) {
   if (user.enable_record_audio) {
     if (!person.is_status_normal())
       play_audio(fail_audio_);
-    else
+    else if (Config::get_user_lang() != "jp" || user.enable_temperature)
       play_audio(success_audio_);
   }
+
+  if (user.enable_pass_audio && !user.enable_temperature &&
+      Config::get_user_lang() == "jp")
+    play_pass(person);
 
   is_running_ = false;
 }
@@ -145,6 +152,9 @@ void AudioTask::rx_report_temperature(PersonData person) {
     else
       play_audio(temperature_normal_audio_);
   }
+
+  if (user.enable_pass_audio && Config::get_user_lang() == "jp")
+    play_pass(person);
 
   is_running_ = false;
 }
@@ -167,4 +177,17 @@ void AudioTask::rx_warn_distance() {
   is_running_ = true;
   play_audio(warn_distance_audio_);
   is_running_ = false;
+}
+
+void AudioTask::play_pass(PersonData person) {
+  auto user = Config::get_user();
+
+  bool all_pass = true;
+  if (user.relay_switch_cond & RelaySwitchCond::Status)
+    all_pass = all_pass && person.is_status_normal();
+  if (user.enable_temperature &&
+      (user.relay_switch_cond & RelaySwitchCond::Temperature))
+    all_pass = all_pass && person.is_temperature_normal();
+
+  if (all_pass) play_audio(pass_audio_);
 }
