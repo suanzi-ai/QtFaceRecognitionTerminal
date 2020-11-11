@@ -89,10 +89,13 @@ SZ_RETCODE FaceService::extract_image_feature(SZ_UINT32 face_id,
                                               std::vector<SZ_BYTE> &buffer,
                                               FaceFeature &feature,
                                               std::string &error_message) {
+  SZ_LOG_INFO("start extract");
   cv::Mat raw_data(1, buffer.size(), CV_8UC1, (void *)buffer.data());
   cv::Mat decoded_image = cv::imdecode(raw_data, cv::IMREAD_COLOR);
+  SZ_LOG_INFO("end extract");
   if (decoded_image.empty()) {
-    SZ_LOG_ERROR("Decode image data failed!");
+    error_message = "cv::imdecode failed!";
+    SZ_LOG_ERROR(error_message);
     return SZ_RETCODE_FAILED;
   }
 
@@ -116,7 +119,7 @@ SZ_RETCODE FaceService::extract_image_feature(SZ_UINT32 face_id,
     }
 
     if (detections.size() == 0) {
-      error_message = "no face";
+      error_message = "no face detected";
       SZ_LOG_ERROR(error_message);
       ret = SZ_RETCODE_FAILED;
       break;
@@ -183,6 +186,7 @@ SZ_RETCODE FaceService::extract_image_feature(SZ_UINT32 face_id,
   } while (0);
 
   delete bgr;
+  SZ_LOG_INFO("Success!");
 
   return ret;
 }
@@ -220,6 +224,7 @@ SZ_RETCODE FaceService::read_buffer(const PersonImageInfo &face,
 
 json FaceService::db_add(const json &body) {
   try {
+    SZ_LOG_INFO("start db_add");
     SZ_UINT32 db_size;
     db_->size(db_size);
     if (db_size >= MAX_DATABASE_SIZE) {
@@ -250,6 +255,7 @@ json FaceService::db_add(const json &body) {
     std::string error_message;
     ret = extract_image_feature(face.id, buffer, feature, error_message);
     if (ret != SZ_RETCODE_OK) {
+      SZ_LOG_ERROR("extract_image_feature failed");
       return {
           {"ok", false},
           {"message", error_message},
