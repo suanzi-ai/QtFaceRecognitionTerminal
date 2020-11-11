@@ -146,7 +146,7 @@ void RecognizeTipWidget::paint(QPainter *painter) {
 
   // draw SN, FW and ip
   char buffer[100];
-  sprintf(buffer, "SN:20200602%s FW:1.9.8%s", mac_.substr(0, 2).c_str(),
+  sprintf(buffer, "SN:20200602%s FW:1.0.0%s", mac_.substr(0, 2).c_str(),
           ip_.c_str());
   font_.setPointSize(0.02125 * w);
   painter->setFont(font_);
