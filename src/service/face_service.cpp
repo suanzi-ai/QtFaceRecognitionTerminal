@@ -163,10 +163,10 @@ SZ_RETCODE FaceService::extract_image_feature(SZ_UINT32 face_id,
     int avatar_size =
         std::min({detections[0].bbox.width, detections[0].bbox.height, center_x,
                   center_y, (float)width - center_x, (float)height - center_y});
-    int avatar_x = center_x - avatar_size;
-    int avatar_y = center_y - avatar_size;
-    int avatar_w = avatar_size * 2;
-    int avatar_h = avatar_size * 2;
+    int avatar_x = std::max(center_x - avatar_size, 0.f);
+    int avatar_y = std::max(center_y - avatar_size, 0.f);
+    int avatar_w = std::min(avatar_size * 2, width - avatar_x);
+    int avatar_h = std::min(avatar_size * 2, height - avatar_y);
 
     if (avatar_w > avatar_h)
       cv::resize(decoded_image({avatar_x, avatar_y, avatar_w, avatar_h}),
@@ -186,6 +186,7 @@ SZ_RETCODE FaceService::extract_image_feature(SZ_UINT32 face_id,
   } while (0);
 
   delete bgr;
+  decoded_image.release();
   SZ_LOG_INFO("Success!");
 
   return ret;
@@ -203,6 +204,9 @@ SZ_RETCODE FaceService::read_image_as_base64(SZ_UINT32 id,
 
 SZ_RETCODE FaceService::read_buffer(const PersonImageInfo &face,
                                     std::vector<SZ_BYTE> &buffer) {
+
+  buffer.clear();
+
   SZ_RETCODE ret;
   if (face.face_path.size() > 0) {
     std::ifstream fd(image_store_dir_ + face.face_path);
@@ -210,11 +214,16 @@ SZ_RETCODE FaceService::read_buffer(const PersonImageInfo &face,
       SZ_LOG_DEBUG("Read file {} failed", face.face_path);
       return SZ_RETCODE_FAILED;
     }
-    buffer = std::vector<SZ_BYTE>(std::istreambuf_iterator<char>(fd),
-                                  std::istreambuf_iterator<char>{});
+
+    std::vector<SZ_BYTE> temp(std::istreambuf_iterator<char>(fd),
+                              std::istreambuf_iterator<char>{});
+    buffer = temp;
+    temp.clear();
   } else if (face.face_image.size() > 0) {
     auto buf = base64_decode(face.face_image.c_str());
-    buffer = std::vector<SZ_BYTE>(buf.begin(), buf.end());
+    std::vector<SZ_BYTE> temp(buf.begin(), buf.end());
+    buffer = temp;
+    temp.clear();
   } else {
     SZ_LOG_ERROR("No image found");
     return SZ_RETCODE_FAILED;
@@ -241,7 +250,7 @@ json FaceService::db_add(const json &body) {
     SZ_RETCODE ret;
     FaceFeature feature;
     SZ_INT32 feature_size;
-    std::vector<SZ_BYTE> buffer;
+    static std::vector<SZ_BYTE> buffer;
 
     ret = read_buffer(face, buffer);
     if (ret != SZ_RETCODE_OK) {
@@ -314,7 +323,7 @@ json FaceService::db_add_many(const json &body) {
 
     json failedPersons;
 
-    std::vector<SZ_BYTE> buffer;
+    static std::vector<SZ_BYTE> buffer;
 
     for (auto &face : faceArrary) {
       SZ_UINT32 db_size;
