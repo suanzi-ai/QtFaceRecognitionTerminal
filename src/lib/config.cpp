@@ -735,20 +735,25 @@ bool Config::load_screen_type(LCDScreenType &lcd_screen_type) {
         // 2: mipi-10inch-800x1280
         // 3: rh-9881-8inch-800x1280
         // 4: mipi-5inch-480x854
-
+        // 5: LX_ICN9700_5INCH_480x854
         if (lcd_type == "1") {
-          lcd_screen_type = SML_LCD_MIPI_8INCH_800X1280;
-          SZ_LOG_INFO("Load screen type SML_LCD_MIPI_8INCH_800X1280");
+          lcd_screen_type = RH_8080B1_8INCH_800X1280;
+          SZ_LOG_INFO("Load screen type RH_8080B1_8INCH_800X1280");
           return true;
         } else if (lcd_type == "3") {
           lcd_screen_type = RH_9881_8INCH_800X1280;
           SZ_LOG_INFO("Load screen type RH_9881_8INCH_800X1280");
           return true;
         } else if (lcd_type == "4") {
-          lcd_screen_type = SML_LCD_MIPI_5INCH_480X854;
-          SZ_LOG_INFO("Load screen type SML_LCD_MIPI_5INCH_480X854");
+          lcd_screen_type = RH_ST7701S_MIPI_5INCH_480X854;
+          SZ_LOG_INFO("Load screen type RH_ST7701S_MIPI_5INCH_480X854");
           return true;
-        } else {
+        } else if (lcd_type == "5") {
+          lcd_screen_type = LX_ICN9700_5INCH_480x854;
+          SZ_LOG_INFO("Load screen type LX_ICN9700_5INCH_480x854");
+          return true;
+        }	
+		else {
           SZ_LOG_ERROR("lcd type unknown {}", lcd_type);
         }
         return false;

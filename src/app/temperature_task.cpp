@@ -100,14 +100,14 @@ bool TemperatureTask::try_reading(TemperatureMatrix& mat) {
 
   int trial = 0;
   while (SZ_RETCODE_OK != temperature_reader_->read(mat)) {
-    QThread::msleep(200);
+    QThread::msleep(10);
     if (++trial == 10) {
       temperature_reader_.reset();
       temperature_reader_ = nullptr;
       break;
     }
   }
-  QThread::msleep(200);
+  QThread::msleep(10);
   return trial < 100;
 }
 
