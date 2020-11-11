@@ -13,6 +13,13 @@
 #include "audio_task.hpp"
 #include "config.hpp"
 
+#define CONTAIN_KEY(dict, key) ((dict).find((key)) != (dict).end())
+#define SECONDS_DIFF(t1, t2) \
+  (std::chrono::duration_cast<std::chrono::seconds>((t1) - (t2)).count())
+#define GOOD_TEMPERATURE(t)                     \
+  (Config::get_user().temperature_min <= (t) && \
+   Config::get_user().temperature_max >= (t))
+
 using namespace suanzi;
 using namespace suanzi::io;
 
@@ -363,27 +370,30 @@ bool RecordTask::if_duplicated(const SZ_UINT32 &face_id, float &temperature) {
   bool ret = false;
 
   auto current_query_clock = std::chrono::steady_clock::now();
-  if (query_clock_.find(face_id) != query_clock_.end()) {
+  if (CONTAIN_KEY(query_clock_, face_id)) {
     auto last_query_clock = query_clock_[face_id];
-    auto duration = std::chrono::duration_cast<std::chrono::seconds>(
-                        current_query_clock - last_query_clock)
-                        .count();
+    auto duration = SECONDS_DIFF(current_query_clock, last_query_clock);
+
+    // find stable temperature in history
+    if (GOOD_TEMPERATURE(temperature)) {
+      if (CONTAIN_KEY(known_temperature_, face_id) && duration <= 30)
+        known_temperature_[face_id] =
+            std::max(temperature, known_temperature_[face_id]);
+      else
+        known_temperature_[face_id] = temperature;
+      temperature = known_temperature_[face_id];
+    }
 
     if (duration > cfg.duplication_interval) {
       query_clock_[face_id] = current_query_clock;
-      known_temperature_[face_id] = temperature;
       return false;
-    } else {
-      if (std::abs(temperature - known_temperature_[face_id]) < 1)
-        temperature = known_temperature_[face_id];
-      else
-        known_temperature_[face_id] = temperature;
-
+    } else
       return true;
-    }
+
   } else {
     query_clock_[face_id] = current_query_clock;
-    known_temperature_[face_id] = temperature;
+    if (GOOD_TEMPERATURE(temperature))
+      known_temperature_[face_id] = temperature;
     return false;
   }
 }
@@ -411,31 +421,33 @@ bool RecordTask::if_duplicated(const FaceFeature &feature, float &temperature) {
     }
   }
 
-  if (face_id > 0 &&
-      unknown_query_clock_.find(face_id) != unknown_query_clock_.end()) {
+  if (face_id > 0 && CONTAIN_KEY(unknown_query_clock_, face_id)) {
     auto last_query_clock = unknown_query_clock_[face_id];
-    auto duration = std::chrono::duration_cast<std::chrono::seconds>(
-                        current_query_clock - last_query_clock)
-                        .count();
+    auto duration = SECONDS_DIFF(current_query_clock, last_query_clock);
+
+    // find stable temperature in history
+    if (GOOD_TEMPERATURE(temperature)) {
+      if (CONTAIN_KEY(unknown_temperature_, face_id) && duration <= 30)
+        unknown_temperature_[face_id] =
+            std::max(temperature, unknown_temperature_[face_id]);
+      else
+        unknown_temperature_[face_id] = temperature;
+      temperature = unknown_temperature_[face_id];
+    }
 
     if (duration > cfg.duplication_interval) {
       unknown_query_clock_[face_id] = current_query_clock;
-      unknown_temperature_[face_id] = temperature;
       return false;
-    } else {
-      if (std::abs(temperature - unknown_temperature_[face_id]) < 1)
-        temperature = unknown_temperature_[face_id];
-      else
-        unknown_temperature_[face_id] = temperature;
-
+    } else
       return true;
-    }
+
   } else {
     if (face_id == -1) face_id = (db_size % 100) + 1;
 
     unknown_database_->add(face_id, feature);
     unknown_query_clock_[face_id] = current_query_clock;
-    unknown_temperature_[face_id] = temperature;
+    if (GOOD_TEMPERATURE(temperature))
+      unknown_temperature_[face_id] = temperature;
     return false;
   }
 }
