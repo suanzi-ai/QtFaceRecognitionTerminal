@@ -18,6 +18,7 @@ void suanzi::to_json(json &j, const UserConfig &c) {
   SAVE_JSON_TO(j, "relay_restore_time", c.relay_restore_time);
   SAVE_JSON_TO(j, "relay_switch_mode", c.relay_switch_mode);
   SAVE_JSON_TO(j, "enable_temperature", c.enable_temperature);
+  SAVE_JSON_TO(j, "temperature_bias", c.temperature_bias);
   SAVE_JSON_TO(j, "temperature_max", c.temperature_max);
   SAVE_JSON_TO(j, "temperature_min", c.temperature_min);
   SAVE_JSON_TO(j, "enable_audio", c.enable_audio);
@@ -52,6 +53,7 @@ void suanzi::from_json(const json &j, UserConfig &c) {
   } else {
     LOAD_JSON_TO(j, "enable_temperature", c.enable_temperature);
   }
+  LOAD_JSON_TO(j, "temperature_bias", c.temperature_bias);
   LOAD_JSON_TO(j, "temperature_max", c.temperature_max);
   LOAD_JSON_TO(j, "temperature_min", c.temperature_min);
   LOAD_JSON_TO(j, "enable_audio", c.enable_audio);
@@ -102,7 +104,6 @@ void suanzi::to_json(json &j, const TemperatureConfig &c) {
   SAVE_JSON_TO(j, "device_face_width", c.device_face_width);
   SAVE_JSON_TO(j, "temperature_distance", c.temperature_distance);
   SAVE_JSON_TO(j, "manufacturer", c.manufacturer);
-  SAVE_JSON_TO(j, "toffset", c.toffset);
   SAVE_JSON_TO(j, "temperature_delay", c.temperature_delay);
 }
 
@@ -113,7 +114,6 @@ void suanzi::from_json(const json &j, TemperatureConfig &c) {
   LOAD_JSON_TO(j, "device_face_width", c.device_face_width);
   LOAD_JSON_TO(j, "temperature_distance", c.temperature_distance);
   LOAD_JSON_TO(j, "manufacturer", c.manufacturer);
-  LOAD_JSON_TO(j, "toffset", c.toffset);
   LOAD_JSON_TO(j, "temperature_delay", c.temperature_delay);
 }
 
@@ -295,7 +295,6 @@ void Config::load_defaults(ConfigData &c) {
       .device_face_height = 0.35,
       .device_face_width = 0.48,
       .temperature_distance = 0.68,
-      .toffset = 0,
       .temperature_delay = 5,
       .manufacturer = 1,
   };
@@ -313,6 +312,7 @@ void Config::load_defaults(ConfigData &c) {
       .relay_default_state = RelayState::Low,
       .relay_restore_time = 10,
       .enable_temperature = false,
+      .temperature_bias = 0,
       .temperature_max = 37.3,
       .temperature_min = 35.0,
       .enable_audio = true,
@@ -752,7 +752,7 @@ bool Config::load_screen_type(LCDScreenType &lcd_screen_type) {
           lcd_screen_type = LX_ICN9700_5INCH_480x854;
           SZ_LOG_INFO("Load screen type LX_ICN9700_5INCH_480x854");
           return true;
-        }	
+        }
 		else {
           SZ_LOG_ERROR("lcd type unknown {}", lcd_type);
         }

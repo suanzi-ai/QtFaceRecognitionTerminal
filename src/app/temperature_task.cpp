@@ -165,7 +165,7 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
     //             face_temperature_);
 
     face_temperature_ = surface_to_inner(measure_to_surface(
-        face_temperature_ + Config::get_temperature().toffset));
+        face_temperature_ + Config::get_user().temperature_bias));
 
     face_temperature_ = ((float)((int)((face_temperature_ + 0.05) * 10))) / 10;
     emit tx_temperature(face_temperature_);

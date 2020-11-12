@@ -53,6 +53,7 @@ typedef struct {
   RelayState relay_default_state;
   SZ_UINT16 relay_restore_time;
   bool enable_temperature;
+  SZ_FLOAT temperature_bias;
   float temperature_max;
   float temperature_min;
   bool enable_audio;
@@ -94,7 +95,6 @@ typedef struct {
   SZ_FLOAT device_face_height;
   SZ_FLOAT device_face_width;
   SZ_FLOAT temperature_distance;
-  SZ_FLOAT toffset;
   SZ_FLOAT temperature_delay;
   int manufacturer;
 } TemperatureConfig;
