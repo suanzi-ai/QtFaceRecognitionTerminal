@@ -96,19 +96,12 @@ void TemperatureTask::connect() {
 }
 
 bool TemperatureTask::try_reading(TemperatureMatrix& mat) {
-  if (temperature_reader_ == nullptr) return false;
-
+  const int MAX_TRIAL = 10;
   int trial = 0;
-  while (SZ_RETCODE_OK != temperature_reader_->read(mat)) {
+  while (SZ_RETCODE_OK != temperature_reader_->read(mat) && ++trial < MAX_TRIAL)
     QThread::msleep(100);
-    if (++trial == 10) {
-      temperature_reader_.reset();
-      temperature_reader_ = nullptr;
-      break;
-    }
-  }
-  QThread::msleep(100);
-  return trial < 10;
+
+  return trial < MAX_TRIAL;
 }
 
 void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
@@ -117,14 +110,8 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
   if (ambient_temperature_ == 0) connect();
 
   static TemperatureMatrix mat;
-  while (!try_reading(mat)) {
-    temperature_reader_ = nullptr;
-    SZ_LOG_WARN("re-connecting for successive failure");
-    while (temperature_reader_ == nullptr) {
-      temperature_reader_ = Engine::instance()->get_temperature_reader(m_);
-    }
-    QThread::msleep(2000);
-  }
+  while (!try_reading(mat)) QThread::msleep(100);
+
 
   if (!to_clear) {
     detection.x += 0.125f;

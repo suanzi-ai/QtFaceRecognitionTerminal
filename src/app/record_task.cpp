@@ -472,7 +472,7 @@ void RecordTask::rx_temperature(float body_temperature) {
 void RecordTask::rx_start_temperature() {
   if (!Config::get_user().enable_temperature) return;
 
-  SZ_LOG_INFO("start temperature");
+  // SZ_LOG_INFO("start temperature");
   if (!temperature_timer_) {
     temperature_timer_ = new QTimer();
     temperature_timer_->setSingleShot(true);
@@ -494,7 +494,7 @@ void RecordTask::rx_reset_temperature() {
 }
 
 void RecordTask::rx_end_temperature() {
-  SZ_LOG_INFO("end temperature");
+  // SZ_LOG_INFO("end temperature");
   float max_temperature = 0;
   for (float temperature : temperature_history_)
     max_temperature = std::max(max_temperature_, temperature);
