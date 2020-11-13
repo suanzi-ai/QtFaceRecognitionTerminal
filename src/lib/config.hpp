@@ -5,13 +5,12 @@
 
 #include <fstream>
 #include <mutex>
-#include <string>
-
 #include <nlohmann/json.hpp>
 #include <quface-io/isp_option.hpp>
 #include <quface-io/option.hpp>
 #include <quface/common.hpp>
 #include <quface/logger.hpp>
+#include <string>
 
 #define APP_DIR_PREFIX "/user/quface-app"
 
@@ -72,6 +71,12 @@ typedef struct {
 void to_json(json &j, const UserConfig &c);
 void from_json(const json &j, UserConfig &c);
 
+typedef enum ISPInfoWindowType {
+  ISPInfoWindowNONE,
+  ISPInfoWindowBGR,
+  ISPInfoWindowNIR,
+} ISPInfoWindowType;
+
 typedef struct {
   int recognize_tip_top_percent;
   SZ_UINT16 server_port;
@@ -81,7 +86,7 @@ typedef struct {
   bool enable_anti_spoofing;
   bool show_infrared_window;
   int infrared_window_percent;
-  bool show_isp_hist_window;
+  ISPInfoWindowType show_isp_info_window;
   std::string boot_image_path;
   std::string screensaver_image_path;
 } AppConfig;

@@ -78,7 +78,7 @@ void suanzi::to_json(json &j, const AppConfig &c) {
   SAVE_JSON_TO(j, "enable_anti_spoofing", c.enable_anti_spoofing);
   SAVE_JSON_TO(j, "show_infrared_window", c.show_infrared_window);
   SAVE_JSON_TO(j, "infrared_window_percent", c.infrared_window_percent);
-  SAVE_JSON_TO(j, "show_isp_hist_window", c.show_isp_hist_window);
+  SAVE_JSON_TO(j, "show_isp_info_window", c.show_isp_info_window);
   SAVE_JSON_TO(j, "boot_image_path", c.boot_image_path);
   SAVE_JSON_TO(j, "screensaver_image_path", c.screensaver_image_path);
 }
@@ -92,7 +92,7 @@ void suanzi::from_json(const json &j, AppConfig &c) {
   LOAD_JSON_TO(j, "enable_anti_spoofing", c.enable_anti_spoofing);
   LOAD_JSON_TO(j, "show_infrared_window", c.show_infrared_window);
   LOAD_JSON_TO(j, "infrared_window_percent", c.infrared_window_percent);
-  LOAD_JSON_TO(j, "show_isp_hist_window", c.show_isp_hist_window);
+  LOAD_JSON_TO(j, "show_isp_info_window", c.show_isp_info_window);
   LOAD_JSON_TO(j, "boot_image_path", c.boot_image_path);
   LOAD_JSON_TO(j, "screensaver_image_path", c.screensaver_image_path);
 }
@@ -284,7 +284,7 @@ void Config::load_defaults(ConfigData &c) {
       .enable_anti_spoofing = false,
       .show_infrared_window = false,
       .infrared_window_percent = 25,
-      .show_isp_hist_window = false,
+      .show_isp_info_window = ISPInfoWindowNONE,
       .boot_image_path = "boot.jpg",
       .screensaver_image_path = "background.jpg",
   };
@@ -366,11 +366,12 @@ void Config::load_defaults(ConfigData &c) {
                       .black_speed_bias = 0x90,  // default: 0x90
                       .tolerance = 0x2,          // default: 0x2
                       .compensation = 0x38,      // default: 0x38
-                      .ev_bias = 0x600,          // default: 0x400
+                      .ev_bias = 0x400,          // default: 0x400
                       .ae_strategy_mode =
                           1,  // 0: HIGHLIGHT_PRIOR 1: LOWLIGHT_PRIOR
-                      .hist_ratio_slope = 0xFFF,  // default: 0x80
-                      .max_hist_offset = 0x6,     // default: 0x10
+                      .hist_ratio_slope =
+                          0xFF,                 // default: 0x80 range: 0~0xffff
+                      .max_hist_offset = 0x10,  // default: 0x10 range: 0~0xff
                       .antiflicker = false,
                       .antiflicker_frequency = 50,
                       .antiflicker_mode = 0,
@@ -437,11 +438,12 @@ void Config::load_defaults(ConfigData &c) {
                       .black_speed_bias = 0x90,  // default: 0x90
                       .tolerance = 0x2,          // default: 0x2
                       .compensation = 0x38,      // default: 0x38
-                      .ev_bias = 0x600,          // default: 0x400
+                      .ev_bias = 0x400,          // default: 0x400
                       .ae_strategy_mode =
                           1,  // 0: HIGHLIGHT_PRIOR 1: LOWLIGHT_PRIOR
-                      .hist_ratio_slope = 0xFFF,  // default: 0x80
-                      .max_hist_offset = 0x6,     // default: 0x10
+                      .hist_ratio_slope =
+                          0xFFF,                // default: 0x80 range: 0~0xffff
+                      .max_hist_offset = 0x10,  // default: 0x10 range: 0~0xff
                       .antiflicker = false,
                       .antiflicker_frequency = 50,
                       .antiflicker_mode = 0,
@@ -752,8 +754,7 @@ bool Config::load_screen_type(LCDScreenType &lcd_screen_type) {
           lcd_screen_type = LX_ICN9700_5INCH_480x854;
           SZ_LOG_INFO("Load screen type LX_ICN9700_5INCH_480x854");
           return true;
-        }
-		else {
+        } else {
           SZ_LOG_ERROR("lcd type unknown {}", lcd_type);
         }
         return false;
