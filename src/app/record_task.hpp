@@ -19,6 +19,8 @@ class RecordTask : QObject {
   static RecordTask *get_instance();
   static bool idle();
 
+  static void clear_cache();
+
  private slots:
   void rx_frame(PingPangBuffer<RecognizeData> *buffer);
   void rx_reset_recognizing();

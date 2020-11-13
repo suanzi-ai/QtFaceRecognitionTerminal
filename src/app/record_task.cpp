@@ -28,6 +28,21 @@ RecordTask *RecordTask::get_instance() {
 
 bool RecordTask::idle() { return !get_instance()->is_running_; }
 
+void RecordTask::clear_cache() {
+  auto task = get_instance();
+
+  task->db_->clear();
+  task->unknown_database_->clear();
+
+  task->query_clock_.clear();
+  task->known_temperature_.clear();
+
+  task->unknown_query_clock_.clear();
+  task->unknown_temperature_.clear();
+
+  task->max_temperature_ = 0;
+}
+
 RecordTask::RecordTask(QThread *thread, QObject *parent)
     : is_running_(false),
       is_measuring_temperature_(false),

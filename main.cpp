@@ -32,6 +32,8 @@ void trigger_led() {
   last_status = status;
 }
 
+void reset_temperature() { RecordTask::clear_cache(); }
+
 Config* read_cfg(int argc, char* argv[]) {
   // 基础配置文件，默认：config.json
   std::string cfg_file = "config.json";
@@ -214,6 +216,7 @@ int main(int argc, char* argv[]) {
 
   // Step 4.1: LED配置修改触发反馈
   config->appendListener("reload", trigger_led);
+  config->appendListener("reload", reset_temperature);
 
   // Step 5: 播放自定义开机画面
   std::string filename = Config().get_app().boot_image_path;
