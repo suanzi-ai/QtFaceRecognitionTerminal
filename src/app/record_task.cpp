@@ -16,9 +16,7 @@
 #define CONTAIN_KEY(dict, key) ((dict).find((key)) != (dict).end())
 #define SECONDS_DIFF(t1, t2) \
   (std::chrono::duration_cast<std::chrono::seconds>((t1) - (t2)).count())
-#define GOOD_TEMPERATURE(t)                     \
-  (Config::get_user().temperature_min <= (t) && \
-   Config::get_user().temperature_max >= (t))
+#define GOOD_TEMPERATURE(t) (Config::get_user().temperature_max >= (t))
 
 using namespace suanzi;
 using namespace suanzi::io;
@@ -363,47 +361,54 @@ bool RecordTask::sequence_mask_detecting(const std::vector<bool> &history) {
   return count >= (history.size() - count);
 }
 
-bool RecordTask::if_duplicated(const SZ_UINT32 &face_id, float &temperature) {
-  auto cfg = Config::get_user();
-  if (cfg.enable_temperature && temperature == 0) return false;
+bool RecordTask::sequence_temperature(const SZ_UINT32 &face_id, int duration,
+                                      std::map<SZ_UINT32, float> &history,
+                                      float &temperature) {
+  SZ_LOG_INFO("id={}, duration={}, temperature={:.2f}", face_id, duration,
+              temperature);
+  if (!GOOD_TEMPERATURE(temperature)) return false;
 
-  bool ret = false;
-
-  auto current_query_clock = std::chrono::steady_clock::now();
-  if (CONTAIN_KEY(query_clock_, face_id)) {
-    auto last_query_clock = query_clock_[face_id];
-    auto duration = SECONDS_DIFF(current_query_clock, last_query_clock);
-
-    // find stable temperature in history
-    if (GOOD_TEMPERATURE(temperature)) {
-      if (CONTAIN_KEY(known_temperature_, face_id) && duration <= 30)
-        known_temperature_[face_id] =
-            std::max(temperature, known_temperature_[face_id]);
-      else
-        known_temperature_[face_id] = temperature;
-      temperature = known_temperature_[face_id];
-    }
-
-    if (duration > cfg.duplication_interval) {
-      query_clock_[face_id] = current_query_clock;
-      return false;
-    } else
-      return true;
-
-  } else {
-    query_clock_[face_id] = current_query_clock;
-    if (GOOD_TEMPERATURE(temperature))
-      known_temperature_[face_id] = temperature;
+  if (!CONTAIN_KEY(history, face_id) ||
+      (history[face_id] - temperature <= 0.3 && duration > 10)) {
+    history[face_id] = temperature;
     return false;
+  } else {
+    history[face_id] = std::max(temperature, history[face_id]);
+    temperature = history[face_id];
+    return true;
   }
 }
 
+bool RecordTask::if_duplicated(const SZ_UINT32 &face_id, float &temperature) {
+  bool ret = false;
+
+  auto cfg = Config::get_user();
+  if (cfg.enable_temperature && temperature == 0) return ret;
+
+  int duration = 0;
+  auto current_query_clock = std::chrono::steady_clock::now();
+  if (CONTAIN_KEY(query_clock_, face_id)) {
+    auto last_query_clock = query_clock_[face_id];
+    duration = SECONDS_DIFF(current_query_clock, last_query_clock);
+
+    if (duration > cfg.duplication_interval)
+      query_clock_[face_id] = current_query_clock;
+    else
+      ret = true;
+  } else
+    query_clock_[face_id] = current_query_clock;
+
+  sequence_temperature(face_id, duration, known_temperature_, temperature);
+  return ret;
+}
+
 bool RecordTask::if_duplicated(const FaceFeature &feature, float &temperature) {
+  bool ret = false;
+
   auto cfg = Config::get_user();
   if (cfg.enable_temperature && temperature == 0) return false;
 
-  bool ret = false;
-
+  int duration = 0;
   auto current_query_clock = std::chrono::steady_clock::now();
 
   SZ_UINT32 db_size;
@@ -423,33 +428,25 @@ bool RecordTask::if_duplicated(const FaceFeature &feature, float &temperature) {
 
   if (face_id > 0 && CONTAIN_KEY(unknown_query_clock_, face_id)) {
     auto last_query_clock = unknown_query_clock_[face_id];
-    auto duration = SECONDS_DIFF(current_query_clock, last_query_clock);
+    duration = SECONDS_DIFF(current_query_clock, last_query_clock);
 
-    // find stable temperature in history
-    if (GOOD_TEMPERATURE(temperature)) {
-      if (CONTAIN_KEY(unknown_temperature_, face_id) && duration <= 30)
-        unknown_temperature_[face_id] =
-            std::max(temperature, unknown_temperature_[face_id]);
-      else
-        unknown_temperature_[face_id] = temperature;
-      temperature = unknown_temperature_[face_id];
-    }
-
-    if (duration > cfg.duplication_interval) {
+    if (duration > cfg.duplication_interval)
       unknown_query_clock_[face_id] = current_query_clock;
-      return false;
-    } else
-      return true;
+    else
+      ret = true;
 
   } else {
-    if (face_id == -1) face_id = (db_size % 100) + 1;
+    if (face_id == -1) {
+      face_id = (db_size % 100) + 1;
+      unknown_temperature_[face_id] = temperature;
+    }
 
     unknown_database_->add(face_id, feature);
     unknown_query_clock_[face_id] = current_query_clock;
-    if (GOOD_TEMPERATURE(temperature))
-      unknown_temperature_[face_id] = temperature;
-    return false;
   }
+
+  sequence_temperature(face_id, duration, unknown_temperature_, temperature);
+  return ret;
 }
 
 void RecordTask::rx_temperature(float body_temperature) {

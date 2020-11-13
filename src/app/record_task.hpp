@@ -16,7 +16,7 @@ namespace suanzi {
 class RecordTask : QObject {
   Q_OBJECT
  public:
-  static RecordTask* get_instance();
+  static RecordTask *get_instance();
   static bool idle();
 
  private slots:
@@ -49,6 +49,9 @@ class RecordTask : QObject {
                       SZ_UINT32 &face_id, SZ_FLOAT &score);
   bool sequence_antispoof(const std::vector<bool> &history);
   bool sequence_mask_detecting(const std::vector<bool> &history);
+  bool sequence_temperature(const SZ_UINT32 &face_id, int duration,
+                            std::map<SZ_UINT32, float> &history,
+                            float &temperature);
 
   bool if_duplicated(const SZ_UINT32 &face_id, float &temperature);
   bool if_duplicated(const FaceFeature &feature, float &temperature);
@@ -76,7 +79,7 @@ class RecordTask : QObject {
   bool is_measuring_temperature_;
   std::vector<float> temperature_history_;
   float max_temperature_;
-  QTimer* temperature_timer_;
+  QTimer *temperature_timer_;
 };
 
 }  // namespace suanzi
