@@ -103,3 +103,11 @@ SZ_RETCODE System::get_hostname(std::string& hostname) {
   hostname = "";
   return exec("hostname", hostname);
 }
+
+SZ_RETCODE System::get_serial_number(std::string& serial_number) {
+  std::string name, ip, mac;
+  System::get_current_network(name, ip, mac);
+
+  serial_number = "20200602" + mac.substr(0, 2);
+  return exec("cat /etc/serial-number", serial_number);
+}

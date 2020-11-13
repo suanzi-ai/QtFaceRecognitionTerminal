@@ -61,6 +61,8 @@ void UploadTask::rx_upload(PersonData person, bool if_duplicated) {
       bgr_encode_result = engine->encode_jpeg(
           bgr_image_buffer, person.bgr_snapshot.data, person.bgr_snapshot.cols,
           person.bgr_snapshot.rows);
+    if (bgr_encode_result != SZ_RETCODE_OK)
+      SZ_LOG_ERROR("Encode bgr jpg failed");
 
     SZ_RETCODE nir_encode_result;
     if (person.nir_snapshot.cols > person.nir_snapshot.rows)
@@ -77,7 +79,5 @@ void UploadTask::rx_upload(PersonData person, bool if_duplicated) {
       person_service_->report_face_record(person.id, bgr_image_buffer,
                                           nir_image_buffer, person.status,
                                           person.temperature);
-    else
-      SZ_LOG_ERROR("Encode bgr jpg failed");
   }
 }

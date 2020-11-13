@@ -79,6 +79,7 @@ void RecognizeTipWidget::rx_display(PersonData person, bool if_duplicated) {
 void RecognizeTipWidget::rx_update() {
   System::get_current_network(name_, ip_, mac_);
   System::get_hostname(hostname_);
+  System::get_serial_number(serial_number_);
 
   if (name_ == "eth0" || name_ == "wlan0") {
     std::istringstream sin(ip_);
@@ -146,8 +147,7 @@ void RecognizeTipWidget::paint(QPainter *painter) {
 
   // draw SN, FW and ip
   char buffer[100];
-  sprintf(buffer, "SN:20200602%s FW:1.0.0%s", mac_.substr(0, 2).c_str(),
-          ip_.c_str());
+  sprintf(buffer, "SN:%s FW:1.0.1%s", serial_number_.c_str(), ip_.c_str());
   font_.setPointSize(0.02125 * w);
   painter->setFont(font_);
   painter->drawText(0.05625 * w, 0.984375 * h, buffer);

@@ -43,6 +43,7 @@ class RecognizeTipWidget : public QWidget {
 
   std::string ip_, name_, mac_;
   std::string hostname_;
+  std::string serial_number_;
 };
 
 }  // namespace suanzi
