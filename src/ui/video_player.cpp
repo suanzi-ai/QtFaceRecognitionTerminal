@@ -161,13 +161,13 @@ void VideoPlayer::init_widgets() {
 
   // 创建人脸识别记录控件
   recognize_tip_widget_ =
-      new RecognizeTipWidget(screen_width, screen_height, nullptr);
+      new RecognizeTipWidget(screen_width, screen_height, this);
   connect((const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool)),
           (const QObject *)recognize_tip_widget_,
           SLOT(rx_display(PersonData, bool)));
 
   // 创建屏保控件
-  screen_saver_ = new ScreenSaverWidget(screen_width, screen_height, nullptr);
+  screen_saver_ = new ScreenSaverWidget(screen_width, screen_height, this);
   screen_saver_->hide();
   connect((const QObject *)face_timer_, SIGNAL(tx_face_disappear(int)),
           (const QObject *)screen_saver_, SLOT(rx_display(int)));
@@ -175,15 +175,15 @@ void VideoPlayer::init_widgets() {
           (const QObject *)screen_saver_, SLOT(rx_hide()));
 
   // 创建人体轮廓控件
-  outline_widget_ = new OutlineWidget(screen_width, screen_height, nullptr);
+  outline_widget_ = new OutlineWidget(screen_width, screen_height, this);
   connect((const QObject *)detect_task_, SIGNAL(tx_display_rectangle()),
           (const QObject *)outline_widget_, SLOT(rx_warn_distance()));
 
   // 创建顶部状态栏控件
-  status_banner_ = new StatusBanner(screen_width, screen_height, nullptr);
+  status_banner_ = new StatusBanner(screen_width, screen_height, this);
 
   // 创建热力图控件
-  heatmap_widget_ = new HeatmapWidget(screen_width, screen_height, nullptr);
+  heatmap_widget_ = new HeatmapWidget(screen_width, screen_height, this);
   connect((const QObject *)temperature_task_, SIGNAL(tx_heatmap_init(int)),
           (const QObject *)heatmap_widget_, SLOT(rx_init(int)));
   connect((const QObject *)temperature_task_,
