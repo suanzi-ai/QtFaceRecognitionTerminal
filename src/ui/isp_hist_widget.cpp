@@ -22,9 +22,15 @@ ISPHistWidget::ISPHistWidget(int width, int height, QWidget *parent)
   setFixedSize(width, height);
   setAttribute(Qt::WA_TranslucentBackground);
 
+  font_ = new QFont();
+  font_->setPointSize(14);
+  font_->setFamily(QFontDatabase::applicationFontFamilies(
+                       QFontDatabase::addApplicationFont(":asserts/clock.ttf"))
+                       .at(0));
+
   chart_view_ = new QChartView(chart_);
   // chart_view_->setMinimumSize(width, height);
-  chart_view_->setFixedSize(width, height);
+  // chart_view_->setFixedSize(width, height);
   chart_view_->setStyleSheet("background: transparent");
 
   chart_->addSeries(series_);
@@ -49,12 +55,52 @@ ISPHistWidget::ISPHistWidget(int width, int height, QWidget *parent)
   // chart_->setTitle("Hist");
   chart_->setBackgroundVisible(false);
 
-  main_layout_ = new QVBoxLayout(this);
-  main_layout_->addWidget(chart_view_);
+  label_iso_ = new QLabel("0", this);
+  label_iso_calibrate_ = new QLabel("0", this);
+  label_ave_lum_ = new QLabel("0", this);
+  label_exposure_ = new QLabel("0", this);
+  label_exp_time_ = new QLabel("0", this);
+  label_short_exp_time_ = new QLabel("0", this);
+  label_median_exp_time_ = new QLabel("0", this);
+  label_long_exp_time_ = new QLabel("0", this);
+  label_a_gain_ = new QLabel("0", this);
+  label_d_gain_ = new QLabel("0", this);
+  label_isp_d_gain_ = new QLabel("0", this);
+  label_lines_per_500ms_ = new QLabel("0", this);
 
-  font_.setFamily(QFontDatabase::applicationFontFamilies(
-                      QFontDatabase::addApplicationFont(":asserts/clock.ttf"))
-                      .at(0));
+  std::vector<std::tuple<QLabel *, QLabel *>> desc_table = {
+      {new QLabel("ISO:", this), label_iso_},
+      {new QLabel("ISO calibrate:", this), label_iso_calibrate_},
+      {new QLabel("Ave lum:", this), label_ave_lum_},
+      {new QLabel("Exposure:", this), label_exposure_},
+      {new QLabel("Exp time:", this), label_exp_time_},
+      {new QLabel("Short exp time:", this), label_short_exp_time_},
+      {new QLabel("Median exp time:", this), label_median_exp_time_},
+      {new QLabel("Long exp time:", this), label_long_exp_time_},
+      {new QLabel("A gain:", this), label_a_gain_},
+      {new QLabel("D gain:", this), label_d_gain_},
+      {new QLabel("ISP d gain:", this), label_isp_d_gain_},
+      {new QLabel("Lines/500ms:", this), label_lines_per_500ms_},
+  };
+
+  main_layout_ = new QGridLayout(this);
+  main_layout_->addWidget(chart_view_, 0, 0, desc_table.size(), 8);
+
+  int r = 0;
+  QLabel *key, *value;
+  for (const auto kv : desc_table) {
+    std::tie(key, value) = kv;
+    key->setFont(*font_);
+    key->setStyleSheet("QLabel { color : white; }");
+    value->setFont(*font_);
+    value->setStyleSheet("QLabel { color : white; }");
+
+    main_layout_->addWidget(key, r, 8, 1, 3);
+    main_layout_->addWidget(value, r, 11, 1, 1);
+    r++;
+  }
+
+  startTimer(1000);
 }
 
 ISPHistWidget::~ISPHistWidget() {
@@ -63,59 +109,54 @@ ISPHistWidget::~ISPHistWidget() {
   delete axis_x_;
   delete axis_y_;
   delete chart_view_;
+  delete font_;
+
+  delete label_iso_;
+  delete label_iso_calibrate_;
+  delete label_ave_lum_;
+  delete label_exposure_;
+  delete label_exp_time_;
+  delete label_short_exp_time_;
+  delete label_median_exp_time_;
+  delete label_long_exp_time_;
+  delete label_a_gain_;
+  delete label_d_gain_;
+  delete label_isp_d_gain_;
+  delete label_lines_per_500ms_;
+
   delete main_layout_;
-}
-
-void ISPHistWidget::paint_desc(QPainter *painter,
-                               const ISPExposureInfo &exp_info) {
-  std::vector<std::tuple<QString, QString>> desc = {
-      {"ISO:", QString::asprintf("%d", exp_info.iso)},
-      {"ISO calibrate:", QString::asprintf("%d", exp_info.iso_calibrate)},
-      {"Ave lum:", QString::asprintf("%d", exp_info.ave_lum)},
-      {"Exposure:", QString::asprintf("%d", exp_info.exposure)},
-      {"Exp time:", QString::asprintf("%d", exp_info.exp_time)},
-      {"Short exp time:", QString::asprintf("%d", exp_info.short_exp_time)},
-      {"Median exp time:", QString::asprintf("%d", exp_info.median_exp_time)},
-      {"Long exp time:", QString::asprintf("%d", exp_info.long_exp_time)},
-      {"A gain:", QString::asprintf("%d", exp_info.a_gain)},
-      {"D gain:", QString::asprintf("%d", exp_info.d_gain)},
-      {"ISP d gain:", QString::asprintf("%d", exp_info.isp_d_gain)},
-      {"Lines/500ms:", QString::asprintf("%d", exp_info.lines_per_500ms)},
-  };
-
-  int x_offset = width() + 10;
-  int y_offset = 50;
-
-  QString key, value;
-  for (const auto kv : desc) {
-    std::tie(key, value) = kv;
-    painter->drawText(x() + x_offset, y() + y_offset, key);
-    painter->drawText(x() + x_offset + 140, y() + y_offset, value);
-    y_offset += 20;
-  }
 }
 
 void ISPHistWidget::set_camera_type(io::CameraType camera_type) {
   camera_type_ = camera_type;
 }
 
-void ISPHistWidget::paint(QPainter *painter) {
+void ISPHistWidget::timerEvent(QTimerEvent *event) {
   switch (Config::get_app().show_isp_info_window) {
     case ISPInfoWindowBGR:
       set_camera_type(CAMERA_BGR);
       show();
+      update();
       break;
 
     case ISPInfoWindowNIR:
       set_camera_type(CAMERA_NIR);
       show();
+      update();
       break;
 
     default:
       hide();
       return;
   }
+}
 
+void ISPHistWidget::paintEvent(QPaintEvent *event) {
+  QPainter painter(this);
+  paint(&painter);
+}
+
+void ISPHistWidget::paint(QPainter *painter) {
   static ISPExposureInfo exp_info;
   SZ_RETCODE ret =
       Engine::instance()->isp_query_exposure_info(camera_type_, &exp_info);
@@ -138,11 +179,16 @@ void ISPHistWidget::paint(QPainter *painter) {
   series_->replace(buffer);
   axis_y_->setRange(0, max - max % 1000 + 1000);
 
-  QFont font_backup = painter->font();
-
-  painter->setFont(font_);
-
-  paint_desc(painter, exp_info);
-
-  painter->setFont(font_backup);
+  label_iso_->setText(QString::number(exp_info.iso));
+  label_iso_calibrate_->setText(QString::number(exp_info.iso_calibrate));
+  label_ave_lum_->setText(QString::number(exp_info.ave_lum));
+  label_exposure_->setText(QString::number(exp_info.exposure));
+  label_exp_time_->setText(QString::number(exp_info.exp_time));
+  label_short_exp_time_->setText(QString::number(exp_info.short_exp_time));
+  label_median_exp_time_->setText(QString::number(exp_info.median_exp_time));
+  label_long_exp_time_->setText(QString::number(exp_info.long_exp_time));
+  label_a_gain_->setText(QString::number(exp_info.a_gain));
+  label_d_gain_->setText(QString::number(exp_info.d_gain));
+  label_isp_d_gain_->setText(QString::number(exp_info.isp_d_gain));
+  label_lines_per_500ms_->setText(QString::number(exp_info.lines_per_500ms));
 }
