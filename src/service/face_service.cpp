@@ -83,18 +83,22 @@ bool FaceService::load_image(SZ_UINT32 face_id, std::vector<SZ_BYTE> &buffer) {
   return false;
 }
 
-SZ_RETCODE FaceService::extract_image_feature(SZ_UINT32 face_id,
-                                              std::vector<SZ_BYTE> &buffer,
+SZ_RETCODE FaceService::extract_image_feature(SZ_UINT32 face_id, std::vector<SZ_BYTE> &buffer,
                                               FaceFeature &feature,
                                               std::string &error_message) {
-  SZ_LOG_INFO("start extract");
   cv::Mat raw_data(1, buffer.size(), CV_8UC1, (void *)buffer.data());
   cv::Mat decoded_image = cv::imdecode(raw_data, cv::IMREAD_COLOR);
-  SZ_LOG_INFO("end extract");
+
+  //cv::Mat decoded_image = cv::imread(image_store_dir_ + face.face_path, 1);
   if (decoded_image.empty()) {
     error_message = "cv::imdecode failed!";
     SZ_LOG_ERROR(error_message);
     return SZ_RETCODE_FAILED;
+  }
+
+  if (decoded_image.channels() != 3) {
+	SZ_LOG_ERROR("it's not rgb image");
+    return SZ_RETCODE_FAILED;	
   }
 
   int width = decoded_image.cols;
@@ -103,7 +107,6 @@ SZ_RETCODE FaceService::extract_image_feature(SZ_UINT32 face_id,
   SZ_RETCODE ret;
   std::vector<FaceDetection> detections;
   FacePose pose;
-
   size_t size = width * height * 3;
   static SZ_BYTE *bgr = new SZ_BYTE[size];
   static int cur_bgr_size = size;
@@ -111,8 +114,10 @@ SZ_RETCODE FaceService::extract_image_feature(SZ_UINT32 face_id,
 	 delete bgr;
 	 bgr = new SZ_BYTE[size];
   	 cur_bgr_size = size;
-	 memcpy(bgr, decoded_image.data, size);
   }
+
+  memcpy(bgr, decoded_image.data, size);
+
   do {
     ret = detector_->detect(bgr, width, height, detections);
     if (ret != SZ_RETCODE_OK) {
@@ -120,7 +125,6 @@ SZ_RETCODE FaceService::extract_image_feature(SZ_UINT32 face_id,
       SZ_LOG_ERROR(error_message);
       break;
     }
-
     if (detections.size() == 0) {
       error_message = "no face detected";
       SZ_LOG_ERROR(error_message);
@@ -151,6 +155,7 @@ SZ_RETCODE FaceService::extract_image_feature(SZ_UINT32 face_id,
       break;
     }
 
+
     ret = extractor_->extract(bgr, width, height, detections[0], pose, feature);
     if (ret != SZ_RETCODE_OK) {
       error_message = "assert extractor_->extract == SZ_RETCODE_OK failed";
@@ -180,13 +185,13 @@ SZ_RETCODE FaceService::extract_image_feature(SZ_UINT32 face_id,
     }
 	int cur_size = resize_avata_w * resize_avata_h * 3;
 	static int cur_avatar_size = cur_size;
-	static unsigned char *pResize_data = new unsigned char [cur_size];
+	static unsigned char *pResize_data = new unsigned char[cur_size];
 	if (cur_avatar_size < cur_size) {
 		delete pResize_data;
 		cur_avatar_size = cur_size;
 		pResize_data = new unsigned char [cur_size];
 	}
-	cv::Mat avatar(resize_avata_h, resize_avata_w, CV_8UC1, pResize_data);
+	cv::Mat avatar(resize_avata_h, resize_avata_w, CV_8UC3, pResize_data);
 	cv::resize(decoded_image({avatar_x, avatar_y, avatar_w, avatar_h}),
 	         avatar, {resize_avata_w, resize_avata_h});
     buffer.clear();
@@ -199,8 +204,6 @@ SZ_RETCODE FaceService::extract_image_feature(SZ_UINT32 face_id,
     }
   } while (0);
   decoded_image.release();
-  SZ_LOG_INFO("Success!");
-
   return ret;
 }
 
@@ -257,9 +260,8 @@ json FaceService::db_add(const json &body) {
     SZ_LOG_DEBUG("db.add id: {}", face.id);
 
     SZ_RETCODE ret;
-    FaceFeature feature;
-    SZ_INT32 feature_size;
-    static std::vector<SZ_BYTE> buffer(2 * 1024 * 1024);
+    static FaceFeature feature;
+    static std::vector<SZ_BYTE> buffer(3 * 1024 * 1024);
 
     ret = read_buffer(face, buffer);
     if (ret != SZ_RETCODE_OK) {
@@ -332,7 +334,7 @@ json FaceService::db_add_many(const json &body) {
 
     json failedPersons;
 
-    static std::vector<SZ_BYTE> buffer(2 * 1024 * 1024);
+    static std::vector<SZ_BYTE> buffer(3 * 1024 * 1024);
 
     for (auto &face : faceArrary) {
       SZ_UINT32 db_size;
