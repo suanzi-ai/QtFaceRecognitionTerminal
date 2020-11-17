@@ -106,9 +106,8 @@ void RecognizeTask::rx_frame(PingPangBuffer<DetectionData> *buffer) {
     }
     if (output->has_person_info) {
       output->has_mask = has_mask(input);
-      if (output->has_mask)
-        extract_and_query(input, output->has_mask, output->person_feature,
-                          output->person_info);
+      extract_and_query(input, output->has_mask, output->person_feature,
+                        output->person_info);
     }
   } else {
     output->has_live = false;
@@ -196,7 +195,6 @@ void RecognizeTask::extract_and_query(DetectionData *detection, bool has_mask,
     static std::vector<suanzi::QueryResult> results;
     results.clear();
 
-    // TODO: 修正佩戴口罩的人脸分数，修正到同一个分数
     if (has_mask)
       ret = mask_database_->query(feature, 1, results);
     else
@@ -207,8 +205,6 @@ void RecognizeTask::extract_and_query(DetectionData *detection, bool has_mask,
       else
         person_info.score = results[0].score;
       person_info.face_id = results[0].face_id;
-      SZ_LOG_INFO("id={}, score={:.2f}", person_info.face_id,
-                  person_info.score);
       return;
     }
   }

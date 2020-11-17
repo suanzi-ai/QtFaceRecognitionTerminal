@@ -28,6 +28,8 @@ struct PersonData {
   cv::Mat bgr_snapshot;
   cv::Mat nir_snapshot;
   cv::Mat face_snapshot;
+  bool is_duplicated;
+  bool has_mask;
   bool is_status_normal();
   bool is_status_blacklist();
   bool is_temperature_normal();

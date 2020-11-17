@@ -94,12 +94,12 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
     return;
   }
 
-  bool bgr_finished = false;
-  bool nir_finished = false;
+  bool bgr_finished = false, ir_finished = false;
+  bool has_mask;
 
-  int max_person = Config::get_extract().history_size;
   if (input->has_person_info) {
     // reset if new person appear
+    // TODO: 优化person_history_.size()的判断
     bool fresh = if_fresh(input->person_feature);
     if (fresh || person_history_.size() == 0) rx_reset_recognizing();
     if (is_measuring_temperature_ && fresh && person_history_.size() > 0) {
@@ -108,122 +108,34 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
 
     // add person info
     mask_history_.push_back(input->has_mask);
-    if (mask_history_.size() > max_person)
-      mask_history_.erase(mask_history_.begin() + max_person,
-                          mask_history_.end());
-
     person_history_.push_back(input->person_info);
-    if (person_history_.size() > max_person)
-      person_history_.erase(person_history_.begin() + max_person,
-                            person_history_.end());
 
-    bgr_finished = (person_history_.size() == max_person);
+    // do sequence mask detection
+    bgr_finished = sequence_mask(mask_history_, has_mask);
   }
 
   bool is_live = false;
-  int max_live = Config::get_liveness().history_size;
   if (input->has_live) {
     // add antispoofing data
     live_history_.push_back(input->is_live);
-    if (live_history_.size() > max_live)
-      live_history_.erase(live_history_.begin() + max_live,
-                          live_history_.end());
 
     // do sequence antispoofing
-    is_live = sequence_antispoof(live_history_);
-    nir_finished = (is_live || live_history_.size() == max_live);
+    ir_finished = sequence_antispoof(live_history_, is_live);
   }
 
-  if (bgr_finished && nir_finished) {
-    // do sequence mask detecting
-    if (!sequence_mask_detecting(mask_history_)) {
-      if (AudioTask::idle()) emit tx_warn_mask();
-    }
-    // do sequence recognizing
-    else if (is_live) {
+  if (bgr_finished && ir_finished) {
+    if (is_live) {
       SZ_UINT32 face_id;
       PersonData person;
-      PersonStatus status = PersonStatus::Stranger;
-      if (sequence_query(person_history_, face_id, person.score)) {
-          if (input->has_mask && person.score < 0.85)
-            mask_database_->add(face_id, input->person_feature, 0.1);
-          if (!input->has_mask && person.score < 0.9)
-            face_database_->add(face_id, input->person_feature, 0.1);
-
-        if (SZ_RETCODE_OK == person_service_->get_person(face_id, person)) {
-          if (person.is_status_normal()) status = PersonStatus::Normal;
-          if (person.is_status_blacklist()) status = PersonStatus::Blacklist;
-        }
+      if (sequence_query(person_history_, mask_history_, has_mask, face_id,
+                         person.score)) {
+        if (has_mask && person.score < 0.85)
+          mask_database_->add(face_id, input->person_feature, 0.1);
+        if (!has_mask && person.score < 0.9)
+          face_database_->add(face_id, input->person_feature, 0.1);
       }
-
-      // record person info
-      person.temperature = max_temperature_;
-      max_temperature_ = 0;
-
-      bool duplicated;
-      switch (status) {
-        case PersonStatus::Blacklist:
-          if (Config::get_user().blacklist_policy == "alarm")
-            person.name = tr("黑名单").toStdString();
-          else {
-            person.name = tr("访客").toStdString();
-            person.number = "";
-          }
-          person.face_path = ":asserts/avatar_unknown.jpg";
-        case PersonStatus::Normal:
-          duplicated = if_duplicated(face_id, person.temperature);
-          break;
-        default:  // PersonStatus::Stranger
-          duplicated = if_duplicated(input->person_feature, person.temperature);
-          person.name = tr("访客").toStdString();
-          person.id = 0;
-          person.score = 0;
-          person.number = "";
-          person.face_path = ":asserts/avatar_unknown.jpg";
-          person.status = person_service_->get_status(PersonStatus::Stranger);
-          break;
-      }
-      // SZ_LOG_INFO("Record: id={}, staff={}, score={:.2f}, status={}",
-      // person.id,
-      //             person.number, person.score, person.status);
-
-      // record snapshots
-      int width = input->img_bgr_large->width;
-      int height = input->img_bgr_large->height;
-      person.bgr_snapshot.create(height, width, CV_8UC3);
-      memcpy(person.bgr_snapshot.data, input->img_bgr_large->pData,
-             width * height * 3 / 2);
-
-      if (input->bgr_face_detected_ && width < height) {
-        auto engine = Engine::instance();
-        static std::vector<SZ_BYTE> buffer;
-        buffer.clear();
-
-        if (SZ_RETCODE_OK == engine->encode_jpeg(buffer,
-                                                 person.bgr_snapshot.data,
-                                                 width, height)) {
-          int crop_x = input->bgr_detection_.x * width;
-          int crop_y = input->bgr_detection_.y * height;
-          int crop_w = input->bgr_detection_.width * width;
-          int crop_h = input->bgr_detection_.height * height;
-
-          crop_x = std::max(0, crop_x - crop_w / 2);
-          crop_y = std::max(0, crop_y - crop_h / 2);
-          crop_w = std::min(width - crop_x - 1, crop_w * 2);
-          crop_h = std::min(height - crop_y - 1, crop_h * 2);
-
-          cv::imdecode(buffer,
-                       CV_LOAD_IMAGE_COLOR)({crop_x, crop_y, crop_w, crop_h})
-              .copyTo(person.face_snapshot);
-        }
-      } else
-        person.face_snapshot = cv::Mat();
-
-      width = input->img_nir_large->width;
-      height = input->img_nir_large->height;
-      person.nir_snapshot.create(height, width, CV_8UC3);
-      memcpy(person.nir_snapshot.data, input->img_nir_large->pData,
-             width * height * 3 / 2);
+      person.has_mask = has_mask;
+      update_person(input, face_id, person);
 
       if (AudioTask::idle()) {
         if (person.temperature == 0) {
@@ -238,7 +150,7 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
 
       // start temperature
       if (!is_measuring_temperature_) rx_start_temperature();
-      emit tx_display(person, duplicated);
+      emit tx_display(person, person.is_duplicated);
     }
     rx_reset_recognizing();
   }
@@ -297,87 +209,106 @@ bool RecordTask::if_fresh(const FaceFeature &feature) {
   return score / 2 + 0.5f < 0.9;
 }
 
-bool RecordTask::sequence_query(const std::vector<QueryResult> &history,
-                                SZ_UINT32 &face_id, SZ_FLOAT &score) {
-  auto cfg = Config::get_extract();
+bool RecordTask::sequence_query(const std::vector<QueryResult> &person_history,
+                                const std::vector<bool> &mask_history,
+                                const bool has_mask, SZ_UINT32 &face_id,
+                                SZ_FLOAT &score) {
+  // initialize map
   std::map<SZ_UINT32, int> person_counts;
   std::map<SZ_UINT32, float> person_accumulate_score;
   std::map<SZ_UINT32, float> person_max_score;
-
-  // initialize map
-  for (auto &person : history) {
+  for (auto &person : person_history) {
     person_counts[person.face_id] = 0;
     person_accumulate_score[person.face_id] = 0.f;
     person_max_score[person.face_id] = 0.f;
   }
 
   // accumulate id and score
-  for (auto &person : history) {
-    person_counts[person.face_id] += 1;
-    person_accumulate_score[person.face_id] += person.score;
-    person_max_score[person.face_id] =
-        std::max(person.score, person_max_score[person.face_id]);
+  int max_count = 0;
+  float accumulate_score;
+
+  auto pit = person_history.rbegin();
+  auto mit = mask_history.rbegin();
+  while (pit != person_history.rend() && mit != mask_history.rend()) {
+    if (*mit == has_mask) {
+      person_counts[pit->face_id] += 1;
+      person_accumulate_score[pit->face_id] += pit->score;
+      person_max_score[pit->face_id] =
+          std::max(pit->score, person_max_score[pit->face_id]);
+
+      if (person_counts[pit->face_id] > max_count) {
+        max_count = person_counts[pit->face_id];
+        face_id = pit->face_id;
+        score = person_max_score[face_id];
+        accumulate_score = person_accumulate_score[face_id];
+      }
+    }
+    pit++;
+    mit++;
   }
 
-  // person id with max counts
-  auto max_person = std::max_element(
-      person_counts.begin(), person_counts.end(),
-      [](const std::pair<int, int> &i, const std::pair<int, int> &j) {
-        return i.second < j.second;
-      });
-
-  SZ_UINT32 max_person_id = max_person->first;
-  int max_count = max_person->second;
-  float max_person_accumulate_score = person_accumulate_score[max_person_id];
-  float max_person_score = person_max_score[max_person_id];
-
+  auto cfg = Config::get_extract();
   SZ_LOG_DEBUG("count={}/{}, max={:.2f}/{:.2f}, sum={:.2f}/{:.2f}", max_count,
-               cfg.history_size, max_person_score, cfg.min_recognize_score,
-               person_accumulate_score[max_person_id],
-               cfg.min_accumulate_score);
+               cfg.history_size, score, cfg.min_recognize_score,
+               accumulate_score, cfg.min_accumulate_score);
 
   if (max_count >= cfg.min_recognize_count &&
-      max_person_accumulate_score >= cfg.min_accumulate_score &&
-      max_person_score >= cfg.min_recognize_score) {
-    face_id = max_person_id;
-    score = max_person_score;
+      score >= cfg.min_recognize_score &&
+      accumulate_score >= cfg.min_accumulate_score)
     return true;
-  }
+
   if (max_count == cfg.history_size &&
-      max_person_accumulate_score >= cfg.min_accumulate_score) {
-    face_id = max_person_id;
-    score = max_person_score;
+      accumulate_score >= cfg.min_accumulate_score)
     return true;
-  } else {
-    return false;
-  }
+
+  face_id = -1;
+  score = 0;
+  return false;
 }
 
-bool RecordTask::sequence_antispoof(const std::vector<bool> &history) {
-  if (history.size() == 0) return false;
+bool RecordTask::sequence_antispoof(const std::vector<bool> &history,
+                                    bool &is_live) {
+  int min_count = Config::get_liveness().min_alive_count;
+  int max_count = Config::get_liveness().history_size;
+  if (history.size() < min_count) return false;
 
-  int count = 0;
-  for (auto is_live : history) {
-    if (is_live) count++;
+  int live_count = 0, count = 0;
+  auto it = history.rbegin();
+  while (it != history.rend()) {
+    if (*it && ++live_count >= min_count) {
+      is_live = true;
+      return true;
+    }
+    if (++count >= max_count) {
+      is_live = false;
+      return true;
+    }
+    it++;
   }
 
-  bool ret = count >= Config::get_liveness().min_alive_count;
-  if (ret || history.size() == Config::get_liveness().history_size)
-    SZ_LOG_DEBUG("live={}/{}/{}", count, Config::get_liveness().min_alive_count,
-                 history.size());
-
-  return ret;
+  return false;
 }
 
-bool RecordTask::sequence_mask_detecting(const std::vector<bool> &history) {
-  if (history.size() == 0) return false;
+bool RecordTask::sequence_mask(const std::vector<bool> &history,
+                               bool &has_mask) {
+  int max_person = Config::get_extract().history_size;
+  if (history.size() < max_person) return false;
 
-  int count = 0;
-  for (auto has_mask : history) {
-    if (has_mask) count++;
+  int mask = 0, no_mask = 0;
+  auto it = history.rbegin();
+  while (it != history.rend()) {
+    if (*it && ++mask >= max_person) {
+      has_mask = true;
+      return true;
+    }
+    if (!(*it) && ++no_mask >= max_person) {
+      has_mask = false;
+      return true;
+    }
+    it++;
   }
 
-  return count >= (history.size() - count);
+  return false;
 }
 
 bool RecordTask::sequence_temperature(const SZ_UINT32 &face_id, int duration,
@@ -396,6 +327,82 @@ bool RecordTask::sequence_temperature(const SZ_UINT32 &face_id, int duration,
     temperature = history[face_id];
     return true;
   }
+}
+
+void RecordTask::update_person(RecognizeData *input, const SZ_UINT32 &face_id,
+                               PersonData &person) {
+  person.temperature = max_temperature_;
+  max_temperature_ = 0;
+
+  PersonStatus status = PersonStatus::Stranger;
+  if (face_id > 0 &&
+      SZ_RETCODE_OK == person_service_->get_person(face_id, person)) {
+    if (person.is_status_normal()) status = PersonStatus::Normal;
+    if (person.is_status_blacklist()) status = PersonStatus::Blacklist;
+  }
+
+  switch (status) {
+    case PersonStatus::Blacklist:
+      if (Config::get_user().blacklist_policy == "alarm")
+        person.name = tr("黑名单").toStdString();
+      else {
+        person.name = tr("访客").toStdString();
+        person.number = "";
+      }
+      person.face_path = ":asserts/avatar_unknown.jpg";
+    case PersonStatus::Normal:
+      person.is_duplicated = if_duplicated(face_id, person.temperature);
+      break;
+    case PersonStatus::Stranger:
+      person.is_duplicated =
+          if_duplicated(input->person_feature, person.temperature);
+      person.name = tr("访客").toStdString();
+      person.id = 0;
+      person.score = 0;
+      person.number = "";
+      person.face_path = ":asserts/avatar_unknown.jpg";
+      person.status = person_service_->get_status(PersonStatus::Stranger);
+      break;
+  }
+  SZ_LOG_INFO("Record: id={}, staff={}, score={:.2f}, status={}", person.id,
+              person.number, person.score, person.status);
+
+  // record snapshots
+  int width = input->img_bgr_large->width;
+  int height = input->img_bgr_large->height;
+  person.bgr_snapshot.create(height, width, CV_8UC3);
+  memcpy(person.bgr_snapshot.data, input->img_bgr_large->pData,
+         width * height * 3 / 2);
+
+  if (input->bgr_face_detected_ && width < height) {
+    auto engine = Engine::instance();
+    static std::vector<SZ_BYTE> buffer;
+    buffer.clear();
+
+    if (SZ_RETCODE_OK ==
+        engine->encode_jpeg(buffer, person.bgr_snapshot.data, width, height)) {
+      int crop_x = input->bgr_detection_.x * width;
+      int crop_y = input->bgr_detection_.y * height;
+      int crop_w = input->bgr_detection_.width * width;
+      int crop_h = input->bgr_detection_.height * height;
+
+      crop_x = std::max(0, crop_x - crop_w / 2);
+      crop_y = std::max(0, crop_y - crop_h / 2);
+      crop_w = std::min(width - crop_x - 1, crop_w * 2);
+      crop_h = std::min(height - crop_y - 1, crop_h * 2);
+
+      cv::imdecode(buffer,
+                   CV_LOAD_IMAGE_COLOR)({crop_x, crop_y, crop_w, crop_h})
+          .copyTo(person.face_snapshot);
+    }
+  } else
+    person.face_snapshot = cv::Mat();
+
+  width = input->img_nir_large->width;
+  height = input->img_nir_large->height;
+  person.nir_snapshot.create(height, width, CV_8UC3);
+  memcpy(person.nir_snapshot.data, input->img_nir_large->pData,
+         width * height * 3 / 2);
 }
 
 bool RecordTask::if_duplicated(const SZ_UINT32 &face_id, float &temperature) {

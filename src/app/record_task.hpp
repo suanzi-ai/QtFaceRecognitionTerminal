@@ -47,14 +47,17 @@ class RecordTask : QObject {
 
   bool if_fresh(const FaceFeature &feature);
 
-  bool sequence_query(const std::vector<QueryResult> &history,
-                      SZ_UINT32 &face_id, SZ_FLOAT &score);
-  bool sequence_antispoof(const std::vector<bool> &history);
-  bool sequence_mask_detecting(const std::vector<bool> &history);
+  bool sequence_query(const std::vector<QueryResult> &person_history,
+                      const std::vector<bool> &mask_history,
+                      const bool has_mask, SZ_UINT32 &face_id, SZ_FLOAT &score);
+  bool sequence_antispoof(const std::vector<bool> &history, bool &is_live);
+  bool sequence_mask(const std::vector<bool> &history, bool &has_mask);
   bool sequence_temperature(const SZ_UINT32 &face_id, int duration,
                             std::map<SZ_UINT32, float> &history,
                             float &temperature);
 
+  void update_person(RecognizeData *input, const SZ_UINT32 &face_id,
+                     PersonData &person);
   bool if_duplicated(const SZ_UINT32 &face_id, float &temperature);
   bool if_duplicated(const FaceFeature &feature, float &temperature);
 
