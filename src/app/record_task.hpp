@@ -62,7 +62,8 @@ class RecordTask : QObject {
 
   PersonService::ptr person_service_;
 
-  FaceDatabasePtr db_, unknown_database_;
+  FaceDatabasePtr face_database_, mask_database_;
+  FaceDatabasePtr unknown_database_;
 
   std::vector<QueryResult> person_history_;
   std::vector<bool> mask_history_;

@@ -13,7 +13,7 @@ namespace suanzi {
 class RecognizeTask : QObject {
   Q_OBJECT
  public:
-  static RecognizeTask* get_instance();
+  static RecognizeTask *get_instance();
   static bool idle();
 
  private slots:
@@ -31,8 +31,8 @@ class RecognizeTask : QObject {
 
   bool is_live(DetectionData *detection);
   bool has_mask(DetectionData *detection);
-  void extract_and_query(DetectionData *detection, FaceFeature &feature,
-                         QueryResult &person_info);
+  void extract_and_query(DetectionData *detection, bool has_mask,
+                         FaceFeature &feature, QueryResult &person_info);
 
   // nyy
   const Size VPSS_CH_SIZES_BGR[3] = {
@@ -49,7 +49,7 @@ class RecognizeTask : QObject {
   bool rx_nir_finished_;
   bool rx_bgr_finished_;
 
-  FaceDatabasePtr face_database_;
+  FaceDatabasePtr face_database_, mask_database_;
   FaceExtractorPtr face_extractor_;
   FaceAntiSpoofingPtr anti_spoofing_;
   MaskDetectorPtr mask_detector_;

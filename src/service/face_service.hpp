@@ -36,16 +36,18 @@ class FaceService {
   static constexpr size_t MAX_DATABASE_SIZE = 25000;
 
   SZ_RETCODE read_buffer(const PersonImageInfo &face,
-                         std::vector<SZ_BYTE> &imgBuf);
-  std::string get_image_file_name(SZ_UINT32 faceId);
-  bool save_image(SZ_UINT32 faceId, const std::vector<SZ_BYTE> &buffer);
-  bool load_image(SZ_UINT32 faceId, std::vector<SZ_BYTE> &buffer);
-  SZ_RETCODE extract_image_feature(SZ_UINT32 faceId, std::vector<SZ_BYTE> &imgBuf,
-                                   FaceFeature &pFeature,
+                         std::vector<SZ_BYTE> &buffer);
+  std::string get_image_file_name(SZ_UINT32 face_id);
+  bool save_image(SZ_UINT32 face_id, const std::vector<SZ_BYTE> &buffer);
+  bool load_image(SZ_UINT32 face_id, std::vector<SZ_BYTE> &buffer);
+  SZ_RETCODE extract_image_feature(SZ_UINT32 face_id,
+                                   std::vector<SZ_BYTE> &buffer,
+                                   FaceFeature &feature,
+                                   FaceFeature &masked_feature,
                                    std::string &error_message);
   SZ_RETCODE read_image_as_base64(SZ_UINT32 id, std::string &result);
 
-  FaceDatabasePtr db_;
+  FaceDatabasePtr face_database_, mask_database_;
   FaceDetectorPtr detector_;
   FacePoseEstimatorPtr pose_estimator_;
   FaceExtractorPtr extractor_;

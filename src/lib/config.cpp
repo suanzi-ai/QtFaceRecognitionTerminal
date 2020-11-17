@@ -123,6 +123,7 @@ void suanzi::to_json(json &j, const QufaceConfig &c) {
   SAVE_JSON_TO(j, "device_secret", c.device_secret);
   SAVE_JSON_TO(j, "client_id", c.client_id);
   SAVE_JSON_TO(j, "db_name", c.db_name);
+  SAVE_JSON_TO(j, "masked_db_name", c.masked_db_name);
   SAVE_JSON_TO(j, "model_file_path", c.model_file_path);
   SAVE_JSON_TO(j, "license_filename", c.license_filename);
 }
@@ -133,6 +134,7 @@ void suanzi::from_json(const json &j, QufaceConfig &c) {
   LOAD_JSON_TO(j, "device_secret", c.device_secret);
   LOAD_JSON_TO(j, "client_id", c.client_id);
   LOAD_JSON_TO(j, "db_name", c.db_name);
+  LOAD_JSON_TO(j, "masked_db_name", c.masked_db_name);
   LOAD_JSON_TO(j, "model_file_path", c.model_file_path);
   LOAD_JSON_TO(j, "license_filename", c.license_filename);
 }
@@ -334,6 +336,7 @@ void Config::load_defaults(ConfigData &c) {
       .device_secret = "",
       .client_id = "face-service",
       .db_name = APP_DIR_PREFIX "/var/db/quface",
+      .masked_db_name = APP_DIR_PREFIX "/var/db/quface_masked",
       .model_file_path = "facemodel.bin",
       .license_filename = "license.json",
   };

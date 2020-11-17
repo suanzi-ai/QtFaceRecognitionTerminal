@@ -31,7 +31,6 @@ bool RecordTask::idle() { return !get_instance()->is_running_; }
 void RecordTask::clear_cache() {
   auto task = get_instance();
 
-  task->db_->clear();
   task->unknown_database_->clear();
 
   task->query_clock_.clear();
@@ -49,7 +48,9 @@ RecordTask::RecordTask(QThread *thread, QObject *parent)
       max_temperature_(0),
       temperature_timer_(nullptr) {
   person_service_ = PersonService::get_instance();
-  db_ = std::make_shared<FaceDatabase>(Config::get_quface().db_name);
+  face_database_ = std::make_shared<FaceDatabase>(Config::get_quface().db_name);
+  mask_database_ =
+      std::make_shared<FaceDatabase>(Config::get_quface().masked_db_name);
 
   // Create db for unknown faces
   unknown_database_ = std::make_shared<FaceDatabase>("_UNKNOWN_DB_");
@@ -135,7 +136,7 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
 
   if (bgr_finished && nir_finished) {
     // do sequence mask detecting
-    if (sequence_mask_detecting(mask_history_)) {
+    if (!sequence_mask_detecting(mask_history_)) {
       if (AudioTask::idle()) emit tx_warn_mask();
     }
     // do sequence recognizing
@@ -144,7 +145,10 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
       PersonData person;
       PersonStatus status = PersonStatus::Stranger;
       if (sequence_query(person_history_, face_id, person.score)) {
-        if (person.score < 0.9) db_->add(face_id, input->person_feature, 0.1);
+          if (input->has_mask && person.score < 0.85)
+            mask_database_->add(face_id, input->person_feature, 0.1);
+          if (!input->has_mask && person.score < 0.9)
+            face_database_->add(face_id, input->person_feature, 0.1);
 
         if (SZ_RETCODE_OK == person_service_->get_person(face_id, person)) {
           if (person.is_status_normal()) status = PersonStatus::Normal;

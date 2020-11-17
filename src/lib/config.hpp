@@ -113,6 +113,7 @@ typedef struct {
   std::string device_secret;
   std::string client_id;
   std::string db_name;
+  std::string masked_db_name;
   std::string model_file_path;
   std::string license_filename;
 } QufaceConfig;
