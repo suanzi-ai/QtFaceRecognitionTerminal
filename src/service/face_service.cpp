@@ -2,9 +2,7 @@
 
 #include <algorithm>
 #include <cstdlib>
-
 #include <opencv2/opencv.hpp>
-
 #include <quface/logger.hpp>
 
 #include "base64.hpp"
@@ -204,7 +202,6 @@ SZ_RETCODE FaceService::read_image_as_base64(SZ_UINT32 id,
 
 SZ_RETCODE FaceService::read_buffer(const PersonImageInfo &face,
                                     std::vector<SZ_BYTE> &buffer) {
-
   buffer.clear();
 
   SZ_RETCODE ret;
@@ -215,19 +212,17 @@ SZ_RETCODE FaceService::read_buffer(const PersonImageInfo &face,
       return SZ_RETCODE_FAILED;
     }
 
-    std::vector<SZ_BYTE> temp(std::istreambuf_iterator<char>(fd),
-                              std::istreambuf_iterator<char>{});
-    buffer = temp;
-    temp.clear();
+    buffer.assign(std::istreambuf_iterator<char>(fd),
+                  std::istreambuf_iterator<char>{});
   } else if (face.face_image.size() > 0) {
     auto buf = base64_decode(face.face_image.c_str());
-    std::vector<SZ_BYTE> temp(buf.begin(), buf.end());
-    buffer = temp;
-    temp.clear();
+    buffer.assign(buf.begin(), buf.end());
   } else {
     SZ_LOG_ERROR("No image found");
     return SZ_RETCODE_FAILED;
   }
+
+  SZ_LOG_INFO("Read buffer size {}", buffer.size());
   return SZ_RETCODE_OK;
 }
 
@@ -250,7 +245,7 @@ json FaceService::db_add(const json &body) {
     SZ_RETCODE ret;
     FaceFeature feature;
     SZ_INT32 feature_size;
-    static std::vector<SZ_BYTE> buffer;
+    static std::vector<SZ_BYTE> buffer(2 * 1024 * 1024);
 
     ret = read_buffer(face, buffer);
     if (ret != SZ_RETCODE_OK) {
@@ -323,7 +318,7 @@ json FaceService::db_add_many(const json &body) {
 
     json failedPersons;
 
-    static std::vector<SZ_BYTE> buffer;
+    static std::vector<SZ_BYTE> buffer(2 * 1024 * 1024);
 
     for (auto &face : faceArrary) {
       SZ_UINT32 db_size;
