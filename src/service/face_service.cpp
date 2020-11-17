@@ -105,9 +105,14 @@ SZ_RETCODE FaceService::extract_image_feature(SZ_UINT32 face_id,
   FacePose pose;
 
   size_t size = width * height * 3;
-  SZ_BYTE *bgr = new SZ_BYTE[size];
-  std::copy(decoded_image.ptr(), decoded_image.ptr() + size, bgr);
-
+  static SZ_BYTE *bgr = new SZ_BYTE[size];
+  static int cur_bgr_size = size;
+  if (cur_bgr_size < size) {
+	 delete bgr;
+	 bgr = new SZ_BYTE[size];
+  	 cur_bgr_size = size;
+	 memcpy(bgr, decoded_image.data, size);
+  }
   do {
     ret = detector_->detect(bgr, width, height, detections);
     if (ret != SZ_RETCODE_OK) {
@@ -154,7 +159,6 @@ SZ_RETCODE FaceService::extract_image_feature(SZ_UINT32 face_id,
     }
 
     // save cropped and resized avatar
-    static cv::Mat avatar;
     float center_x = detections[0].bbox.x + detections[0].bbox.width / 2;
     float center_y = detections[0].bbox.y + detections[0].bbox.height / 2;
 
@@ -166,13 +170,25 @@ SZ_RETCODE FaceService::extract_image_feature(SZ_UINT32 face_id,
     int avatar_w = std::min(avatar_size * 2, width - avatar_x);
     int avatar_h = std::min(avatar_size * 2, height - avatar_y);
 
-    if (avatar_w > avatar_h)
-      cv::resize(decoded_image({avatar_x, avatar_y, avatar_w, avatar_h}),
-                 avatar, {200, (int)(200.f * avatar_h / avatar_w)});
-    else
-      cv::resize(decoded_image({avatar_x, avatar_y, avatar_w, avatar_h}),
-                 avatar, {(int)(200.f * avatar_w / avatar_h), 200});
-
+	int resize_avata_w = 200;
+	int resize_avata_h = 200;
+    if (avatar_w > avatar_h) {
+	  resize_avata_h = (int)(200.f * avatar_h / avatar_w);
+    }
+    else {
+	  resize_avata_w = (int)(200.f * avatar_w / avatar_h);
+    }
+	int cur_size = resize_avata_w * resize_avata_h * 3;
+	static int cur_avatar_size = cur_size;
+	static unsigned char *pResize_data = new unsigned char [cur_size];
+	if (cur_avatar_size < cur_size) {
+		delete pResize_data;
+		cur_avatar_size = cur_size;
+		pResize_data = new unsigned char [cur_size];
+	}
+	cv::Mat avatar(resize_avata_h, resize_avata_w, CV_8UC1, pResize_data);
+	cv::resize(decoded_image({avatar_x, avatar_y, avatar_w, avatar_h}),
+	         avatar, {resize_avata_w, resize_avata_h});
     buffer.clear();
     cv::imencode(".jpg", avatar, buffer);
 
@@ -182,8 +198,6 @@ SZ_RETCODE FaceService::extract_image_feature(SZ_UINT32 face_id,
       break;
     }
   } while (0);
-
-  delete bgr;
   decoded_image.release();
   SZ_LOG_INFO("Success!");
 
@@ -213,7 +227,7 @@ SZ_RETCODE FaceService::read_buffer(const PersonImageInfo &face,
     }
 
     buffer.assign(std::istreambuf_iterator<char>(fd),
-                  std::istreambuf_iterator<char>{});
+                  std::istreambuf_iterator<char>());
   } else if (face.face_image.size() > 0) {
     auto buf = base64_decode(face.face_image.c_str());
     buffer.assign(buf.begin(), buf.end());
