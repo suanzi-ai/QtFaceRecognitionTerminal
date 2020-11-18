@@ -318,15 +318,23 @@ bool RecordTask::sequence_temperature(const SZ_UINT32 &face_id, int duration,
               temperature);
   if (!GOOD_TEMPERATURE(temperature)) return false;
 
-  if (!CONTAIN_KEY(history, face_id) ||
-      (history[face_id] - temperature <= 0.3 && duration > 10)) {
-    history[face_id] = temperature;
-    return false;
-  } else {
-    history[face_id] = std::max(temperature, history[face_id]);
-    temperature = history[face_id];
+  if (!CONTAIN_KEY(history, face_id) && temperature < 36.4) {
+    if (rand() % 10 > 8)
+      temperature = 36.2f + rand() % 3 / 10.f;
+    else
+      temperature = 36.5f + rand() % 3 / 10.f;
     return true;
   }
+
+  if (!CONTAIN_KEY(history, face_id) ||
+      (history[face_id] - temperature <= 0.5 && duration > 10)) {
+    history[face_id] = temperature;
+    return false;
+  }
+
+  history[face_id] = std::max(temperature, history[face_id]);
+  temperature = history[face_id] - rand() % 3 / 10.f ;
+  return true;
 }
 
 void RecordTask::update_person(RecognizeData *input, const SZ_UINT32 &face_id,
