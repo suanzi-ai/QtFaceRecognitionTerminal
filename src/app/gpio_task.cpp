@@ -38,6 +38,9 @@ void GPIOTask::rx_trigger(PersonData person, bool if_duplicated) {
   if (user.enable_temperature &&
       (user.relay_switch_cond & RelaySwitchCond::Temperature))
     all_pass = all_pass && person.is_temperature_normal();
+  if (user.enable_temperature &&
+      (user.relay_switch_cond & RelaySwitchCond::Mask))
+    all_pass = all_pass && person.has_mask;
 
   bool switch_relay;
   if (user.relay_switch_mode == RelaySwitchMode::AllPass) {

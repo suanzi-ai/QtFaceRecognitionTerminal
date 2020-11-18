@@ -27,6 +27,7 @@ using json = nlohmann::json;
 typedef enum RelaySwitchCond {
   Status = 1,
   Temperature = 2,
+  Mask = 4,
 } RelaySwitchCond;
 
 typedef enum RelayState {
