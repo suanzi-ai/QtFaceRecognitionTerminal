@@ -133,20 +133,15 @@ void AudioTask::rx_report_person(PersonData person) {
 
   is_running_ = true;
 
-  bool skip = false;
-  if (user.enable_mask_audio && user.enable_temperature &&
-      (user.relay_switch_cond & RelaySwitchCond::Mask))
-    if (!person.has_mask) {
-      skip = true;
-      play_audio(warn_mask_audio_);
-    }
-
-  if (!skip && user.enable_record_audio) {
+  if (user.enable_record_audio) {
     if (!person.is_status_normal())
       play_audio(fail_audio_);
     else
       play_audio(success_audio_);
   }
+
+  if (user.enable_mask_audio && user.enable_temperature)
+    if (!person.has_mask) play_audio(warn_mask_audio_);
 
   if (user.enable_pass_audio && !user.enable_temperature)
     play_pass(person);
