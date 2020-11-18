@@ -242,7 +242,7 @@ int main(int argc, char* argv[]) {
         .http_port = 8000,
         .rtsp_port = 554,
         .max_packet_size = 1456,
-        .max_buffer_size = 400000,
+        .max_buffer_size = 2 * 1024 * 1024,
         .enable_timestamp = true,
     };
 
@@ -252,8 +252,7 @@ int main(int argc, char* argv[]) {
 
       server->stop();
     }
-  })
-      .detach();
+  }).detach();
 
   return app.exec();
 }
