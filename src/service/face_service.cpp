@@ -198,14 +198,6 @@ SZ_RETCODE FaceService::extract_image_feature(SZ_UINT32 face_id,
       cur_avatar_size = cur_size;
       pResize_data = new unsigned char[cur_size];
     }
-    int cur_size = resize_avata_w * resize_avata_h * 3;
-    static int cur_avatar_size = cur_size;
-    static unsigned char *pResize_data = new unsigned char[cur_size];
-    if (cur_avatar_size < cur_size) {
-      delete pResize_data;
-      cur_avatar_size = cur_size;
-      pResize_data = new unsigned char[cur_size];
-    }
     cv::Mat avatar(resize_avata_h, resize_avata_w, CV_8UC3, pResize_data);
     cv::resize(decoded_image({avatar_x, avatar_y, avatar_w, avatar_h}), avatar,
                {resize_avata_w, resize_avata_h});
