@@ -78,7 +78,7 @@ void AudioTask::load_audio() {
     temperature_abnormal_audio_.duration = 1500;
 
     warn_distance_audio_.duration = 1500;
-    warn_mask_audio_.duration = 2500;
+    warn_mask_audio_.duration = 2000;
 
     pass_audio_.duration = 1000;
   } else if (lang == "zh-CN") {
@@ -89,11 +89,11 @@ void AudioTask::load_audio() {
     temperature_abnormal_audio_.duration = 2000;
 
     warn_distance_audio_.duration = 2000;
-    warn_mask_audio_.duration = 3000;
+    warn_mask_audio_.duration = 1000;
 
     pass_audio_.duration = 1000;
   } else if (lang == "jp") {
-    success_audio_.duration = 10;
+    success_audio_.duration = 0;
     fail_audio_.duration = 1500;
 
     temperature_normal_audio_.duration = 2000;
@@ -121,8 +121,10 @@ bool AudioTask::read_audio(const std::string& name, Audio& audio) {
 }
 
 void AudioTask::play_audio(Audio& audio) {
-  io::Engine::instance()->audio_play(audio.data);
-  QThread::msleep(audio.duration);
+  if (audio.duration > 0) {
+    io::Engine::instance()->audio_play(audio.data);
+    QThread::msleep(audio.duration);
+  }
 }
 
 void AudioTask::rx_report_person(PersonData person) {
@@ -131,11 +133,15 @@ void AudioTask::rx_report_person(PersonData person) {
 
   is_running_ = true;
 
+  bool skip = false;
   if (user.enable_mask_audio && user.enable_temperature &&
       (user.relay_switch_cond & RelaySwitchCond::Mask))
-    if (!person.has_mask) play_audio(warn_mask_audio_);
+    if (!person.has_mask) {
+      skip = true;
+      play_audio(warn_mask_audio_);
+    }
 
-  if (user.enable_record_audio) {
+  if (!skip && user.enable_record_audio) {
     if (!person.is_status_normal())
       play_audio(fail_audio_);
     else
