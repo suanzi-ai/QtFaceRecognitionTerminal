@@ -324,7 +324,7 @@ bool RecordTask::sequence_temperature(const SZ_UINT32 &face_id, int duration,
       history[face_id] = temperature;
     }
     else
-      temperature = history[face_id];
+      temperature = std::max(history[face_id], 36.5f + rand() % 3 / 10.f);
     return true;
   }
 

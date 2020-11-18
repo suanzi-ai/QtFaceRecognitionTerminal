@@ -100,7 +100,8 @@ SZ_RETCODE FaceService::extract_image_feature(SZ_UINT32 face_id,
   }
 
   if (decoded_image.channels() != 3) {
-    SZ_LOG_ERROR("it's not rgb image");
+    error_message = "it's not rgb image";
+    SZ_LOG_ERROR(error_message);
     return SZ_RETCODE_FAILED;
   }
 
@@ -152,6 +153,7 @@ SZ_RETCODE FaceService::extract_image_feature(SZ_UINT32 face_id,
           cfg.min_pitch <= pose.pitch && pose.pitch <= cfg.max_pitch &&
           cfg.min_roll <= pose.roll && pose.roll <= cfg.max_roll)) {
       error_message = "large pose face";
+      ret = SZ_RETCODE_FAILED;
       SZ_LOG_ERROR(error_message);
       break;
     }
