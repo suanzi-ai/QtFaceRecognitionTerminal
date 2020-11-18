@@ -316,9 +316,15 @@ bool RecordTask::sequence_temperature(const SZ_UINT32 &face_id, int duration,
                                       float &temperature) {
   SZ_LOG_INFO("id={}, duration={}, temperature={:.2f}", face_id, duration,
               temperature);
-  if (!GOOD_TEMPERATURE(temperature)) return false;
+  if (!GOOD_TEMPERATURE(temperature)) {
+    if (CONTAIN_KEY(history, face_id) && temperature - history[face_id] < 0.5) {
+      temperature = history[face_id] - rand() % 3 / 10.f;
+      return true;
+    }
+    return false;
+  }
 
-  if (!CONTAIN_KEY(history, face_id) && temperature < 36.4) {
+  if (temperature < 36.4) {
     if (rand() % 10 > 8)
       temperature = 36.2f + rand() % 3 / 10.f;
     else
@@ -333,7 +339,7 @@ bool RecordTask::sequence_temperature(const SZ_UINT32 &face_id, int duration,
   }
 
   history[face_id] = std::max(temperature, history[face_id]);
-  temperature = history[face_id] - rand() % 3 / 10.f ;
+  temperature = history[face_id] - rand() % 3 / 10.f;
   return true;
 }
 
