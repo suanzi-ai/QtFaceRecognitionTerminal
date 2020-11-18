@@ -181,24 +181,24 @@ void RecognizeTask::extract_and_query(DetectionData *detection, bool has_mask,
 
   // extract: 25ms
   SZ_RETCODE ret;
-  if (has_mask)
-    ret = face_extractor_->extract_mask(
-        (const SVP_IMAGE_S *)detection->img_bgr_large->pImplData,
-        face_detection, pose, feature);
-  else
-    ret = face_extractor_->extract(
-        (const SVP_IMAGE_S *)detection->img_bgr_large->pImplData,
-        face_detection, pose, feature);
+  // if (has_mask)
+  //   ret = face_extractor_->extract_mask(
+  //       (const SVP_IMAGE_S *)detection->img_bgr_large->pImplData,
+  //       face_detection, pose, feature);
+  // else
+  ret = face_extractor_->extract(
+      (const SVP_IMAGE_S *)detection->img_bgr_large->pImplData,
+      face_detection, pose, feature);
 
   if (SZ_RETCODE_OK == ret) {
     // query
     static std::vector<suanzi::QueryResult> results;
     results.clear();
 
-    if (has_mask)
-      ret = mask_database_->query(feature, 1, results);
-    else
-      ret = face_database_->query(feature, 1, results);
+    // if (has_mask)
+    //   ret = mask_database_->query(feature, 1, results);
+    // else
+    ret = face_database_->query(feature, 1, results);
     if (SZ_RETCODE_OK == ret) {
       if (has_mask)
         person_info.score = pow((results[0].score - 0.5) * 2, 0.45) / 2 + 0.5;

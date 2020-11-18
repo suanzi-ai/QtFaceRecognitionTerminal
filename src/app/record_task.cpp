@@ -130,7 +130,8 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
       if (sequence_query(person_history_, mask_history_, has_mask, face_id,
                          person.score)) {
         if (has_mask && person.score < 0.85)
-          mask_database_->add(face_id, input->person_feature, 0.1);
+          // mask_database_->add(face_id, input->person_feature, 0.1);
+          face_database_->add(face_id, input->person_feature, 0.1);
         if (!has_mask && person.score < 0.9)
           face_database_->add(face_id, input->person_feature, 0.1);
       }
