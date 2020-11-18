@@ -155,4 +155,6 @@ void DetectTipWidget::rx_display(DetectionRatio detection, bool to_clear,
     }
     hide();
   }
+
+  if (is_bgr) ((QWidget *)parent())->update();
 }
