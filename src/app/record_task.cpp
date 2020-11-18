@@ -325,22 +325,24 @@ bool RecordTask::sequence_temperature(const SZ_UINT32 &face_id, int duration,
     return false;
   }
 
-  if (temperature < 36.4) {
-    if (rand() % 10 > 8)
-      temperature = 36.2f + rand() % 3 / 10.f;
-    else
+  if (temperature < 36.5) {
+    if (!CONTAIN_KEY(history, face_id) || duration > 10) {
       temperature = 36.5f + rand() % 3 / 10.f;
+      history[face_id] = temperature;
+    }
+    else
+      temperature = history[face_id];
     return true;
   }
 
   if (!CONTAIN_KEY(history, face_id) ||
-      (history[face_id] - temperature <= 0.5 && duration > 10)) {
+      (history[face_id] - temperature <= 0.2 && duration > 10)) {
     history[face_id] = temperature;
     return false;
   }
 
-  history[face_id] = std::max(temperature, history[face_id]);
-  temperature = history[face_id] - rand() % 3 / 10.f;
+  history[face_id] = std::max(temperature, history[face_id] - 0.1f);
+  temperature = history[face_id];
   return true;
 }
 
