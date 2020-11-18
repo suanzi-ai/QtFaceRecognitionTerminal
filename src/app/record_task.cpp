@@ -378,6 +378,7 @@ void RecordTask::update_person(RecognizeData *input, const SZ_UINT32 &face_id,
       person.status = person_service_->get_status(PersonStatus::Stranger);
       break;
   }
+  person.temperature = ((float)((int)((person.temperature + 0.05) * 10))) / 10;
   SZ_LOG_INFO("Record: id={}, staff={}, score={:.2f}, status={}", person.id,
               person.number, person.score, person.status);
 
