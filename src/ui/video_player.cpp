@@ -28,8 +28,8 @@ void VideoPlayer::paintEvent(QPaintEvent *event) {
   QPainter painter(this);
 
   outline_widget_->paint(&painter);
-  status_banner_->paint(&painter);
   recognize_tip_widget_->paint(&painter);
+  status_banner_->paint(&painter);
   heatmap_widget_->paint(&painter);
 }
 

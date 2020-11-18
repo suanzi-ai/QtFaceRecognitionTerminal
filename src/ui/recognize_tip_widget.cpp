@@ -108,10 +108,24 @@ void RecognizeTipWidget::paint(QPainter *painter) {
   const int h = height();
 
   auto lang = Config::get_user_lang();
+  auto cfg = Config::get_user();
+
+  QColor background = QColor(5, 0, 20, 150);
+  bool has_temperature = false;
+  if (has_info_) {
+    if (Config::get_user().enable_temperature &&
+        (person_.temperature > 0 || latest_temperature_ > 0)) {
+      has_temperature = true;
+      if (person_.temperature > 0) latest_temperature_ = person_.temperature;
+
+      person_.temperature = latest_temperature_;
+      if (!person_.is_temperature_normal()) background = QColor(220, 0, 0, 150);
+    }
+  }
 
   // draw background
-  painter->fillRect(QRect(0, 0.84375 * h, w, 0.171875 * h),
-                    QColor(5, 0, 20, 150));
+  painter->fillRect(QRect(0, 0, w, 0.02734375 * h), background);
+  painter->fillRect(QRect(0, 0.84375 * h, w, 0.171875 * h), background);
 
   // draw border and seperator
   painter->setPen(QPen(QColor(150, 100, 0, 150), 2));
@@ -160,12 +174,10 @@ void RecognizeTipWidget::paint(QPainter *painter) {
       QRect(0.05375 * w, 0.9390625 * h, 0.025 * w, 0.021875 * h), icon_,
       QRect());
 
-  auto cfg = Config::get_user();
   painter->drawText(0.09375 * w, 0.95703125 * h, hostname_.c_str());
 
   // draw avatar here
   if (has_info_) {
-    auto cfg = Config::get_user();
     painter->drawPixmap(
         QRect(0.8125 * w, 0.8828125 * h, 0.1375 * w, 0.0859375 * h), snapshot_,
         QRect());
@@ -174,18 +186,11 @@ void RecognizeTipWidget::paint(QPainter *painter) {
           QRect(0.625 * w, 0.8828125 * h, 0.1375 * w, 0.0859375 * h), avatar_,
           QRect());
 
-    if (Config::get_user().enable_temperature &&
-        (person_.temperature > 0 || latest_temperature_ > 0)) {
-      if (person_.temperature > 0) latest_temperature_ = person_.temperature;
-
-      person_.temperature = latest_temperature_;
-
+    if (has_temperature) {
       char temperature_value[10];
       sprintf(temperature_value, ":%.1f°C", person_.temperature);
 
       painter->setRenderHint(QPainter::Antialiasing);
-
-      auto cfg = Config::get_user();
 
       QColor color;
       if (person_.is_temperature_normal()) {

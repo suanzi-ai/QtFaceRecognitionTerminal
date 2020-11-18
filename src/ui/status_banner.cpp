@@ -51,7 +51,7 @@ void StatusBanner::paint(QPainter *painter) {
   auto cfg = Config::get_user();
 
   // draw background
-  painter->fillRect(QRect(0, 0, w, 0.02734375 * h), QColor(5, 0, 20, 150));
+  // painter->fillRect(QRect(0, 0, w, 0.02734375 * h), QColor(5, 0, 20, 150));
 
   // draw person count
   QFont font = painter->font();
