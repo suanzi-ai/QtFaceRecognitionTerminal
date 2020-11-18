@@ -161,7 +161,7 @@ bool RecognizeTask::has_mask(DetectionData *detection) {
   SZ_BOOL has_mask;
   SZ_RETCODE ret = mask_detector_->classify(
       (const SVP_IMAGE_S *)detection->img_bgr_large->pImplData, face_detection,
-      has_mask, 0.9);
+      has_mask, Config::get_user().mask_score);
 
   if (SZ_RETCODE_OK == ret && has_mask == SZ_TRUE)
     return true;
@@ -187,8 +187,8 @@ void RecognizeTask::extract_and_query(DetectionData *detection, bool has_mask,
   //       face_detection, pose, feature);
   // else
   ret = face_extractor_->extract(
-      (const SVP_IMAGE_S *)detection->img_bgr_large->pImplData,
-      face_detection, pose, feature);
+      (const SVP_IMAGE_S *)detection->img_bgr_large->pImplData, face_detection,
+      pose, feature);
 
   if (SZ_RETCODE_OK == ret) {
     // query
@@ -205,6 +205,8 @@ void RecognizeTask::extract_and_query(DetectionData *detection, bool has_mask,
       else
         person_info.score = results[0].score;
       person_info.face_id = results[0].face_id;
+      SZ_LOG_INFO("mask={}, id={}, score={:.2f}", has_mask, person_info.face_id,
+                  person_info.score);
       return;
     }
   }

@@ -54,8 +54,8 @@ typedef struct {
   SZ_UINT16 relay_restore_time;
   bool enable_temperature;
   SZ_FLOAT temperature_bias;
-  float temperature_max;
-  float temperature_min;
+  SZ_FLOAT temperature_max;
+  SZ_FLOAT temperature_min;
   bool enable_audio;
   bool enable_record_audio;
   bool enable_temperature_audio;
@@ -67,6 +67,7 @@ typedef struct {
   SZ_UINT16 screensaver_timeout;
   bool upload_known_person;
   bool upload_unknown_person;
+  SZ_FLOAT mask_score;
 } UserConfig;
 
 void to_json(json &j, const UserConfig &c);
