@@ -39,7 +39,6 @@ class RecordTask : QObject {
   // for audio report
   void tx_report_person(PersonData person);
   void tx_report_temperature(PersonData person);
-  void tx_warn_mask();
 
  private:
   RecordTask(QThread *thread = nullptr, QObject *parent = nullptr);

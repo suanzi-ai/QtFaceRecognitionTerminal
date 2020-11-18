@@ -28,7 +28,6 @@ class AudioTask : QObject {
   void rx_report_person(PersonData person);
   void rx_report_temperature(PersonData person);
 
-  void rx_warn_mask();
   void rx_warn_distance();
 
  private:
