@@ -97,11 +97,14 @@ void TemperatureTask::connect() {
 
 bool TemperatureTask::try_reading(TemperatureMatrix& mat) {
   const int MAX_TRIAL = 10;
+  const int INTERVAL = 200;
   int trial = 0;
   while (SZ_RETCODE_OK != temperature_reader_->read(mat) && ++trial < MAX_TRIAL)
-    QThread::msleep(100);
+    QThread::msleep(INTERVAL);
 
-  return trial < MAX_TRIAL;
+  bool ret = trial < MAX_TRIAL;
+  if (ret) QThread::msleep(INTERVAL);
+  return ret;
 }
 
 void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
@@ -110,7 +113,7 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
   if (ambient_temperature_ == 0) connect();
 
   static TemperatureMatrix mat;
-  while (!try_reading(mat)) QThread::msleep(100);
+  while (!try_reading(mat)) QThread::msleep(1);
 
 
   if (!to_clear) {
