@@ -83,13 +83,14 @@ bool FaceService::load_image(SZ_UINT32 face_id, std::vector<SZ_BYTE> &buffer) {
   return false;
 }
 
-SZ_RETCODE FaceService::extract_image_feature(SZ_UINT32 face_id, std::vector<SZ_BYTE> &buffer,
+SZ_RETCODE FaceService::extract_image_feature(SZ_UINT32 face_id,
+                                              std::vector<SZ_BYTE> &buffer,
                                               FaceFeature &feature,
                                               std::string &error_message) {
   cv::Mat raw_data(1, buffer.size(), CV_8UC1, (void *)buffer.data());
   cv::Mat decoded_image = cv::imdecode(raw_data, cv::IMREAD_COLOR);
 
-  //cv::Mat decoded_image = cv::imread(image_store_dir_ + face.face_path, 1);
+  // cv::Mat decoded_image = cv::imread(image_store_dir_ + face.face_path, 1);
   if (decoded_image.empty()) {
     error_message = "cv::imdecode failed!";
     SZ_LOG_ERROR(error_message);
@@ -97,8 +98,8 @@ SZ_RETCODE FaceService::extract_image_feature(SZ_UINT32 face_id, std::vector<SZ_
   }
 
   if (decoded_image.channels() != 3) {
-	SZ_LOG_ERROR("it's not rgb image");
-    return SZ_RETCODE_FAILED;	
+    SZ_LOG_ERROR("it's not rgb image");
+    return SZ_RETCODE_FAILED;
   }
 
   int width = decoded_image.cols;
@@ -111,13 +112,11 @@ SZ_RETCODE FaceService::extract_image_feature(SZ_UINT32 face_id, std::vector<SZ_
   static SZ_BYTE *bgr = new SZ_BYTE[size];
   static int cur_bgr_size = size;
   if (cur_bgr_size < size) {
-	 delete bgr;
-	 bgr = new SZ_BYTE[size];
-  	 cur_bgr_size = size;
+    delete bgr;
+    bgr = new SZ_BYTE[size];
+    cur_bgr_size = size;
   }
-
   memcpy(bgr, decoded_image.data, size);
-
   do {
     ret = detector_->detect(bgr, width, height, detections);
     if (ret != SZ_RETCODE_OK) {
@@ -155,7 +154,6 @@ SZ_RETCODE FaceService::extract_image_feature(SZ_UINT32 face_id, std::vector<SZ_
       break;
     }
 
-
     ret = extractor_->extract(bgr, width, height, detections[0], pose, feature);
     if (ret != SZ_RETCODE_OK) {
       error_message = "assert extractor_->extract == SZ_RETCODE_OK failed";
@@ -175,25 +173,32 @@ SZ_RETCODE FaceService::extract_image_feature(SZ_UINT32 face_id, std::vector<SZ_
     int avatar_w = std::min(avatar_size * 2, width - avatar_x);
     int avatar_h = std::min(avatar_size * 2, height - avatar_y);
 
-	int resize_avata_w = 200;
-	int resize_avata_h = 200;
+    int resize_avata_w = 200;
+    int resize_avata_h = 200;
     if (avatar_w > avatar_h) {
-	  resize_avata_h = (int)(200.f * avatar_h / avatar_w);
+      resize_avata_h = (int)(200.f * avatar_h / avatar_w);
+    } else {
+      resize_avata_w = (int)(200.f * avatar_w / avatar_h);
     }
-    else {
-	  resize_avata_w = (int)(200.f * avatar_w / avatar_h);
+    int cur_size = resize_avata_w * resize_avata_h * 3;
+    static int cur_avatar_size = cur_size;
+    static unsigned char *pResize_data = new unsigned char[cur_size];
+    if (cur_avatar_size < cur_size) {
+      delete pResize_data;
+      cur_avatar_size = cur_size;
+      pResize_data = new unsigned char[cur_size];
     }
-	int cur_size = resize_avata_w * resize_avata_h * 3;
-	static int cur_avatar_size = cur_size;
-	static unsigned char *pResize_data = new unsigned char[cur_size];
-	if (cur_avatar_size < cur_size) {
-		delete pResize_data;
-		cur_avatar_size = cur_size;
-		pResize_data = new unsigned char [cur_size];
-	}
-	cv::Mat avatar(resize_avata_h, resize_avata_w, CV_8UC3, pResize_data);
-	cv::resize(decoded_image({avatar_x, avatar_y, avatar_w, avatar_h}),
-	         avatar, {resize_avata_w, resize_avata_h});
+    int cur_size = resize_avata_w * resize_avata_h * 3;
+    static int cur_avatar_size = cur_size;
+    static unsigned char *pResize_data = new unsigned char[cur_size];
+    if (cur_avatar_size < cur_size) {
+      delete pResize_data;
+      cur_avatar_size = cur_size;
+      pResize_data = new unsigned char[cur_size];
+    }
+    cv::Mat avatar(resize_avata_h, resize_avata_w, CV_8UC3, pResize_data);
+    cv::resize(decoded_image({avatar_x, avatar_y, avatar_w, avatar_h}), avatar,
+               {resize_avata_w, resize_avata_h});
     buffer.clear();
     cv::imencode(".jpg", avatar, buffer);
 
