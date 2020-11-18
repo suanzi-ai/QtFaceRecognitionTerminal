@@ -6,7 +6,6 @@
 #include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
 #include <quface/common.hpp>
-
 #include <quface/logger.hpp>
 
 namespace suanzi {
@@ -65,11 +64,9 @@ class PersonService {
   SZ_RETCODE update_person_face_image(
       uint id, const std::vector<SZ_UINT8> &image_content);
 
-  SZ_RETCODE report_face_record(uint person_id,
+  SZ_RETCODE report_face_record(const PersonData &person,
                                 const std::vector<SZ_UINT8> &bgr_image_content,
-                                const std::vector<SZ_UINT8> &nir_image_content,
-                                const std::string &status,
-                                float body_temperature);
+                                const std::vector<SZ_UINT8> &nir_image_content);
 
   static std::string get_status(PersonStatus s);
 

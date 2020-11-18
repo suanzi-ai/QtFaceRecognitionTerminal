@@ -140,9 +140,8 @@ SZ_RETCODE PersonService::upload_image(
 }
 
 SZ_RETCODE PersonService::report_face_record(
-    uint person_id, const std::vector<SZ_UINT8> &bgr_image_content,
-    const std::vector<SZ_UINT8> &nir_image_content, const std::string &status,
-    float body_temperature) {
+    const PersonData &person, const std::vector<SZ_UINT8> &bgr_image_content,
+    const std::vector<SZ_UINT8> &nir_image_content) {
   std::string bgr_file_path;
   SZ_RETCODE ret = upload_bgr_image(bgr_image_content, bgr_file_path);
   if (ret != SZ_RETCODE_OK) {
@@ -158,9 +157,12 @@ SZ_RETCODE PersonService::report_face_record(
   }
 
   json j = {
-      {"personID", person_id},           {"imagePath", bgr_file_path},
-      {"irImagePath", nir_file_path},    {"status", status},
-      {"temperature", body_temperature},
+      {"personID", person.id},
+      {"imagePath", bgr_file_path},
+      {"irImagePath", nir_file_path},
+      {"status", person.status},
+      {"temperature", person.temperature},
+      {"maskStatus", person.has_mask ? "correct" : "none"},
   };
   if (!Config::get_user().enable_temperature) j.erase("temperature");
 

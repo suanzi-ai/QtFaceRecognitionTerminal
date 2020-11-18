@@ -1,7 +1,6 @@
 #include "upload_task.hpp"
 
 #include <QThread>
-
 #include <quface-io/engine.hpp>
 
 #include "config.hpp"
@@ -37,8 +36,7 @@ void UploadTask::rx_upload(PersonData person, bool if_duplicated) {
   auto cfg = Config::get_user();
   if (!if_duplicated) {
     // whether temperature is enabled but no temperature data
-    if (cfg.enable_temperature && person.temperature == 0)
-      return;
+    if (cfg.enable_temperature && person.temperature == 0) return;
 
     // whether is known person
     if ((person.status == PersonService::get_status(PersonStatus::Normal) ||
@@ -76,8 +74,7 @@ void UploadTask::rx_upload(PersonData person, bool if_duplicated) {
 
     if (SZ_RETCODE_OK == bgr_encode_result &&
         SZ_RETCODE_OK == nir_encode_result)
-      person_service_->report_face_record(person.id, bgr_image_buffer,
-                                          nir_image_buffer, person.status,
-                                          person.temperature);
+      person_service_->report_face_record(person, bgr_image_buffer,
+                                          nir_image_buffer);
   }
 }
