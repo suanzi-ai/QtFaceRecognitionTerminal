@@ -41,7 +41,7 @@ void DetectTipWidget::paintEvent(QPaintEvent *event) {
 }
 
 void DetectTipWidget::paint(QPainter *painter) {
-  if (rects_.size() > 0) {
+  if (rects_.size() > 0 && !Config::get_user().enable_temperature) {
     float sum_x = 0, sum_y = 0, sum_width = 0, sum_height = 0;
     float count = 0;
 
