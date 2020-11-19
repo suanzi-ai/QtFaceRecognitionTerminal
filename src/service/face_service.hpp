@@ -43,11 +43,10 @@ class FaceService {
   SZ_RETCODE extract_image_feature(SZ_UINT32 face_id,
                                    std::vector<SZ_BYTE> &buffer,
                                    FaceFeature &feature,
-                                   FaceFeature &masked_feature,
                                    std::string &error_message);
   SZ_RETCODE read_image_as_base64(SZ_UINT32 id, std::string &result);
 
-  FaceDatabasePtr face_database_, mask_database_;
+  FaceDatabasePtr face_database_;
   FaceDetectorPtr detector_;
   FacePoseEstimatorPtr pose_estimator_;
   FaceExtractorPtr extractor_;

@@ -25,7 +25,6 @@ RecognizeTask::RecognizeTask(QThread *thread, QObject *parent)
     : is_running_(false) {
   auto cfg = Config::get_quface();
   face_database_ = std::make_shared<FaceDatabase>(cfg.db_name);
-  mask_database_ = std::make_shared<FaceDatabase>(cfg.masked_db_name);
 
   face_extractor_ = std::make_shared<FaceExtractor>(cfg.model_file_path);
   anti_spoofing_ = std::make_shared<FaceAntiSpoofing>(cfg.model_file_path);
@@ -180,13 +179,7 @@ void RecognizeTask::extract_and_query(DetectionData *detection, bool has_mask,
   detection->bgr_detection_.scale(width, height, face_detection, pose);
 
   // extract: 25ms
-  SZ_RETCODE ret;
-  // if (has_mask)
-  //   ret = face_extractor_->extract_mask(
-  //       (const SVP_IMAGE_S *)detection->img_bgr_large->pImplData,
-  //       face_detection, pose, feature);
-  // else
-  ret = face_extractor_->extract(
+  SZ_RETCODE ret = face_extractor_->extract(
       (const SVP_IMAGE_S *)detection->img_bgr_large->pImplData, face_detection,
       pose, feature);
 
@@ -195,9 +188,6 @@ void RecognizeTask::extract_and_query(DetectionData *detection, bool has_mask,
     static std::vector<suanzi::QueryResult> results;
     results.clear();
 
-    // if (has_mask)
-    //   ret = mask_database_->query(feature, 1, results);
-    // else
     ret = face_database_->query(feature, 1, results);
     if (SZ_RETCODE_OK == ret) {
       if (has_mask)

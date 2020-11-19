@@ -43,7 +43,6 @@ FaceService::FaceService(PersonService::ptr person_service, bool store_image)
       store_image_(store_image) {
   auto quface = Config::get_quface();
   face_database_ = std::make_shared<FaceDatabase>(quface.db_name);
-  mask_database_ = std::make_shared<FaceDatabase>(quface.masked_db_name);
 
   detector_ = std::make_shared<FaceDetector>(quface.model_file_path);
   extractor_ = std::make_shared<FaceExtractor>(quface.model_file_path);
@@ -87,7 +86,6 @@ bool FaceService::load_image(SZ_UINT32 face_id, std::vector<SZ_BYTE> &buffer) {
 SZ_RETCODE FaceService::extract_image_feature(SZ_UINT32 face_id,
                                               std::vector<SZ_BYTE> &buffer,
                                               FaceFeature &feature,
-                                              FaceFeature &masked_feature,
                                               std::string &error_message) {
   cv::Mat raw_data(1, buffer.size(), CV_8UC1, (void *)buffer.data());
   cv::Mat decoded_image = cv::imdecode(raw_data, cv::IMREAD_COLOR);
@@ -161,14 +159,6 @@ SZ_RETCODE FaceService::extract_image_feature(SZ_UINT32 face_id,
     ret = extractor_->extract(bgr, width, height, detections[0], pose, feature);
     if (ret != SZ_RETCODE_OK) {
       error_message = "assert extractor_->extract == SZ_RETCODE_OK failed";
-      SZ_LOG_ERROR(error_message);
-      break;
-    }
-
-    ret = extractor_->extract_mask(bgr, width, height, detections[0], pose,
-                                   masked_feature);
-    if (ret != SZ_RETCODE_OK) {
-      error_message = "assert extractor_->extract_mask == SZ_RETCODE_OK failed";
       SZ_LOG_ERROR(error_message);
       break;
     }
@@ -269,7 +259,7 @@ json FaceService::db_add(const json &body) {
     SZ_LOG_DEBUG("db.add id: {}", face.id);
 
     SZ_RETCODE ret;
-    FaceFeature feature, masked_feature;
+    FaceFeature feature;
     SZ_INT32 feature_size;
     static std::vector<SZ_BYTE> buffer(10 * 1024 * 1024);
 
@@ -283,8 +273,7 @@ json FaceService::db_add(const json &body) {
     }
 
     std::string error_message;
-    ret = extract_image_feature(face.id, buffer, feature, masked_feature,
-                                error_message);
+    ret = extract_image_feature(face.id, buffer, feature, error_message);
     if (ret != SZ_RETCODE_OK) {
       SZ_LOG_ERROR("extract_image_feature failed");
       return {
@@ -300,16 +289,6 @@ json FaceService::db_add(const json &body) {
       return {
           {"ok", false},
           {"message", "face_database_->add failed"},
-          {"code", "DB_FAILED"},
-      };
-    }
-
-    ret = mask_database_->add(face.id, masked_feature);
-    if (ret != SZ_RETCODE_OK) {
-      SZ_LOG_ERROR("mask_database_->add failed");
-      return {
-          {"ok", false},
-          {"message", "mask_database_->add failed"},
           {"code", "DB_FAILED"},
       };
     }
@@ -334,16 +313,6 @@ json FaceService::db_add(const json &body) {
       };
     }
 
-    ret = mask_database_->save();
-    if (ret != SZ_RETCODE_OK) {
-      SZ_LOG_ERROR("mask_database_->save failed");
-      return {
-          {"ok", false},
-          {"message", "mask_database_->save failed"},
-          {"code", "DB_FAILED"},
-      };
-    }
-
     return {{"ok", true}, {"message", "ok"}};
   } catch (std::exception &e) {
     SZ_LOG_ERROR("received data error {}", e.what());
@@ -360,7 +329,7 @@ json FaceService::db_add_many(const json &body) {
     auto faceArrary = body["persons"].get<std::vector<PersonImageInfo>>();
 
     SZ_RETCODE ret;
-    FaceFeature feature, masked_feature;
+    FaceFeature feature;
     SZ_INT32 feature_size;
 
     json failedPersons;
@@ -390,8 +359,7 @@ json FaceService::db_add_many(const json &body) {
       }
 
       std::string error_message;
-      ret = extract_image_feature(face.id, buffer, feature, masked_feature,
-                                  error_message);
+      ret = extract_image_feature(face.id, buffer, feature, error_message);
       if (ret != SZ_RETCODE_OK) {
         failedPersons.push_back(
             json({{"id", face.id},
@@ -402,15 +370,6 @@ json FaceService::db_add_many(const json &body) {
       }
 
       ret = face_database_->add(face.id, feature);
-      if (ret != SZ_RETCODE_OK) {
-        failedPersons.push_back(
-            json({{"id", face.id}, {"reason", "DB_FAILED"}}));
-        SZ_LOG_WARN("[Add many] failed face id: {} reason: {}", face.id,
-                    "DB_FAILED");
-        continue;
-      }
-
-      ret = mask_database_->add(face.id, feature);
       if (ret != SZ_RETCODE_OK) {
         failedPersons.push_back(
             json({{"id", face.id}, {"reason", "DB_FAILED"}}));
@@ -430,16 +389,6 @@ json FaceService::db_add_many(const json &body) {
     }
 
     ret = face_database_->save();
-    if (ret != SZ_RETCODE_OK) {
-      SZ_LOG_ERROR("[Add many] db.save failed");
-      return {
-          {"ok", false},
-          {"message", "db save failed"},
-          {"code", "DB_FAILED"},
-      };
-    }
-
-    ret = mask_database_->save();
     if (ret != SZ_RETCODE_OK) {
       SZ_LOG_ERROR("[Add many] db.save failed");
       return {
@@ -481,27 +430,7 @@ json FaceService::db_remove_by_id(const json &body) {
     };
   }
 
-  ret = mask_database_->remove(face_id);
-  if (ret != SZ_RETCODE_OK) {
-    SZ_LOG_ERROR("mask_database_->remove failed!");
-    return {
-        {"ok", false},
-        {"message", "failed"},
-        {"code", "DB_FAILED"},
-    };
-  }
-
   ret = face_database_->save();
-  if (ret != SZ_RETCODE_OK) {
-    SZ_LOG_ERROR("db.save failed");
-    return {
-        {"ok", false},
-        {"message", "db save failed"},
-        {"code", "DB_FAILED"},
-    };
-  }
-
-  ret = mask_database_->save();
   if (ret != SZ_RETCODE_OK) {
     SZ_LOG_ERROR("db.save failed");
     return {
@@ -526,16 +455,6 @@ json FaceService::db_remove_all(const json &body) {
     };
   }
 
-  ret = mask_database_->clear();
-  if (ret != SZ_RETCODE_OK) {
-    SZ_LOG_ERROR("db.clear failed");
-    return {
-        {"ok", false},
-        {"message", "db clear failed"},
-        {"code", "DB_FAILED"},
-    };
-  }
-
   ret = face_database_->save();
   if (ret != SZ_RETCODE_OK) {
     SZ_LOG_ERROR("db.save failed");
@@ -546,15 +465,6 @@ json FaceService::db_remove_all(const json &body) {
     };
   }
 
-  ret = mask_database_->save();
-  if (ret != SZ_RETCODE_OK) {
-    SZ_LOG_ERROR("db.save failed");
-    return {
-        {"ok", false},
-        {"message", "db save failed"},
-        {"code", "DB_FAILED"},
-    };
-  }
   return {{"ok", true}, {"message", "ok"}};
 }
 

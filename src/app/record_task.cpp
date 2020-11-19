@@ -49,8 +49,6 @@ RecordTask::RecordTask(QThread *thread, QObject *parent)
       temperature_timer_(nullptr) {
   person_service_ = PersonService::get_instance();
   face_database_ = std::make_shared<FaceDatabase>(Config::get_quface().db_name);
-  mask_database_ =
-      std::make_shared<FaceDatabase>(Config::get_quface().masked_db_name);
 
   // Create db for unknown faces
   unknown_database_ = std::make_shared<FaceDatabase>("_UNKNOWN_DB_");
@@ -130,7 +128,6 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
       if (sequence_query(person_history_, mask_history_, has_mask, face_id,
                          person.score)) {
         if (has_mask && person.score < 0.85)
-          // mask_database_->add(face_id, input->person_feature, 0.1);
           face_database_->add(face_id, input->person_feature, 0.1);
         if (!has_mask && person.score < 0.9)
           face_database_->add(face_id, input->person_feature, 0.1);

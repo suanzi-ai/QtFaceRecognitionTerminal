@@ -49,7 +49,7 @@ class RecognizeTask : QObject {
   bool rx_nir_finished_;
   bool rx_bgr_finished_;
 
-  FaceDatabasePtr face_database_, mask_database_;
+  FaceDatabasePtr face_database_;
   FaceExtractorPtr face_extractor_;
   FaceAntiSpoofingPtr anti_spoofing_;
   MaskDetectorPtr mask_detector_;
