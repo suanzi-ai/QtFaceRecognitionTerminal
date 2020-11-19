@@ -647,6 +647,17 @@ SZ_RETCODE Config::read_override_config(json &cfg) {
   return SZ_RETCODE_OK;
 }
 
+SZ_RETCODE Config::write_override_config(const json &cfg) {
+  std::ofstream o(config_override_file_);
+  if (!o.is_open()) {
+    SZ_LOG_WARN("Open {} failed, can't save", config_override_file_);
+    return SZ_RETCODE_FAILED;
+  }
+
+  o << cfg.dump(2);
+  return SZ_RETCODE_OK;
+}
+
 SZ_RETCODE Config::reload() {
   {
     std::unique_lock<std::mutex> lock(cfg_mutex_);
@@ -666,6 +677,22 @@ SZ_RETCODE Config::reload() {
       }
 
       if (config_patch.is_array()) {
+        bool patch_updated = false;
+        for (auto it = config_patch.begin(); it < config_patch.end(); it++) {
+          std::string path;
+          it->at("path").get_to(path);
+          if (!config.contains(json::json_pointer(path))) {
+            config_patch.erase(it);
+            SZ_LOG_WARN("Config path {} not exist, erased", path);
+            patch_updated = true;
+          }
+        }
+        if (patch_updated) {
+          ret = write_override_config(config_patch);
+          if (ret != SZ_RETCODE_OK) {
+            return ret;
+          }
+        }
         config = config.patch(config_patch);
       }
 
@@ -692,15 +719,12 @@ SZ_RETCODE Config::save_diff(const json &target_patch) {
     json target(cfg_data_);
     target.merge_patch(target_patch);
 
-    std::ofstream o(config_override_file_);
-    if (!o.is_open()) {
-      SZ_LOG_WARN("Open {} failed, can't save", config_override_file_);
-      return SZ_RETCODE_FAILED;
-    }
-
     json diff = json::diff(source, target);
 
-    o << diff.dump(2);
+    ret = write_override_config(diff);
+    if (ret != SZ_RETCODE_OK) {
+      return ret;
+    }
   } catch (std::exception &exc) {
     SZ_LOG_ERROR("Save diff error: {}", exc.what());
     return SZ_RETCODE_FAILED;

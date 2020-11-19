@@ -267,6 +267,7 @@ class Config : public ConfigEventEmitter {
   void load_defaults(ConfigData &c);
   SZ_RETCODE read_config(json &cfg);
   SZ_RETCODE read_override_config(json &cfg);
+  SZ_RETCODE write_override_config(const json &cfg);
 
  private:
   mutable std::mutex cfg_mutex_;
