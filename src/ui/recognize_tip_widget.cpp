@@ -124,7 +124,8 @@ void RecognizeTipWidget::paint(QPainter *painter) {
     if (Config::get_user().enable_temperature &&
         (person_.temperature > 0 || latest_temperature_ > 0)) {
       has_temperature = true;
-      if (person_.temperature > 0) latest_temperature_ = person_.temperature;
+      if (person_.temperature > 0 && latest_temperature_ == 0)
+        latest_temperature_ = person_.temperature;
 
       person_.temperature = latest_temperature_;
       if (!person_.is_temperature_normal()) background = QColor(220, 0, 0, 150);
