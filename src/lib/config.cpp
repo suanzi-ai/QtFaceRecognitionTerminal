@@ -1,5 +1,6 @@
 #include "config.hpp"
 
+#include <QFile>
 #include <regex>
 
 using namespace suanzi;
@@ -950,4 +951,28 @@ const LivenessConfig &Config::get_liveness() {
 bool Config::enable_anti_spoofing() {
   std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
   return instance_.cfg_data_.app.enable_anti_spoofing;
+}
+
+bool Config::read_image(const std::string &image, const std::string &fallback,
+                        std::vector<SZ_BYTE> &data) {
+  QFile file(image.c_str());
+  if (!file.exists()) {
+    file.setFileName(fallback.c_str());
+  }
+  if (!file.open(QIODevice::ReadOnly)) {
+    return false;
+  }
+  auto content = file.readAll();
+  data.assign(content.begin(), content.end());
+  return true;
+}
+
+bool Config::read_boot_background(std::vector<SZ_BYTE> &data) {
+  std::string filename = Config().get_app().boot_image_path;
+  return read_image(filename, ":asserts/boot.jpg", data);
+}
+
+bool Config::read_screen_saver_background(std::vector<SZ_BYTE> &data) {
+  std::string filename = Config().get_app().screensaver_image_path;
+  return read_image(filename, ":asserts/background.jpg", data);
 }

@@ -262,11 +262,17 @@ class Config : public ConfigEventEmitter {
   static std::string get_user_lang();
   static bool enable_anti_spoofing();
 
+  static bool read_boot_background(std::vector<SZ_BYTE> &data);
+  static bool read_screen_saver_background(std::vector<SZ_BYTE> &data);
+
  private:
   void load_defaults(ConfigData &c);
   SZ_RETCODE read_config(json &cfg);
   SZ_RETCODE read_override_config(json &cfg);
   SZ_RETCODE write_override_config(const json &cfg);
+
+  static bool read_image(const std::string &image, const std::string &fallback,
+                         std::vector<SZ_BYTE> &data);
 
  private:
   mutable std::mutex cfg_mutex_;

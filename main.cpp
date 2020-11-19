@@ -219,14 +219,8 @@ int main(int argc, char* argv[]) {
   config->appendListener("reload", reset_temperature);
 
   // Step 5: 播放自定义开机画面
-  std::string filename = Config().get_app().boot_image_path;
-  if (QFile(filename.c_str()).exists())
-    engine->start_boot_ui(filename);
-  else {
-    QFile file(":asserts/boot.jpg");
-    file.open(QIODevice::ReadOnly);
-    auto data = file.readAll();
-    std::vector<SZ_BYTE> img(data.begin(), data.end());
+  std::vector<SZ_BYTE> img;
+  if (Config::read_boot_background(img)) {
     engine->start_boot_ui(img);
   }
 

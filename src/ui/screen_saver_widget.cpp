@@ -4,7 +4,6 @@
 #include <QFile>
 #include <QPaintEvent>
 #include <QPainter>
-
 #include <quface/logger.hpp>
 
 #include "config.hpp"
@@ -20,11 +19,11 @@ ScreenSaverWidget::ScreenSaverWidget(int width, int height, QWidget *parent)
   move(0, 0);
   setFixedSize(width, height);
 
-  std::string filename = Config::get_app().screensaver_image_path;
-  if (QFile(filename.c_str()).exists())
-    background_.load(filename.c_str());
-  else
-    background_.load(":asserts/background.jpg");
+  std::vector<SZ_BYTE> img;
+  if (Config::read_screen_saver_background(img)) {
+    background_.loadFromData(img.data(), img.size());
+  }
+
   background_.scaled(width, height);
 }
 
