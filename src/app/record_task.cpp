@@ -28,17 +28,11 @@ RecordTask *RecordTask::get_instance() {
 
 bool RecordTask::idle() { return !get_instance()->is_running_; }
 
-void RecordTask::clear_cache() {
+void RecordTask::clear_temperature() {
   auto task = get_instance();
 
-  task->unknown_database_->clear();
-
-  task->query_clock_.clear();
   task->known_temperature_.clear();
-
-  task->unknown_query_clock_.clear();
   task->unknown_temperature_.clear();
-
   task->max_temperature_ = 0;
 }
 
@@ -318,39 +312,105 @@ bool RecordTask::sequence_temperature(const SZ_UINT32 &face_id, int duration,
   const float MAX_TEMPERATURE = Config::get_user().temperature_max;
   const float MIN_TEMPERATURE = 36.3;
 
+  // Low temperature
   if (temperature < MIN_TEMPERATURE) {
-    if (!CONTAIN_KEY(history, face_id) || duration > 10) {
-      temperature = MIN_TEMPERATURE + rand() % 3 / 10.f;
+    if (!CONTAIN_KEY(history, face_id))
       history[face_id] = temperature;
-    } else
-      temperature =
-          std::max(history[face_id], MIN_TEMPERATURE + rand() % 3 / 10.f);
+    else
+      history[face_id] = std::max(temperature, history[face_id]);
+
+    temperature =
+        std::max(MIN_TEMPERATURE + rand() % 2 / 10.f, history[face_id]);
     return true;
   }
 
-  if (!GOOD_TEMPERATURE(temperature)) {
-    if (CONTAIN_KEY(history, face_id) &&
-        temperature < history[face_id] + 0.5f) {
+  // High temperature
+  if (temperature >= MAX_TEMPERATURE) {
+    if (!CONTAIN_KEY(history, face_id)) {
+      history[face_id] = temperature;
+      return false;
+    } else {
+      // High history
+      if (history[face_id] >= MAX_TEMPERATURE) {
+        if (temperature > history[face_id]) {
+          history[face_id] = temperature;
+          return false;
+        } else {
+          temperature = history[face_id];
+          return true;
+        }
+      }
+
+      // Normal history
+      if (temperature >= MAX_TEMPERATURE + 0.5f) {
+        history[face_id] = temperature;
+        return false;
+      } else {
+        temperature = history[face_id];
+        return true;
+      }
+    }
+  }
+
+  // Normal temperature
+  if (!CONTAIN_KEY(history, face_id)) {
+    history[face_id] = temperature;
+    return false;
+  } else {
+    // High history
+    if (history[face_id] >= MAX_TEMPERATURE) {
+      history[face_id] = temperature;
+      return false;
+    }
+
+    // Normal history
+    if ((temperature > history[face_id] - 0.2f && duration > 10) ||
+        (temperature > history[face_id])) {
+      history[face_id] = temperature;
+      return false;
+    } else {
       temperature = history[face_id];
       return true;
     }
-    if (temperature < MAX_TEMPERATURE + 0.5f) {
-      temperature = MAX_TEMPERATURE - 0.1f;
-      history[face_id] = temperature;
-      return true;
-    }
-    return false;
+  }
+}
+
+bool RecordTask::update_temperature_bias() {
+  const float AVE_TEMPERATURE = 36.6;
+
+  float sum = 0, max_temperature = 0, min_temperature = 100;
+  int count = 0;
+  for (auto &it : known_temperature_) {
+    max_temperature = std::max(max_temperature, it.second);
+    sum += it.second;
+    count += 1;
+  }
+  for (auto &it : unknown_temperature_) {
+    min_temperature = std::min(min_temperature, it.second);
+    sum += it.second;
+    count += 1;
   }
 
-  if (!CONTAIN_KEY(history, face_id) ||
-      (temperature > history[face_id] - 0.2f && duration > 10) ||
-      (temperature > history[face_id] - 0.1f)) {
-    history[face_id] = temperature;
-    return false;
+  if (count == 1 || count >= 5) {
+    float bias = Config::get_temperature_bias();
+    float diff;
+    if (count == 1) diff = AVE_TEMPERATURE - sum;
+    if (count >= 5)
+      diff = AVE_TEMPERATURE -
+             (sum - max_temperature - min_temperature) / (count - 2);
+    Config::set_temperature_bias(bias + diff);
+    for (auto &it : known_temperature_) it.second += diff;
+    for (auto &it : unknown_temperature_) it.second += diff;
+    SZ_LOG_INFO("update bias {:.2f} --> {:.2f}", bias,
+                Config::get_temperature_bias());
+    return true;
   }
 
-  temperature = history[face_id];
-  return true;
+  if (count > 10) {
+    known_temperature_.clear();
+    unknown_temperature_.clear();
+  }
+  return false;
 }
 
 void RecordTask::update_person(RecognizeData *input, const SZ_UINT32 &face_id,
@@ -449,7 +509,12 @@ bool RecordTask::if_duplicated(const SZ_UINT32 &face_id, float &temperature) {
   } else
     query_clock_[face_id] = current_query_clock;
 
-  sequence_temperature(face_id, duration, known_temperature_, temperature);
+  SZ_LOG_INFO("size={}", known_temperature_.size() + unknown_temperature_.size());
+  if (sequence_temperature(face_id, duration, known_temperature_,
+                           temperature) ||
+      known_temperature_.size() + unknown_temperature_.size() == 1)
+    update_temperature_bias();
+
   return ret;
 }
 
@@ -496,7 +561,12 @@ bool RecordTask::if_duplicated(const FaceFeature &feature, float &temperature) {
     unknown_query_clock_[face_id] = current_query_clock;
   }
 
-  sequence_temperature(face_id, duration, unknown_temperature_, temperature);
+  SZ_LOG_INFO("size={}", known_temperature_.size() + unknown_temperature_.size());
+  if (sequence_temperature(face_id, duration, unknown_temperature_,
+                           temperature) ||
+      known_temperature_.size() + unknown_temperature_.size() == 1)
+    update_temperature_bias();
+
   return ret;
 }
 

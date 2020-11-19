@@ -32,7 +32,13 @@ void trigger_led() {
   last_status = status;
 }
 
-void reset_temperature() { RecordTask::clear_cache(); }
+void reset_temperature() {
+  static float last_bias = Config::get_temperature_bias();
+  float bias = Config::get_temperature_bias();
+  if (std::abs(bias - last_bias > 0.1)) RecordTask::clear_temperature();
+
+  last_bias = bias;
+}
 
 Config* read_cfg(int argc, char* argv[]) {
   // 基础配置文件，默认：config.json
@@ -246,7 +252,8 @@ int main(int argc, char* argv[]) {
 
       server->stop();
     }
-  }).detach();
+  })
+      .detach();
 
   return app.exec();
 }

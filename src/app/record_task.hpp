@@ -19,7 +19,7 @@ class RecordTask : QObject {
   static RecordTask *get_instance();
   static bool idle();
 
-  static void clear_cache();
+  static void clear_temperature();
 
  private slots:
   void rx_frame(PingPangBuffer<RecognizeData> *buffer);
@@ -54,6 +54,7 @@ class RecordTask : QObject {
   bool sequence_temperature(const SZ_UINT32 &face_id, int duration,
                             std::map<SZ_UINT32, float> &history,
                             float &temperature);
+  bool update_temperature_bias();
 
   void update_person(RecognizeData *input, const SZ_UINT32 &face_id,
                      PersonData &person);
