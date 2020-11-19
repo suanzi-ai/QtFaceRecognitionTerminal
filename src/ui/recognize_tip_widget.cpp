@@ -57,7 +57,13 @@ RecognizeTipWidget::~RecognizeTipWidget() {}
 void RecognizeTipWidget::rx_display(PersonData person, bool if_duplicated) {
   person_ = person;
 
-  avatar_.load(person_.face_path.c_str());
+  // avatar_.load(person_.face_path.c_str());
+  cv::Mat avatar = cv::imread(person_.face_path.c_str());
+  cv::cvtColor(avatar, avatar, CV_BGR2RGB);
+  avatar_ = QPixmap::fromImage(QImage((unsigned char *)avatar.data, avatar.cols,
+                                      avatar.rows, avatar.step,
+                                      QImage::Format_RGB888));
+  avatar.release();
 
   if ((!has_info_ || person_.face_path != person.face_path) &&
       !person.face_snapshot.empty()) {
