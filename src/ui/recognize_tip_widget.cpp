@@ -124,8 +124,8 @@ void RecognizeTipWidget::paint(QPainter *painter) {
     if (Config::get_user().enable_temperature &&
         (person_.temperature > 0 || latest_temperature_ > 0)) {
       has_temperature = true;
-      if (person_.temperature > 0 &&
-          std::abs(latest_temperature_ - person_.temperature) > 1)
+      if ((person_.temperature > 0 && latest_temperature_ == 0) ||
+          !person_.is_temperature_normal())
         latest_temperature_ = person_.temperature;
 
       person_.temperature = latest_temperature_;
