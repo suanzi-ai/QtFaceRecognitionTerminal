@@ -271,7 +271,7 @@ json FaceService::db_add(const json &body) {
     SZ_RETCODE ret;
     FaceFeature feature, masked_feature;
     SZ_INT32 feature_size;
-    static std::vector<SZ_BYTE> buffer(3 * 5120 * 5120);
+    static std::vector<SZ_BYTE> buffer(10 * 1024 * 1024);
 
     ret = read_buffer(face, buffer);
     if (ret != SZ_RETCODE_OK) {
@@ -365,7 +365,7 @@ json FaceService::db_add_many(const json &body) {
 
     json failedPersons;
 
-    static std::vector<SZ_BYTE> buffer(3 * 1024 * 1024);
+    static std::vector<SZ_BYTE> buffer(10 * 1024 * 1024);
 
     for (auto &face : faceArrary) {
       SZ_UINT32 db_size;
