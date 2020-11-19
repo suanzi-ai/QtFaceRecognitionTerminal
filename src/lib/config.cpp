@@ -277,6 +277,8 @@ Config Config::instance_;
 
 Config *Config::get_instance() { return &instance_; }
 
+void Config::to_json(json &j) { ::to_json(j, instance_.cfg_data_); }
+
 void Config::load_defaults(ConfigData &c) {
   c.app = {
       .recognize_tip_top_percent = 78,

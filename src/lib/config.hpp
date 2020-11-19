@@ -235,6 +235,7 @@ class Config : public ConfigEventEmitter {
  public:
   typedef std::shared_ptr<Config> ptr;
   static Config *get_instance();
+  static void to_json(json &j);
 
   SZ_RETCODE load_from_file(const std::string &config_file,
                             const std::string &config_override_file);

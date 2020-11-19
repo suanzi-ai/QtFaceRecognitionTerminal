@@ -398,11 +398,17 @@ bool RecordTask::update_temperature_bias() {
     if (count >= 5)
       diff = AVE_TEMPERATURE -
              (sum - max_temperature - min_temperature) / (count - 2);
-    Config::set_temperature_bias(bias + diff);
+
     for (auto &it : known_temperature_) it.second += diff;
     for (auto &it : unknown_temperature_) it.second += diff;
+
+    Config::set_temperature_bias(bias + diff);
     SZ_LOG_INFO("update bias {:.2f} --> {:.2f}", bias,
                 Config::get_temperature_bias());
+    json cfg;
+    Config::to_json(cfg);
+    Config::get_instance()->save_diff(cfg);
+
     return true;
   }
 
@@ -509,7 +515,6 @@ bool RecordTask::if_duplicated(const SZ_UINT32 &face_id, float &temperature) {
   } else
     query_clock_[face_id] = current_query_clock;
 
-  SZ_LOG_INFO("size={}", known_temperature_.size() + unknown_temperature_.size());
   if (sequence_temperature(face_id, duration, known_temperature_,
                            temperature) ||
       known_temperature_.size() + unknown_temperature_.size() == 1)
