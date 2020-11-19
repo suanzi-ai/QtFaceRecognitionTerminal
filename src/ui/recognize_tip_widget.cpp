@@ -59,11 +59,13 @@ void RecognizeTipWidget::rx_display(PersonData person, bool if_duplicated) {
 
   // avatar_.load(person_.face_path.c_str());
   cv::Mat avatar = cv::imread(person_.face_path.c_str());
-  cv::cvtColor(avatar, avatar, CV_BGR2RGB);
-  avatar_ = QPixmap::fromImage(QImage((unsigned char *)avatar.data, avatar.cols,
-                                      avatar.rows, avatar.step,
-                                      QImage::Format_RGB888));
-  avatar.release();
+  if (!avatar.empty()) {
+    cv::cvtColor(avatar, avatar, CV_BGR2RGB);
+    avatar_ = QPixmap::fromImage(QImage((unsigned char *)avatar.data,
+                                        avatar.cols, avatar.rows, avatar.step,
+                                        QImage::Format_RGB888));
+    avatar.release();
+  }
 
   if ((!has_info_ || person_.face_path != person.face_path) &&
       !person.face_snapshot.empty()) {
@@ -170,7 +172,7 @@ void RecognizeTipWidget::paint(QPainter *painter) {
 
   // draw SN, FW and ip
   char buffer[100];
-  sprintf(buffer, "SN:%s FW:1.0.2%s", serial_number_.c_str(), ip_.c_str());
+  sprintf(buffer, "SN:%s FW:1.0.3%s", serial_number_.c_str(), ip_.c_str());
   font_.setPointSize(0.02125 * w);
   painter->setFont(font_);
   painter->drawText(0.05625 * w, 0.984375 * h, buffer);
