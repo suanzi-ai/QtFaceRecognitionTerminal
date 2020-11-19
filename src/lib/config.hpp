@@ -248,6 +248,9 @@ class Config : public ConfigEventEmitter {
   static bool write_audio_volume(int volume_percent);
   static bool read_audio_volume(int &volume_percent);
 
+  static void set_temperature_bias(float bias);
+  static float get_temperature_bias();
+
   static const ConfigData &get_all();
   static const UserConfig &get_user();
   static const TemperatureConfig &get_temperature();

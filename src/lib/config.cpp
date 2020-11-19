@@ -880,6 +880,16 @@ bool Config::write_audio_volume(int volume_percent) {
   return true;
 }
 
+void Config::set_temperature_bias(float bias) {
+  std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
+  instance_.cfg_data_.user.temperature_bias = bias;
+}
+
+float Config::get_temperature_bias() {
+  std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
+  return instance_.cfg_data_.user.temperature_bias;
+}
+
 const ConfigData &Config::get_all() {
   std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
   return instance_.cfg_data_;
