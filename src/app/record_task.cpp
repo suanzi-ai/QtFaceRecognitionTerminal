@@ -311,17 +311,27 @@ bool RecordTask::sequence_temperature(const SZ_UINT32 &face_id, int duration,
 
   const float MAX_TEMPERATURE = Config::get_user().temperature_max;
   const float MIN_TEMPERATURE = 36.3;
+  const float RANDOM_TEMPERATURE = MIN_TEMPERATURE + rand() % 2 / 10.f;
 
   // Low temperature
   if (temperature < MIN_TEMPERATURE) {
-    if (!CONTAIN_KEY(history, face_id))
+    if (!CONTAIN_KEY(history, face_id)) {
       history[face_id] = temperature;
-    else
-      history[face_id] = std::max(temperature, history[face_id]);
+      temperature = RANDOM_TEMPERATURE;
+      return true;
+    } else {
+      // High history
+      if (history[face_id] >= MAX_TEMPERATURE) {
+        history[face_id] = temperature;
+        temperature = RANDOM_TEMPERATURE;
+        return true;
+      }
 
-    temperature =
-        std::max(MIN_TEMPERATURE + rand() % 2 / 10.f, history[face_id]);
-    return true;
+      // Normal history
+      history[face_id] = std::max(temperature, history[face_id]);
+      temperature = std::max(RANDOM_TEMPERATURE, history[face_id]);
+      return true;
+    }
   }
 
   // High temperature
@@ -566,7 +576,8 @@ bool RecordTask::if_duplicated(const FaceFeature &feature, float &temperature) {
     unknown_query_clock_[face_id] = current_query_clock;
   }
 
-  SZ_LOG_INFO("size={}", known_temperature_.size() + unknown_temperature_.size());
+  SZ_LOG_INFO("size={}",
+              known_temperature_.size() + unknown_temperature_.size());
   if (sequence_temperature(face_id, duration, unknown_temperature_,
                            temperature) ||
       known_temperature_.size() + unknown_temperature_.size() == 1)
