@@ -20,7 +20,6 @@ class OutlineWidget : public QWidget {
   void rx_reset();
 
  private:
-  QPixmap outline_;
   QTimer timer_;
 
   bool show_valid_rect_;
