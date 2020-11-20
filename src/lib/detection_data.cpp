@@ -67,10 +67,10 @@ bool DetectionRatio::is_valid_position() {
     min_x = min_y = 0.01;
     max_x = max_y = 0.99;
   } else {
-    min_x = temperature.device_face_x;
-    min_y = temperature.device_face_y;
-    max_x = min_x + temperature.device_face_width;
-    max_y = min_y + temperature.device_face_height + 0.05;
+    min_x = 0.15;
+    min_y = 0.05;
+    max_x = 0.85;
+    max_y = 0.95;
   }
 
   return x > min_x && y > min_y && x + width < max_x && y + height < max_y;
