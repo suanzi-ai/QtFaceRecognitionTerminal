@@ -115,7 +115,6 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
   static TemperatureMatrix mat;
   while (!try_reading(mat)) QThread::msleep(1);
 
-
   if (!to_clear) {
     detection.x += 0.125f;
     detection.width = std::min(detection.width, 1.f - detection.x);
@@ -131,7 +130,8 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
   float max_temperature = 0;
   for (size_t i = 0; i < 256; i++) {
     float x = (i % 16) / 16.f, y = (i / 16) / 16.f;
-    if (detection.x <= x && x <= detection.x + detection.width &&
+    if (pow(x - 0.5f, 2) + pow(y - 0.5f, 2) <= pow(6.f / 16.f, 2) &&
+        detection.x <= x && x <= detection.x + detection.width &&
         detection.y <= y && y <= detection.y + detection.height &&
         mat.value[i] > max_temperature) {
       max_temperature = mat.value[i];
@@ -154,8 +154,8 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
     // SZ_LOG_INFO("ambient={:.2f}°C, face={:.2f}°C", ambient_temperature_,
     //             face_temperature_);
 
-    face_temperature_ = surface_to_inner(measure_to_surface(
-        face_temperature_ + Config::get_temperature_bias()));
+    face_temperature_ = surface_to_inner(
+        measure_to_surface(face_temperature_ + Config::get_temperature_bias()));
 
     emit tx_temperature(face_temperature_);
   }
