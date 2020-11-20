@@ -26,16 +26,13 @@ VideoPlayer::~VideoPlayer() {}
 
 void VideoPlayer::paintEvent(QPaintEvent *event) {
   QPainter painter(this);
-
   outline_widget_->paint(&painter);
   recognize_tip_widget_->paint(&painter);
-  heatmap_widget_->paint(&painter);
 }
 
 void VideoPlayer::init_workflow() {
   // 创建摄像头读取对象
   camera_reader_ = CameraReader::get_instance();
-
   // 创建人脸检测线程
   detect_task_ = DetectTask::get_instance();
   connect((const QObject *)camera_reader_,
@@ -173,6 +170,7 @@ void VideoPlayer::init_widgets() {
 
   // 创建热力图控件
   heatmap_widget_ = new HeatmapWidget(screen_width, screen_height, this);
+  heatmap_widget_->hide();
   connect((const QObject *)temperature_task_, SIGNAL(tx_heatmap_init(int)),
           (const QObject *)heatmap_widget_, SLOT(rx_init(int)));
   connect((const QObject *)temperature_task_,
@@ -190,4 +188,5 @@ void VideoPlayer::init_widgets() {
 
 void VideoPlayer::delay_init_widgets() {
 	status_banner_->show();
+	heatmap_widget_->show();
 }

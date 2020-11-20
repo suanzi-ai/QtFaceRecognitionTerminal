@@ -1,5 +1,5 @@
 #include "heatmap_widget.hpp"
-
+#include <QPaintEvent>
 #include <algorithm>
 #include <cstring>
 
@@ -10,12 +10,16 @@ using namespace suanzi::io;
 
 HeatmapWidget::HeatmapWidget(int width, int height, QWidget *parent)
     : QWidget(parent), raw_(16, 16, CV_8UC3), init_(false), success_(0) {
-  QPalette palette = this->palette();
-  palette.setColor(QPalette::Background, Qt::transparent);
-  setPalette(palette);
 
-  move(0, 0);
-  setFixedSize(width, height);
+  setAttribute(Qt::WA_StyledBackground, true);
+  setAutoFillBackground(true);
+
+  int w = 0.1875 * width;
+  int h = 0.1171875 * height;
+  int pos_x = 0.0625 * width;
+  int pos_y = 0.703125 * height;
+  setFixedSize(w, h);
+  move(pos_x, pos_y);
 
   x_ = y_ = 0.5;
   detection_.x = 0.45;
@@ -30,7 +34,7 @@ HeatmapWidget::HeatmapWidget(int width, int height, QWidget *parent)
 
 HeatmapWidget::~HeatmapWidget() {}
 
-void HeatmapWidget::rx_init(int success) { success_ = success; }
+void HeatmapWidget::rx_init(int success) { success_ = success; update();}
 
 void HeatmapWidget::rx_update(TemperatureMatrix mat, DetectionRatio detection,
                               float x, float y) {
@@ -64,37 +68,38 @@ void HeatmapWidget::rx_update(TemperatureMatrix mat, DetectionRatio detection,
   detection_ = detection;
   x_ = x;
   y_ = y;
+  update();
 }
 
-void HeatmapWidget::paint(QPainter *painter) {
+void HeatmapWidget::paintEvent(QPaintEvent *event) {
+
+  QPainter painter(this);
   const int w = width();
   const int h = height();
 
-  const QRect target(0.0625 * w, 0.703125 * h, 0.1875 * w, 0.1171875 * h);
-
-  if (Config::get_user().enable_temperature) {
-    painter->drawPixmap(target, heatmap_, QRect());
-
-    painter->setPen(Qt::white);
+	if (Config::get_user().enable_temperature) {
+	const QRect target(0, 0, w, h);
+    painter.drawPixmap(target, heatmap_, QRect());
+    painter.setPen(Qt::white);
     if (init_) {
       QRect face(target.x() + target.width() * detection_.x,
                  target.y() + target.height() * detection_.y,
                  target.width() * detection_.width,
                  target.height() * detection_.height);
-      painter->drawRect(face);
+      painter.drawRect(face);
 
-      painter->drawLine(target.x() + (x_ - 0.1) * target.width(),
+      painter.drawLine(target.x() + (x_ - 0.1) * target.width(),
                         target.y() + y_ * target.height(),
                         target.x() + (x_ + 0.1) * target.width(),
                         target.y() + y_ * target.height());
-      painter->drawLine(target.x() + x_ * target.width(),
+      painter.drawLine(target.x() + x_ * target.width(),
                         target.y() + (y_ - 0.1) * target.height(),
                         target.x() + x_ * target.width(),
                         target.y() + (y_ + 0.1) * target.height());
     } else {
       char progress[100];
       sprintf(progress, "Loading %d%%", success_ * 10);
-      painter->drawText(target.x() + 0.05 * target.width(),
+      painter.drawText(target.x() + 0.05 * target.width(),
                         target.y() + 0.55 * target.height(), progress);
     }
   }

@@ -22,7 +22,8 @@ class HeatmapWidget : public QWidget {
   HeatmapWidget(int width, int height, QWidget *parent = nullptr);
   ~HeatmapWidget() override;
 
-  void paint(QPainter *painter);
+ private:
+ 	void paintEvent(QPaintEvent *event) override;
 
  private slots:
   void rx_init(int success);
