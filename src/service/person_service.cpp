@@ -104,6 +104,20 @@ SZ_RETCODE PersonService::get_person(SZ_UINT32 id, PersonData &person) {
   return SZ_RETCODE_FAILED;
 }
 
+SZ_RETCODE PersonService::get_person(std::string card_no, PersonData &person) {
+  std::string path = "/api/v1/persons-by-number/" + card_no;
+  auto res = client_.Get(path.c_str());
+  if (res && res->status < 400) {
+    // SZ_LOG_DEBUG("Got person body {}", res->body);
+    json body = json::parse(res->body);
+    body.get_to(person);
+    person.face_path = image_store_path_ + person.face_path;
+    return SZ_RETCODE_OK;
+  }
+  return SZ_RETCODE_FAILED;
+}
+
+
 SZ_RETCODE PersonService::update_person_face_image(
     uint id, const std::vector<SZ_UINT8> &image_content) {
   std::string path = "/api/v1/persons/" + std::to_string(id) + "/faceImage";

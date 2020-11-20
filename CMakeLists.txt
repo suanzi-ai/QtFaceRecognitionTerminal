@@ -57,12 +57,16 @@ set(QT_SDK_PREFIX
 set(TEMPERATURE_SDK_PREFIX
     "${PROJECT_DEPENDENCY_DIR}/temperature"
     CACHE STRING "Dir for temperature sdk")
+set(ZBAR_SDK_PREFIX
+    "${PROJECT_DEPENDENCY_DIR}/zbar"
+    CACHE STRING "Dir for zbar sdk")
 
 message(STATUS "set HISI_SDK_PREFIX to: ${HISI_SDK_PREFIX}")
 message(STATUS "set THIRD_PARTY_PREFIX to: ${THIRD_PARTY_PREFIX}")
 message(STATUS "set QUFACE_SDK_PREFIX to: ${QUFACE_SDK_PREFIX}")
 message(STATUS "set QT_SDK_PREFIX to: ${QT_SDK_PREFIX}")
 message(STATUS "set TEMPERATURE_SDK_PREFIX to: ${TEMPERATURE_SDK_PREFIX}")
+message(STATUS "set ZBAR_SDK_PREFIX to: ${ZBAR_SDK_PREFIX}")
 
 set(PREFIX_LIST
     ${HISI_SDK_PREFIX} ${QUFACE_SDK_PREFIX} ${QUFACE_IO_SDK_PREFIX}
@@ -177,6 +181,13 @@ set_target_properties(
              IMPORTED_LOCATION "${TEMPERATURE_SDK_PREFIX}/lib/libtemperature.a"
              INTERFACE_POSITION_INDEPENDENT_CODE "ON")
 
+add_library(zbar::zbar STATIC IMPORTED)
+set_target_properties(
+  zbar::zbar
+  PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${ZBAR_SDK_PREFIX}/include"
+             IMPORTED_LOCATION "${ZBAR_SDK_PREFIX}/lib/libzbar.a"
+             INTERFACE_POSITION_INDEPENDENT_CODE "ON")
+
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_definitions(-DDEBUG)
 endif()
@@ -215,3 +226,10 @@ target_link_libraries(
   PRIVATE
   PUBLIC lib)
 install(TARGETS smoke-test DESTINATION .)
+
+add_executable(qrcode-test qrcode-test.cpp resource.qrc)
+target_link_libraries(
+  qrcode-test
+  PRIVATE
+  PUBLIC lib)
+install(TARGETS qrcode-test DESTINATION .)

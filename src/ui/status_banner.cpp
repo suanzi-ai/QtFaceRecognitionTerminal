@@ -6,7 +6,8 @@
 #include <QPainter>
 #include <QPushButton>
 #include <QStringList>
-
+#include <QHBoxLayout>
+#include <QPushButton>
 #include "config.hpp"
 #include "system.hpp"
 

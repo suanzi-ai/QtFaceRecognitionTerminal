@@ -16,7 +16,11 @@ class ScreenSaverWidget : public QWidget {
   ~ScreenSaverWidget() override;
 
  protected:
-  void paintEvent(QPaintEvent *event);
+  void paintEvent(QPaintEvent *event) override;
+  void mousePressEvent(QMouseEvent *event) override;
+
+ signals:
+  void tx_display_screen_saver(bool visible);
 
  private slots:
   void rx_display(bool visible);
@@ -24,6 +28,7 @@ class ScreenSaverWidget : public QWidget {
 
  private:
   QTimer *refresh_timer_;
+  int saver_timeout_;
 };
 
 }  // namespace suanzi

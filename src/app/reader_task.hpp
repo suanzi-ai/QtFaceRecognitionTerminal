@@ -1,34 +1,27 @@
-#ifndef __READER_TASK_HPP__
-#define __READER_TASK_HPP__
+#ifndef READER_TASK_H
+#define READER_TASK_H
 
 #include <QThread>
 
-#include <quface-io/ic_reader.hpp>
-#include <quface-io/option.hpp>
+#include "person_service.hpp"
 
 namespace suanzi {
-using namespace io;
 
-class ReaderTask : public QThread {
+class ReaderTask : QThread {
   Q_OBJECT
-
  public:
-  ReaderTask();
+  static ReaderTask *get_instance();
+
+ private:
+  ReaderTask(QThread *thread = nullptr, QObject *parent = nullptr);
   ~ReaderTask();
+  void run() override;
 
- protected:
  signals:
-
- private slots:
-  void rx_enable();
-  void rx_disable();
+  void tx_display(PersonData person, bool if_duplicated);
 
  private:
-  void run();
-
- private:
-  ICReader::ptr ic_reader_;
-  bool is_enabled_;
+  PersonService::ptr person_service_;
 };
 
 }  // namespace suanzi
