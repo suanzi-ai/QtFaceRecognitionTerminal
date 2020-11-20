@@ -154,7 +154,7 @@ void VideoPlayer::init_widgets() {
           SLOT(rx_display(PersonData, bool)));
 
   // 创建屏保控件
-  screen_saver_ = new ScreenSaverWidget(screen_width, screen_height, this);
+  screen_saver_ = new ScreenSaverWidget(screen_width, screen_height);
   screen_saver_->hide();
   connect((const QObject *)face_timer_, SIGNAL(tx_display_screen_saver(bool)),
           (const QObject *)screen_saver_, SLOT(rx_display(bool)));

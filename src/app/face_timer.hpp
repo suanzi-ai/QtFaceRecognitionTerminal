@@ -2,6 +2,7 @@
 #define FACE_TIMER_HPP
 
 #include <QObject>
+#include <QThread>
 #include <QTimer>
 #include <chrono>
 
@@ -10,7 +11,7 @@
 #include "quface_common.hpp"
 
 namespace suanzi {
-class FaceTimer : QObject {
+class FaceTimer : QThread {
   Q_OBJECT
  public:
   static FaceTimer* get_instance();
@@ -24,9 +25,10 @@ class FaceTimer : QObject {
   void tx_display_screen_saver(bool visible);
 
  private:
-  FaceTimer(QThread *thread = nullptr, QObject *parent = nullptr);
+  FaceTimer(QObject *parent = nullptr);
   ~FaceTimer();
   void display_screen_saver(bool visible);
+  void run() override;
 
   int disappear_counter_;
   int disappear_duration_;
