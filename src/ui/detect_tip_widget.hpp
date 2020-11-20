@@ -3,6 +3,7 @@
 
 #include <QImage>
 #include <QPainter>
+#include <QVBoxLayout>
 #include <QWidget>
 
 #include "detection_data.hpp"
@@ -20,6 +21,10 @@ class DetectTipWidget : public QWidget {
   ~DetectTipWidget() override;
 
   void paint(QPainter *painter);
+
+  void timerEvent(QTimerEvent *event) override;
+
+  void paintEvent(QPaintEvent *event) override;
 
  private slots:
   void rx_display(DetectionRatio detection, bool to_clear, bool valid,

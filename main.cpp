@@ -32,7 +32,13 @@ void trigger_led() {
   last_status = status;
 }
 
-void reset_temperature() { RecordTask::clear_cache(); }
+void reset_temperature() {
+  static float last_bias = Config::get_temperature_bias();
+  float bias = Config::get_temperature_bias();
+  if (std::abs(bias - last_bias > 0.1)) RecordTask::clear_temperature();
+
+  last_bias = bias;
+}
 
 Config* read_cfg(int argc, char* argv[]) {
   // 基础配置文件，默认：config.json
@@ -219,14 +225,8 @@ int main(int argc, char* argv[]) {
   config->appendListener("reload", reset_temperature);
 
   // Step 5: 播放自定义开机画面
-  std::string filename = Config().get_app().boot_image_path;
-  if (QFile(filename.c_str()).exists())
-    engine->start_boot_ui(filename);
-  else {
-    QFile file(":asserts/boot.jpg");
-    file.open(QIODevice::ReadOnly);
-    auto data = file.readAll();
-    std::vector<SZ_BYTE> img(data.begin(), data.end());
+  std::vector<SZ_BYTE> img;
+  if (Config::read_boot_background(img)) {
     engine->start_boot_ui(img);
   }
 
@@ -242,7 +242,8 @@ int main(int argc, char* argv[]) {
         .http_port = 8000,
         .rtsp_port = 554,
         .max_packet_size = 1456,
-        .max_buffer_size = 400000,
+        .max_buffer_size = 2 * 1024 * 1024,
+        .enable_timestamp = true,
     };
 
     auto server = engine->start_live_streaming(option);

@@ -2,6 +2,7 @@
 
 #include <QPaintEvent>
 #include <QPainter>
+#include <QPicture>
 #include <QTimer>
 
 #include "config.hpp"
@@ -21,12 +22,26 @@ DetectTipWidget::DetectTipWidget(int win_x, int win_y, int win_width,
   QPalette palette = this->palette();
   palette.setColor(QPalette::Background, Qt::transparent);
   setPalette(palette);
+
+  move(win_x_, win_y_);
+  setFixedSize(win_width_, win_height_);
+
+  QVBoxLayout *main_layout = new QVBoxLayout(this);
+
+  startTimer(1000 / 33);
 }
 
 DetectTipWidget::~DetectTipWidget() {}
 
+void DetectTipWidget::timerEvent(QTimerEvent *event) { update(); };
+
+void DetectTipWidget::paintEvent(QPaintEvent *event) {
+  QPainter painter(this);
+  paint(&painter);
+}
+
 void DetectTipWidget::paint(QPainter *painter) {
-  if (rects_.size() > 0) {
+  if (rects_.size() > 0 && !Config::get_user().enable_temperature) {
     float sum_x = 0, sum_y = 0, sum_width = 0, sum_height = 0;
     float count = 0;
 
@@ -57,8 +72,8 @@ void DetectTipWidget::paint(QPainter *painter) {
     float top_y = sum_y / count;
     float bottom_x = top_x + width;
     float bottom_y = top_y + height;
-    // SZ_LOG_DEBUG("top_x={},top_y={},bottom_x={},bottom_y={},w={},h={}",
-    // top_x,
+
+    // SZ_LOG_INFO("top_x={},top_y={},bottom_x={},bottom_y={},w={},h={}", top_x,
     //              top_y, bottom_x, bottom_y, width, height);
 
     if (is_valid_)
@@ -87,8 +102,8 @@ void DetectTipWidget::paint(QPainter *painter) {
 
 void DetectTipWidget::rx_display(DetectionRatio detection, bool to_clear,
                                  bool valid, bool is_bgr) {
-  int box_x = win_x_ + 1;
-  int box_y = win_y_ + 1;
+  int box_x = 1;
+  int box_y = 1;
   int box_w = win_width_ - 1;
   int box_h = win_height_ - 1;
 
@@ -99,8 +114,7 @@ void DetectTipWidget::rx_display(DetectionRatio detection, bool to_clear,
   if (Config::get_camera(CAMERA_BGR).rotate == 1) {
     detection.y = detection.y / ratio;
     detection.height = detection.height / ratio;
-  }
-  else {
+  } else {
     detection.y = detection.y * (ratio + cy * (1 - ratio));
     detection.height = detection.height * (ratio + cy * (1 - ratio));
   }
@@ -131,7 +145,7 @@ void DetectTipWidget::rx_display(DetectionRatio detection, bool to_clear,
     if (rects_.size() > MAX_RECT_COUNT) rects_.erase(rects_.begin());
 
     if (is_bgr) is_valid_ = valid;
-
+    show();
   } else {
     if (++lost_age_ > MAX_LOST_AGE) {
       rects_.clear();
@@ -139,8 +153,8 @@ void DetectTipWidget::rx_display(DetectionRatio detection, bool to_clear,
       is_valid_ = false;
       valid_count_ = 0;
     }
+    hide();
   }
 
-  QWidget *p = (QWidget *)parent();
-  p->update();
+  if (is_bgr) ((QWidget *)parent())->update();
 }

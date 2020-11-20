@@ -149,6 +149,31 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
     response_ok(res);
   });
 
+  server_->Get("/background", [&](const Request& req, Response& res) {
+    std::string type = "boot";
+    if (req.has_param("type")) {
+      type = req.get_param_value("type");
+    }
+
+    std::vector<SZ_BYTE> img;
+    if (type == "boot") {
+      if (!Config::read_boot_background(img)) {
+        response_failed(res, "read failed");
+        return;
+      }
+    } else if (type == "screen-saver") {
+      if (!Config::read_screen_saver_background(img)) {
+        response_failed(res, "read failed");
+        return;
+      }
+    } else {
+      response_failed(res, "unknown type " + type);
+      return;
+    }
+
+    res.set_content((const char*)img.data(), img.size(), "application/jpeg");
+  });
+
   server_->Post("/background", [&](const Request& req, Response& res) {
     if (!req.is_multipart_form_data()) {
       response_failed(res, "invalid content type");
@@ -189,6 +214,7 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
     }
 
     json body = {
+        {"ok", true},
         {"percent", volume_percent},
     };
     res.set_content(body.dump(), "application/json");

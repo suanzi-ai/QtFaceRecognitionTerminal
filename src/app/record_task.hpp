@@ -19,7 +19,7 @@ class RecordTask : QObject {
   static RecordTask *get_instance();
   static bool idle();
 
-  static void clear_cache();
+  static void clear_temperature();
 
  private slots:
   void rx_frame(PingPangBuffer<RecognizeData> *buffer);
@@ -39,7 +39,6 @@ class RecordTask : QObject {
   // for audio report
   void tx_report_person(PersonData person);
   void tx_report_temperature(PersonData person);
-  void tx_warn_mask();
 
  private:
   RecordTask(QThread *thread = nullptr, QObject *parent = nullptr);
@@ -47,14 +46,18 @@ class RecordTask : QObject {
 
   bool if_fresh(const FaceFeature &feature);
 
-  bool sequence_query(const std::vector<QueryResult> &history,
-                      SZ_UINT32 &face_id, SZ_FLOAT &score);
-  bool sequence_antispoof(const std::vector<bool> &history);
-  bool sequence_mask_detecting(const std::vector<bool> &history);
+  bool sequence_query(const std::vector<QueryResult> &person_history,
+                      const std::vector<bool> &mask_history,
+                      const bool has_mask, SZ_UINT32 &face_id, SZ_FLOAT &score);
+  bool sequence_antispoof(const std::vector<bool> &history, bool &is_live);
+  bool sequence_mask(const std::vector<bool> &history, bool &has_mask);
   bool sequence_temperature(const SZ_UINT32 &face_id, int duration,
                             std::map<SZ_UINT32, float> &history,
                             float &temperature);
+  bool update_temperature_bias();
 
+  void update_person(RecognizeData *input, const SZ_UINT32 &face_id,
+                     PersonData &person);
   bool if_duplicated(const SZ_UINT32 &face_id, float &temperature);
   bool if_duplicated(const FaceFeature &feature, float &temperature);
 
@@ -62,7 +65,7 @@ class RecordTask : QObject {
 
   PersonService::ptr person_service_;
 
-  FaceDatabasePtr db_, unknown_database_;
+  FaceDatabasePtr face_database_, unknown_database_;
 
   std::vector<QueryResult> person_history_;
   std::vector<bool> mask_history_;

@@ -9,12 +9,12 @@
 
 #include <quface/logger.hpp>
 
-#include "record_task.hpp"
 #include "config.hpp"
+#include "record_task.hpp"
 
 using namespace suanzi;
 
-RecognizeTask* RecognizeTask::get_instance() {
+RecognizeTask *RecognizeTask::get_instance() {
   static RecognizeTask instance;
   return &instance;
 }
@@ -23,7 +23,6 @@ bool RecognizeTask::idle() { return !get_instance()->is_running_; }
 
 RecognizeTask::RecognizeTask(QThread *thread, QObject *parent)
     : is_running_(false) {
-
   auto cfg = Config::get_quface();
   face_database_ = std::make_shared<FaceDatabase>(cfg.db_name);
 
@@ -106,8 +105,8 @@ void RecognizeTask::rx_frame(PingPangBuffer<DetectionData> *buffer) {
     }
     if (output->has_person_info) {
       output->has_mask = has_mask(input);
-      if (!output->has_mask)
-        extract_and_query(input, output->person_feature, output->person_info);
+      extract_and_query(input, output->has_mask, output->person_feature,
+                        output->person_info);
     }
   } else {
     output->has_live = false;
@@ -161,7 +160,7 @@ bool RecognizeTask::has_mask(DetectionData *detection) {
   SZ_BOOL has_mask;
   SZ_RETCODE ret = mask_detector_->classify(
       (const SVP_IMAGE_S *)detection->img_bgr_large->pImplData, face_detection,
-      has_mask, 0.9);
+      has_mask, Config::get_user().mask_score);
 
   if (SZ_RETCODE_OK == ret && has_mask == SZ_TRUE)
     return true;
@@ -169,7 +168,7 @@ bool RecognizeTask::has_mask(DetectionData *detection) {
     return false;
 }
 
-void RecognizeTask::extract_and_query(DetectionData *detection,
+void RecognizeTask::extract_and_query(DetectionData *detection, bool has_mask,
                                       FaceFeature &feature,
                                       QueryResult &person_info) {
   int width = detection->img_bgr_large->width;
@@ -183,6 +182,7 @@ void RecognizeTask::extract_and_query(DetectionData *detection,
   SZ_RETCODE ret = face_extractor_->extract(
       (const SVP_IMAGE_S *)detection->img_bgr_large->pImplData, face_detection,
       pose, feature);
+
   if (SZ_RETCODE_OK == ret) {
     // query
     static std::vector<suanzi::QueryResult> results;
@@ -190,9 +190,13 @@ void RecognizeTask::extract_and_query(DetectionData *detection,
 
     ret = face_database_->query(feature, 1, results);
     if (SZ_RETCODE_OK == ret) {
-      person_info.score = results[0].score;
+      if (has_mask)
+        person_info.score = pow((results[0].score - 0.5) * 2, 0.45) / 2 + 0.5;
+      else
+        person_info.score = results[0].score;
       person_info.face_id = results[0].face_id;
-
+      SZ_LOG_INFO("mask={}, id={}, score={:.2f}", has_mask, person_info.face_id,
+                  person_info.score);
       return;
     }
   }

@@ -27,6 +27,7 @@ using json = nlohmann::json;
 typedef enum RelaySwitchCond {
   Status = 1,
   Temperature = 2,
+  Mask = 4,
 } RelaySwitchCond;
 
 typedef enum RelayState {
@@ -53,8 +54,8 @@ typedef struct {
   SZ_UINT16 relay_restore_time;
   bool enable_temperature;
   SZ_FLOAT temperature_bias;
-  float temperature_max;
-  float temperature_min;
+  SZ_FLOAT temperature_max;
+  SZ_FLOAT temperature_min;
   bool enable_audio;
   bool enable_record_audio;
   bool enable_temperature_audio;
@@ -66,6 +67,7 @@ typedef struct {
   SZ_UINT16 screensaver_timeout;
   bool upload_known_person;
   bool upload_unknown_person;
+  SZ_FLOAT mask_score;
 } UserConfig;
 
 void to_json(json &j, const UserConfig &c);
@@ -233,6 +235,7 @@ class Config : public ConfigEventEmitter {
  public:
   typedef std::shared_ptr<Config> ptr;
   static Config *get_instance();
+  static void to_json(json &j);
 
   SZ_RETCODE load_from_file(const std::string &config_file,
                             const std::string &config_override_file);
@@ -245,6 +248,9 @@ class Config : public ConfigEventEmitter {
 
   static bool write_audio_volume(int volume_percent);
   static bool read_audio_volume(int &volume_percent);
+
+  static void set_temperature_bias(float bias);
+  static float get_temperature_bias();
 
   static const ConfigData &get_all();
   static const UserConfig &get_user();
@@ -260,10 +266,17 @@ class Config : public ConfigEventEmitter {
   static std::string get_user_lang();
   static bool enable_anti_spoofing();
 
+  static bool read_boot_background(std::vector<SZ_BYTE> &data);
+  static bool read_screen_saver_background(std::vector<SZ_BYTE> &data);
+
  private:
   void load_defaults(ConfigData &c);
   SZ_RETCODE read_config(json &cfg);
   SZ_RETCODE read_override_config(json &cfg);
+  SZ_RETCODE write_override_config(const json &cfg);
+
+  static bool read_image(const std::string &image, const std::string &fallback,
+                         std::vector<SZ_BYTE> &data);
 
  private:
   mutable std::mutex cfg_mutex_;

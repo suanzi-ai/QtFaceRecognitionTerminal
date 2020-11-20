@@ -99,7 +99,6 @@ void StatusBanner::rx_update() {
 	}
 }
 
-
 void StatusBanner::rx_display(bool invisible) {
 	if (invisible)
 		hide();

@@ -1,5 +1,6 @@
 #include "config.hpp"
 
+#include <QFile>
 #include <regex>
 
 using namespace suanzi;
@@ -32,6 +33,7 @@ void suanzi::to_json(json &j, const UserConfig &c) {
   SAVE_JSON_TO(j, "screensaver_timeout", c.screensaver_timeout);
   SAVE_JSON_TO(j, "upload_known_person", c.upload_known_person);
   SAVE_JSON_TO(j, "upload_unknown_person", c.upload_unknown_person);
+  SAVE_JSON_TO(j, "mask_score", c.mask_score);
 }
 
 void suanzi::from_json(const json &j, UserConfig &c) {
@@ -67,6 +69,7 @@ void suanzi::from_json(const json &j, UserConfig &c) {
   LOAD_JSON_TO(j, "screensaver_timeout", c.screensaver_timeout);
   LOAD_JSON_TO(j, "upload_known_person", c.upload_known_person);
   LOAD_JSON_TO(j, "upload_unknown_person", c.upload_unknown_person);
+  LOAD_JSON_TO(j, "mask_score", c.mask_score);
 }
 
 void suanzi::to_json(json &j, const AppConfig &c) {
@@ -274,6 +277,8 @@ Config Config::instance_;
 
 Config *Config::get_instance() { return &instance_; }
 
+void Config::to_json(json &j) { ::to_json(j, instance_.cfg_data_); }
+
 void Config::load_defaults(ConfigData &c) {
   c.app = {
       .recognize_tip_top_percent = 78,
@@ -326,6 +331,7 @@ void Config::load_defaults(ConfigData &c) {
       .screensaver_timeout = 60,
       .upload_known_person = true,
       .upload_unknown_person = true,
+      .mask_score = 0.7,
   };
 
   c.quface = {
@@ -641,6 +647,17 @@ SZ_RETCODE Config::read_override_config(json &cfg) {
   return SZ_RETCODE_OK;
 }
 
+SZ_RETCODE Config::write_override_config(const json &cfg) {
+  std::ofstream o(config_override_file_);
+  if (!o.is_open()) {
+    SZ_LOG_WARN("Open {} failed, can't save", config_override_file_);
+    return SZ_RETCODE_FAILED;
+  }
+
+  o << cfg.dump(2);
+  return SZ_RETCODE_OK;
+}
+
 SZ_RETCODE Config::reload() {
   {
     std::unique_lock<std::mutex> lock(cfg_mutex_);
@@ -660,6 +677,22 @@ SZ_RETCODE Config::reload() {
       }
 
       if (config_patch.is_array()) {
+        bool patch_updated = false;
+        for (auto it = config_patch.begin(); it < config_patch.end(); it++) {
+          std::string path;
+          it->at("path").get_to(path);
+          if (!config.contains(json::json_pointer(path))) {
+            config_patch.erase(it);
+            SZ_LOG_WARN("Config path {} not exist, erased", path);
+            patch_updated = true;
+          }
+        }
+        if (patch_updated) {
+          ret = write_override_config(config_patch);
+          if (ret != SZ_RETCODE_OK) {
+            return ret;
+          }
+        }
         config = config.patch(config_patch);
       }
 
@@ -686,15 +719,12 @@ SZ_RETCODE Config::save_diff(const json &target_patch) {
     json target(cfg_data_);
     target.merge_patch(target_patch);
 
-    std::ofstream o(config_override_file_);
-    if (!o.is_open()) {
-      SZ_LOG_WARN("Open {} failed, can't save", config_override_file_);
-      return SZ_RETCODE_FAILED;
-    }
-
     json diff = json::diff(source, target);
 
-    o << diff.dump(2);
+    ret = write_override_config(diff);
+    if (ret != SZ_RETCODE_OK) {
+      return ret;
+    }
   } catch (std::exception &exc) {
     SZ_LOG_ERROR("Save diff error: {}", exc.what());
     return SZ_RETCODE_FAILED;
@@ -852,6 +882,16 @@ bool Config::write_audio_volume(int volume_percent) {
   return true;
 }
 
+void Config::set_temperature_bias(float bias) {
+  std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
+  instance_.cfg_data_.user.temperature_bias = bias;
+}
+
+float Config::get_temperature_bias() {
+  std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
+  return instance_.cfg_data_.user.temperature_bias;
+}
+
 const ConfigData &Config::get_all() {
   std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
   return instance_.cfg_data_;
@@ -923,4 +963,28 @@ const LivenessConfig &Config::get_liveness() {
 bool Config::enable_anti_spoofing() {
   std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
   return instance_.cfg_data_.app.enable_anti_spoofing;
+}
+
+bool Config::read_image(const std::string &image, const std::string &fallback,
+                        std::vector<SZ_BYTE> &data) {
+  QFile file(image.c_str());
+  if (!file.exists()) {
+    file.setFileName(fallback.c_str());
+  }
+  if (!file.open(QIODevice::ReadOnly)) {
+    return false;
+  }
+  auto content = file.readAll();
+  data.assign(content.begin(), content.end());
+  return true;
+}
+
+bool Config::read_boot_background(std::vector<SZ_BYTE> &data) {
+  std::string filename = Config().get_app().boot_image_path;
+  return read_image(filename, ":asserts/boot.jpg", data);
+}
+
+bool Config::read_screen_saver_background(std::vector<SZ_BYTE> &data) {
+  std::string filename = Config().get_app().screensaver_image_path;
+  return read_image(filename, ":asserts/background.jpg", data);
 }

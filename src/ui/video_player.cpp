@@ -27,14 +27,9 @@ VideoPlayer::~VideoPlayer() {}
 void VideoPlayer::paintEvent(QPaintEvent *event) {
   QPainter painter(this);
 
-  detect_tip_widget_bgr_->paint(&painter);
-  detect_tip_widget_nir_->paint(&painter);
-
   outline_widget_->paint(&painter);
   recognize_tip_widget_->paint(&painter);
   heatmap_widget_->paint(&painter);
-
-  isp_hist_widget_->paint(&painter);
 }
 
 void VideoPlayer::init_workflow() {
@@ -95,8 +90,6 @@ void VideoPlayer::init_workflow() {
   connect(
       (const QObject *)record_task_, SIGNAL(tx_report_temperature(PersonData)),
       (const QObject *)audio_task_, SLOT(rx_report_temperature(PersonData)));
-  connect((const QObject *)record_task_, SIGNAL(tx_warn_mask()),
-          (const QObject *)audio_task_, SLOT(rx_warn_mask()));
   connect((const QObject *)detect_task_, SIGNAL(tx_warn_distance()),
           (const QObject *)audio_task_, SLOT(rx_warn_distance()));
 
@@ -187,8 +180,10 @@ void VideoPlayer::init_widgets() {
           (const QObject *)heatmap_widget_,
           SLOT(rx_update(TemperatureMatrix, DetectionRatio, float, float)));
 
-  isp_hist_widget_ = new ISPHistWidget(400, 300, this);
-  isp_hist_widget_->move(0, 50);
+	isp_hist_widget_ = new ISPHistWidget(screen_width, 350, this);
+	isp_hist_widget_->move(0, 350);
+	isp_hist_widget_->hide();
+
 
   QTimer::singleShot(1, this, SLOT(delay_init_widgets()));
 }

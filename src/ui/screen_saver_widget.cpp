@@ -13,7 +13,6 @@ using namespace suanzi;
 
 ScreenSaverWidget::ScreenSaverWidget(int width, int height, QWidget *parent)
     : QWidget(parent) {
-
 	//
 	setAttribute(Qt::WA_StyledBackground, true);
 	setAutoFillBackground(true);
@@ -35,7 +34,6 @@ ScreenSaverWidget::ScreenSaverWidget(int width, int height, QWidget *parent)
 
 	refresh_timer_ = new QTimer(this);
 	connect(refresh_timer_, SIGNAL(timeout()), this, SLOT(resfresh_timeout()));
-
 }
 
 ScreenSaverWidget::~ScreenSaverWidget() {}

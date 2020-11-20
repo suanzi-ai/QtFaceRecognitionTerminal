@@ -51,7 +51,7 @@
     <file>asserts/zh-CN/recognition_failed.aac</file>
 </qresource>
 <qresource>
-    <file>asserts/zh-CN/take_off_mask.aac</file>
+    <file>asserts/zh-CN/take_on_mask.aac</file>
 </qresource>
 <qresource>
     <file>asserts/zh-CN/temperature_abnormal.aac</file>
@@ -63,13 +63,16 @@
     <file>asserts/zh-CN/get_closer.aac</file>
 </qresource>
 <qresource>
+    <file>asserts/zh-CN/pass.aac</file>
+</qresource>
+<qresource>
     <file>asserts/en/recognition_succeed.aac</file>
 </qresource>
 <qresource>
     <file>asserts/en/recognition_failed.aac</file>
 </qresource>
 <qresource>
-    <file>asserts/en/take_off_mask.aac</file>
+    <file>asserts/en/take_on_mask.aac</file>
 </qresource>
 <qresource>
     <file>asserts/en/temperature_abnormal.aac</file>
@@ -81,13 +84,13 @@
     <file>asserts/en/get_closer.aac</file>
 </qresource>
 <qresource>
-    <file>asserts/jp/recognition_succeed.aac</file>
+    <file>asserts/en/pass.aac</file>
 </qresource>
 <qresource>
     <file>asserts/jp/recognition_failed.aac</file>
 </qresource>
 <qresource>
-    <file>asserts/jp/take_off_mask.aac</file>
+    <file>asserts/jp/take_on_mask.aac</file>
 </qresource>
 <qresource>
     <file>asserts/jp/temperature_abnormal.aac</file>
