@@ -4,53 +4,65 @@
 #include <QFile>
 #include <QPaintEvent>
 #include <QPainter>
-
+#include <QString>
 #include <quface/logger.hpp>
-
+#include <QDebug>
 #include "config.hpp"
 
 using namespace suanzi;
 
 ScreenSaverWidget::ScreenSaverWidget(int width, int height, QWidget *parent)
     : QWidget(parent) {
-  QPalette palette = this->palette();
-  palette.setColor(QPalette::Background, Qt::transparent);
-  setPalette(palette);
 
-  move(0, 0);
-  setFixedSize(width, height);
+	//
+	setAttribute(Qt::WA_StyledBackground, true);
+	setAutoFillBackground(true);
 
-  std::string filename = Config::get_app().screensaver_image_path;
-  if (QFile(filename.c_str()).exists())
-    background_.load(filename.c_str());
-  else
-    background_.load(":asserts/background.jpg");
-  background_.scaled(width, height);
+	move(0, 0);
+	setFixedSize(width, height);
+
+
+	//set background image
+	QString style_str = "QWidget {border-image: url(";
+	QString filename(Config::get_app().screensaver_image_path.c_str());
+		if (QFile(filename).exists())
+		style_str += filename;
+	else {
+		style_str += ":asserts/background.jpg";
+	}
+	style_str += ");}";
+	setStyleSheet(style_str);
+
+	refresh_timer_ = new QTimer(this);
+	connect(refresh_timer_, SIGNAL(timeout()), this, SLOT(resfresh_timeout()));
+
 }
 
 ScreenSaverWidget::~ScreenSaverWidget() {}
 
-void ScreenSaverWidget::rx_display(int disappear_seconds) {
-  auto cfg = Config::get_user();
-  if (cfg.enable_screensaver && disappear_seconds > cfg.screensaver_timeout) {
-    hide();
-    show();
+void ScreenSaverWidget::rx_display(bool visible) {
+  if (visible) {
+	 show();
+	 if (!refresh_timer_->isActive())
+	 	refresh_timer_->start(1000);
+  } else {
+	 hide();
+	 if (refresh_timer_->isActive())
+	 	refresh_timer_->stop();
   }
 }
 
-void ScreenSaverWidget::rx_hide() { hide(); }
+
+void ScreenSaverWidget::resfresh_timeout() {
+	update();
+}
+
 
 void ScreenSaverWidget::paintEvent(QPaintEvent *event) {
-  if (!Config::get_user().enable_screensaver)
-    hide();
-  else {
+
     QPainter painter(this);
     const int w = width();
     const int h = height();
-
-    // draw background
-    QPixmap pixmapToShow = QPixmap::fromImage(background_);
-    painter.drawPixmap(QRect(0, 0, w, h), pixmapToShow, QRect());
 
     // draw datetime
     QDateTime now = QDateTime::currentDateTime();
@@ -72,5 +84,4 @@ void ScreenSaverWidget::paintEvent(QPaintEvent *event) {
     font.setPixelSize(base_font_size * 2);
     painter.setFont(font);
     painter.drawText(w * 26 / 100, h * 40 / 100, date);
-  }
 }

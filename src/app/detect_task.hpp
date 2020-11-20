@@ -42,7 +42,10 @@ class DetectTask : QObject {
   void tx_display_rectangle();
 
   // for recognition
-  void tx_frame(PingPangBuffer<DetectionData> *buffer);
+  void tx_frame_for_recognize(PingPangBuffer<DetectionData> *buffer);
+
+  //for face timer
+  void tx_detect_result(bool valid_detect);
 
  private:
   DetectTask(QThread *thread = nullptr, QObject *parent = nullptr);
@@ -62,6 +65,7 @@ class DetectTask : QObject {
 
   uint detect_count_ = 0;
   uint no_detect_count_ = 0;
+  bool last_valid_detect_;
 };
 
 }  // namespace suanzi

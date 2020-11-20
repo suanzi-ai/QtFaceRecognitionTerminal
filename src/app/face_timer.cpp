@@ -1,5 +1,4 @@
 #include "face_timer.hpp"
-
 #include <quface-io/engine.hpp>
 
 #include "config.hpp"
@@ -14,44 +13,49 @@ FaceTimer *FaceTimer::get_instance() {
 }
 
 FaceTimer::FaceTimer(QThread *thread, QObject *parent) {
-  // Create thread
-  if (thread == nullptr) {
-    static QThread new_thread;
-    moveToThread(&new_thread);
-    new_thread.start();
-  } else {
-    moveToThread(thread);
-    thread->start();
-  }
+
+  screen_saver_timer_ = new QTimer(this);
+  screen_saver_timer_->setSingleShot(true);
+  connect(screen_saver_timer_, SIGNAL(timeout()), this, SLOT(screen_saver_timeout()));
+
+  white_led_timer_ = new QTimer(this);
+  white_led_timer_->setSingleShot(true);
+  connect(white_led_timer_, SIGNAL(timeout()), this, SLOT(white_led_timeout()));
+
 
   disappear_counter_ = 0;
   disappear_duration_ = 0;
+  int screensaver_timeout = Config::get_user().screensaver_timeout;
+  screen_saver_timer_->start(screensaver_timeout * 1000);
 }
 
 FaceTimer::~FaceTimer() {}
 
-void FaceTimer::rx_frame(PingPangBuffer<DetectionData> *buffer) {
-  DetectionData *input = buffer->get_pang();
+void FaceTimer::rx_detect_result(bool valid_detect) {
+	if (valid_detect) {
+		LEDTask::get_instance()->turn_on();
+		white_led_timer_->start(MAX_WHITE_LED_TIMEOUT * 1000);
+		display_screen_saver(false);
+	}
+}
 
-  if (!input->bgr_face_detected() && !input->nir_face_detected()) {
-    disappear_counter_++;
-    if (disappear_counter_ == Config::get_extract().max_lost_age)
-      disappear_begin_ = std::chrono::steady_clock::now();
 
-    if (disappear_counter_ >= Config::get_extract().max_lost_age) {
-      auto current_clock = std::chrono::steady_clock::now();
-      disappear_duration_ = std::chrono::duration_cast<std::chrono::seconds>(
-                                current_clock - disappear_begin_)
-                                .count();
-      emit tx_face_disappear(disappear_duration_);
-      LEDTask::get_instance()->turn_off();
-    }
-  } else {
-    if (disappear_counter_ >= Config::get_extract().max_lost_age) {
-      emit tx_face_appear(disappear_duration_);
-      LEDTask::get_instance()->turn_on();
-      disappear_counter_ = 0;
-      disappear_duration_ = 0;
-    }
-  }
+void FaceTimer::display_screen_saver(bool visible) {
+	if (Config::get_user().enable_screensaver) {
+		emit tx_display_screen_saver(visible);
+	}
+}
+
+void FaceTimer::screen_saver_timeout() {
+	display_screen_saver(true);
+}
+
+void FaceTimer::white_led_timeout() {
+	LEDTask::get_instance()->turn_off();
+	int screensaver_timeout = Config::get_user().screensaver_timeout;
+	if (MAX_WHITE_LED_TIMEOUT >= screensaver_timeout)
+		display_screen_saver(true);
+	else {
+		screen_saver_timer_->start((screensaver_timeout - MAX_WHITE_LED_TIMEOUT) * 1000);
+	}
 }

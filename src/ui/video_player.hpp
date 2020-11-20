@@ -42,6 +42,9 @@ class VideoPlayer : public QWidget {
 
   void paintEvent(QPaintEvent *event) override;
 
+ private slots:
+ 	void delay_init_widgets();
+
  private:
   DetectTipWidget *detect_tip_widget_bgr_;
   DetectTipWidget *detect_tip_widget_nir_;

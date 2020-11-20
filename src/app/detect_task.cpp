@@ -25,7 +25,7 @@ DetectTask *DetectTask::get_instance() {
 }
 
 DetectTask::DetectTask(QThread *thread, QObject *parent)
-    : buffer_inited_(false) {
+    : buffer_inited_(false), last_valid_detect_(false) {
   auto cfg = Config::get_quface();
   face_detector_ = std::make_shared<FaceDetector>(cfg.model_file_path);
   pose_estimator_ = std::make_shared<FacePoseEstimator>(cfg.model_file_path);
@@ -150,7 +150,8 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
   emit tx_nir_display(output->nir_detection_, !output->nir_face_detected_,
                       output->nir_face_valid_, false);
 
-  if (output->bgr_face_detected_ || output->nir_face_detected_) {
+  bool valid_dectect = output->bgr_face_detected_ || output->nir_face_detected_;
+  if (valid_dectect) {
     detect_count_++;
     no_detect_count_ = 0;
   } else {
@@ -163,10 +164,15 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
     SZ_LOG_ERROR("Adjust isp failed");
   }
 
-  if (RecognizeTask::idle())
-    emit tx_frame(pingpang_buffer_);
+  if (RecognizeTask::idle() && valid_dectect)
+    emit tx_frame_for_recognize(pingpang_buffer_);
   else
     QThread::usleep(10);
+
+  if (valid_dectect != last_valid_detect_) {
+	 last_valid_detect_ = valid_dectect;
+	 emit tx_detect_result(valid_dectect);
+  }
 
   emit tx_finish();
 }

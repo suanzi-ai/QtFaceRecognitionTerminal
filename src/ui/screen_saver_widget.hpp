@@ -4,6 +4,7 @@
 #include <QPixmap>
 #include <QImage>
 #include <QWidget>
+#include <QTimer>
 
 namespace suanzi {
 
@@ -18,11 +19,11 @@ class ScreenSaverWidget : public QWidget {
   void paintEvent(QPaintEvent *event);
 
  private slots:
-  void rx_display(int disappear_seconds);
-  void rx_hide();
+  void rx_display(bool visible);
+  void resfresh_timeout();
 
  private:
-  QImage background_;
+ 	QTimer *refresh_timer_;
 };
 
 }  // namespace suanzi

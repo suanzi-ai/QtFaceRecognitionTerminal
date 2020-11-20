@@ -5,6 +5,7 @@
 #include <QWidget>
 #include <QFont>
 #include <QPixmap>
+#include <QLabel>
 
 #include "quface_common.hpp"
 #include "person_service.hpp"
@@ -18,10 +19,9 @@ class StatusBanner : public QWidget {
   StatusBanner(int width, int height, QWidget *parent = nullptr);
   ~StatusBanner() override;
 
-  void paint(QPainter *painter);
-
  private slots:
   void rx_update();
+  void rx_display(bool invisible);
 
  private:
   SZ_UINT32 db_size_;
@@ -30,15 +30,11 @@ class StatusBanner : public QWidget {
   FaceDatabasePtr db_;
 
   QTimer *timer_;
-  QPixmap icon1_;
-  QPixmap icon2_;
-  QPixmap icon3_;
-  QPixmap icon4_;
-  QPixmap icon5_;
-  QPixmap icon6_;
-  QPixmap icon7_;
+  QLabel *pl_person_num_;
+  QLabel *pl_temperature_;
+  QLabel *pl_net_;
 
-  std::string name_, ip_, mac_;
+  std::string name_, ip_, mac_, last_name_;
 };
 
 }  // namespace suanzi
