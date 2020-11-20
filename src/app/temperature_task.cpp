@@ -118,7 +118,7 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
   if (!to_clear) {
     detection.x += 0.125f;
     detection.width = std::min(detection.width, 1.f - detection.x);
-    detection.height = std::min(detection.height * 1.25f, 1.f - detection.y);
+    detection.height = detection.height * 0.4f;
   } else {
     detection.x = 0.45;
     detection.y = 0.45;
