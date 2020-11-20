@@ -12,19 +12,26 @@ using namespace suanzi;
 
 OutlineWidget::OutlineWidget(int width, int height, QWidget *parent)
     : QWidget(parent),
-      outline_(":asserts/outline.png"),
       show_valid_rect_(false) {
-  QPalette palette = this->palette();
-  palette.setColor(QPalette::Background, Qt::transparent);
-  setPalette(palette);
+	QPalette palette = this->palette();
+	palette.setColor(QPalette::Background, Qt::transparent);
+	setPalette(palette);
+	setAttribute(Qt::WA_StyledBackground, true);
+	setAutoFillBackground(true);
 
-  move(0, 0);
-  setFixedSize(width, height);
+	move(0, 0);
+	setFixedSize(width, height);
 
-  timer_.setInterval(1000);
-  timer_.setSingleShot(true);
-  connect((const QObject *)&timer_, SIGNAL(timeout()), (const QObject *)this,
-          SLOT(rx_reset()));
+	//set background image
+	QString style_str = "QWidget {background-image: url(:asserts/outline.png);";
+	style_str += "background-repeat:no-repeat;margin-top: ";
+	style_str += QString::number(0.1875 * height) + "px;}";
+	setStyleSheet(style_str);
+
+	timer_.setInterval(1000);
+	timer_.setSingleShot(true);
+	connect((const QObject *)&timer_, SIGNAL(timeout()), (const QObject *)this,
+	      SLOT(rx_reset()));
 }
 
 OutlineWidget::~OutlineWidget() {}
@@ -32,9 +39,6 @@ OutlineWidget::~OutlineWidget() {}
 void OutlineWidget::paint(QPainter *painter) {
   int w = width();   // 800
   int h = height();  // 1280
-
-  painter->drawPixmap(QRect(0, 0.1875 * h, w, 0.6171875 * h), outline_,
-                      QRect());
   if (show_valid_rect_) {
     QDateTime now = QDateTime::currentDateTime();
     bool flag = (now.currentMSecsSinceEpoch() / 250) % 2;
