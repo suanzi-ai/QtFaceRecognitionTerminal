@@ -60,6 +60,7 @@ class PersonService {
   static PersonService::ptr get_instance();
 
   SZ_RETCODE get_person(SZ_UINT32 id, PersonData &person);
+  SZ_RETCODE get_person(std::string card_no, PersonData &person);
 
   SZ_RETCODE upload_image(const std::string &type,
                           const std::vector<SZ_UINT8> &image_content,

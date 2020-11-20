@@ -12,7 +12,8 @@ target_link_libraries(
   PUBLIC QuFaceIOSDK::io
   PUBLIC QuFaceSDK::face
   PUBLIC QuFaceSDK::database
-  PUBLIC Qt5::Widgets)
+  PUBLIC Qt5::Widgets
+  PUBLIC zbar::zbar)
 
 # For audio
 target_link_libraries(lib PRIVATE "${HISI_SDK_PREFIX}/lib/libsecurec.so")

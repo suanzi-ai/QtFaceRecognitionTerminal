@@ -62,6 +62,7 @@ class DetectTask : QObject {
 
   uint detect_count_ = 0;
   uint no_detect_count_ = 0;
+  bool last_valid_detect_;
 };
 
 }  // namespace suanzi

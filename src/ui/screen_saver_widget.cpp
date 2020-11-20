@@ -6,9 +6,7 @@
 #include <QPaintEvent>
 #include <QPainter>
 #include <QString>
-
 #include <quface/logger.hpp>
-
 #include "config.hpp"
 
 using namespace suanzi;
@@ -18,10 +16,6 @@ ScreenSaverWidget::ScreenSaverWidget(int width, int height, QWidget *parent)
   //
   setAttribute(Qt::WA_StyledBackground, true);
   setAutoFillBackground(true);
-
-  move(0, 0);
-  setFixedSize(width, height);
-
   // set background image
   QString style_str = "QWidget {border-image: url(";
   QString filename(Config::get_app().screensaver_image_path.c_str());
@@ -32,6 +26,9 @@ ScreenSaverWidget::ScreenSaverWidget(int width, int height, QWidget *parent)
   }
   style_str += ");}";
   setStyleSheet(style_str);
+
+  move(0, 0);
+  setFixedSize(width, height);
 
   refresh_timer_ = new QTimer(this);
   connect(refresh_timer_, SIGNAL(timeout()), this, SLOT(resfresh_timeout()));
@@ -49,7 +46,20 @@ void ScreenSaverWidget::rx_display(bool visible) {
   }
 }
 
-void ScreenSaverWidget::resfresh_timeout() { update(); }
+void ScreenSaverWidget::resfresh_timeout() {
+  update();
+  saver_timeout_ += 500;
+  if (saver_timeout_ > Config::get_user().screensaver_timeout * 1000) {
+    emit tx_display_screen_saver(true);
+    show();
+  }
+}
+
+void ScreenSaverWidget::mousePressEvent(QMouseEvent *event) {
+  emit tx_display_screen_saver(false);
+  hide();
+  saver_timeout_ = 0;
+}
 
 void ScreenSaverWidget::paintEvent(QPaintEvent *event) {
   QPainter painter(this);
