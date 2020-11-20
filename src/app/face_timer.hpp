@@ -2,7 +2,7 @@
 #define FACE_TIMER_HPP
 
 #include <QObject>
-
+#include <QTimer>
 #include <chrono>
 
 #include "detection_data.hpp"
@@ -16,22 +16,26 @@ class FaceTimer : QObject {
   static FaceTimer* get_instance();
 
  private slots:
-  void rx_frame(PingPangBuffer<DetectionData> *buffer);
+  void rx_detect_result(bool valid_detect);
+  void screen_saver_timeout();
+  void white_led_timeout();
 
  signals:
-  // face disappear
-  void tx_face_disappear(int disappear_duration);
-
-  // face appear
-  void tx_face_appear(int disappear_duration);
+  void tx_display_screen_saver(bool visible);
 
  private:
   FaceTimer(QThread *thread = nullptr, QObject *parent = nullptr);
   ~FaceTimer();
+  void display_screen_saver(bool visible);
 
   int disappear_counter_;
   int disappear_duration_;
   std::chrono::steady_clock::time_point disappear_begin_;
+
+  QTimer *screen_saver_timer_;
+  QTimer *white_led_timer_;
+
+  const int MAX_WHITE_LED_TIMEOUT = 5;
 };
 
 }  // namespace suanzi

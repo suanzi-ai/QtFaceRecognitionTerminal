@@ -4,81 +4,105 @@
 #include <QFontDatabase>
 #include <QPainter>
 #include <QStringList>
-
+#include <QHBoxLayout>
+#include <QPushButton>
 #include "config.hpp"
 #include "system.hpp"
 
 using namespace suanzi;
 
-StatusBanner::StatusBanner(int width, int height, QWidget *parent)
-    : QWidget(parent),
-      icon1_(":asserts/people.png"),
-      icon2_(":asserts/temperature.png"),
-      icon3_(":asserts/wired_network.png"),
-      icon4_(":asserts/face.png"),
-      icon5_(":asserts/file.png"),
-      icon6_(":asserts/wireless_network.png"),
-      icon7_(":asserts/no_network.png") {
-  person_service_ = PersonService::get_instance();
-  db_ = std::make_shared<FaceDatabase>(Config::get_quface().db_name);
-  db_->size(db_size_);
+StatusBanner::StatusBanner(int screen_width, int screen_height, QWidget *parent)
+    : QWidget(parent),name_(""),last_name_("") {
 
-  QPalette palette = this->palette();
-  palette.setColor(QPalette::Background, Qt::transparent);
-  setPalette(palette);
+	setAttribute(Qt::WA_StyledBackground, true);
 
-  move(0, 0);
-  setFixedSize(width, height);
+	person_service_ = PersonService::get_instance();
+	db_ = std::make_shared<FaceDatabase>(Config::get_quface().db_name);
+	db_->size(db_size_);
 
-  rx_update();
-  timer_ = new QTimer(this);
-  connect(timer_, SIGNAL(timeout()), this, SLOT(rx_update()));
-  timer_->start(1000);
+	setStyleSheet("QWidget {background-color:rgba(5, 0, 20, 150);margin:0px;} QLabel {background-color:transparent;}");
+	setFixedSize(screen_width, 0.02734375 * screen_height);
+	move(0, 0);
+
+	int w = 0.0275 * screen_width;
+	int h = 0.0171875 * screen_height;
+
+	//left icon
+	QLabel *pl_person = new QLabel(this);
+	pl_person->setFixedSize(w, h);
+	pl_person->setStyleSheet("QLabel {border-image: url(:asserts/people.png);}");
+
+
+	pl_person_num_ = new QLabel(this);
+	QString style_str = "QLabel {color: rgba(255, 255, 255, 200);font-weight:bold;font-size:";
+	style_str +=  QString::number(0.02125 * screen_width) + "pt;}";
+	pl_person_num_->setStyleSheet(style_str);
+	pl_person_num_->setAlignment(Qt::AlignTop | Qt::AlignRight);
+
+
+	//right icon
+	pl_temperature_ = new QLabel(this);
+	pl_temperature_->setFixedSize(w, h);
+	pl_temperature_->setStyleSheet("QLabel {border-image: url(:asserts/temperature.png);}");
+	QLabel *pl_face = new QLabel(this);
+	pl_face->setFixedSize(w, h);
+	pl_face->setStyleSheet("QLabel {border-image: url(:asserts/face.png);}");
+
+	pl_net_ = new QLabel(this);
+	pl_net_->setFixedSize(w, h);
+	pl_net_->setStyleSheet("QLabel {border-image: url(:asserts/no_network.png);}");
+
+	QHBoxLayout *ph_layout = new QHBoxLayout;
+	ph_layout->addWidget(pl_person, 0, Qt::AlignLeft | Qt::AlignCenter);
+	ph_layout->addWidget(pl_person_num_, 0, Qt::AlignCenter);
+	ph_layout->addStretch();
+
+	ph_layout->addWidget(pl_temperature_, 0, Qt::AlignRight | Qt::AlignCenter);
+	ph_layout->addWidget(pl_face, 0, Qt::AlignRight | Qt::AlignCenter);
+	ph_layout->addWidget(pl_net_, 0, Qt::AlignRight | Qt::AlignCenter);
+	ph_layout->setSpacing(6);
+	ph_layout->setContentsMargins(10, 3, 10, 3);
+
+	setLayout(ph_layout);
+
+	rx_update();
+	timer_ = new QTimer(this);
+	connect(timer_, SIGNAL(timeout()), this, SLOT(rx_update()));
+	timer_->start(1000);
 }
 
 StatusBanner::~StatusBanner() { timer_->stop(); }
 
 void StatusBanner::rx_update() {
-  System::get_current_network(name_, ip_, mac_);
 
-  if (SZ_RETCODE_OK != db_->size(db_size_)) db_size_ = 0;
+	if (SZ_RETCODE_OK != db_->size(db_size_)) db_size_ = 0;
+		pl_person_num_->setNum((int)db_size_);
+
+	auto cfg = Config::get_user();
+	if (cfg.enable_temperature) {
+		pl_temperature_->show();
+	} else {
+		pl_temperature_->hide();
+	}
+
+	System::get_current_network(name_, ip_, mac_);
+	if (last_name_ != name_) {
+		last_name_ = name_;
+		QString style_str = "QLabel {border-image: url(:asserts/no_network.png);}";
+		if (last_name_ == "eth0") {
+			style_str = "QLabel {border-image: url(:asserts/wired_network.png);}";
+		}
+		else if (last_name_ == "wlan0") {
+			style_str = "QLabel {border-image: url(:asserts/wireless_network.png);}";
+		}
+		pl_net_->setStyleSheet(style_str);
+	}
 }
 
-void StatusBanner::paint(QPainter *painter) {
-  const int w = width();
-  const int h = height();
 
-  auto cfg = Config::get_user();
-
-  // draw background
-  // painter->fillRect(QRect(0, 0, w, 0.02734375 * h), QColor(5, 0, 20, 150));
-
-  // draw person count
-  QFont font = painter->font();
-  font.setPointSize(0.02125 * w);
-  painter->setFont(font);
-  painter->setPen(QPen(QColor(255, 255, 255, 200), 2));
-  painter->drawText(0.04125 * w, 0.01953125 * h,
-                    std::to_string(db_size_).c_str());
-
-  painter->drawPixmap(QRect(0.01 * w, 0.0078125 * h, 0.025 * w, 0.0140625 * h),
-                      icon1_, QRect());
-  if (cfg.enable_temperature)
-    painter->drawPixmap(
-        QRect(0.875 * w, 0.00234375 * h, 0.0375 * w, 0.0234375 * h), icon2_,
-        QRect());
-
-  QPixmap network_icon = icon7_;
-  if (name_ == "eth0") network_icon = icon3_;
-  if (name_ == "wlan0") network_icon = icon6_;
-  painter->drawPixmap(
-      QRect(0.96 * w, 0.00546875 * h, 0.0275 * w, 0.0171875 * h), network_icon,
-      QRect());
-
-  painter->drawPixmap(
-      QRect(0.91875 * w, 0.00546875 * h, 0.0275 * w, 0.0171875 * h), icon4_,
-      QRect());
-  // painter->drawPixmap(
-  //     QRect(0.84 * w, 0.0046875 * h, 0.03125 * w, 0.01796875 * h), icon5_,
-  //     QRect());
+void StatusBanner::rx_display(bool invisible) {
+	if (invisible)
+		hide();
+	else
+		show();
 }

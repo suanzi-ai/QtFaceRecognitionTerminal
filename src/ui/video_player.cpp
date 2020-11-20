@@ -49,7 +49,7 @@ void VideoPlayer::init_workflow() {
   // 创建人脸识别线程
   recognize_task_ = RecognizeTask::get_instance();
   connect((const QObject *)detect_task_,
-          SIGNAL(tx_frame(PingPangBuffer<DetectionData> *)),
+          SIGNAL(tx_frame_for_recognize(PingPangBuffer<DetectionData> *)),
           (const QObject *)recognize_task_,
           SLOT(rx_frame(PingPangBuffer<DetectionData> *)));
 
@@ -78,10 +78,8 @@ void VideoPlayer::init_workflow() {
 
   // 创建人脸计时器线程
   face_timer_ = FaceTimer::get_instance();
-  connect((const QObject *)detect_task_,
-          SIGNAL(tx_frame(PingPangBuffer<DetectionData> *)),
-          (const QObject *)face_timer_,
-          SLOT(rx_frame(PingPangBuffer<DetectionData> *)));
+  connect((const QObject *)detect_task_, SIGNAL(tx_detect_result(bool)),
+          (const QObject *)face_timer_, SLOT(rx_detect_result(bool)));
   connect((const QObject *)face_timer_, SIGNAL(tx_face_disappear(int)),
           (const QObject *)record_task_, SLOT(rx_reset()));
 
@@ -160,10 +158,8 @@ void VideoPlayer::init_widgets() {
   // 创建屏保控件
   screen_saver_ = new ScreenSaverWidget(screen_width, screen_height, this);
   screen_saver_->hide();
-  connect((const QObject *)face_timer_, SIGNAL(tx_face_disappear(int)),
-          (const QObject *)screen_saver_, SLOT(rx_display(int)));
-  connect((const QObject *)face_timer_, SIGNAL(tx_face_appear(int)),
-          (const QObject *)screen_saver_, SLOT(rx_hide()));
+  connect((const QObject *)face_timer_, SIGNAL(tx_display_screen_saver(bool)),
+          (const QObject *)screen_saver_, SLOT(rx_display(bool)));
 
   // 创建人体轮廓控件
   outline_widget_ = new OutlineWidget(screen_width, screen_height, this);
@@ -172,6 +168,9 @@ void VideoPlayer::init_widgets() {
 
   // 创建顶部状态栏控件
   status_banner_ = new StatusBanner(screen_width, screen_height, this);
+  status_banner_->hide();
+  connect((const QObject *)face_timer_, SIGNAL(tx_display_screen_saver(bool)),
+          (const QObject *)status_banner_, SLOT(rx_display(bool)));
 
   // 创建热力图控件
   heatmap_widget_ = new HeatmapWidget(screen_width, screen_height, this);
@@ -182,7 +181,11 @@ void VideoPlayer::init_widgets() {
           (const QObject *)heatmap_widget_,
           SLOT(rx_update(TemperatureMatrix, DetectionRatio, float, float)));
 
-  isp_hist_widget_ = new ISPHistWidget(screen_width, 350, this);
-  isp_hist_widget_->move(0, 350);
+  isp_hist_widget_ = new ISPHistWidget(400, 300, this);
+  isp_hist_widget_->move(0, 50);
   isp_hist_widget_->hide();
+
+  QTimer::singleShot(1, this, SLOT(delay_init_widgets()));
 }
+
+void VideoPlayer::delay_init_widgets() { status_banner_->show(); }
