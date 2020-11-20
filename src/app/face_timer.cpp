@@ -12,7 +12,7 @@ FaceTimer *FaceTimer::get_instance() {
   return &instance;
 }
 
-FaceTimer::FaceTimer(QThread *thread, QObject *parent) {
+FaceTimer::FaceTimer(QObject *parent) {
 
   screen_saver_timer_ = new QTimer(this);
   screen_saver_timer_->setSingleShot(true);
@@ -27,6 +27,7 @@ FaceTimer::FaceTimer(QThread *thread, QObject *parent) {
   disappear_duration_ = 0;
   int screensaver_timeout = Config::get_user().screensaver_timeout;
   screen_saver_timer_->start(screensaver_timeout * 1000);
+  start();
 }
 
 FaceTimer::~FaceTimer() {}
@@ -58,4 +59,10 @@ void FaceTimer::white_led_timeout() {
 	else {
 		screen_saver_timer_->start((screensaver_timeout - MAX_WHITE_LED_TIMEOUT) * 1000);
 	}
+}
+
+
+void FaceTimer::run() {
+
+	exec();
 }

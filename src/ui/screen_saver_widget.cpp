@@ -44,7 +44,7 @@ void ScreenSaverWidget::rx_display(bool visible) {
   if (visible) {
 	 show();
 	 if (!refresh_timer_->isActive())
-	 	refresh_timer_->start(1000);
+	 	refresh_timer_->start(500);
   } else {
 	 hide();
 	 if (refresh_timer_->isActive())
@@ -59,7 +59,6 @@ void ScreenSaverWidget::resfresh_timeout() {
 
 
 void ScreenSaverWidget::paintEvent(QPaintEvent *event) {
-
     QPainter painter(this);
     const int w = width();
     const int h = height();
@@ -78,8 +77,11 @@ void ScreenSaverWidget::paintEvent(QPaintEvent *event) {
     painter.setPen(Qt::white);
     painter.drawText(w * 25 / 100, h * 33 / 100, time);
 
-    bool flag = (now.currentMSecsSinceEpoch() / 500) % 2;
-    if (flag) painter.drawText(w * 47 / 100, h * 33 / 100, ":");
+    static bool flag = true;
+    if (flag) {
+		painter.drawText(w * 47 / 100, h * 33 / 100, ":");
+    }
+	flag = !flag;
 
     font.setPixelSize(base_font_size * 2);
     painter.setFont(font);
