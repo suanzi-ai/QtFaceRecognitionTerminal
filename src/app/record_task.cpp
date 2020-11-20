@@ -520,7 +520,7 @@ bool RecordTask::if_duplicated(const SZ_UINT32 &face_id, float &temperature) {
       known_temperature_.size() + unknown_temperature_.size() == 1)
     update_temperature_bias();
 
-  return ret;
+  return GOOD_TEMPERATURE(temperature) && ret;
 }
 
 bool RecordTask::if_duplicated(const FaceFeature &feature, float &temperature) {
@@ -572,7 +572,7 @@ bool RecordTask::if_duplicated(const FaceFeature &feature, float &temperature) {
       known_temperature_.size() + unknown_temperature_.size() == 1)
     update_temperature_bias();
 
-  return ret;
+  return GOOD_TEMPERATURE(temperature) && ret;
 }
 
 void RecordTask::rx_temperature(float body_temperature) {
