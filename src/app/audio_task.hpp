@@ -22,6 +22,7 @@ class AudioTask : QObject {
   static AudioTask* get_instance();
   static bool idle();
 
+  void load_audio();
   void beep();
 
  private slots:
@@ -34,7 +35,6 @@ class AudioTask : QObject {
   AudioTask(QThread* thread = nullptr, QObject* parent = nullptr);
   ~AudioTask();
 
-  void load_audio();
   bool read_audio(const std::string& name, Audio& audio);
   void play_audio(Audio& audio);
 

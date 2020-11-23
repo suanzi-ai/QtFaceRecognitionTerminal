@@ -30,7 +30,6 @@ AudioTask::AudioTask(QThread* thread, QObject* parent) : is_running_(false) {
 
   // Load audio resources
   load_audio();
-  Config::get_instance()->appendListener("reload", [&]() { load_audio(); });
 
   // Create thread
   if (thread == nullptr) {
