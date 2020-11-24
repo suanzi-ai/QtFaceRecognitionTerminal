@@ -190,7 +190,7 @@ void RecordTask::reset_recognize() {
 void RecordTask::reset_temperature() {
   is_measuring_temperature_ = false;
   temperature_history_.clear();
-  max_temperature_ = 0;
+  max_temperature_ = latest_temperature_ = 0;
   if (temperature_timer_) temperature_timer_->stop();
 }
 
@@ -427,12 +427,6 @@ void RecordTask::update_person(RecognizeData *input, const SZ_UINT32 &face_id,
   person.temperature = max_temperature_;
   max_temperature_ = 0;
 
-  if (person.temperature > 0 &&
-      (latest_temperature_ == 0 || !person.is_temperature_normal()))
-    latest_temperature_ = person.temperature;
-
-  person.temperature = latest_temperature_;
-
   PersonStatus status = PersonStatus::Stranger;
   if (face_id > 0 &&
       SZ_RETCODE_OK == person_service_->get_person(face_id, person)) {
@@ -465,8 +459,8 @@ void RecordTask::update_person(RecognizeData *input, const SZ_UINT32 &face_id,
       break;
   }
   person.temperature = ((float)((int)((person.temperature + 0.05) * 10))) / 10;
-  SZ_LOG_INFO("Record: id={}, staff={}, score={:.2f}, status={}", person.id,
-              person.number, person.score, person.status);
+  // SZ_LOG_INFO("Record: id={}, staff={}, score={:.2f}, status={}", person.id,
+  //             person.number, person.score, person.status);
 
   // record snapshots
   int width = input->img_bgr_large->width;
@@ -511,7 +505,7 @@ bool RecordTask::if_duplicated(SZ_INT32 face_id, const FaceFeature &feature,
   bool ret = false;
 
   auto cfg = Config::get_user();
-  if (cfg.enable_temperature && temperature == 0) return ret;
+  if (cfg.enable_temperature && temperature == 0) return true;
 
   int duration = 0;
   auto current_query_clock = std::chrono::steady_clock::now();
@@ -532,10 +526,10 @@ bool RecordTask::if_duplicated(SZ_INT32 face_id, const FaceFeature &feature,
       query_clock_[face_id] = current_query_clock;
     }
 
-    // if (sequence_temperature(face_id, duration, known_temperature_,
-    //                          temperature) ||
-    //     known_temperature_.size() + unknown_temperature_.size() == 1)
-    //   update_temperature_bias();
+    if (sequence_temperature(face_id, duration, known_temperature_,
+                             temperature) ||
+        known_temperature_.size() + unknown_temperature_.size() == 1)
+      update_temperature_bias();
 
   }
   // query unknown person
@@ -574,10 +568,10 @@ bool RecordTask::if_duplicated(SZ_INT32 face_id, const FaceFeature &feature,
       unknown_query_clock_[face_id] = current_query_clock;
     }
 
-    // if (sequence_temperature(face_id, duration, unknown_temperature_,
-    //                          temperature) ||
-    //     known_temperature_.size() + unknown_temperature_.size() == 1)
-    //   update_temperature_bias();
+    if (sequence_temperature(face_id, duration, unknown_temperature_,
+                             temperature) ||
+        known_temperature_.size() + unknown_temperature_.size() == 1)
+      update_temperature_bias();
   }
   // return GOOD_TEMPERATURE(temperature) && ret;
   return ret;

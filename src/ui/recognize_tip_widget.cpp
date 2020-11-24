@@ -77,7 +77,7 @@ void RecognizeTipWidget::rx_display(PersonData person, bool if_duplicated) {
   }
 
   if (person_.temperature > 0) {
-    SZ_LOG_INFO("temp={:.2f}", person_.temperature);
+    // SZ_LOG_INFO("temp={:.2f}", person_.temperature);
     update();
   }
 

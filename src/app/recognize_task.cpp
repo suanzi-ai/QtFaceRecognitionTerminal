@@ -195,8 +195,8 @@ void RecognizeTask::extract_and_query(DetectionData *detection, bool has_mask,
       else
         person_info.score = results[0].score;
       person_info.face_id = results[0].face_id;
-      SZ_LOG_INFO("mask={}, id={}, score={:.2f}", has_mask, person_info.face_id,
-                  person_info.score);
+      // SZ_LOG_INFO("mask={}, id={}, score={:.2f}", has_mask, person_info.face_id,
+      //             person_info.score);
       return;
     }
   }
