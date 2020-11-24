@@ -124,8 +124,7 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
         if (cfg.enable_temperature) {
           if (if_temperature_updated(person.temperature))
             person.is_duplicated = false;
-          if (person.temperature == 0)
-            person.is_duplicated = true;
+          if (person.temperature == 0) person.is_duplicated = true;
           if (!is_measuring_temperature_) rx_start_temperature();
         }
         emit tx_display(person, person.is_duplicated);
@@ -445,11 +444,11 @@ void RecordTask::update_person(RecognizeData *input, const SZ_UINT32 &face_id,
       person.face_path = ":asserts/avatar_unknown.jpg";
     case PersonStatus::Normal:
       person.is_duplicated =
-          if_duplicated(face_id, input->person_feature, person.temperature);
+          if_duplicated(face_id, input->person_feature, person);
       break;
     case PersonStatus::Stranger:
       person.is_duplicated =
-          if_duplicated(-1, input->person_feature, person.temperature);
+          if_duplicated(-1, input->person_feature, person);
       person.name = tr("访客").toStdString();
       person.id = 0;
       person.score = 0;
@@ -501,11 +500,11 @@ void RecordTask::update_person(RecognizeData *input, const SZ_UINT32 &face_id,
 }
 
 bool RecordTask::if_duplicated(SZ_INT32 face_id, const FaceFeature &feature,
-                               float &temperature) {
+                               PersonData &person) {
   bool ret = false;
 
   auto cfg = Config::get_user();
-  if (cfg.enable_temperature && temperature == 0) return true;
+  if (cfg.enable_temperature && person.temperature == 0) return true;
 
   int duration = 0;
   auto current_query_clock = std::chrono::steady_clock::now();
@@ -516,7 +515,8 @@ bool RecordTask::if_duplicated(SZ_INT32 face_id, const FaceFeature &feature,
       auto last_query_clock = query_clock_[face_id];
       duration = SECONDS_DIFF(current_query_clock, last_query_clock);
 
-      if (duration > cfg.duplication_interval) {
+      if (duration >
+          std::max(cfg.duplication_interval, AudioTask::duration(person))) {
         query_clock_[face_id] = current_query_clock;
         duplicated_counter_++;
       } else
@@ -527,7 +527,7 @@ bool RecordTask::if_duplicated(SZ_INT32 face_id, const FaceFeature &feature,
     }
 
     if (sequence_temperature(face_id, duration, known_temperature_,
-                             temperature) ||
+                             person.temperature) ||
         known_temperature_.size() + unknown_temperature_.size() == 1)
       update_temperature_bias();
 
@@ -551,7 +551,8 @@ bool RecordTask::if_duplicated(SZ_INT32 face_id, const FaceFeature &feature,
     if (face_id > 0 && CONTAIN_KEY(unknown_query_clock_, face_id)) {
       auto last_query_clock = unknown_query_clock_[face_id];
       duration = SECONDS_DIFF(current_query_clock, last_query_clock);
-      if (duration >= cfg.duplication_interval) {
+      if (duration >
+          std::max(cfg.duplication_interval, AudioTask::duration(person))) {
         unknown_query_clock_[face_id] = current_query_clock;
         duplicated_counter_++;
       } else
@@ -560,7 +561,7 @@ bool RecordTask::if_duplicated(SZ_INT32 face_id, const FaceFeature &feature,
     } else {
       if (face_id == -1) {
         face_id = (db_size % 100) + 1;
-        unknown_temperature_[face_id] = temperature;
+        unknown_temperature_[face_id] = person.temperature;
       }
 
       unknown_database_->add(face_id, feature);
@@ -569,7 +570,7 @@ bool RecordTask::if_duplicated(SZ_INT32 face_id, const FaceFeature &feature,
     }
 
     if (sequence_temperature(face_id, duration, unknown_temperature_,
-                             temperature) ||
+                             person.temperature) ||
         known_temperature_.size() + unknown_temperature_.size() == 1)
       update_temperature_bias();
   }

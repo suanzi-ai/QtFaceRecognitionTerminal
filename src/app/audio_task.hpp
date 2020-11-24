@@ -21,6 +21,7 @@ class AudioTask : QObject {
  public:
   static AudioTask* get_instance();
   static bool idle();
+  static SZ_UINT16 duration(PersonData person);
 
   void load_audio();
   void beep();

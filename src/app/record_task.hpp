@@ -57,7 +57,7 @@ class RecordTask : QObject {
   void update_person(RecognizeData *input, const SZ_UINT32 &face_id,
                      PersonData &person);
   bool if_duplicated(SZ_INT32 face_id, const FaceFeature &feature,
-                     float &temperature);
+                     PersonData &person);
   bool if_temperature_updated(float &temperature);
 
   bool is_running_;
