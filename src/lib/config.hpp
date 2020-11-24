@@ -48,6 +48,7 @@ typedef struct {
   std::string extract_level;
   std::string liveness_level;
   SZ_UINT16 duplication_interval;
+  SZ_UINT16 duplication_limit;
   SZ_UINT32 relay_switch_cond;
   RelaySwitchMode relay_switch_mode;
   RelayState relay_default_state;

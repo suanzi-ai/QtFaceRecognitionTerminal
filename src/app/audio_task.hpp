@@ -26,9 +26,7 @@ class AudioTask : QObject {
   void beep();
 
  private slots:
-  void rx_report_person(PersonData person);
-  void rx_report_temperature(PersonData person);
-
+  void rx_report(PersonData person, bool duplicated);
   void rx_warn_distance();
 
  private:
@@ -37,8 +35,6 @@ class AudioTask : QObject {
 
   bool read_audio(const std::string& name, Audio& audio);
   void play_audio(Audio& audio);
-
-  void play_pass(PersonData person);
 
   Audio pass_audio_;
 

@@ -80,17 +80,16 @@ void VideoPlayer::init_workflow() {
           SIGNAL(tx_frame(PingPangBuffer<DetectionData> *)),
           (const QObject *)face_timer_,
           SLOT(rx_frame(PingPangBuffer<DetectionData> *)));
+  connect((const QObject *)face_timer_, SIGNAL(tx_face_disappear(int)),
+          (const QObject *)record_task_, SLOT(rx_reset()));
 
   // 创建LED线程
   led_task_ = LEDTask::get_instance();
 
   // 创建语音播报线程
   audio_task_ = AudioTask::get_instance();
-  connect((const QObject *)record_task_, SIGNAL(tx_report_person(PersonData)),
-          (const QObject *)audio_task_, SLOT(rx_report_person(PersonData)));
-  connect(
-      (const QObject *)record_task_, SIGNAL(tx_report_temperature(PersonData)),
-      (const QObject *)audio_task_, SLOT(rx_report_temperature(PersonData)));
+  connect((const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool)),
+          (const QObject *)audio_task_, SLOT(rx_report(PersonData, bool)));
   connect((const QObject *)detect_task_, SIGNAL(tx_warn_distance()),
           (const QObject *)audio_task_, SLOT(rx_warn_distance()));
 

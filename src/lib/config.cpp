@@ -14,6 +14,7 @@ void suanzi::to_json(json &j, const UserConfig &c) {
   SAVE_JSON_TO(j, "extract_level", c.extract_level);
   SAVE_JSON_TO(j, "liveness_level", c.liveness_level);
   SAVE_JSON_TO(j, "duplication_interval", c.duplication_interval);
+  SAVE_JSON_TO(j, "duplication_limit", c.duplication_limit);
   SAVE_JSON_TO(j, "relay_switch_cond", c.relay_switch_cond);
   SAVE_JSON_TO(j, "relay_default_state", c.relay_default_state);
   SAVE_JSON_TO(j, "relay_restore_time", c.relay_restore_time);
@@ -44,6 +45,7 @@ void suanzi::from_json(const json &j, UserConfig &c) {
   LOAD_JSON_TO(j, "extract_level", c.extract_level);
   LOAD_JSON_TO(j, "liveness_level", c.liveness_level);
   LOAD_JSON_TO(j, "duplication_interval", c.duplication_interval);
+  LOAD_JSON_TO(j, "duplication_limit", c.duplication_limit);
   LOAD_JSON_TO(j, "relay_switch_cond", c.relay_switch_cond);
   LOAD_JSON_TO(j, "relay_default_state", c.relay_default_state);
   LOAD_JSON_TO(j, "relay_restore_time", c.relay_restore_time);
@@ -311,7 +313,8 @@ void Config::load_defaults(ConfigData &c) {
       .detect_level = "medium",
       .extract_level = "medium",
       .liveness_level = "medium",
-      .duplication_interval = 60,
+      .duplication_interval = 5,
+      .duplication_limit = 3,
       .relay_switch_cond = 3,
       .relay_switch_mode = RelaySwitchMode::AllPass,
       .relay_default_state = RelayState::Low,
