@@ -34,6 +34,7 @@ FaceTimer::~FaceTimer() {}
 
 void FaceTimer::rx_detect_result(bool valid_detect) {
 	if (valid_detect) {
+		bclose_white_led_ = false;
 		LEDTask::get_instance()->turn_on();
 		white_led_timer_->start(MAX_WHITE_LED_TIMEOUT * 1000);
 		display_screen_saver(false);
@@ -52,7 +53,9 @@ void FaceTimer::screen_saver_timeout() {
 }
 
 void FaceTimer::white_led_timeout() {
-	LEDTask::get_instance()->turn_off();
+	emit tx_white_led_timeout();
+	bclose_white_led_ = true;
+	QTimer::singleShot(500, this, SLOT(delay_close_white_led()));
 	int screensaver_timeout = Config::get_user().screensaver_timeout;
 	if (MAX_WHITE_LED_TIMEOUT >= screensaver_timeout)
 		display_screen_saver(true);
@@ -62,7 +65,12 @@ void FaceTimer::white_led_timeout() {
 }
 
 
-void FaceTimer::run() {
+void FaceTimer::delay_close_white_led() {
+	if (bclose_white_led_)
+		LEDTask::get_instance()->turn_off();
+}
 
+void FaceTimer::run() {
+	while(1) usleep(1);
 	exec();
 }

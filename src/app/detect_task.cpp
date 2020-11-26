@@ -176,6 +176,12 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
   emit tx_finish();
 }
 
+
+void DetectTask::rx_white_led_timeout() {
+	last_valid_detect_ = false;//enable tx detect result
+}
+
+
 bool DetectTask::detect_and_select(const MmzImage *image,
                                    DetectionRatio &detection, bool is_bgr) {
   auto cfg = Config::get_detect();
