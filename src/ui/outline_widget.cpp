@@ -41,6 +41,8 @@ void OutlineWidget::paint(QPainter *painter) {
 
   int w = width();   // 800
   int h = height();  // 1280
+
+
   if (show_valid_rect_) {
     QDateTime now = QDateTime::currentDateTime();
     bool flag = (now.currentMSecsSinceEpoch() / 250) % 2;

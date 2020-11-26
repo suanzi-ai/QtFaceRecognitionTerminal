@@ -25,8 +25,10 @@ VideoPlayer::VideoPlayer(QWidget *parent) : QWidget(parent) {
 VideoPlayer::~VideoPlayer() {}
 
 void VideoPlayer::paintEvent(QPaintEvent *event) {
+  QWidget::paintEvent(event);
+
   QPainter painter(this);
-  outline_widget_->paint(&painter);
+  //outline_widget_->paint(&painter);
   recognize_tip_widget_->paint(&painter);
 }
 
@@ -145,7 +147,7 @@ void VideoPlayer::init_widgets() {
 
   // 创建人脸识别记录控件
   recognize_tip_widget_ =
-      new RecognizeTipWidget(screen_width, screen_height, this);
+      new RecognizeTipWidget(screen_width, screen_height);
   connect((const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool)),
           (const QObject *)recognize_tip_widget_,
           SLOT(rx_display(PersonData, bool)));
