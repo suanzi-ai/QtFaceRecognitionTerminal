@@ -23,6 +23,7 @@ class DetectTask : QObject {
 
  private slots:
   void rx_frame(PingPangBuffer<ImagePackage> *buffer);
+  void rx_white_led_timeout();
 
  signals:
   void tx_finish();
