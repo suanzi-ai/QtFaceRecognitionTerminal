@@ -19,21 +19,22 @@ DetectTipWidget::DetectTipWidget(int win_x, int win_y, int win_width,
       is_valid_(false),
       valid_count_(0),
       QWidget(parent) {
+  detect_pos_x_ = 0.0;
+  detect_pos_y_ = 0.0;
+  detect_width_ = 0.0;
+  detect_height_ = 0.0;
+
   QPalette palette = this->palette();
   palette.setColor(QPalette::Background, Qt::transparent);
   setPalette(palette);
 
-  move(win_x_, win_y_);
-  setFixedSize(win_width_, win_height_);
-
-  QVBoxLayout *main_layout = new QVBoxLayout(this);
-
-  startTimer(1000 / 33);
+  // move(win_x_, win_y_);
+  // setFixedSize(win_width_, win_height_);
+  setGeometry(detect_pos_x_ + win_x_, detect_pos_y_ + win_y_, detect_width_,
+              detect_height_);
 }
 
 DetectTipWidget::~DetectTipWidget() {}
-
-void DetectTipWidget::timerEvent(QTimerEvent *event) { update(); };
 
 void DetectTipWidget::paintEvent(QPaintEvent *event) {
   QPainter painter(this);
@@ -45,7 +46,6 @@ void DetectTipWidget::paint(QPainter *painter) {
   if (rects_.size() > 0 && !Config::get_user().enable_temperature) {
     float sum_x = 0, sum_y = 0, sum_width = 0, sum_height = 0;
     float count = 0;
-
     auto it = rects_.end();
     QRect latest = rects_.back();
     do {
@@ -67,12 +67,23 @@ void DetectTipWidget::paint(QPainter *painter) {
 
     } while (it != rects_.begin());
 
-    float width = sum_width / count;
-    float height = sum_height / count;
-    float top_x = sum_x / count;
-    float top_y = sum_y / count;
-    float bottom_x = top_x + width;
-    float bottom_y = top_y + height;
+    width = sum_width / count;
+    height = sum_height / count;
+    x = sum_x / count;
+    y = sum_y / count;
+  }
+}
+
+void DetectTipWidget::paint(QPainter *painter) {
+  if (rects_.size() > 0 /*&& !Config::get_user().enable_temperature*/) {
+    // float width, height, top_x, top_y;
+    // get_detect_position(top_x, top_y, width, height);
+    float width = detect_width_;
+    float height = detect_height_;
+    float top_x = 1.0;  // detect_pos_x_;
+    float top_y = 1.0;
+    float bottom_x = top_x + width - 2.0;
+    float bottom_y = top_y + height - 2.0;
 
     // SZ_LOG_INFO("top_x={},top_y={},bottom_x={},bottom_y={},w={},h={}", top_x,
     //              top_y, bottom_x, bottom_y, width, height);
@@ -146,6 +157,11 @@ void DetectTipWidget::rx_display(DetectionRatio detection, bool to_clear,
     if (rects_.size() > MAX_RECT_COUNT) rects_.erase(rects_.begin());
 
     if (is_bgr) is_valid_ = valid;
+
+    get_detect_position(detect_pos_x_, detect_pos_y_, detect_width_,
+                        detect_height_);
+    setGeometry(detect_pos_x_ + win_x_, detect_pos_y_ + win_y_, detect_width_,
+                detect_height_);
     show();
   } else {
     if (++lost_age_ > MAX_LOST_AGE) {
@@ -156,6 +172,4 @@ void DetectTipWidget::rx_display(DetectionRatio detection, bool to_clear,
     }
     hide();
   }
-
-  if (is_bgr) ((QWidget *)parent())->update();
 }

@@ -25,8 +25,10 @@ VideoPlayer::VideoPlayer(QWidget *parent) : QWidget(parent) {
 VideoPlayer::~VideoPlayer() {}
 
 void VideoPlayer::paintEvent(QPaintEvent *event) {
+  QWidget::paintEvent(event);
+
   QPainter painter(this);
-  outline_widget_->paint(&painter);
+  //outline_widget_->paint(&painter);
   recognize_tip_widget_->paint(&painter);
 }
 

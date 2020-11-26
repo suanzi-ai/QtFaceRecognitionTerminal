@@ -5,7 +5,7 @@
 #include <QPainter>
 #include <QVBoxLayout>
 #include <QWidget>
-
+#include <QThread>
 #include "detection_data.hpp"
 #include "image_package.hpp"
 #include "pingpang_buffer.hpp"
@@ -20,15 +20,30 @@ class DetectTipWidget : public QWidget {
                   QWidget *parent = nullptr);
   ~DetectTipWidget() override;
 
+ private:
   void paint(QPainter *painter);
-
-  void timerEvent(QTimerEvent *event) override;
-
   void paintEvent(QPaintEvent *event) override;
 
  private slots:
   void rx_display(DetectionRatio detection, bool to_clear, bool valid,
                   bool is_bgr);
+
+ private:
+ 	void get_detect_position(float &x, float &y, float &width, float &height);
+
+ private:
+
+ 	class InternalEventLoopThread : public QThread {
+		public:
+			InternalEventLoopThread() {
+				start();
+			}
+		private:
+			void run() {
+				exec();
+			}
+	};
+
 
  private:
   static constexpr int MAX_RECT_COUNT = 10;
@@ -47,6 +62,11 @@ class DetectTipWidget : public QWidget {
 
   bool is_valid_;
   int valid_count_;
+
+  float detect_pos_x_;
+  float detect_pos_y_;
+  float detect_width_;
+  float detect_height_;
 };
 
 }  // namespace suanzi
