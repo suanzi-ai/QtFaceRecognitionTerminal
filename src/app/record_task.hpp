@@ -24,8 +24,6 @@ class RecordTask : QObject {
  private slots:
   void rx_frame(PingPangBuffer<RecognizeData> *buffer);
   void rx_temperature(float body_temperature);
-  void rx_start_temperature();
-  void rx_end_temperature();
 
   void rx_reset();
 
@@ -80,10 +78,8 @@ class RecordTask : QObject {
 
   FaceFeature last_feature_;
 
-  bool is_measuring_temperature_;
   std::vector<float> temperature_history_;
-  float max_temperature_, latest_temperature_;
-  QTimer *temperature_timer_;
+  float latest_temperature_;
 };
 
 }  // namespace suanzi
