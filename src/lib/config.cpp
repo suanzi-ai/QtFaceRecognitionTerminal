@@ -22,6 +22,7 @@ void suanzi::to_json(json &j, const UserConfig &c) {
   SAVE_JSON_TO(j, "enable_temperature", c.enable_temperature);
   SAVE_JSON_TO(j, "temperature_bias", c.temperature_bias);
   SAVE_JSON_TO(j, "temperature_finetune", c.temperature_finetune);
+  SAVE_JSON_TO(j, "temperature_var", c.temperature_var);
   SAVE_JSON_TO(j, "temperature_max", c.temperature_max);
   SAVE_JSON_TO(j, "temperature_min", c.temperature_min);
   SAVE_JSON_TO(j, "enable_audio", c.enable_audio);
@@ -60,6 +61,7 @@ void suanzi::from_json(const json &j, UserConfig &c) {
   }
   LOAD_JSON_TO(j, "temperature_bias", c.temperature_bias);
   LOAD_JSON_TO(j, "temperature_finetune", c.temperature_finetune);
+  LOAD_JSON_TO(j, "temperature_var", c.temperature_var);
   LOAD_JSON_TO(j, "temperature_max", c.temperature_max);
   LOAD_JSON_TO(j, "temperature_min", c.temperature_min);
   LOAD_JSON_TO(j, "enable_audio", c.enable_audio);
@@ -324,6 +326,7 @@ void Config::load_defaults(ConfigData &c) {
       .enable_temperature = false,
       .temperature_bias = 0,
       .temperature_finetune = 0,
+      .temperature_var = 90,
       .temperature_max = 37.3,
       .temperature_min = 35.0,
       .enable_audio = true,

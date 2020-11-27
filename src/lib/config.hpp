@@ -56,6 +56,7 @@ typedef struct {
   bool enable_temperature;
   SZ_FLOAT temperature_bias;
   SZ_FLOAT temperature_finetune;
+  SZ_FLOAT temperature_var;
   SZ_FLOAT temperature_max;
   SZ_FLOAT temperature_min;
   bool enable_audio;
