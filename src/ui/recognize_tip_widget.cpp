@@ -1,7 +1,7 @@
 #include "recognize_tip_widget.hpp"
 
 #include <sstream>
-
+#include <QThread>
 #include <QDateTime>
 #include <QFontDatabase>
 #include <QImage>
@@ -27,6 +27,12 @@ RecognizeTipWidget::RecognizeTipWidget(int width, int height, QWidget *parent)
   QPalette palette = this->palette();
   palette.setColor(QPalette::Background, Qt::transparent);
   setPalette(palette);
+
+
+	//QLabel
+
+
+
 
   move(0, 0);
   setFixedSize(width, height);
