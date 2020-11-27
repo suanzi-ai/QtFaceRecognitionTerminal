@@ -98,10 +98,11 @@ void RecognizeTask::rx_frame(PingPangBuffer<DetectionData> *buffer) {
 
   if (input->bgr_face_valid()) {
     if (output->has_live) {
-      if (!Config::enable_anti_spoofing())
-        output->is_live = true;
-      else
-        output->is_live = is_live(input);
+      // if (!Config::enable_anti_spoofing())
+      //   output->is_live = true;
+      // else
+      //   output->is_live = is_live(input);
+      output->is_live = true;
     }
     if (output->has_person_info) {
       output->has_mask = has_mask(input);
