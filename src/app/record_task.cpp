@@ -401,11 +401,12 @@ bool RecordTask::update_temperature_bias() {
     if (count >= 5)
       diff = AVE_TEMPERATURE -
              (sum - max_temperature - min_temperature) / (count - 2);
+    if (diff > 1) diff /= 2;
 
     for (auto &it : known_temperature_) it.second += diff;
     for (auto &it : unknown_temperature_) it.second += diff;
 
-    Config::set_temperature_bias(bias + diff);
+    Config::set_temperature_finetune(diff);
     SZ_LOG_INFO("update bias {:.2f} --> {:.2f}", bias,
                 Config::get_temperature_bias());
     json cfg;
@@ -448,8 +449,7 @@ void RecordTask::update_person(RecognizeData *input, const SZ_UINT32 &face_id,
           if_duplicated(face_id, input->person_feature, person);
       break;
     case PersonStatus::Stranger:
-      person.is_duplicated =
-          if_duplicated(-1, input->person_feature, person);
+      person.is_duplicated = if_duplicated(-1, input->person_feature, person);
       person.name = tr("访客").toStdString();
       person.id = 0;
       person.score = 0;
@@ -527,9 +527,10 @@ bool RecordTask::if_duplicated(SZ_INT32 face_id, const FaceFeature &feature,
       query_clock_[face_id] = current_query_clock;
     }
 
-    if (sequence_temperature(face_id, duration, known_temperature_,
-                             person.temperature) ||
-        known_temperature_.size() + unknown_temperature_.size() == 1)
+    if (cfg.enable_temperature &&
+        (sequence_temperature(face_id, duration, known_temperature_,
+                              person.temperature) ||
+         known_temperature_.size() + unknown_temperature_.size() == 1))
       update_temperature_bias();
 
   }
@@ -570,9 +571,10 @@ bool RecordTask::if_duplicated(SZ_INT32 face_id, const FaceFeature &feature,
       unknown_query_clock_[face_id] = current_query_clock;
     }
 
-    if (sequence_temperature(face_id, duration, unknown_temperature_,
-                             person.temperature) ||
-        known_temperature_.size() + unknown_temperature_.size() == 1)
+    if (cfg.enable_temperature &&
+        (sequence_temperature(face_id, duration, unknown_temperature_,
+                              person.temperature) ||
+         known_temperature_.size() + unknown_temperature_.size() == 1))
       update_temperature_bias();
   }
   // return GOOD_TEMPERATURE(temperature) && ret;

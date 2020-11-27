@@ -21,6 +21,7 @@ void suanzi::to_json(json &j, const UserConfig &c) {
   SAVE_JSON_TO(j, "relay_switch_mode", c.relay_switch_mode);
   SAVE_JSON_TO(j, "enable_temperature", c.enable_temperature);
   SAVE_JSON_TO(j, "temperature_bias", c.temperature_bias);
+  SAVE_JSON_TO(j, "temperature_finetune", c.temperature_finetune);
   SAVE_JSON_TO(j, "temperature_max", c.temperature_max);
   SAVE_JSON_TO(j, "temperature_min", c.temperature_min);
   SAVE_JSON_TO(j, "enable_audio", c.enable_audio);
@@ -58,6 +59,7 @@ void suanzi::from_json(const json &j, UserConfig &c) {
     LOAD_JSON_TO(j, "enable_temperature", c.enable_temperature);
   }
   LOAD_JSON_TO(j, "temperature_bias", c.temperature_bias);
+  LOAD_JSON_TO(j, "temperature_finetune", c.temperature_finetune);
   LOAD_JSON_TO(j, "temperature_max", c.temperature_max);
   LOAD_JSON_TO(j, "temperature_min", c.temperature_min);
   LOAD_JSON_TO(j, "enable_audio", c.enable_audio);
@@ -321,6 +323,7 @@ void Config::load_defaults(ConfigData &c) {
       .relay_restore_time = 10,
       .enable_temperature = false,
       .temperature_bias = 0,
+      .temperature_finetune = 0,
       .temperature_max = 37.3,
       .temperature_min = 35.0,
       .enable_audio = true,
@@ -885,14 +888,19 @@ bool Config::write_audio_volume(int volume_percent) {
   return true;
 }
 
-void Config::set_temperature_bias(float bias) {
+void Config::set_temperature_finetune(float diff) {
   std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
-  instance_.cfg_data_.user.temperature_bias = bias;
+  instance_.cfg_data_.user.temperature_finetune += diff;
+  if (instance_.cfg_data_.user.temperature_finetune > 2)
+    instance_.cfg_data_.user.temperature_finetune = 2;
+  if (instance_.cfg_data_.user.temperature_finetune < -2)
+    instance_.cfg_data_.user.temperature_finetune = -2;
 }
 
 float Config::get_temperature_bias() {
   std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
-  return instance_.cfg_data_.user.temperature_bias;
+  return instance_.cfg_data_.user.temperature_finetune +
+         instance_.cfg_data_.user.temperature_bias;
 }
 
 const ConfigData &Config::get_all() {

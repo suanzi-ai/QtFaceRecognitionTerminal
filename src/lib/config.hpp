@@ -55,6 +55,7 @@ typedef struct {
   SZ_UINT16 relay_restore_time;
   bool enable_temperature;
   SZ_FLOAT temperature_bias;
+  SZ_FLOAT temperature_finetune;
   SZ_FLOAT temperature_max;
   SZ_FLOAT temperature_min;
   bool enable_audio;
@@ -250,7 +251,7 @@ class Config : public ConfigEventEmitter {
   static bool write_audio_volume(int volume_percent);
   static bool read_audio_volume(int &volume_percent);
 
-  static void set_temperature_bias(float bias);
+  static void set_temperature_finetune(float bias);
   static float get_temperature_bias();
 
   static const ConfigData &get_all();
