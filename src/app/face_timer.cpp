@@ -27,6 +27,8 @@ FaceTimer::FaceTimer(QObject *parent) {
   disappear_duration_ = 0;
   int screensaver_timeout = Config::get_user().screensaver_timeout;
   screen_saver_timer_->start(screensaver_timeout * 1000);
+
+  moveToThread(this);
   start();
 }
 
@@ -71,6 +73,5 @@ void FaceTimer::delay_close_white_led() {
 }
 
 void FaceTimer::run() {
-	while(1) usleep(1);
 	exec();
 }

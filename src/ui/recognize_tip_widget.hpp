@@ -6,7 +6,7 @@
 #include <QPixmap>
 #include <QTimer>
 #include <QWidget>
-
+#include <QLabel>
 #include "person_service.hpp"
 
 namespace suanzi {
@@ -44,6 +44,10 @@ class RecognizeTipWidget : public QWidget {
   std::string ip_, name_, mac_;
   std::string hostname_;
   std::string serial_number_;
+
+
+  //QLabel *pl_yyyy_md;
+  //QLabel *pl_h;
 };
 
 }  // namespace suanzi
