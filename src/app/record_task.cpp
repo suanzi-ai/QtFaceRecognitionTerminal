@@ -124,10 +124,11 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
         if (cfg.enable_temperature) {
           if (if_temperature_updated(person.temperature))
             person.is_duplicated = false;
-          if (person.temperature == 0) person.is_duplicated = true;
+          // if (person.temperature == 0) person.is_duplicated = true;
           if (!is_measuring_temperature_) rx_start_temperature();
         }
-        emit tx_display(person, person.is_duplicated);
+        if (person.temperature > 0)
+          emit tx_display(person, person.is_duplicated);
       }
     }
     reset_recognize();
@@ -481,9 +482,9 @@ void RecordTask::update_person(RecognizeData *input, const SZ_UINT32 &face_id,
       int crop_h = input->bgr_detection_.height * height;
 
       crop_x = std::max(0, crop_x - crop_w / 2);
-      crop_y = std::max(0, crop_y - crop_h / 2);
+      crop_y = std::max(0, crop_y - crop_h / 4);
       crop_w = std::min(width - crop_x - 1, crop_w * 2);
-      crop_h = std::min(height - crop_y - 1, crop_h * 2);
+      crop_h = std::min(height - crop_y - 1, crop_h * 3 / 2);
 
       cv::imdecode(buffer,
                    CV_LOAD_IMAGE_COLOR)({crop_x, crop_y, crop_w, crop_h})
