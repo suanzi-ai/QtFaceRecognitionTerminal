@@ -167,7 +167,7 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
         ambient_temperature_, face_temperature_, max_temperature, avg, var);
 
     if (!Config::get_app().enable_anti_spoofing ||
-        (avg - ambient_temperature_ > 2 && var > 20))
+        (avg - ambient_temperature_ > 0 && var > 20))
       emit tx_temperature(face_temperature_);
     else {
       detection.x = 0.45;

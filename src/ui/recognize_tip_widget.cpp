@@ -67,8 +67,7 @@ void RecognizeTipWidget::rx_display(PersonData person, bool if_duplicated) {
     avatar.release();
   }
 
-  if ((!has_info_ || person_.face_path != person.face_path) &&
-      !person.face_snapshot.empty()) {
+  if (!if_duplicated && !person.face_snapshot.empty()) {
     cv::cvtColor(person.face_snapshot, person.face_snapshot, CV_BGR2RGB);
     snapshot_ = QPixmap::fromImage(
         QImage((unsigned char *)person.face_snapshot.data,
