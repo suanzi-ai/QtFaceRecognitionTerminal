@@ -72,6 +72,7 @@ typedef struct {
   bool upload_known_person;
   bool upload_unknown_person;
   SZ_FLOAT mask_score;
+  bool wdr;
 } UserConfig;
 
 void to_json(json &j, const UserConfig &c);
@@ -178,7 +179,6 @@ typedef struct {
   int index;
   int rotate;
   int flip;
-  bool wdr;
   ISPConfig isp;
 } CameraConfig;
 

@@ -166,8 +166,8 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
         "var={:.2f}°C",
         ambient_temperature_, face_temperature_, max_temperature, avg, var);
 
-    auto cfg = Config::get_user();
-    if (!cfg.enable_anti_spoofing || var > cfg.temperature_var)
+    if (!Config::enable_anti_spoofing() ||
+        var > Config::get_user().temperature_var)
       emit tx_temperature(face_temperature_);
     else {
       detection.x = 0.45;

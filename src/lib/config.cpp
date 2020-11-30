@@ -38,6 +38,7 @@ void suanzi::to_json(json &j, const UserConfig &c) {
   SAVE_JSON_TO(j, "upload_known_person", c.upload_known_person);
   SAVE_JSON_TO(j, "upload_unknown_person", c.upload_unknown_person);
   SAVE_JSON_TO(j, "mask_score", c.mask_score);
+  SAVE_JSON_TO(j, "wdr", c.wdr);
 }
 
 void suanzi::from_json(const json &j, UserConfig &c) {
@@ -78,6 +79,7 @@ void suanzi::from_json(const json &j, UserConfig &c) {
   LOAD_JSON_TO(j, "upload_known_person", c.upload_known_person);
   LOAD_JSON_TO(j, "upload_unknown_person", c.upload_unknown_person);
   LOAD_JSON_TO(j, "mask_score", c.mask_score);
+  LOAD_JSON_TO(j, "wdr", c.wdr);
 }
 
 void suanzi::to_json(json &j, const AppConfig &c) {
@@ -150,7 +152,6 @@ void suanzi::to_json(json &j, const CameraConfig &c) {
   SAVE_JSON_TO(j, "index", c.index);
   SAVE_JSON_TO(j, "rotate", c.rotate);
   SAVE_JSON_TO(j, "flip", c.flip);
-  SAVE_JSON_TO(j, "wdr", c.wdr);
   SAVE_JSON_TO(j, "isp", c.isp);
 }
 
@@ -158,7 +159,6 @@ void suanzi::from_json(const json &j, CameraConfig &c) {
   LOAD_JSON_TO(j, "index", c.index);
   LOAD_JSON_TO(j, "rotate", c.rotate);
   LOAD_JSON_TO(j, "flip", c.flip);
-  LOAD_JSON_TO(j, "wdr", c.wdr);
   LOAD_JSON_TO(j, "isp", c.isp);
 }
 
@@ -341,6 +341,7 @@ void Config::load_defaults(ConfigData &c) {
       .upload_known_person = true,
       .upload_unknown_person = true,
       .mask_score = 0.7,
+      .wdr = false,
   };
 
   c.quface = {
@@ -362,7 +363,6 @@ void Config::load_defaults(ConfigData &c) {
       .index = 1,
       .rotate = 1,
       .flip = 1,
-      .wdr = false,
       .isp =
           {
               .stat =
@@ -434,7 +434,6 @@ void Config::load_defaults(ConfigData &c) {
       .index = 0,
       .rotate = 1,
       .flip = 1,
-      .wdr = false,
       .isp =
           {
               .stat =

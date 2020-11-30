@@ -90,6 +90,7 @@ Engine* create_engine() {
 
   // 读取应用参数
   auto app_cfg = Config::get_app();
+  auto user_cfg = Config::get_user();
 
   EngineOption opt = {
       .bgr =
@@ -97,7 +98,7 @@ Engine* create_engine() {
               .sensor_type = sensor0_type,
               .dev = bgr_cam.index,
               .flip = true,
-              .wdr = bgr_cam.wdr,
+              .wdr = user_cfg.wdr,
               .channels =
                   {
                       {
@@ -134,7 +135,7 @@ Engine* create_engine() {
               .sensor_type = sensor1_type,
               .dev = nir_cam.index,
               .flip = true,
-              .wdr = nir_cam.wdr,
+              .wdr = false,
               .channels =
                   {
                       {
