@@ -20,6 +20,7 @@ void suanzi::to_json(json &j, const UserConfig &c) {
   SAVE_JSON_TO(j, "relay_restore_time", c.relay_restore_time);
   SAVE_JSON_TO(j, "relay_switch_mode", c.relay_switch_mode);
   SAVE_JSON_TO(j, "enable_temperature", c.enable_temperature);
+  SAVE_JSON_TO(j, "enable_anti_spoofing", c.enable_anti_spoofing);
   SAVE_JSON_TO(j, "temperature_bias", c.temperature_bias);
   SAVE_JSON_TO(j, "temperature_finetune", c.temperature_finetune);
   SAVE_JSON_TO(j, "temperature_var", c.temperature_var);
@@ -59,6 +60,7 @@ void suanzi::from_json(const json &j, UserConfig &c) {
   } else {
     LOAD_JSON_TO(j, "enable_temperature", c.enable_temperature);
   }
+  LOAD_JSON_TO(j, "enable_anti_spoofing", c.enable_anti_spoofing);
   LOAD_JSON_TO(j, "temperature_bias", c.temperature_bias);
   LOAD_JSON_TO(j, "temperature_finetune", c.temperature_finetune);
   LOAD_JSON_TO(j, "temperature_var", c.temperature_var);
@@ -84,7 +86,6 @@ void suanzi::to_json(json &j, const AppConfig &c) {
   SAVE_JSON_TO(j, "server_host", c.server_host);
   SAVE_JSON_TO(j, "image_store_path", c.image_store_path);
   SAVE_JSON_TO(j, "person_service_base_url", c.person_service_base_url);
-  SAVE_JSON_TO(j, "enable_anti_spoofing", c.enable_anti_spoofing);
   SAVE_JSON_TO(j, "show_infrared_window", c.show_infrared_window);
   SAVE_JSON_TO(j, "infrared_window_percent", c.infrared_window_percent);
   SAVE_JSON_TO(j, "show_isp_info_window", c.show_isp_info_window);
@@ -98,7 +99,6 @@ void suanzi::from_json(const json &j, AppConfig &c) {
   LOAD_JSON_TO(j, "server_host", c.server_host);
   LOAD_JSON_TO(j, "image_store_path", c.image_store_path);
   LOAD_JSON_TO(j, "person_service_base_url", c.person_service_base_url);
-  LOAD_JSON_TO(j, "enable_anti_spoofing", c.enable_anti_spoofing);
   LOAD_JSON_TO(j, "show_infrared_window", c.show_infrared_window);
   LOAD_JSON_TO(j, "infrared_window_percent", c.infrared_window_percent);
   LOAD_JSON_TO(j, "show_isp_info_window", c.show_isp_info_window);
@@ -292,7 +292,6 @@ void Config::load_defaults(ConfigData &c) {
       .server_host = "127.0.0.1",
       .image_store_path = APP_DIR_PREFIX "/var/db/upload/",
       .person_service_base_url = "http://127.0.0.1",
-      .enable_anti_spoofing = false,
       .show_infrared_window = false,
       .infrared_window_percent = 25,
       .show_isp_info_window = ISPInfoWindowNONE,
@@ -324,6 +323,7 @@ void Config::load_defaults(ConfigData &c) {
       .relay_default_state = RelayState::Low,
       .relay_restore_time = 10,
       .enable_temperature = false,
+      .enable_anti_spoofing = false,
       .temperature_bias = 0,
       .temperature_finetune = 0,
       .temperature_var = 90,
@@ -976,7 +976,7 @@ const LivenessConfig &Config::get_liveness() {
 
 bool Config::enable_anti_spoofing() {
   std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
-  return instance_.cfg_data_.app.enable_anti_spoofing;
+  return instance_.cfg_data_.user.enable_anti_spoofing;
 }
 
 bool Config::read_image(const std::string &image, const std::string &fallback,

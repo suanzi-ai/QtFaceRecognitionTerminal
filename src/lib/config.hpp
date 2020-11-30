@@ -54,6 +54,7 @@ typedef struct {
   RelayState relay_default_state;
   SZ_UINT16 relay_restore_time;
   bool enable_temperature;
+  bool enable_anti_spoofing;
   SZ_FLOAT temperature_bias;
   SZ_FLOAT temperature_finetune;
   SZ_FLOAT temperature_var;
@@ -88,7 +89,6 @@ typedef struct {
   std::string server_host;
   std::string image_store_path;
   std::string person_service_base_url;
-  bool enable_anti_spoofing;
   bool show_infrared_window;
   int infrared_window_percent;
   ISPInfoWindowType show_isp_info_window;
