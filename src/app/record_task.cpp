@@ -7,7 +7,7 @@
 
 #include <opencv2/opencv.hpp>
 
-#include <quface-io/engine.hpp>
+#include <quface-io/ive.hpp>
 #include <quface/logger.hpp>
 
 #include "audio_task.hpp"
@@ -459,27 +459,26 @@ void RecordTask::update_person(RecognizeData *input, const SZ_UINT32 &face_id,
   memcpy(person.bgr_snapshot.data, input->img_bgr_large->pData,
          width * height * 3 / 2);
 
-  if (input->bgr_face_detected_ && width < height) {
-    auto engine = Engine::instance();
-    static std::vector<SZ_BYTE> buffer;
-    buffer.clear();
+  width = input->img_bgr_small->width;
+  height = input->img_bgr_small->height;
+  static MmzImage *snapshot =
+      new MmzImage(width, height, SZ_IMAGETYPE_BGR_PACKAGE);
 
-    if (SZ_RETCODE_OK ==
-        engine->encode_jpeg(buffer, person.bgr_snapshot.data, width, height)) {
-      int crop_x = input->bgr_detection_.x * width;
-      int crop_y = input->bgr_detection_.y * height;
-      int crop_w = input->bgr_detection_.width * width;
-      int crop_h = input->bgr_detection_.height * height;
+  if (input->bgr_face_detected_ && width < height &&
+      Ive::getInstance()->yuv2RgbPacked(snapshot, input->img_bgr_small, true)) {
+    int crop_x = input->bgr_detection_.x * width;
+    int crop_y = input->bgr_detection_.y * height;
+    int crop_w = input->bgr_detection_.width * width;
+    int crop_h = input->bgr_detection_.height * height;
 
-      crop_x = std::max(0, crop_x - crop_w / 2);
-      crop_y = std::max(0, crop_y - crop_h / 4);
-      crop_w = std::min(width - crop_x - 1, crop_w * 2);
-      crop_h = std::min(height - crop_y - 1, crop_h * 3 / 2);
+    crop_x = std::max(0, crop_x - crop_w / 2);
+    crop_y = std::max(0, crop_y - crop_h / 4);
+    crop_w = std::min(width - crop_x - 1, crop_w * 2);
+    crop_h = std::min(height - crop_y - 1, crop_h * 3 / 2);
 
-      cv::imdecode(buffer,
-                   CV_LOAD_IMAGE_COLOR)({crop_x, crop_y, crop_w, crop_h})
-          .copyTo(person.face_snapshot);
-    }
+    cv::Mat(height, width, CV_8UC3,
+            snapshot->pData)({crop_x, crop_y, crop_w, crop_h})
+        .copyTo(person.face_snapshot);
   } else
     person.face_snapshot = cv::Mat();
 
