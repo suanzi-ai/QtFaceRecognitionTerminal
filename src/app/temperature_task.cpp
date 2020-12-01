@@ -161,7 +161,7 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
     face_temperature_ = surface_to_inner(
         measure_to_surface(max_temperature + Config::get_temperature_bias()));
 
-    SZ_LOG_INFO(
+    SZ_LOG_DEBUG(
         "ambient={:.2f}°C, face={:.2f}°C, max={:.2f}°C, avg={:.2f}°C, "
         "var={:.2f}°C",
         ambient_temperature_, face_temperature_, max_temperature, avg, var);
