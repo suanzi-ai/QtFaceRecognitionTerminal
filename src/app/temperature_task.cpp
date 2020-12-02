@@ -117,6 +117,7 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
 
   if (!to_clear) {
     detection.x += 0.125f;
+    detection.y -= detection.height * 0.2f;
     detection.width = std::min(detection.width, 1.f - detection.x);
     detection.height = detection.height * 0.4f;
   } else {
@@ -128,15 +129,19 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
 
   float max_x, max_y;
   float max_temperature = 0;
+  static std::vector<float> statistics;
+  statistics.clear();
   for (size_t i = 0; i < 256; i++) {
     float x = (i % 16) / 16.f, y = (i / 16) / 16.f;
     if (pow(x - 0.5f, 2) + pow(y - 0.5f, 2) <= pow(6.f / 16.f, 2) &&
         detection.x <= x && x <= detection.x + detection.width &&
-        detection.y <= y && y <= detection.y + detection.height &&
-        mat.value[i] > max_temperature) {
-      max_temperature = mat.value[i];
-      max_x = x;
-      max_y = y;
+        detection.y <= y && y <= detection.y + detection.height) {
+      statistics.push_back(mat.value[i]);
+      if (mat.value[i] > max_temperature) {
+        max_temperature = mat.value[i];
+        max_x = x;
+        max_y = y;
+      }
     }
   }
 
@@ -150,14 +155,28 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
       ambient_temperature_ = ambient_temperature_ * 0.9 + max_temperature * 0.1;
     face_temperature_ = 0;
   } else {
-    face_temperature_ = max_temperature;
-    // SZ_LOG_INFO("ambient={:.2f}°C, face={:.2f}°C", ambient_temperature_,
-    //             face_temperature_);
-
+    float avg = 0, var = 0;
+    for (float v : statistics) avg += v / statistics.size();
+    for (float v : statistics) var += (v - avg) * (v - avg);
     face_temperature_ = surface_to_inner(
-        measure_to_surface(face_temperature_ + Config::get_temperature_bias()));
+        measure_to_surface(max_temperature + Config::get_temperature_bias()));
 
-    emit tx_temperature(face_temperature_);
+    SZ_LOG_DEBUG(
+        "ambient={:.2f}°C, face={:.2f}°C, max={:.2f}°C, avg={:.2f}°C, "
+        "var={:.2f}°C",
+        ambient_temperature_, face_temperature_, max_temperature, avg, var);
+
+    if (!Config::enable_anti_spoofing() ||
+        var > Config::get_user().temperature_var)
+      emit tx_temperature(face_temperature_);
+    else {
+      detection.x = 0.45;
+      detection.y = 0.45;
+      detection.width = 0.1;
+      detection.height = 0.1;
+
+      max_x = max_y = 0.5;
+    }
   }
 
   emit tx_heatmap(mat, detection, max_x, max_y);

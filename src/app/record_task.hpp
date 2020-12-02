@@ -23,11 +23,9 @@ class RecordTask : QObject {
 
  private slots:
   void rx_frame(PingPangBuffer<RecognizeData> *buffer);
-  void rx_reset_recognizing();
   void rx_temperature(float body_temperature);
-  void rx_start_temperature();
-  void rx_reset_temperature();
-  void rx_end_temperature();
+
+  void rx_reset();
 
  signals:
   void tx_nir_finish(bool if_finished);
@@ -36,30 +34,29 @@ class RecordTask : QObject {
   // for display
   void tx_display(PersonData person, bool if_duplicated);
 
-  // for audio report
-  void tx_report_person(PersonData person);
-  void tx_report_temperature(PersonData person);
-
  private:
   RecordTask(QThread *thread = nullptr, QObject *parent = nullptr);
   ~RecordTask();
 
   bool if_fresh(const FaceFeature &feature);
+  void reset_recognize();
+  void reset_temperature();
 
   bool sequence_query(const std::vector<QueryResult> &person_history,
                       const std::vector<bool> &mask_history,
                       const bool has_mask, SZ_UINT32 &face_id, SZ_FLOAT &score);
   bool sequence_antispoof(const std::vector<bool> &history, bool &is_live);
   bool sequence_mask(const std::vector<bool> &history, bool &has_mask);
-  bool sequence_temperature(const SZ_UINT32 &face_id, int duration,
+  bool sequence_temperature(SZ_UINT32 face_id, int duration,
                             std::map<SZ_UINT32, float> &history,
                             float &temperature);
   bool update_temperature_bias();
 
   void update_person(RecognizeData *input, const SZ_UINT32 &face_id,
                      PersonData &person);
-  bool if_duplicated(const SZ_UINT32 &face_id, float &temperature);
-  bool if_duplicated(const FaceFeature &feature, float &temperature);
+  bool if_duplicated(SZ_INT32 face_id, const FaceFeature &feature,
+                     PersonData &person);
+  bool if_temperature_updated(float &temperature);
 
   bool is_running_;
 
@@ -77,14 +74,12 @@ class RecordTask : QObject {
       unknown_query_clock_;
   std::map<SZ_UINT32, float> unknown_temperature_;
 
-  int reset_counter_;
+  int duplicated_counter_;
 
   FaceFeature last_feature_;
 
-  bool is_measuring_temperature_;
   std::vector<float> temperature_history_;
-  float max_temperature_;
-  QTimer *temperature_timer_;
+  float latest_temperature_;
 };
 
 }  // namespace suanzi

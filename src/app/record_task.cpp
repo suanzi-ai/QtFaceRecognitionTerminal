@@ -7,7 +7,7 @@
 
 #include <opencv2/opencv.hpp>
 
-#include <quface-io/engine.hpp>
+#include <quface-io/ive.hpp>
 #include <quface/logger.hpp>
 
 #include "audio_task.hpp"
@@ -33,20 +33,15 @@ void RecordTask::clear_temperature() {
 
   task->known_temperature_.clear();
   task->unknown_temperature_.clear();
-  task->max_temperature_ = 0;
 }
 
 RecordTask::RecordTask(QThread *thread, QObject *parent)
-    : is_running_(false),
-      is_measuring_temperature_(false),
-      max_temperature_(0),
-      temperature_timer_(nullptr) {
+    : is_running_(false), latest_temperature_(0), duplicated_counter_(0) {
   person_service_ = PersonService::get_instance();
   face_database_ = std::make_shared<FaceDatabase>(Config::get_quface().db_name);
 
   // Create db for unknown faces
   unknown_database_ = std::make_shared<FaceDatabase>("_UNKNOWN_DB_");
-  reset_counter_ = 0;
 
   // Create thread
   if (thread == nullptr) {
@@ -75,27 +70,14 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
   buffer->switch_buffer();
   RecognizeData *input = buffer->get_pang();
 
-  // handle person disappear
-  if (!input->has_live && !input->has_person_info) {
-    if (++reset_counter_ > Config::get_extract().max_lost_age) {
-      rx_reset_temperature();
-      rx_reset_recognizing();
-    }
-
-    is_running_ = false;
-    return;
-  }
-
   bool bgr_finished = false, ir_finished = false;
   bool has_mask;
 
   if (input->has_person_info) {
     // reset if new person appear
-    // TODO: 优化person_history_.size()的判断
-    bool fresh = if_fresh(input->person_feature);
-    if (fresh || person_history_.size() == 0) rx_reset_recognizing();
-    if (is_measuring_temperature_ && fresh && person_history_.size() > 0) {
-      rx_reset_temperature();
+    if (if_fresh(input->person_feature)) {
+      reset_recognize();
+      reset_temperature();
     }
 
     // add person info
@@ -127,36 +109,21 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
           face_database_->add(face_id, input->person_feature, 0.1);
       }
       person.has_mask = has_mask;
+
       update_person(input, face_id, person);
 
-      if (AudioTask::idle()) {
-        if (person.temperature == 0) {
-          if (!Config::get_user().enable_temperature ||
-              !is_measuring_temperature_)
-            emit tx_report_person(person);
-        }
-        if (person.temperature > 0) emit tx_report_temperature(person);
+      auto cfg = Config::get_user();
+      if (duplicated_counter_ <= cfg.duplication_limit) {
+        if (cfg.enable_temperature &&
+            if_temperature_updated(person.temperature))
+          person.is_duplicated = false;
+        if (person.temperature > 0)
+          emit tx_display(person, person.is_duplicated);
       }
-      if (person.temperature > 0)
-        SZ_LOG_INFO("temp={:.2f}", person.temperature);
-
-      // start temperature
-      if (!is_measuring_temperature_) rx_start_temperature();
-      emit tx_display(person, person.is_duplicated);
     }
-    rx_reset_recognizing();
+    reset_recognize();
   }
   is_running_ = false;
-}
-
-void RecordTask::rx_reset_recognizing() {
-  mask_history_.clear();
-  person_history_.clear();
-  live_history_.clear();
-  reset_counter_ = 0;
-
-  emit tx_nir_finish(false);
-  emit tx_bgr_finish(false);
 }
 
 bool RecordTask::if_fresh(const FaceFeature &feature) {
@@ -199,6 +166,20 @@ bool RecordTask::if_fresh(const FaceFeature &feature) {
   memcpy(last_feature_.value, feature.value, SZ_FEATURE_NUM * sizeof(SZ_FLOAT));
 
   return score / 2 + 0.5f < 0.9;
+}
+
+void RecordTask::reset_recognize() {
+  mask_history_.clear();
+  person_history_.clear();
+  live_history_.clear();
+
+  emit tx_nir_finish(false);
+  emit tx_bgr_finish(false);
+}
+
+void RecordTask::reset_temperature() {
+  temperature_history_.clear();
+  latest_temperature_ = 0;
 }
 
 bool RecordTask::sequence_query(const std::vector<QueryResult> &person_history,
@@ -303,7 +284,7 @@ bool RecordTask::sequence_mask(const std::vector<bool> &history,
   return false;
 }
 
-bool RecordTask::sequence_temperature(const SZ_UINT32 &face_id, int duration,
+bool RecordTask::sequence_temperature(SZ_UINT32 face_id, int duration,
                                       std::map<SZ_UINT32, float> &history,
                                       float &temperature) {
   SZ_LOG_INFO("id={}, duration={}, temperature={:.2f}", face_id, duration,
@@ -311,17 +292,27 @@ bool RecordTask::sequence_temperature(const SZ_UINT32 &face_id, int duration,
 
   const float MAX_TEMPERATURE = Config::get_user().temperature_max;
   const float MIN_TEMPERATURE = 36.3;
+  const float RANDOM_TEMPERATURE = MIN_TEMPERATURE + rand() % 2 / 10.f;
 
   // Low temperature
   if (temperature < MIN_TEMPERATURE) {
-    if (!CONTAIN_KEY(history, face_id))
+    if (!CONTAIN_KEY(history, face_id)) {
       history[face_id] = temperature;
-    else
-      history[face_id] = std::max(temperature, history[face_id]);
+      temperature = RANDOM_TEMPERATURE;
+      return true;
+    } else {
+      // High history
+      if (history[face_id] >= MAX_TEMPERATURE) {
+        history[face_id] = temperature;
+        temperature = RANDOM_TEMPERATURE;
+        return true;
+      }
 
-    temperature =
-        std::max(MIN_TEMPERATURE + rand() % 2 / 10.f, history[face_id]);
-    return true;
+      // Normal history
+      history[face_id] = std::max(temperature, history[face_id]);
+      temperature = std::max(RANDOM_TEMPERATURE, history[face_id]);
+      return true;
+    }
   }
 
   // High temperature
@@ -398,11 +389,12 @@ bool RecordTask::update_temperature_bias() {
     if (count >= 5)
       diff = AVE_TEMPERATURE -
              (sum - max_temperature - min_temperature) / (count - 2);
+    if (diff > 1) diff /= 2;
 
     for (auto &it : known_temperature_) it.second += diff;
     for (auto &it : unknown_temperature_) it.second += diff;
 
-    Config::set_temperature_bias(bias + diff);
+    Config::set_temperature_finetune(diff);
     SZ_LOG_INFO("update bias {:.2f} --> {:.2f}", bias,
                 Config::get_temperature_bias());
     json cfg;
@@ -421,8 +413,10 @@ bool RecordTask::update_temperature_bias() {
 
 void RecordTask::update_person(RecognizeData *input, const SZ_UINT32 &face_id,
                                PersonData &person) {
-  person.temperature = max_temperature_;
-  max_temperature_ = 0;
+  person.temperature = 0;
+  for (float temperature : temperature_history_)
+    person.temperature = std::max(temperature, person.temperature);
+  temperature_history_.clear();
 
   PersonStatus status = PersonStatus::Stranger;
   if (face_id > 0 &&
@@ -441,11 +435,11 @@ void RecordTask::update_person(RecognizeData *input, const SZ_UINT32 &face_id,
       }
       person.face_path = ":asserts/avatar_unknown.jpg";
     case PersonStatus::Normal:
-      person.is_duplicated = if_duplicated(face_id, person.temperature);
+      person.is_duplicated =
+          if_duplicated(face_id, input->person_feature, person);
       break;
     case PersonStatus::Stranger:
-      person.is_duplicated =
-          if_duplicated(input->person_feature, person.temperature);
+      person.is_duplicated = if_duplicated(-1, input->person_feature, person);
       person.name = tr("访客").toStdString();
       person.id = 0;
       person.score = 0;
@@ -455,8 +449,8 @@ void RecordTask::update_person(RecognizeData *input, const SZ_UINT32 &face_id,
       break;
   }
   person.temperature = ((float)((int)((person.temperature + 0.05) * 10))) / 10;
-  SZ_LOG_INFO("Record: id={}, staff={}, score={:.2f}, status={}", person.id,
-              person.number, person.score, person.status);
+  // SZ_LOG_INFO("Record: id={}, staff={}, score={:.2f}, status={}", person.id,
+  //             person.number, person.score, person.status);
 
   // record snapshots
   int width = input->img_bgr_large->width;
@@ -465,27 +459,26 @@ void RecordTask::update_person(RecognizeData *input, const SZ_UINT32 &face_id,
   memcpy(person.bgr_snapshot.data, input->img_bgr_large->pData,
          width * height * 3 / 2);
 
-  if (input->bgr_face_detected_ && width < height) {
-    auto engine = Engine::instance();
-    static std::vector<SZ_BYTE> buffer;
-    buffer.clear();
+  width = input->img_bgr_small->width;
+  height = input->img_bgr_small->height;
+  static MmzImage *snapshot =
+      new MmzImage(width, height, SZ_IMAGETYPE_BGR_PACKAGE);
 
-    if (SZ_RETCODE_OK ==
-        engine->encode_jpeg(buffer, person.bgr_snapshot.data, width, height)) {
-      int crop_x = input->bgr_detection_.x * width;
-      int crop_y = input->bgr_detection_.y * height;
-      int crop_w = input->bgr_detection_.width * width;
-      int crop_h = input->bgr_detection_.height * height;
+  if (input->bgr_face_detected_ && width < height &&
+      Ive::getInstance()->yuv2RgbPacked(snapshot, input->img_bgr_small, true)) {
+    int crop_x = input->bgr_detection_.x * width;
+    int crop_y = input->bgr_detection_.y * height;
+    int crop_w = input->bgr_detection_.width * width;
+    int crop_h = input->bgr_detection_.height * height;
 
-      crop_x = std::max(0, crop_x - crop_w / 2);
-      crop_y = std::max(0, crop_y - crop_h / 2);
-      crop_w = std::min(width - crop_x - 1, crop_w * 2);
-      crop_h = std::min(height - crop_y - 1, crop_h * 2);
+    crop_x = std::max(0, crop_x - crop_w / 2);
+    crop_y = std::max(0, crop_y - crop_h / 4);
+    crop_w = std::min(width - crop_x - 1, crop_w * 2);
+    crop_h = std::min(height - crop_y - 1, crop_h * 3 / 2);
 
-      cv::imdecode(buffer,
-                   CV_LOAD_IMAGE_COLOR)({crop_x, crop_y, crop_w, crop_h})
-          .copyTo(person.face_snapshot);
-    }
+    cv::Mat(height, width, CV_8UC3,
+            snapshot->pData)({crop_x, crop_y, crop_w, crop_h})
+        .copyTo(person.face_snapshot);
   } else
     person.face_snapshot = cv::Mat();
 
@@ -496,120 +489,108 @@ void RecordTask::update_person(RecognizeData *input, const SZ_UINT32 &face_id,
          width * height * 3 / 2);
 }
 
-bool RecordTask::if_duplicated(const SZ_UINT32 &face_id, float &temperature) {
+bool RecordTask::if_duplicated(SZ_INT32 face_id, const FaceFeature &feature,
+                               PersonData &person) {
   bool ret = false;
 
   auto cfg = Config::get_user();
-  if (cfg.enable_temperature && temperature == 0) return ret;
+  if (cfg.enable_temperature && person.temperature == 0) return true;
 
   int duration = 0;
   auto current_query_clock = std::chrono::steady_clock::now();
-  if (CONTAIN_KEY(query_clock_, face_id)) {
-    auto last_query_clock = query_clock_[face_id];
-    duration = SECONDS_DIFF(current_query_clock, last_query_clock);
 
-    if (duration > cfg.duplication_interval)
+  // query known person
+  if (face_id >= 0) {
+    if (CONTAIN_KEY(query_clock_, face_id)) {
+      auto last_query_clock = query_clock_[face_id];
+      duration = SECONDS_DIFF(current_query_clock, last_query_clock);
+
+      if (duration >
+          std::max(cfg.duplication_interval, AudioTask::duration(person))) {
+        query_clock_[face_id] = current_query_clock;
+        duplicated_counter_++;
+      } else
+        ret = true;
+    } else {
+      duplicated_counter_ = 1;
       query_clock_[face_id] = current_query_clock;
-    else
-      ret = true;
-  } else
-    query_clock_[face_id] = current_query_clock;
+    }
 
-  if (sequence_temperature(face_id, duration, known_temperature_,
-                           temperature) ||
-      known_temperature_.size() + unknown_temperature_.size() == 1)
-    update_temperature_bias();
+    if (cfg.enable_temperature) {
+      sequence_temperature(face_id, duration, known_temperature_,
+                           person.temperature);
+      update_temperature_bias();
+    }
+  }
+  // query unknown person
+  else {
+    SZ_UINT32 db_size;
+    unknown_database_->size(db_size);
 
-  return GOOD_TEMPERATURE(temperature) && ret;
+    if (db_size != 0) {
+      static std::vector<QueryResult> results;
+      results.clear();
+
+      SZ_RETCODE ret = unknown_database_->query(feature, 1, results);
+      if (SZ_RETCODE_OK == ret && results[0].score >= 0.8) {
+        face_id = results[0].face_id;
+        unknown_database_->add(face_id, feature);
+      }
+    }
+
+    if (face_id > 0 && CONTAIN_KEY(unknown_query_clock_, face_id)) {
+      auto last_query_clock = unknown_query_clock_[face_id];
+      duration = SECONDS_DIFF(current_query_clock, last_query_clock);
+      if (duration >
+          std::max(cfg.duplication_interval, AudioTask::duration(person))) {
+        unknown_query_clock_[face_id] = current_query_clock;
+        duplicated_counter_++;
+      } else
+        ret = true;
+
+    } else {
+      if (face_id == -1) {
+        face_id = (db_size % 100) + 1;
+        unknown_temperature_[face_id] = person.temperature;
+      }
+
+      unknown_database_->add(face_id, feature);
+      duplicated_counter_ = 1;
+      unknown_query_clock_[face_id] = current_query_clock;
+    }
+
+    if (cfg.enable_temperature) {
+      sequence_temperature(face_id, duration, unknown_temperature_,
+                           person.temperature);
+      update_temperature_bias();
+    }
+  }
+  // return GOOD_TEMPERATURE(temperature) && ret;
+  return ret;
 }
 
-bool RecordTask::if_duplicated(const FaceFeature &feature, float &temperature) {
-  bool ret = false;
-
-  auto cfg = Config::get_user();
-  if (cfg.enable_temperature && temperature == 0) return false;
-
-  int duration = 0;
-  auto current_query_clock = std::chrono::steady_clock::now();
-
-  SZ_UINT32 db_size;
-  unknown_database_->size(db_size);
-
-  int face_id = -1;
-  if (db_size != 0) {
-    static std::vector<QueryResult> results;
-    results.clear();
-
-    SZ_RETCODE ret = unknown_database_->query(feature, 1, results);
-    if (SZ_RETCODE_OK == ret && results[0].score >= 0.8) {
-      face_id = results[0].face_id;
-      unknown_database_->add(face_id, feature);
-    }
-  }
-
-  if (face_id > 0 && CONTAIN_KEY(unknown_query_clock_, face_id)) {
-    auto last_query_clock = unknown_query_clock_[face_id];
-    duration = SECONDS_DIFF(current_query_clock, last_query_clock);
-
-    if (duration > cfg.duplication_interval)
-      unknown_query_clock_[face_id] = current_query_clock;
-    else
-      ret = true;
-
+bool RecordTask::if_temperature_updated(float &temperature) {
+  if (((GOOD_TEMPERATURE(latest_temperature_) &&
+        !GOOD_TEMPERATURE(temperature)) ||
+       latest_temperature_ == 0) &&
+      temperature > 0) {
+    latest_temperature_ = temperature;
+    return true;
   } else {
-    if (face_id == -1) {
-      face_id = (db_size % 100) + 1;
-      unknown_temperature_[face_id] = temperature;
-    }
-
-    unknown_database_->add(face_id, feature);
-    unknown_query_clock_[face_id] = current_query_clock;
+    temperature = latest_temperature_;
+    return false;
   }
-
-  SZ_LOG_INFO("size={}", known_temperature_.size() + unknown_temperature_.size());
-  if (sequence_temperature(face_id, duration, unknown_temperature_,
-                           temperature) ||
-      known_temperature_.size() + unknown_temperature_.size() == 1)
-    update_temperature_bias();
-
-  return GOOD_TEMPERATURE(temperature) && ret;
 }
 
 void RecordTask::rx_temperature(float body_temperature) {
-  if (is_measuring_temperature_)
-    temperature_history_.push_back(body_temperature);
+  temperature_history_.push_back(body_temperature);
 }
 
-void RecordTask::rx_start_temperature() {
-  if (!Config::get_user().enable_temperature) return;
+void RecordTask::rx_reset() {
+  reset_recognize();
+  reset_temperature();
 
-  // SZ_LOG_INFO("start temperature");
-  if (!temperature_timer_) {
-    temperature_timer_ = new QTimer();
-    temperature_timer_->setSingleShot(true);
-    connect((const QObject *)temperature_timer_, SIGNAL(timeout()),
-            (const QObject *)this, SLOT(rx_end_temperature()));
-  }
-  temperature_timer_->setInterval(Config::get_temperature().temperature_delay *
-                                  1000);
-  max_temperature_ = 0;
-  is_measuring_temperature_ = true;
-  temperature_timer_->start();
-}
-
-void RecordTask::rx_reset_temperature() {
-  temperature_history_.clear();
-  is_measuring_temperature_ = false;
-  max_temperature_ = 0;
-  if (temperature_timer_) temperature_timer_->stop();
-}
-
-void RecordTask::rx_end_temperature() {
-  // SZ_LOG_INFO("end temperature");
-  float max_temperature = 0;
-  for (float temperature : temperature_history_)
-    max_temperature = std::max(max_temperature_, temperature);
-  max_temperature_ = max_temperature;
-  temperature_history_.clear();
-  is_measuring_temperature_ = false;
+  query_clock_.clear();
+  unknown_query_clock_.clear();
+  duplicated_counter_ = 0;
 }

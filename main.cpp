@@ -10,26 +10,31 @@
 using namespace suanzi;
 
 void load_translator(QApplication& app) {
+  static std::string last_lang = Config::get_user_lang();
+
   std::string lang = Config::get_user_lang();
 
-  SZ_LOG_INFO("Load translator for lang={}", lang);
+  if (last_lang != lang) {
+    SZ_LOG_INFO("Load translator for lang={}", lang);
 
-  static QTranslator translator;
-  QString new_lang_file = (":face_terminal_" + lang).c_str();
-  if (!translator.load(new_lang_file)) {
-    SZ_LOG_WARN("translator load failed for lang={}", lang);
+    static QTranslator translator;
+    QString new_lang_file = (":face_terminal_" + lang).c_str();
+    if (!translator.load(new_lang_file)) {
+      SZ_LOG_WARN("translator load failed for lang={}", lang);
+    }
+    app.installTranslator(&translator);
+
+    AudioTask::get_instance()->load_audio();
   }
-  app.installTranslator(&translator);
+
+  last_lang = lang;
 }
 
 void trigger_led() {
-  static bool last_status = Config::get_user().enable_led;
-
+  bool last_status = LEDTask::get_status();
   bool status = Config::get_user().enable_led;
   if (status && !last_status) LEDTask::get_instance()->turn_on(2000);
-  if (!status) LEDTask::get_instance()->turn_off();
-
-  last_status = status;
+  if (!status) LEDTask::get_instance()->turn_off(true);
 }
 
 void reset_temperature() {
@@ -85,6 +90,7 @@ Engine* create_engine() {
 
   // 读取应用参数
   auto app_cfg = Config::get_app();
+  auto user_cfg = Config::get_user();
 
   EngineOption opt = {
       .bgr =
@@ -92,7 +98,7 @@ Engine* create_engine() {
               .sensor_type = sensor0_type,
               .dev = bgr_cam.index,
               .flip = true,
-              .wdr = bgr_cam.wdr,
+              .wdr = user_cfg.wdr,
               .channels =
                   {
                       {
@@ -129,7 +135,7 @@ Engine* create_engine() {
               .sensor_type = sensor1_type,
               .dev = nir_cam.index,
               .flip = true,
-              .wdr = nir_cam.wdr,
+              .wdr = false,
               .channels =
                   {
                       {
@@ -221,6 +227,7 @@ int main(int argc, char* argv[]) {
   config->appendListener("reload", [&app]() { load_translator(app); });
 
   // Step 4.1: LED配置修改触发反馈
+  Engine::instance()->gpio_set(GpioPinLightBox, false);
   config->appendListener("reload", trigger_led);
   config->appendListener("reload", reset_temperature);
 

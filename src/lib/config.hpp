@@ -48,12 +48,16 @@ typedef struct {
   std::string extract_level;
   std::string liveness_level;
   SZ_UINT16 duplication_interval;
+  SZ_UINT16 duplication_limit;
   SZ_UINT32 relay_switch_cond;
   RelaySwitchMode relay_switch_mode;
   RelayState relay_default_state;
   SZ_UINT16 relay_restore_time;
   bool enable_temperature;
+  bool enable_anti_spoofing;
   SZ_FLOAT temperature_bias;
+  SZ_FLOAT temperature_finetune;
+  SZ_FLOAT temperature_var;
   SZ_FLOAT temperature_max;
   SZ_FLOAT temperature_min;
   bool enable_audio;
@@ -68,6 +72,7 @@ typedef struct {
   bool upload_known_person;
   bool upload_unknown_person;
   SZ_FLOAT mask_score;
+  bool wdr;
 } UserConfig;
 
 void to_json(json &j, const UserConfig &c);
@@ -85,7 +90,6 @@ typedef struct {
   std::string server_host;
   std::string image_store_path;
   std::string person_service_base_url;
-  bool enable_anti_spoofing;
   bool show_infrared_window;
   int infrared_window_percent;
   ISPInfoWindowType show_isp_info_window;
@@ -175,7 +179,6 @@ typedef struct {
   int index;
   int rotate;
   int flip;
-  bool wdr;
   ISPConfig isp;
 } CameraConfig;
 
@@ -249,7 +252,7 @@ class Config : public ConfigEventEmitter {
   static bool write_audio_volume(int volume_percent);
   static bool read_audio_volume(int &volume_percent);
 
-  static void set_temperature_bias(float bias);
+  static void set_temperature_finetune(float bias);
   static float get_temperature_bias();
 
   static const ConfigData &get_all();

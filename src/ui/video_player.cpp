@@ -25,11 +25,11 @@ VideoPlayer::VideoPlayer(QWidget *parent) : QWidget(parent) {
 VideoPlayer::~VideoPlayer() {}
 
 void VideoPlayer::paintEvent(QPaintEvent *event) {
-  QWidget::paintEvent(event);
+  //QWidget::paintEvent(event);
 
-  QPainter painter(this);
+  //QPainter painter(this);
   //outline_widget_->paint(&painter);
-  recognize_tip_widget_->paint(&painter);
+  //recognize_tip_widget_->paint(&painter);
 }
 
 void VideoPlayer::init_workflow() {
@@ -77,6 +77,7 @@ void VideoPlayer::init_workflow() {
   connect((const QObject *)detect_task_,
           SIGNAL(tx_detect_result(bool)),
           (const QObject *)face_timer_,
+
           SLOT(rx_detect_result(bool)));
   connect((const QObject *)face_timer_, SIGNAL(tx_white_led_timeout()),
           (const QObject *)detect_task_, SLOT(rx_white_led_timeout()));
@@ -86,11 +87,8 @@ void VideoPlayer::init_workflow() {
 
   // 创建语音播报线程
   audio_task_ = AudioTask::get_instance();
-  connect((const QObject *)record_task_, SIGNAL(tx_report_person(PersonData)),
-          (const QObject *)audio_task_, SLOT(rx_report_person(PersonData)));
-  connect(
-      (const QObject *)record_task_, SIGNAL(tx_report_temperature(PersonData)),
-      (const QObject *)audio_task_, SLOT(rx_report_temperature(PersonData)));
+  connect((const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool)),
+          (const QObject *)audio_task_, SLOT(rx_report(PersonData, bool)));
   connect((const QObject *)detect_task_, SIGNAL(tx_warn_distance()),
           (const QObject *)audio_task_, SLOT(rx_warn_distance()));
 

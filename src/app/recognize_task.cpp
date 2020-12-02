@@ -98,10 +98,11 @@ void RecognizeTask::rx_frame(PingPangBuffer<DetectionData> *buffer) {
 
   if (input->bgr_face_valid()) {
     if (output->has_live) {
-      if (!Config::enable_anti_spoofing())
-        output->is_live = true;
-      else
-        output->is_live = is_live(input);
+      // if (!Config::enable_anti_spoofing())
+      //   output->is_live = true;
+      // else
+      //   output->is_live = is_live(input);
+      output->is_live = true;
     }
     if (output->has_person_info) {
       output->has_mask = has_mask(input);
@@ -195,8 +196,8 @@ void RecognizeTask::extract_and_query(DetectionData *detection, bool has_mask,
       else
         person_info.score = results[0].score;
       person_info.face_id = results[0].face_id;
-      SZ_LOG_INFO("mask={}, id={}, score={:.2f}", has_mask, person_info.face_id,
-                  person_info.score);
+      // SZ_LOG_INFO("mask={}, id={}, score={:.2f}", has_mask, person_info.face_id,
+      //             person_info.score);
       return;
     }
   }

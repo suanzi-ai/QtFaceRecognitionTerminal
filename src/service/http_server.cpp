@@ -119,6 +119,13 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
     res.set_content(body.dump(), "application/json");
   });
 
+  server_->Get("/config/-/flatten", [&](const Request& req, Response& res) {
+    auto cfg = Config::get_all();
+
+    json body(cfg);
+    res.set_content(body.flatten().dump(), "application/json");
+  });
+
   server_->Post("/config/-/reset", [&](const Request& req, Response& res) {
     auto cfg = Config::get_instance();
 
@@ -283,6 +290,11 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
       SZ_LOG_ERROR("Message err: {}", exc.what());
       response_failed(res, exc.what());
     }
+  });
+
+  server_->Post("/restart", [&](const Request& req, Response& res) {
+    SZ_LOG_WARN("Exit, wait for restart ...");
+    raise(SIGTERM);
   });
 
   server_->Get("/isp/exposure-info", [&](const Request& req, Response& res) {
