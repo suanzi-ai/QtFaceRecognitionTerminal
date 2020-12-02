@@ -135,7 +135,7 @@ void AudioTask::load_audio() {
     warn_distance_audio_.duration = 3000;
     warn_mask_audio_.duration = 1500;
 
-    pass_audio_.duration = 1500;
+    pass_audio_.duration = 2500;
   }
 
   read_audio(":asserts/beep.aac", beep_audio_);
