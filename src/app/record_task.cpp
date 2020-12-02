@@ -390,15 +390,17 @@ bool RecordTask::update_temperature_bias() {
              (sum - max_temperature - min_temperature) / (count - 2);
     if (diff > 1) diff /= 2;
 
-    for (auto &it : known_temperature_) it.second += diff;
-    for (auto &it : unknown_temperature_) it.second += diff;
+    if (diff > 0) {
+      for (auto &it : known_temperature_) it.second += diff;
+      for (auto &it : unknown_temperature_) it.second += diff;
 
-    Config::set_temperature_finetune(diff);
-    SZ_LOG_INFO("update bias {:.2f} --> {:.2f}", bias,
-                Config::get_temperature_bias());
-    json cfg;
-    Config::to_json(cfg);
-    Config::get_instance()->save_diff(cfg);
+      Config::set_temperature_finetune(diff);
+      SZ_LOG_INFO("update bias {:.2f} --> {:.2f}", bias,
+                  Config::get_temperature_bias());
+      json cfg;
+      Config::to_json(cfg);
+      Config::get_instance()->save_diff(cfg);
+    }
 
     return true;
   }
