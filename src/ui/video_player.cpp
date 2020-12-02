@@ -147,12 +147,19 @@ void VideoPlayer::init_widgets() {
             SLOT(rx_display(DetectionRatio, bool, bool, bool)));
   }
 
+  temp_tip_widget_ = new TemperatureTipWidget(screen_width, screen_height, this);
+  temp_tip_widget_->hide();
+
   // 创建人脸识别记录控件
   recognize_tip_widget_ =
-      new RecognizeTipWidget(screen_width, screen_height);
+      new RecognizeTipWidget(screen_width, screen_height, this);
+  recognize_tip_widget_->hide();
   connect((const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool)),
           (const QObject *)recognize_tip_widget_,
           SLOT(rx_display(PersonData, bool)));
+  connect((const QObject *)recognize_tip_widget_, SIGNAL(tx_temperature(bool, bool, float)),
+          (const QObject *)temp_tip_widget_,
+          SLOT(rx_temperature(bool, bool, float)));
 
   // 创建屏保控件
   screen_saver_ = new ScreenSaverWidget(screen_width, screen_height);
@@ -193,4 +200,6 @@ void VideoPlayer::init_widgets() {
 void VideoPlayer::delay_init_widgets() {
 	status_banner_->show();
 	heatmap_widget_->show();
+	recognize_tip_widget_->show();
+	temp_tip_widget_->show();
 }
