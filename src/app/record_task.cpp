@@ -114,8 +114,7 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
 
       auto cfg = Config::get_user();
       if (duplicated_counter_ <= cfg.duplication_limit) {
-        if (cfg.enable_temperature &&
-            if_temperature_updated(person.temperature))
+        if (if_temperature_updated(person.temperature))
           person.is_duplicated = false;
         if (person.temperature > 0)
           emit tx_display(person, person.is_duplicated);
@@ -494,7 +493,7 @@ bool RecordTask::if_duplicated(SZ_INT32 face_id, const FaceFeature &feature,
   bool ret = false;
 
   auto cfg = Config::get_user();
-  if (cfg.enable_temperature && person.temperature == 0) return true;
+  if (person.temperature == 0) return true;
 
   int duration = 0;
   auto current_query_clock = std::chrono::steady_clock::now();

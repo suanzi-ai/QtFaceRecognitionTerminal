@@ -169,10 +169,9 @@ void AudioTask::rx_report(PersonData person, bool duplicated) {
   if (user.enable_record_audio && !person.is_status_normal())
     play_audio(fail_audio_);
 
-  if (user.enable_temperature) {
-    if (user.enable_mask_audio && !person.has_mask)
-      play_audio(warn_mask_audio_);
+  if (user.enable_mask_audio && !person.has_mask) play_audio(warn_mask_audio_);
 
+  if (user.enable_temperature) {
     if (user.enable_temperature_audio) {
       if (!person.is_temperature_normal())
         play_audio(temperature_abnormal_audio_);
@@ -186,8 +185,9 @@ void AudioTask::rx_report(PersonData person, bool duplicated) {
           person.has_mask)
         play_audio(pass_audio_);
     }
-  } else if (user.enable_record_audio && user.enable_pass_audio)
-    if (person.is_status_normal()) play_audio(pass_audio_);
+  } else if ((user.enable_record_audio || user.enable_mask_audio) &&
+             user.enable_pass_audio)
+    if (person.is_status_normal() && person.has_mask) play_audio(pass_audio_);
 
   is_running_ = false;
 }

@@ -36,7 +36,7 @@ void UploadTask::rx_upload(PersonData person, bool if_duplicated) {
   auto cfg = Config::get_user();
   if (!if_duplicated) {
     // whether temperature is enabled but no temperature data
-    if (cfg.enable_temperature && person.temperature == 0) return;
+    if (person.temperature == 0) return;
 
     // whether is known person
     if ((person.status == PersonService::get_status(PersonStatus::Normal) ||

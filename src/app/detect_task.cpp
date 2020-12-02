@@ -138,8 +138,7 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
   emit tx_bgr_display(output->bgr_detection_, !output->bgr_face_detected_,
                       output->bgr_face_valid_, true);
 
-  if (Config::get_user().enable_temperature &&
-      TemperatureTask::get_instance()->idle())
+  if (TemperatureTask::get_instance()->idle())
     emit tx_temperature_target(output->bgr_detection_,
                                !output->bgr_face_detected_);
 

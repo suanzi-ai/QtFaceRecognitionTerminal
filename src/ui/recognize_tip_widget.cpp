@@ -23,8 +23,7 @@ RecognizeTipWidget::RecognizeTipWidget(int width, int height, QWidget *parent)
       icon_(":asserts/location.png"),
       icon_good_(":asserts/tick.png"),
       icon_bad_(":asserts/cross.png"),
-      has_info_(false),
-      latest_temperature_(0) {
+      has_info_(false) {
   QPalette palette = this->palette();
   palette.setColor(QPalette::Background, Qt::transparent);
   setPalette(palette);
@@ -107,7 +106,6 @@ void RecognizeTipWidget::rx_update() {
 
 void RecognizeTipWidget::rx_reset() {
   has_info_ = false;
-  latest_temperature_ = 0;
 }
 
 void RecognizeTipWidget::paint(QPainter *painter) {
@@ -119,15 +117,9 @@ void RecognizeTipWidget::paint(QPainter *painter) {
 
   QColor background = QColor(5, 0, 20, 150);
   bool has_temperature = false;
-  if (has_info_) {
-    if (Config::get_user().enable_temperature &&
-        (person_.temperature > 0 || latest_temperature_ > 0)) {
+  if (has_info_ && Config::get_user().enable_temperature) {
+    if (person_.temperature > 0) {
       has_temperature = true;
-      if (person_.temperature > 0 &&
-          (latest_temperature_ == 0 || !person_.is_temperature_normal()))
-        latest_temperature_ = person_.temperature;
-
-      person_.temperature = latest_temperature_;
       if (!person_.is_temperature_normal()) background = QColor(220, 0, 0, 150);
     }
   }
