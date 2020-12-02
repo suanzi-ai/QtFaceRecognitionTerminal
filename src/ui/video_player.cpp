@@ -76,19 +76,12 @@ void VideoPlayer::init_workflow() {
 
   // 创建人脸计时器线程
   face_timer_ = FaceTimer::get_instance();
-<<<<<<< HEAD
-  connect((const QObject *)detect_task_, SIGNAL(tx_detect_result(bool)),
-          (const QObject *)face_timer_, SLOT(rx_detect_result(bool)));
-  connect((const QObject *)face_timer_, SIGNAL(tx_face_disappear(int)),
-          (const QObject *)record_task_, SLOT(rx_reset()));
-=======
   connect((const QObject *)detect_task_,
           SIGNAL(tx_detect_result(bool)),
           (const QObject *)face_timer_,
           SLOT(rx_detect_result(bool)));
   connect((const QObject *)face_timer_, SIGNAL(tx_white_led_timeout()),
           (const QObject *)detect_task_, SLOT(rx_white_led_timeout()));
->>>>>>> optimzie white led on and off
 
   // 创建LED线程
   led_task_ = LEDTask::get_instance();
@@ -154,13 +147,20 @@ void VideoPlayer::init_widgets() {
             SLOT(rx_display(DetectionRatio, bool, bool, bool)));
   }
 
+  temp_tip_widget_ = new TemperatureTipWidget(screen_width, screen_height, this);
+  temp_tip_widget_->hide();
+
   // 创建人脸识别记录控件
   recognize_tip_widget_ =
       new RecognizeTipWidget(screen_width, screen_height, this);
+  recognize_tip_widget_->hide();
   connect((const QObject *)record_task_,
           SIGNAL(tx_display(PersonData, bool, bool)),
           (const QObject *)recognize_tip_widget_,
           SLOT(rx_display(PersonData, bool, bool)));
+  connect((const QObject *)recognize_tip_widget_, SIGNAL(tx_temperature(bool, bool, float)),
+          (const QObject *)temp_tip_widget_,
+          SLOT(rx_temperature(bool, bool, float)));
 
   // 创建屏保控件
   screen_saver_ = new ScreenSaverWidget(screen_width, screen_height);
@@ -199,4 +199,6 @@ void VideoPlayer::init_widgets() {
 void VideoPlayer::delay_init_widgets() {
 	status_banner_->show();
 	heatmap_widget_->show();
+	recognize_tip_widget_->show();
+	temp_tip_widget_->show();
 }

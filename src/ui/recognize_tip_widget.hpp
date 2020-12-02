@@ -20,11 +20,19 @@ class RecognizeTipWidget : public QWidget {
 
   void paint(QPainter *painter);
 
+
+ private:
+ 	void check_temperature(bool &btemperature, bool &bnormal_temperature);
+
+ signals:
+ 	void tx_temperature(bool bvisible, bool bnormal_temperature, float temperature);
+
  private slots:
   void rx_display(PersonData person, bool audio_duplicated,
                   bool record_duplicated);
   void rx_update();
   void rx_reset();
+  void rx_timeout();
 
  private:
   PersonData person_;
@@ -46,8 +54,15 @@ class RecognizeTipWidget : public QWidget {
   std::string serial_number_;
 
 
-  //QLabel *pl_yyyy_md;
-  //QLabel *pl_h;
+  int screen_width_;
+  int screen_height_;
+  QLabel *pl_yyyy_mm_dd_;
+  QLabel *pl_hh_mm_;
+  QLabel *pl_week_;
+  QLabel *pl_host_name_;
+  QLabel *pl_sn_;
+  QLabel *pl_avatar_;
+  QLabel *pl_snapshot_;
 };
 
 }  // namespace suanzi

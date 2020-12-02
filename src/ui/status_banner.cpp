@@ -22,6 +22,7 @@ StatusBanner::StatusBanner(int screen_width, int screen_height, QWidget *parent)
 
 	setStyleSheet("QWidget {background-color:rgba(5, 0, 20, 150);margin:0px;} QLabel {background-color:transparent;}");
 	setFixedSize(screen_width, 0.02734375 * screen_height);
+
 	move(0, 0);
 
 	int w = 0.0275 * screen_width;
