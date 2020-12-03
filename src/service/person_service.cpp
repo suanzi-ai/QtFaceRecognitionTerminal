@@ -42,6 +42,29 @@ void suanzi::from_json(const json &j, PersonData &p) {
 
 using namespace suanzi;
 
+PersonData &PersonData::operator=(const PersonData &other) {
+  id = other.id;
+  score = other.score;
+  temperature = other.temperature;
+  age = other.age;
+
+  number = other.number;
+  name = other.name;
+  gender = other.gender;
+  department = other.department;
+  mobile = other.mobile;
+  status = other.status;
+  face_url = other.face_url;
+  face_path = other.face_path;
+
+  other.bgr_snapshot.copyTo(bgr_snapshot);
+  other.nir_snapshot.copyTo(nir_snapshot);
+  other.face_snapshot.copyTo(face_snapshot);
+
+  is_duplicated = other.is_duplicated;
+  has_mask = other.has_mask;
+}
+
 bool PersonData::is_status_normal() {
   return status == PersonService::get_status(PersonStatus::Normal);
 }

@@ -52,10 +52,12 @@ class RecordTask : QObject {
                             float &temperature);
   bool update_temperature_bias();
 
-  void update_person(RecognizeData *input, const SZ_UINT32 &face_id,
-                     PersonData &person);
-  bool if_duplicated(SZ_INT32 face_id, const FaceFeature &feature,
-                     PersonData &person);
+  void update_person_temperature(PersonData &person);
+  void update_person_info(RecognizeData *input, const SZ_UINT32 &face_id,
+                          PersonData &person);
+
+  bool if_duplicated(SZ_UINT32 &face_id, const FaceFeature &feature,
+                     int &duration, PersonData &person);
   bool if_temperature_updated(float &temperature);
 
   bool is_running_;
@@ -76,7 +78,12 @@ class RecordTask : QObject {
 
   int duplicated_counter_;
 
-  FaceFeature last_feature_;
+  bool has_unhandle_person_;
+  PersonData latest_person_;
+  SZ_UINT32 duplicated_id_;
+  int duplicated_duration_;
+
+  FaceFeature latest_feature_;
 
   std::vector<float> temperature_history_;
   float latest_temperature_;

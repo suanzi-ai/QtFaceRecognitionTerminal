@@ -47,7 +47,7 @@ SZ_UINT16 AudioTask::duration(PersonData person) {
     if (person.is_status_normal())
       total_duration += instance->pass_audio_.duration;
 
-  SZ_LOG_INFO("total_duration={}", total_duration / 1000);
+  // SZ_LOG_INFO("total_duration={}", total_duration / 1000);
   return total_duration / 1000;
 }
 
