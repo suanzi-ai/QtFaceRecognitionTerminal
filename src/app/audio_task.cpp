@@ -7,6 +7,7 @@
 #include <quface-io/engine.hpp>
 
 #include "config.hpp"
+#include "gpio_task.hpp"
 
 using namespace suanzi;
 
@@ -179,16 +180,9 @@ void AudioTask::rx_report(PersonData person, bool audio_duplicated,
       else
         play_audio(temperature_normal_audio_);
     }
+  }
 
-    if ((user.enable_record_audio || user.enable_mask_audio) &&
-        user.enable_pass_audio) {
-      if (person.is_status_normal() && person.is_temperature_normal() &&
-          person.has_mask)
-        play_audio(pass_audio_);
-    }
-  } else if ((user.enable_record_audio || user.enable_mask_audio) &&
-             user.enable_pass_audio)
-    if (person.is_status_normal() && person.has_mask) play_audio(pass_audio_);
+  if (GPIOTask::validate(person)) play_audio(pass_audio_);
 
   is_running_ = false;
 }
