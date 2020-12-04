@@ -450,7 +450,6 @@ void RecordTask::update_person_temperature(PersonData &person) {
   for (float temperature : temperature_history_)
     person.temperature = std::max(temperature, person.temperature);
   temperature_history_.clear();
-  person.temperature = ((float)((int)((person.temperature + 0.05) * 10))) / 10;
 }
 
 void RecordTask::update_person_info(RecognizeData *input,

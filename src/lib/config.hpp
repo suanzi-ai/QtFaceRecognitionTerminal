@@ -100,6 +100,13 @@ typedef struct {
 void to_json(json &j, const AppConfig &c);
 void from_json(const json &j, AppConfig &c);
 
+typedef enum TemperatureRotation {
+  None = 0,
+  ROTATION_90 = 90,
+  ROTATION_180 = 180,
+  ROTATION_270 = 270
+} TemperatureRotation;
+
 typedef struct {
   SZ_FLOAT device_face_x;
   SZ_FLOAT device_face_y;
@@ -108,6 +115,11 @@ typedef struct {
   SZ_FLOAT temperature_distance;
   SZ_FLOAT temperature_delay;
   int manufacturer;
+  TemperatureRotation sensor_rotation;
+  SZ_FLOAT min_x;
+  SZ_FLOAT max_x;
+  SZ_FLOAT min_y;
+  SZ_FLOAT max_y;
 } TemperatureConfig;
 
 void to_json(json &j, const TemperatureConfig &c);

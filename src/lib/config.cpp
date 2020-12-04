@@ -116,6 +116,11 @@ void suanzi::to_json(json &j, const TemperatureConfig &c) {
   SAVE_JSON_TO(j, "temperature_distance", c.temperature_distance);
   SAVE_JSON_TO(j, "manufacturer", c.manufacturer);
   SAVE_JSON_TO(j, "temperature_delay", c.temperature_delay);
+  SAVE_JSON_TO(j, "sensor_rotation", c.sensor_rotation);
+  SAVE_JSON_TO(j, "min_x", c.min_x);
+  SAVE_JSON_TO(j, "max_x", c.max_x);
+  SAVE_JSON_TO(j, "min_y", c.min_y);
+  SAVE_JSON_TO(j, "max_y", c.max_y);
 }
 
 void suanzi::from_json(const json &j, TemperatureConfig &c) {
@@ -126,6 +131,11 @@ void suanzi::from_json(const json &j, TemperatureConfig &c) {
   LOAD_JSON_TO(j, "temperature_distance", c.temperature_distance);
   LOAD_JSON_TO(j, "manufacturer", c.manufacturer);
   LOAD_JSON_TO(j, "temperature_delay", c.temperature_delay);
+  LOAD_JSON_TO(j, "sensor_rotation", c.sensor_rotation);
+  LOAD_JSON_TO(j, "min_x", c.min_x);
+  LOAD_JSON_TO(j, "max_x", c.max_x);
+  LOAD_JSON_TO(j, "min_y", c.min_y);
+  LOAD_JSON_TO(j, "max_y", c.max_y);
 }
 
 void suanzi::to_json(json &j, const QufaceConfig &c) {
@@ -307,6 +317,11 @@ void Config::load_defaults(ConfigData &c) {
       .temperature_distance = 0.68,
       .temperature_delay = 5,
       .manufacturer = 1,
+      .sensor_rotation = TemperatureRotation::None,
+      .min_x = 0.3125,
+      .max_x = 0.875,
+      .min_y = 0,
+      .max_y = 1,
   };
 
   c.user = {

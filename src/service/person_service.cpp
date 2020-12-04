@@ -179,12 +179,13 @@ SZ_RETCODE PersonService::report_face_record(
     }
   }
 
+  float temperature = ((float)((int)((person.temperature + 0.05f) * 10))) / 10;
   json j = {
       {"personID", person.id},
       {"imagePath", bgr_file_path},
       {"irImagePath", nir_file_path},
       {"status", person.status},
-      {"temperature", person.temperature},
+      {"temperature", temperature},
       {"maskStatus", person.has_mask ? "correct" : "none"},
   };
   if (!Config::get_user().enable_temperature) j.erase("temperature");
