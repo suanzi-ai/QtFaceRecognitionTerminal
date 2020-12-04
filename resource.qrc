@@ -42,6 +42,36 @@
     <file>asserts/cross.png</file>
 </qresource>
 <qresource>
+    <file>asserts/qrcode.png</file>
+</qresource>
+<qresource>
+    <file>asserts/intercom.png</file>
+</qresource>
+<qresource>
+    <file>asserts/password.png</file>
+</qresource>
+<qresource>
+    <file>asserts/back.png</file>
+</qresource>
+<qresource>
+    <file>asserts/key_background.png</file>
+</qresource>
+<qresource>
+    <file>asserts/video.png</file>
+</qresource>
+<qresource>
+    <file>asserts/intercom_small.png</file>
+</qresource>
+<qresource>
+    <file>asserts/doorbell.png</file>
+</qresource>
+<qresource>
+    <file>asserts/backspace.png</file>
+</qresource>
+<qresource>
+    <file>asserts/back_small.png</file>
+</qresource>
+<qresource>
     <file>asserts/clock.ttf</file>
 </qresource>
 <qresource>

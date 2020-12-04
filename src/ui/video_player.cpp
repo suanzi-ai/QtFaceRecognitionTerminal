@@ -145,6 +145,7 @@ void VideoPlayer::init_widgets() {
             SLOT(rx_display(DetectionRatio, bool, bool, bool)));
   }
 
+#if 0
   temp_tip_widget_ = new TemperatureTipWidget(screen_width, screen_height, this);
   temp_tip_widget_->hide();
 
@@ -158,6 +159,11 @@ void VideoPlayer::init_widgets() {
   connect((const QObject *)recognize_tip_widget_, SIGNAL(tx_temperature(bool, bool, float)),
           (const QObject *)temp_tip_widget_,
           SLOT(rx_temperature(bool, bool, float)));
+#endif
+
+  touch_widget_ = new TouchWidget(screen_width, screen_height);
+  touch_widget_->hide();
+
 
   // 创建屏保控件
   screen_saver_ = new ScreenSaverWidget(screen_width, screen_height);
@@ -198,6 +204,7 @@ void VideoPlayer::init_widgets() {
 void VideoPlayer::delay_init_widgets() {
 	status_banner_->show();
 	heatmap_widget_->show();
-	recognize_tip_widget_->show();
-	temp_tip_widget_->show();
+	//recognize_tip_widget_->show();
+	//temp_tip_widget_->show();
+	touch_widget_->show();
 }

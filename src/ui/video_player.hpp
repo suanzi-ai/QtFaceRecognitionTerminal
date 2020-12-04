@@ -27,6 +27,8 @@
 #include "heatmap_widget.hpp"
 #include "isp_hist_widget.hpp"
 #include "temperature_tip_widget.hpp"
+#include "touch_widget.hpp"
+
 
 namespace suanzi {
 
@@ -54,6 +56,7 @@ class VideoPlayer : public QWidget {
   DetectTipWidget *detect_tip_widget_nir_;
   RecognizeTipWidget *recognize_tip_widget_;
   TemperatureTipWidget *temp_tip_widget_;
+  TouchWidget *touch_widget_;
 
   ScreenSaverWidget *screen_saver_;
   OutlineWidget *outline_widget_;

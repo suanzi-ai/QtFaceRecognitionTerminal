@@ -99,6 +99,7 @@ bool TemperatureTask::try_reading(TemperatureMatrix& mat) {
   const int MAX_TRIAL = 10;
   const int INTERVAL = 200;
   int trial = 0;
+  return true;
   while (SZ_RETCODE_OK != temperature_reader_->read(mat) && ++trial < MAX_TRIAL)
     QThread::msleep(INTERVAL);
 
