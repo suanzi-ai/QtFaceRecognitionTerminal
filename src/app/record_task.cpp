@@ -63,8 +63,6 @@ RecordTask::~RecordTask() {
   person_history_.clear();
   live_history_.clear();
   temperature_history_.clear();
-  query_clock_.clear();
-  unknown_query_clock_.clear();
 }
 
 void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
@@ -77,14 +75,13 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
 
   bool bgr_finished = false, ir_finished = false;
   bool has_mask;
+  bool update_record = false;
 
   if (input->has_person_info) {
     // reset if new person appear
     if (if_fresh(input->person_feature)) {
       reset_recognize();
-      reset_temperature();
-      duplicated_counter_ = 0;
-      has_unhandle_person_ = false;
+      update_record = true;
     }
 
     // add person info
@@ -138,14 +135,13 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
           update_temperature_bias();
         }
 
-        duplicated = !if_temperature_updated(person.temperature);
-
-        if (!duplicated) duplicated_counter_++;
+        update_record |= if_temperature_updated(person.temperature);
 
         if (person.temperature > 0) {
           has_unhandle_person_ = false;
-          emit tx_display(person, duplicated);
-        } else if (latest_temperature_ == 0 && duplicated_counter_ == 0) {
+          if (!duplicated) duplicated_counter_++;
+          emit tx_display(person, duplicated, !update_record);
+        } else if (latest_temperature_ == 0) {
           duplicated_id_ = face_id;
           duplicated_duration_ = duration;
           latest_person_ = person;
@@ -198,7 +194,7 @@ bool RecordTask::if_fresh(const FaceFeature &feature) {
   memcpy(latest_feature_.value, feature.value,
          SZ_FEATURE_NUM * sizeof(SZ_FLOAT));
 
-  return score / 2 + 0.5f < 0.9;
+  return score / 2 + 0.5f < 0.8;
 }
 
 void RecordTask::reset_recognize() {
@@ -530,17 +526,16 @@ bool RecordTask::if_duplicated(SZ_UINT32 &face_id, const FaceFeature &feature,
 
   // query known person
   if (person.status != PersonService::get_status(PersonStatus::Stranger)) {
-    if (CONTAIN_KEY(query_clock_, face_id)) {
-      auto last_query_clock = query_clock_[face_id];
-      duration = SECONDS_DIFF(current_query_clock, last_query_clock);
+    if (duplicated_counter_ != 0) {
+      duration = SECONDS_DIFF(current_query_clock, last_query_clock_);
 
       if (duration >
           std::max(cfg.duplication_interval, AudioTask::duration(person))) {
-        query_clock_[face_id] = current_query_clock;
+        last_query_clock_ = current_query_clock;
       } else
         ret = true;
     } else
-      query_clock_[face_id] = current_query_clock;
+      last_query_clock_ = current_query_clock;
   }
   // query unknown person
   else {
@@ -559,12 +554,11 @@ bool RecordTask::if_duplicated(SZ_UINT32 &face_id, const FaceFeature &feature,
       }
     }
 
-    if (CONTAIN_KEY(unknown_query_clock_, face_id)) {
-      auto last_query_clock = unknown_query_clock_[face_id];
-      duration = SECONDS_DIFF(current_query_clock, last_query_clock);
+    if (duplicated_counter_ != 0) {
+      duration = SECONDS_DIFF(current_query_clock, last_query_clock_);
       if (duration >
           std::max(cfg.duplication_interval, AudioTask::duration(person))) {
-        unknown_query_clock_[face_id] = current_query_clock;
+        last_query_clock_ = current_query_clock;
       } else
         ret = true;
 
@@ -575,7 +569,7 @@ bool RecordTask::if_duplicated(SZ_UINT32 &face_id, const FaceFeature &feature,
       }
 
       unknown_database_->add(face_id, feature);
-      unknown_query_clock_[face_id] = current_query_clock;
+      last_query_clock_ = current_query_clock;
     }
   }
   return ret;
@@ -614,7 +608,7 @@ void RecordTask::rx_temperature(float body_temperature) {
     if_temperature_updated(latest_person_.temperature);
     has_unhandle_person_ = false;
     duplicated_counter_++;
-    emit tx_display(latest_person_, false);
+    emit tx_display(latest_person_, false, false);
   }
   is_running_ = false;
 }
@@ -623,8 +617,6 @@ void RecordTask::rx_reset() {
   reset_recognize();
   reset_temperature();
 
-  query_clock_.clear();
-  unknown_query_clock_.clear();
   duplicated_counter_ = 0;
   has_unhandle_person_ = false;
 }

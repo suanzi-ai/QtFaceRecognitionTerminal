@@ -66,13 +66,15 @@ void VideoPlayer::init_workflow() {
 
   // 创建继电器开关线程
   gpio_task_ = GPIOTask::get_instance();
-  connect((const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool)),
-          (const QObject *)gpio_task_, SLOT(rx_trigger(PersonData, bool)));
+  connect(
+      (const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool, bool)),
+      (const QObject *)gpio_task_, SLOT(rx_trigger(PersonData, bool, bool)));
 
   // 创建人脸记录线程
   upload_task_ = UploadTask::get_instance();
-  connect((const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool)),
-          (const QObject *)upload_task_, SLOT(rx_upload(PersonData, bool)));
+  connect(
+      (const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool, bool)),
+      (const QObject *)upload_task_, SLOT(rx_upload(PersonData, bool, bool)));
 
   // 创建人脸计时器线程
   face_timer_ = FaceTimer::get_instance();
@@ -88,8 +90,9 @@ void VideoPlayer::init_workflow() {
 
   // 创建语音播报线程
   audio_task_ = AudioTask::get_instance();
-  connect((const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool)),
-          (const QObject *)audio_task_, SLOT(rx_report(PersonData, bool)));
+  connect(
+      (const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool, bool)),
+      (const QObject *)audio_task_, SLOT(rx_report(PersonData, bool, bool)));
   connect((const QObject *)detect_task_, SIGNAL(tx_warn_distance()),
           (const QObject *)audio_task_, SLOT(rx_warn_distance()));
 
@@ -149,9 +152,10 @@ void VideoPlayer::init_widgets() {
   // 创建人脸识别记录控件
   recognize_tip_widget_ =
       new RecognizeTipWidget(screen_width, screen_height, this);
-  connect((const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool)),
+  connect((const QObject *)record_task_,
+          SIGNAL(tx_display(PersonData, bool, bool)),
           (const QObject *)recognize_tip_widget_,
-          SLOT(rx_display(PersonData, bool)));
+          SLOT(rx_display(PersonData, bool, bool)));
 
   // 创建屏保控件
   screen_saver_ = new ScreenSaverWidget(screen_width, screen_height, this);

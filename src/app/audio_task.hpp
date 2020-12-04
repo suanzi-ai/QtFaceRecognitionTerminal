@@ -27,7 +27,8 @@ class AudioTask : QObject {
   void beep();
 
  private slots:
-  void rx_report(PersonData person, bool duplicated);
+  void rx_report(PersonData person, bool audio_duplicated,
+                 bool record_duplicated);
   void rx_warn_distance();
 
  private:

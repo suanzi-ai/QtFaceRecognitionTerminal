@@ -14,7 +14,8 @@ class GPIOTask : QObject {
   static GPIOTask* get_instance();
 
  private slots:
-  void rx_trigger(PersonData person, bool if_duplicated);
+  void rx_trigger(PersonData person, bool audio_duplicated,
+                  bool record_duplicated);
   void rx_reset();
 
  private:

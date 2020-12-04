@@ -53,7 +53,8 @@ RecognizeTipWidget::RecognizeTipWidget(int width, int height, QWidget *parent)
 
 RecognizeTipWidget::~RecognizeTipWidget() {}
 
-void RecognizeTipWidget::rx_display(PersonData person, bool if_duplicated) {
+void RecognizeTipWidget::rx_display(PersonData person, bool audio_duplicated,
+                                    bool record_duplicated) {
   person_ = person;
 
   // avatar_.load(person_.face_path.c_str());
@@ -66,7 +67,7 @@ void RecognizeTipWidget::rx_display(PersonData person, bool if_duplicated) {
     avatar.release();
   }
 
-  if (!if_duplicated && !person.face_snapshot.empty()) {
+  if (!record_duplicated && !person.face_snapshot.empty()) {
     cv::cvtColor(person.face_snapshot, person.face_snapshot, CV_BGR2RGB);
     snapshot_ = QPixmap::fromImage(
         QImage((unsigned char *)person.face_snapshot.data,

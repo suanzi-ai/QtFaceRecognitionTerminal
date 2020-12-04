@@ -21,7 +21,8 @@ class RecognizeTipWidget : public QWidget {
   void paint(QPainter *painter);
 
  private slots:
-  void rx_display(PersonData person, bool if_duplicated);
+  void rx_display(PersonData person, bool audio_duplicated,
+                  bool record_duplicated);
   void rx_update();
   void rx_reset();
 

@@ -32,7 +32,8 @@ class RecordTask : QObject {
   void tx_bgr_finish(bool if_finished);
 
   // for display
-  void tx_display(PersonData person, bool if_duplicated);
+  void tx_display(PersonData person, bool audio_duplicated,
+                  bool record_duplicated);
 
  private:
   RecordTask(QThread *thread = nullptr, QObject *parent = nullptr);
@@ -68,14 +69,12 @@ class RecordTask : QObject {
 
   std::vector<QueryResult> person_history_;
   std::vector<bool> mask_history_;
-  std::map<SZ_UINT32, std::chrono::steady_clock::time_point> query_clock_;
   std::map<SZ_UINT32, float> known_temperature_;
 
   std::vector<bool> live_history_;
-  std::map<SZ_UINT32, std::chrono::steady_clock::time_point>
-      unknown_query_clock_;
   std::map<SZ_UINT32, float> unknown_temperature_;
 
+  std::chrono::steady_clock::time_point last_query_clock_;
   int duplicated_counter_;
 
   bool has_unhandle_person_;

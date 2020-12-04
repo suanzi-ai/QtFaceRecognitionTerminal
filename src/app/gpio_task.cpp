@@ -29,7 +29,8 @@ GPIOTask::GPIOTask(QThread* thread, QObject* parent) : event_count_(0) {
 
 GPIOTask::~GPIOTask() {}
 
-void GPIOTask::rx_trigger(PersonData person, bool if_duplicated) {
+void GPIOTask::rx_trigger(PersonData person, bool audio_duplicated,
+                          bool record_duplicated) {
   auto user = Config::get_user();
 
   bool all_pass = true;

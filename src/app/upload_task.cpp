@@ -29,12 +29,13 @@ UploadTask::UploadTask(QThread *thread, QObject *parent) {
 
 UploadTask::~UploadTask() {}
 
-void UploadTask::rx_upload(PersonData person, bool if_duplicated) {
+void UploadTask::rx_upload(PersonData person, bool audio_duplicated,
+                           bool record_duplicated) {
   static std::vector<SZ_UINT8> bgr_image_buffer;
   static std::vector<SZ_UINT8> nir_image_buffer;
 
   auto cfg = Config::get_user();
-  if (!if_duplicated) {
+  if (!record_duplicated) {
     // whether temperature is enabled but no temperature data
     if (person.temperature == 0) return;
 

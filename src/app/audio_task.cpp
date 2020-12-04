@@ -48,7 +48,7 @@ SZ_UINT16 AudioTask::duration(PersonData person) {
       total_duration += instance->pass_audio_.duration;
 
   // SZ_LOG_INFO("total_duration={}", total_duration / 1000);
-  return total_duration / 1000;
+  return total_duration / 1000 + 1;
 }
 
 AudioTask::AudioTask(QThread* thread, QObject* parent) : is_running_(false) {
@@ -160,9 +160,10 @@ void AudioTask::play_audio(Audio& audio) {
   }
 }
 
-void AudioTask::rx_report(PersonData person, bool duplicated) {
+void AudioTask::rx_report(PersonData person, bool audio_duplicated,
+                          bool record_duplicated) {
   auto user = Config::get_user();
-  if (!user.enable_audio || duplicated) return;
+  if (!user.enable_audio || audio_duplicated) return;
 
   is_running_ = true;
 
