@@ -175,6 +175,10 @@ set_target_properties(
   temperature::temperature
   PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${TEMPERATURE_SDK_PREFIX}/include"
              IMPORTED_LOCATION "${TEMPERATURE_SDK_PREFIX}/lib/libtemperature.a"
+             IMPORTED_LOCATION
+             "${TEMPERATURE_SDK_PREFIX}/lib/libJQQRCodeReader.a"
+             # IMPORTED_LOCATION
+             # "${TEMPERATURE_SDK_PREFIX}/lib/libJQQRCodeWriter.a"
              INTERFACE_POSITION_INDEPENDENT_CODE "ON")
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -215,3 +219,10 @@ target_link_libraries(
   PRIVATE
   PUBLIC lib)
 install(TARGETS smoke-test DESTINATION .)
+
+add_executable(qrcode-test qrcode-test.cpp resource.qrc)
+target_link_libraries(
+  qrcode-test
+  PRIVATE
+  PUBLIC lib)
+install(TARGETS qrcode-test DESTINATION .)

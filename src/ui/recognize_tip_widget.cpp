@@ -23,9 +23,6 @@ using namespace suanzi::io;
 
 RecognizeTipWidget::RecognizeTipWidget(int screen_width, int screen_height, QWidget *parent)
     : QWidget(parent),
-      icon_(":asserts/location.png"),
-      icon_good_(":asserts/tick.png"),
-      icon_bad_(":asserts/cross.png"),
       has_info_(false),
       latest_temperature_(0) {
 

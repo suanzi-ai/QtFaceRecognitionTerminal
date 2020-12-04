@@ -72,6 +72,9 @@
     <file>asserts/back_small.png</file>
 </qresource>
 <qresource>
+    <file>asserts/lightneedle.png</file>
+</qresource>
+<qresource>
     <file>asserts/clock.ttf</file>
 </qresource>
 <qresource>

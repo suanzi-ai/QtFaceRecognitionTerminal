@@ -13,6 +13,7 @@ class DigitKeyWidget : public QWidget {
  public:
   DigitKeyWidget(int width, int height, QWidget *parent = nullptr);
   ~DigitKeyWidget() override;
+  void init();
 
  private:
  	void setCommonAttribute(QPushButton *ppb);

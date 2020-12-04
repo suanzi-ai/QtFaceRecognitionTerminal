@@ -32,6 +32,7 @@ void VideoPlayer::paintEvent(QPaintEvent *event) {
   //recognize_tip_widget_->paint(&painter);
 }
 
+
 void VideoPlayer::init_workflow() {
   // 创建摄像头读取对象
   camera_reader_ = CameraReader::get_instance();

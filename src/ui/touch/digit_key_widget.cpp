@@ -155,6 +155,11 @@ DigitKeyWidget::~DigitKeyWidget() {
 
 }
 
+void DigitKeyWidget::init() {
+	ple_input_tip_->clear();
+}
+
+
 void DigitKeyWidget::setCommonAttribute(QPushButton *ppb) {
 	ppb->setFixedSize(150, 150);
   	ppb->setFocusPolicy(Qt::NoFocus);

@@ -53,6 +53,14 @@ void ScreenSaverWidget::rx_display(bool visible) {
 
 void ScreenSaverWidget::resfresh_timeout() {
 	update();
+	saver_timeout_ += 500;
+	if (saver_timeout_ > Config::get_user().screensaver_timeout * 1000)
+		show();
+}
+
+void ScreenSaverWidget::mousePressEvent(QMouseEvent * event) {
+	hide();
+	saver_timeout_ = 0;
 }
 
 
