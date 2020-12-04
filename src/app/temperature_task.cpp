@@ -171,8 +171,8 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
     float x1 = (cfg.max_x - cfg.min_x) * detection.x + cfg.min_x;
     float x2 =
         (cfg.max_x - cfg.min_x) * (detection.x + detection.width) + cfg.min_x;
-    detection.x = x1;
-    detection.width = x2 - x1;
+    detection.x = std::max(x1 - .0725f, 0.f);
+    detection.width = std::min((x2 - x1) + .125f, 1.f);
 
     float y1 = (cfg.max_y - cfg.min_y) * detection.y + cfg.min_y;
     float y2 =
