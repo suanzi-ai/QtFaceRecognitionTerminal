@@ -686,13 +686,13 @@ SZ_RETCODE Config::reload() {
     std::unique_lock<std::mutex> lock(cfg_mutex_);
 
     SZ_LOG_INFO("Load from files ...");
-    try {
-      json config;
-      SZ_RETCODE ret = read_config(config);
-      if (ret != SZ_RETCODE_OK) {
-        return ret;
-      }
+    json config;
+    SZ_RETCODE ret = read_config(config);
+    if (ret != SZ_RETCODE_OK) {
+      return ret;
+    }
 
+    try {
       json config_patch;
       ret = read_override_config(config_patch);
       if (ret != SZ_RETCODE_OK) {
@@ -722,7 +722,9 @@ SZ_RETCODE Config::reload() {
       config.get_to(cfg_data_);
     } catch (std::exception &exc) {
       SZ_LOG_ERROR("Load error, will using defaults: {}", exc.what());
-      return SZ_RETCODE_FAILED;
+      config.get_to(cfg_data_);
+      dispatch("reload");
+      return SZ_RETCODE_OK;
     }
   }
 
