@@ -47,8 +47,7 @@ void LEDTask::turn_off(bool force) {
   if (force) {
     Engine::instance()->gpio_set(GpioPinLightBox, false);
     status_ = false;
-  }
-  else if (is_running_) {
+  } else if (is_running_) {
     Engine::instance()->gpio_set(GpioPinLightBox, false);
     is_running_ = status_ = false;
     event_count_ = 0;

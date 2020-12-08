@@ -2,7 +2,9 @@
 #define IMAGE_PACKAGE_H
 
 #include <QMetaType>
+
 #include <opencv2/opencv.hpp>
+
 #include <quface-io/mmzimage.hpp>
 #include <quface/common.hpp>
 #include <quface/logger.hpp>
@@ -13,7 +15,7 @@ using namespace io;
 class ImagePackage {
  public:
   ImagePackage();
-  ImagePackage(const ImagePackage* pkg);
+  ImagePackage(const ImagePackage *pkg);
   ImagePackage(Size size_bgr_large, Size size_bgr_small, Size size_nir_large,
                Size size_nir_small);
   ~ImagePackage();

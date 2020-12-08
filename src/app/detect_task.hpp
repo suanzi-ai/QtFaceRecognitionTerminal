@@ -45,7 +45,7 @@ class DetectTask : QObject {
   // for recognition
   void tx_frame_for_recognize(PingPangBuffer<DetectionData> *buffer);
 
-  //for face timer
+  // for face timer
   void tx_detect_result(bool valid_detect);
 
  private:

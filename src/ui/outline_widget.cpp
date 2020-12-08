@@ -11,27 +11,26 @@
 using namespace suanzi;
 
 OutlineWidget::OutlineWidget(int width, int height, QWidget *parent)
-    : QWidget(parent),
-      show_valid_rect_(false) {
-	QPalette palette = this->palette();
-	palette.setColor(QPalette::Background, Qt::transparent);
-	setPalette(palette);
-	setAttribute(Qt::WA_StyledBackground, true);
-	setAutoFillBackground(true);
+    : QWidget(parent), show_valid_rect_(false) {
+  QPalette palette = this->palette();
+  palette.setColor(QPalette::Background, Qt::transparent);
+  setPalette(palette);
+  setAttribute(Qt::WA_StyledBackground, true);
+  setAutoFillBackground(true);
 
-	move(0, 0);
-	setFixedSize(width, height);
+  move(0, 0);
+  setFixedSize(width, height);
 
-	//set background image
-	QString style_str = "QWidget {background-image: url(:asserts/outline.png);";
-	style_str += "background-repeat:no-repeat;margin-top: ";
-	style_str += QString::number(0.1875 * height) + "px;}";
-	setStyleSheet(style_str);
+  // set background image
+  QString style_str = "QWidget {background-image: url(:asserts/outline.png);";
+  style_str += "background-repeat:no-repeat;margin-top: ";
+  style_str += QString::number(0.1875 * height) + "px;}";
+  setStyleSheet(style_str);
 
-	timer_.setInterval(1000);
-	timer_.setSingleShot(true);
-	connect((const QObject *)&timer_, SIGNAL(timeout()), (const QObject *)this,
-	      SLOT(rx_reset()));
+  timer_.setInterval(1000);
+  timer_.setSingleShot(true);
+  connect((const QObject *)&timer_, SIGNAL(timeout()), (const QObject *)this,
+          SLOT(rx_reset()));
 }
 
 OutlineWidget::~OutlineWidget() {}
@@ -39,7 +38,6 @@ OutlineWidget::~OutlineWidget() {}
 void OutlineWidget::paint(QPainter *painter) {
   int w = width();   // 800
   int h = height();  // 1280
-
 
   if (show_valid_rect_) {
     QDateTime now = QDateTime::currentDateTime();

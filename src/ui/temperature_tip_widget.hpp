@@ -13,8 +13,8 @@ class TemperatureTipWidget : public QWidget {
   ~TemperatureTipWidget() override;
 
  private slots:
-	void rx_temperature(bool bvisible, bool bnormal_temperature, float temperature);
-
+  void rx_temperature(bool bvisible, bool bnormal_temperature,
+                      float temperature);
 
  private:
   QLabel *pl_ok_or_no_;

@@ -1,18 +1,19 @@
 #include "recognize_tip_widget.hpp"
 
+#include <sstream>
+
 #include <QDateTime>
 #include <QFontDatabase>
+#include <QGridLayout>
+#include <QHBoxLayout>
 #include <QImage>
 #include <QLocale>
 #include <QPainter>
 #include <QStringList>
 #include <QThread>
 #include <QTimer>
-#include <sstream>
-
-#include <QGridLayout>
-#include <QHBoxLayout>
 #include <QVBoxLayout>
+
 #include <opencv2/opencv.hpp>
 
 #include "config.hpp"
@@ -27,8 +28,7 @@ RecognizeTipWidget::RecognizeTipWidget(int screen_width, int screen_height,
       icon_(":asserts/location.png"),
       icon_good_(":asserts/tick.png"),
       icon_bad_(":asserts/cross.png"),
-      has_info_(false),
-      latest_temperature_(0) {
+      has_info_(false) {
   setAttribute(Qt::WA_StyledBackground, true);
   setStyleSheet(
       "QWidget {background-color:rgba(5, 0, 20, 150);margin:0px;} QLabel "
@@ -164,11 +164,6 @@ void RecognizeTipWidget::rx_display(PersonData person, bool audio_duplicated,
                person.face_snapshot.step, QImage::Format_RGB888));
   }
 
-  if (person_.temperature > 0) {
-    SZ_LOG_INFO("temp={:.2f}", person_.temperature);
-    // update();
-  }
-
   bool btemperature = false;
   bool bnormal_temperature = false;
   check_temperature(btemperature, bnormal_temperature);
@@ -217,7 +212,7 @@ void RecognizeTipWidget::rx_update() {
   pl_host_name_->setText(hostname_.c_str());
   QString sn_str = "SN:";
   sn_str += serial_number_.c_str();
-  sn_str += " FW:1.0.3";
+  sn_str += " FW:1.1.1";
   sn_str += ip_.c_str();
 
   //去掉换行符
@@ -228,7 +223,6 @@ void RecognizeTipWidget::rx_update() {
 }
 
 void RecognizeTipWidget::rx_reset() {
-  latest_temperature_ = 0;
   pl_avatar_->hide();
   pl_snapshot_->hide();
 }
@@ -237,14 +231,8 @@ void RecognizeTipWidget::check_temperature(bool &btemperature,
                                            bool &bnormal_temperature) {
   btemperature = false;
   bnormal_temperature = true;
-  if (Config::get_user().enable_temperature &&
-      (person_.temperature > 0 || latest_temperature_ > 0)) {
+  if (Config::get_user().enable_temperature && person_.temperature > 0) {
     btemperature = true;
-    if (person_.temperature > 0 &&
-        (latest_temperature_ == 0 || !person_.is_temperature_normal()))
-      latest_temperature_ = person_.temperature;
-
-    person_.temperature = latest_temperature_;
     bnormal_temperature = person_.is_temperature_normal();
   }
 }
@@ -270,127 +258,4 @@ void RecognizeTipWidget::rx_timeout() {
   pl_hh_mm_->setText(time);
   pl_yyyy_mm_dd_->setText(date);
   pl_week_->setText(weekday);
-}
-
-void RecognizeTipWidget::paint(QPainter *painter) {
-#if 0
-
-  const int w = screen_width_;
-  const int h = screen_height_;
-
-  auto lang = Config::get_user_lang();
-  auto cfg = Config::get_user();
-
-
-
-  QColor background = QColor(5, 0, 20, 150);
-  bool has_temperature = false;
-  if (has_info_ && Config::get_user().enable_temperature) {
-    if (person_.temperature > 0) {
-      has_temperature = true;
-      if (!person_.is_temperature_normal()) background = QColor(220, 0, 0, 150);
-    }
-  }
-
-
-  // draw background
-  //painter->fillRect(QRect(0, 0, w, 0.02734375 * h), background);
-  painter->fillRect(QRect(0, 0.84375 * h, w, 0.171875 * h), background);
-
-  // draw border and seperator
-  painter->setPen(QPen(QColor(150, 100, 0, 150), 2));
-  painter->drawLine(0, 0, w, 0);
-  painter->setPen(QPen(QColor(255, 255, 255, 200), 2));
-  painter->drawLine(0.27875 * w, 0.8828125 * h, 0.27875 * w, 0.921875 * h);
-
-
-  // draw datetime
-  QLocale locale;
-  QString format = "ddd";
-  if (lang == "zh-CN") locale = QLocale::Chinese;
-  if (lang == "en") locale = QLocale::English;
-  if (lang == "jp") {
-    locale = QLocale::Japanese;
-    format = "ddd曜日";
-  }
-  QDateTime now = QDateTime::currentDateTime();
-  QString time = now.toString("hh mm");
-  QString date = now.toString(tr("yyyy年MM月dd日"));
-  QString weekday = locale.toString(now, format);
-
-
-  QFont font = painter->font();
-  font_.setPointSize(0.0625 * w);
-  painter->setFont(font_);
-  painter->drawText(0.0375 * w, 0.9203125 * h, time);
-  font_.setPointSize(0.05 * w);
-  painter->setFont(font_);
-  painter->drawText(0.135 * w, 0.9203125 * h, ":");
-
-  font_.setPointSize(0.02125 * w);
-  painter->setFont(font_);
-  painter->drawText(0.29375 * w, 0.896875 * h, date);
-  font_.setPointSize(0.02 * w);
-  painter->setFont(font_);
-  painter->drawText(0.29375 * w, 0.9203125 * h, weekday);
-
-
-
-  // draw SN, FW and ip
-  char buffer[100];
-  sprintf(buffer, "SN:%s FW:1.1.1%s", serial_number_.c_str(), ip_.c_str());
-  font_.setPointSize(0.02125 * w);
-  painter->setFont(font_);
-  painter->drawText(0.05625 * w, 0.984375 * h, buffer);
-
-  // draw icon
-  painter->drawPixmap(
-      QRect(0.05375 * w, 0.9390625 * h, 0.025 * w, 0.021875 * h), icon_,
-      QRect());
-
-  painter->drawText(0.09375 * w, 0.95703125 * h, hostname_.c_str());
-
-
-
-
-  // draw avatar here
-  if (has_info_) {
-    painter->drawPixmap(
-        QRect(0.8125 * w, 0.8828125 * h, 0.1375 * w, 0.0859375 * h), snapshot_,
-        QRect());
-    if (person_.is_status_normal())
-      painter->drawPixmap(
-          QRect(0.625 * w, 0.8828125 * h, 0.1375 * w, 0.0859375 * h), avatar_,
-          QRect());
-
-    if (has_temperature) {
-      char temperature_value[10];
-      sprintf(temperature_value, ":%.1f°C", person_.temperature);
-
-      painter->setRenderHint(QPainter::Antialiasing);
-
-      QColor color;
-      if (person_.is_temperature_normal()) {
-        color = QColor(0, 100, 0, 180);
-        painter->drawPixmap(
-            QRect(0.275 * w, 0.11796875 * h, 0.05625 * w, 0.03515625 * h),
-            icon_good_, QRect());
-      } else {
-        color = QColor(220, 0, 0, 150);
-        painter->drawPixmap(
-            QRect(0.275 * w, 0.11796875 * h, 0.05625 * w, 0.03515625 * h),
-            icon_bad_, QRect());
-      }
-      painter->fillPath(temperature_rect_, color);
-
-      font_.setPointSize(0.02875 * w);
-      painter->setFont(font_);
-      painter->drawText(0.35 * w, 0.14453125 * h,
-                        tr("体温") + temperature_value);
-    }
-
-  }
-#endif
-
-  // painter->setFont(font);
 }

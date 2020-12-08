@@ -28,8 +28,8 @@ void VideoPlayer::paintEvent(QPaintEvent *event) {
   QWidget::paintEvent(event);
 
   QPainter painter(this);
-  //outline_widget_->paint(&painter);
-  recognize_tip_widget_->paint(&painter);
+  //   outline_widget_->paint(&painter);
+  //   recognize_tip_widget_->paint(&painter);
 }
 
 void VideoPlayer::init_workflow() {
@@ -76,10 +76,8 @@ void VideoPlayer::init_workflow() {
 
   // 创建人脸计时器线程
   face_timer_ = FaceTimer::get_instance();
-  connect((const QObject *)detect_task_,
-          SIGNAL(tx_detect_result(bool)),
-          (const QObject *)face_timer_,
-          SLOT(rx_detect_result(bool)));
+  connect((const QObject *)detect_task_, SIGNAL(tx_detect_result(bool)),
+          (const QObject *)face_timer_, SLOT(rx_detect_result(bool)));
   connect((const QObject *)face_timer_, SIGNAL(tx_white_led_timeout()),
           (const QObject *)detect_task_, SLOT(rx_white_led_timeout()));
 
@@ -147,7 +145,8 @@ void VideoPlayer::init_widgets() {
             SLOT(rx_display(DetectionRatio, bool, bool, bool)));
   }
 
-  temp_tip_widget_ = new TemperatureTipWidget(screen_width, screen_height, this);
+  temp_tip_widget_ =
+      new TemperatureTipWidget(screen_width, screen_height, this);
   temp_tip_widget_->hide();
 
   // 创建人脸识别记录控件
@@ -158,7 +157,8 @@ void VideoPlayer::init_widgets() {
           SIGNAL(tx_display(PersonData, bool, bool)),
           (const QObject *)recognize_tip_widget_,
           SLOT(rx_display(PersonData, bool, bool)));
-  connect((const QObject *)recognize_tip_widget_, SIGNAL(tx_temperature(bool, bool, float)),
+  connect((const QObject *)recognize_tip_widget_,
+          SIGNAL(tx_temperature(bool, bool, float)),
           (const QObject *)temp_tip_widget_,
           SLOT(rx_temperature(bool, bool, float)));
 
@@ -197,8 +197,8 @@ void VideoPlayer::init_widgets() {
 }
 
 void VideoPlayer::delay_init_widgets() {
-	status_banner_->show();
-	heatmap_widget_->show();
-	recognize_tip_widget_->show();
-	temp_tip_widget_->show();
+  status_banner_->show();
+  heatmap_widget_->show();
+  recognize_tip_widget_->show();
+  temp_tip_widget_->show();
 }

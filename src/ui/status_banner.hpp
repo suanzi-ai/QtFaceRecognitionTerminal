@@ -1,14 +1,14 @@
 #ifndef STATUS_BANNER_H
 #define STATUS_BANNER_H
 
+#include <QFont>
+#include <QLabel>
+#include <QPixmap>
 #include <QTimer>
 #include <QWidget>
-#include <QFont>
-#include <QPixmap>
-#include <QLabel>
 
-#include "quface_common.hpp"
 #include "person_service.hpp"
+#include "quface_common.hpp"
 
 namespace suanzi {
 

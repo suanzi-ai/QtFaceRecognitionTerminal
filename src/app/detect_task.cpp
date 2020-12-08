@@ -169,18 +169,16 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
     QThread::usleep(10);
 
   if (valid_dectect != last_valid_detect_) {
-	 last_valid_detect_ = valid_dectect;
-	 emit tx_detect_result(valid_dectect);
+    last_valid_detect_ = valid_dectect;
+    emit tx_detect_result(valid_dectect);
   }
 
   emit tx_finish();
 }
 
-
 void DetectTask::rx_white_led_timeout() {
-	last_valid_detect_ = false;//enable tx detect result
+  last_valid_detect_ = false;  // enable tx detect result
 }
-
 
 bool DetectTask::detect_and_select(const MmzImage *image,
                                    DetectionRatio &detection, bool is_bgr) {

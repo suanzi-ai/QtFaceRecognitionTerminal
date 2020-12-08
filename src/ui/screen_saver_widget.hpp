@@ -1,10 +1,10 @@
 #ifndef SCREEN_SAVER_WIDGET_H
 #define SCREEN_SAVER_WIDGET_H
 
-#include <QPixmap>
 #include <QImage>
-#include <QWidget>
+#include <QPixmap>
 #include <QTimer>
+#include <QWidget>
 
 namespace suanzi {
 
@@ -23,7 +23,7 @@ class ScreenSaverWidget : public QWidget {
   void resfresh_timeout();
 
  private:
- 	QTimer *refresh_timer_;
+  QTimer *refresh_timer_;
 };
 
 }  // namespace suanzi

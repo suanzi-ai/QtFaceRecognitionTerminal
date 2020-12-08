@@ -3,9 +3,10 @@
 
 #include <QImage>
 #include <QPainter>
+#include <QThread>
 #include <QVBoxLayout>
 #include <QWidget>
-#include <QThread>
+
 #include "detection_data.hpp"
 #include "image_package.hpp"
 #include "pingpang_buffer.hpp"
@@ -29,21 +30,16 @@ class DetectTipWidget : public QWidget {
                   bool is_bgr);
 
  private:
- 	void get_detect_position(float &x, float &y, float &width, float &height);
+  void get_detect_position(float &x, float &y, float &width, float &height);
 
  private:
+  class InternalEventLoopThread : public QThread {
+   public:
+    InternalEventLoopThread() { start(); }
 
- 	class InternalEventLoopThread : public QThread {
-		public:
-			InternalEventLoopThread() {
-				start();
-			}
-		private:
-			void run() {
-				exec();
-			}
-	};
-
+   private:
+    void run() { exec(); }
+  };
 
  private:
   static constexpr int MAX_RECT_COUNT = 10;
@@ -61,7 +57,6 @@ class DetectTipWidget : public QWidget {
   int lost_age_;
 
   bool is_valid_;
-  int valid_count_;
 
   float detect_pos_x_;
   float detect_pos_y_;

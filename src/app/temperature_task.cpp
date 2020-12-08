@@ -237,9 +237,10 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
   }
 
   static TemperatureMatrix output;
-  if (output.value == nullptr) output.value = (float *)malloc(256 * sizeof(float));
+  if (output.value == nullptr)
+    output.value = (float*)malloc(256 * sizeof(float));
   if (output.size != 256)
-    output.value = (float *)realloc(output.value, 256 * sizeof(float));
+    output.value = (float*)realloc(output.value, 256 * sizeof(float));
   output.size = 256;
   memcpy(output.value, mat.value, output.size * sizeof(float));
 

@@ -5,6 +5,7 @@
 #include <fstream>
 
 #include <nlohmann/json.hpp>
+
 #include <quface/logger.hpp>
 
 using json = nlohmann::json;

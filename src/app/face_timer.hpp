@@ -1,10 +1,11 @@
 #ifndef FACE_TIMER_HPP
 #define FACE_TIMER_HPP
 
+#include <chrono>
+
 #include <QObject>
 #include <QThread>
 #include <QTimer>
-#include <chrono>
 
 #include "detection_data.hpp"
 #include "pingpang_buffer.hpp"
@@ -14,7 +15,7 @@ namespace suanzi {
 class FaceTimer : QThread {
   Q_OBJECT
  public:
-  static FaceTimer* get_instance();
+  static FaceTimer *get_instance();
 
  private slots:
   void rx_detect_result(bool valid_detect);

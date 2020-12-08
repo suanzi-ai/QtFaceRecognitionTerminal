@@ -2,11 +2,12 @@
 #define RECOGNIZETIPWIDGET_H
 
 #include <QFont>
+#include <QLabel>
 #include <QPainterPath>
 #include <QPixmap>
 #include <QTimer>
 #include <QWidget>
-#include <QLabel>
+
 #include "person_service.hpp"
 
 namespace suanzi {
@@ -18,14 +19,12 @@ class RecognizeTipWidget : public QWidget {
   RecognizeTipWidget(int width, int height, QWidget *parent = nullptr);
   ~RecognizeTipWidget() override;
 
-  void paint(QPainter *painter);
-
-
  private:
- 	void check_temperature(bool &btemperature, bool &bnormal_temperature);
+  void check_temperature(bool &btemperature, bool &bnormal_temperature);
 
  signals:
- 	void tx_temperature(bool bvisible, bool bnormal_temperature, float temperature);
+  void tx_temperature(bool bvisible, bool bnormal_temperature,
+                      float temperature);
 
  private slots:
   void rx_display(PersonData person, bool audio_duplicated,
@@ -52,7 +51,6 @@ class RecognizeTipWidget : public QWidget {
   std::string ip_, name_, mac_;
   std::string hostname_;
   std::string serial_number_;
-
 
   int screen_width_;
   int screen_height_;

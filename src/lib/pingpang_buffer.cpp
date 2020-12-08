@@ -34,7 +34,9 @@ T *PingPangBuffer<T>::get_pang() {
 }
 
 template <class T>
-void PingPangBuffer<T>::switch_buffer() { switch_ = !switch_; }
+void PingPangBuffer<T>::switch_buffer() {
+  switch_ = !switch_;
+}
 
 template class PingPangBuffer<ImagePackage>;
 template class PingPangBuffer<DetectionData>;

@@ -1,7 +1,8 @@
 #include "config.hpp"
 
-#include <QFile>
 #include <regex>
+
+#include <QFile>
 
 using namespace suanzi;
 using namespace suanzi::io;

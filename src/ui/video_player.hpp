@@ -20,18 +20,17 @@
 #include "upload_task.hpp"
 
 #include "detect_tip_widget.hpp"
+#include "heatmap_widget.hpp"
+#include "isp_hist_widget.hpp"
 #include "outline_widget.hpp"
 #include "recognize_tip_widget.hpp"
 #include "screen_saver_widget.hpp"
 #include "status_banner.hpp"
-#include "heatmap_widget.hpp"
-#include "isp_hist_widget.hpp"
 #include "temperature_tip_widget.hpp"
 
 namespace suanzi {
 
 class TemperatureTipWidget;
-
 
 class VideoPlayer : public QWidget {
   Q_OBJECT
@@ -47,7 +46,7 @@ class VideoPlayer : public QWidget {
   void paintEvent(QPaintEvent *event) override;
 
  private slots:
- 	void delay_init_widgets();
+  void delay_init_widgets();
 
  private:
   DetectTipWidget *detect_tip_widget_bgr_;
@@ -71,7 +70,7 @@ class VideoPlayer : public QWidget {
   UploadTask *upload_task_;
   AudioTask *audio_task_;
   GPIOTask *gpio_task_;
-  LEDTask* led_task_;
+  LEDTask *led_task_;
 
   TemperatureTask *temperature_task_;
 };

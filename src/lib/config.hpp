@@ -1,16 +1,16 @@
 #ifndef CONFIG_HPP
 #define CONFIG_HPP
 
-#include <eventpp/eventdispatcher.h>
-
 #include <fstream>
 #include <mutex>
+#include <string>
+
+#include <eventpp/eventdispatcher.h>
 #include <nlohmann/json.hpp>
 #include <quface-io/isp_option.hpp>
 #include <quface-io/option.hpp>
 #include <quface/common.hpp>
 #include <quface/logger.hpp>
-#include <string>
 
 #define APP_DIR_PREFIX "/user/quface-app"
 

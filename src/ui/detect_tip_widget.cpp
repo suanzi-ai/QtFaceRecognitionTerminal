@@ -17,7 +17,6 @@ DetectTipWidget::DetectTipWidget(int win_x, int win_y, int win_width,
       win_height_(win_height),
       lost_age_(0),
       is_valid_(false),
-      valid_count_(0),
       QWidget(parent) {
   detect_pos_x_ = 0.0;
   detect_pos_y_ = 0.0;
@@ -41,9 +40,9 @@ void DetectTipWidget::paintEvent(QPaintEvent *event) {
   paint(&painter);
 }
 
-void DetectTipWidget::paint(QPainter *painter) {
-  return;
-  if (rects_.size() > 0 && !Config::get_user().enable_temperature) {
+void DetectTipWidget::get_detect_position(float &x, float &y, float &width,
+                                          float &height) {
+  if (rects_.size() > 0) {
     float sum_x = 0, sum_y = 0, sum_width = 0, sum_height = 0;
     float count = 0;
     auto it = rects_.end();
@@ -75,18 +74,14 @@ void DetectTipWidget::paint(QPainter *painter) {
 }
 
 void DetectTipWidget::paint(QPainter *painter) {
-  if (rects_.size() > 0 /*&& !Config::get_user().enable_temperature*/) {
-    // float width, height, top_x, top_y;
-    // get_detect_position(top_x, top_y, width, height);
+  // if (rects_.size() > 0 && !Config::get_user().enable_temperature) {
+  if (rects_.size() > 0) {
     float width = detect_width_;
     float height = detect_height_;
-    float top_x = 1.0;  // detect_pos_x_;
+    float top_x = 1.0;
     float top_y = 1.0;
     float bottom_x = top_x + width - 2.0;
     float bottom_y = top_y + height - 2.0;
-
-    // SZ_LOG_INFO("top_x={},top_y={},bottom_x={},bottom_y={},w={},h={}", top_x,
-    //              top_y, bottom_x, bottom_y, width, height);
 
     if (is_valid_)
       painter->setPen(QPen(QColor(0, 0, 255, 128), 5));
@@ -149,8 +144,6 @@ void DetectTipWidget::rx_display(DetectionRatio detection, bool to_clear,
     float center_x = box_x + (detection.x + .5f * detection.width) * box_w;
     float center_Y = box_y + (detection.y + .5f * detection.height) * box_h;
     float size = .5f * (detection.width * box_w + detection.height * box_h);
-    // SZ_LOG_DEBUG("x={},y={},w={},h={},c_x={},c_y={}", box_x, box_y, box_w,
-    //              box_h, center_x, center_Y);
 
     QRect next_rect(center_x - .5f * size, center_Y - .5f * size, size, size);
     rects_.push_back(next_rect);
@@ -168,7 +161,6 @@ void DetectTipWidget::rx_display(DetectionRatio detection, bool to_clear,
       rects_.clear();
       lost_age_ = 0;
       is_valid_ = false;
-      valid_count_ = 0;
     }
     hide();
   }
