@@ -20,33 +20,28 @@ bool AudioTask::idle() { return !get_instance()->is_running_; }
 
 SZ_UINT16 AudioTask::duration(PersonData person) {
   auto user = Config::get_user();
+  if (!user.enable_audio) return 0;
+
   auto instance = get_instance();
   SZ_UINT16 total_duration = 0;
-  if (!user.enable_audio) return total_duration;
 
   if (user.enable_record_audio && !person.is_status_normal())
     total_duration += instance->fail_audio_.duration;
 
-  if (user.enable_temperature) {
-    if (user.enable_mask_audio && !person.has_mask)
-      total_duration += instance->warn_mask_audio_.duration;
+  if (user.enable_mask_audio && !person.has_mask)
+    total_duration += instance->warn_mask_audio_.duration;
 
+  if (user.enable_temperature) {
     if (user.enable_temperature_audio) {
       if (!person.is_temperature_normal())
         total_duration += instance->temperature_abnormal_audio_.duration;
       else
         total_duration += instance->temperature_normal_audio_.duration;
     }
+  }
 
-    if ((user.enable_record_audio || user.enable_mask_audio) &&
-        user.enable_pass_audio) {
-      if (person.is_status_normal() && person.is_temperature_normal() &&
-          person.has_mask)
-        total_duration += instance->pass_audio_.duration;
-    }
-  } else if (user.enable_record_audio && user.enable_pass_audio)
-    if (person.is_status_normal())
-      total_duration += instance->pass_audio_.duration;
+  if (user.enable_pass_audio && GPIOTask::validate(person))
+    total_duration += instance->pass_audio_.duration;
 
   // SZ_LOG_INFO("total_duration={}", total_duration / 1000);
   return total_duration / 1000 + 1;
@@ -182,7 +177,8 @@ void AudioTask::rx_report(PersonData person, bool audio_duplicated,
     }
   }
 
-  if (GPIOTask::validate(person)) play_audio(pass_audio_);
+  if (user.enable_pass_audio && GPIOTask::validate(person))
+    play_audio(pass_audio_);
 
   is_running_ = false;
 }
