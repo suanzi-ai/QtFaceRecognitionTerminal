@@ -27,32 +27,35 @@ StatusBanner::StatusBanner(int screen_width, int screen_height, QWidget *parent)
 
   move(0, 0);
 
-  int w = 0.0275 * screen_width;
-  int h = 0.0171875 * screen_height;
+  const int w = screen_width;
+  const int h = screen_height;
 
-  // left icon
+  // people icon
   QLabel *pl_person = new QLabel(this);
-  pl_person->setFixedSize(w, h);
+  pl_person->setFixedSize(0.025 * w, 0.0140625 * h);
   pl_person->setStyleSheet("QLabel {border-image: url(:asserts/people.png);}");
 
   pl_person_num_ = new QLabel(this);
   QString style_str =
       "QLabel {color: rgba(255, 255, 255, 200);font-weight:bold;font-size:";
-  style_str += QString::number(0.02125 * screen_width) + "pt;}";
+  style_str += QString::number(0.02125 * w) + "pt;}";
   pl_person_num_->setStyleSheet(style_str);
   pl_person_num_->setAlignment(Qt::AlignTop | Qt::AlignRight);
 
-  // right icon
+  // temperature icon
   pl_temperature_ = new QLabel(this);
-  pl_temperature_->setFixedSize(w, h);
+  pl_temperature_->setFixedSize(0.0375 * w, 0.0234375 * h);
   pl_temperature_->setStyleSheet(
       "QLabel {border-image: url(:asserts/temperature.png);}");
+
+  // face icon
   QLabel *pl_face = new QLabel(this);
-  pl_face->setFixedSize(w, h);
+  pl_face->setFixedSize(0.0275 * w, 0.0171875 * h);
   pl_face->setStyleSheet("QLabel {border-image: url(:asserts/face.png);}");
 
+  // network icon
   pl_net_ = new QLabel(this);
-  pl_net_->setFixedSize(w, h);
+  pl_net_->setFixedSize(0.0275 * w, 0.0171875 * h);
   pl_net_->setStyleSheet(
       "QLabel {border-image: url(:asserts/no_network.png);}");
 
@@ -63,9 +66,11 @@ StatusBanner::StatusBanner(int screen_width, int screen_height, QWidget *parent)
 
   ph_layout->addWidget(pl_temperature_, 0, Qt::AlignRight | Qt::AlignCenter);
   ph_layout->addWidget(pl_face, 0, Qt::AlignRight | Qt::AlignCenter);
+  ph_layout->addSpacing(0.00625 * w);
   ph_layout->addWidget(pl_net_, 0, Qt::AlignRight | Qt::AlignCenter);
-  ph_layout->setSpacing(6);
-  ph_layout->setContentsMargins(10, 3, 10, 3);
+  ph_layout->setSpacing(0.00625 * w);
+  ph_layout->setContentsMargins(0.0125 * w, 0.00234375 * h, 0.0125 * w,
+                                0.00234375 * h);
 
   setLayout(ph_layout);
 
