@@ -37,6 +37,13 @@ void trigger_led() {
   if (!status) LEDTask::get_instance()->turn_off(true);
 }
 
+void trigger_gpio() {
+  if (Config::get_user().relay_default_state == RelayState::Low)
+    Engine::instance()->gpio_set(GpioPinDOOR, false);
+  else
+    Engine::instance()->gpio_set(GpioPinDOOR, true);
+}
+
 void reset_temperature() {
   static float last_bias = Config::get_temperature_bias();
   float bias = Config::get_temperature_bias();
@@ -228,7 +235,9 @@ int main(int argc, char* argv[]) {
 
   // Step 4.1: LED配置修改触发反馈
   Engine::instance()->gpio_set(GpioPinLightBox, false);
+  trigger_gpio();
   config->appendListener("reload", trigger_led);
+  config->appendListener("reload", trigger_gpio);
   config->appendListener("reload", reset_temperature);
 
   // Step 5: 播放自定义开机画面
