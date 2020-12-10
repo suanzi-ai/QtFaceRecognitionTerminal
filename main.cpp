@@ -142,7 +142,7 @@ Engine* create_engine() {
               .sensor_type = sensor1_type,
               .dev = nir_cam.index,
               .flip = true,
-              .wdr = false,
+              .wdr = user_cfg.wdr,
               .channels =
                   {
                       {
@@ -268,8 +268,7 @@ int main(int argc, char* argv[]) {
 
       server->stop();
     }
-  })
-      .detach();
+  }).detach();
 
   return app.exec();
 }

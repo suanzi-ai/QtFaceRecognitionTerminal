@@ -99,10 +99,20 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
         return;
       }
 
+      bool pre_wdr = Config::get_user().wdr;
+
       ret = cfg->reload();
       if (ret != SZ_RETCODE_OK) {
         response_failed(res, "reload error " + std::to_string(ret));
         return;
+      }
+
+      bool post_wdr = Config::get_user().wdr;
+
+      if (pre_wdr != post_wdr) {
+        if (!Engine::instance()->switch_wdr_mode()) {
+          SZ_LOG_ERROR("Switch WDR mode failed");
+        }
       }
 
       response_ok(res);
