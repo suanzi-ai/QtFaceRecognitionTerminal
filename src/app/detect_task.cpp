@@ -1,16 +1,14 @@
 #include "detect_task.hpp"
 
+#include <QRect>
+#include <QThread>
 #include <chrono>
 #include <ctime>
 #include <iostream>
-#include <string>
-
-#include <QRect>
-#include <QThread>
-
 #include <quface-io/engine.hpp>
 #include <quface/common.hpp>
 #include <quface/face.hpp>
+#include <string>
 
 #include "audio_task.hpp"
 #include "config.hpp"
@@ -156,11 +154,6 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
   } else {
     detect_count_ = 0;
     no_detect_count_++;
-  }
-
-  SZ_RETCODE ret = adjust_isp_by_detection(output);
-  if (ret != SZ_RETCODE_OK) {
-    SZ_LOG_ERROR("Adjust isp failed");
   }
 
   if (RecognizeTask::idle() && valid_dectect)

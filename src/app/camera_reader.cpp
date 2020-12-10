@@ -19,18 +19,6 @@ CameraReader::CameraReader(QObject *parent) {
   auto engine = Engine::instance();
   engine->start();
 
-  SZ_LOG_INFO("Update isp ...");
-  if (!isp_update()) {
-    SZ_LOG_ERROR("Update isp failed");
-  }
-
-  Config::get_instance()->appendListener("reload", [&]() {
-    SZ_LOG_INFO("Update isp ...");
-    if (!isp_update()) {
-      SZ_LOG_ERROR("Update isp failed");
-    }
-  });
-
   // Initialize PINGPANG buffer
   Size size_bgr_1, size_bgr_2;
   Size size_nir_1, size_nir_2;
