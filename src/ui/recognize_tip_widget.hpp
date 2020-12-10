@@ -39,9 +39,6 @@ class RecognizeTipWidget : public QWidget {
   QPixmap avatar_;
 
   QFont font_;
-  QPixmap icon_;
-  QPixmap icon_good_;
-  QPixmap icon_bad_;
   QPainterPath temperature_rect_;
   QTimer reset_timer_;
   QTimer ip_timer_;

@@ -66,7 +66,7 @@ StatusBanner::StatusBanner(int screen_width, int screen_height, QWidget *parent)
 
   ph_layout->addWidget(pl_temperature_, 0, Qt::AlignRight | Qt::AlignCenter);
   ph_layout->addWidget(pl_face, 0, Qt::AlignRight | Qt::AlignCenter);
-  ph_layout->addSpacing(0.00625 * w);
+  ph_layout->addSpacing(0.0075 * w);
   ph_layout->addWidget(pl_net_, 0, Qt::AlignRight | Qt::AlignCenter);
   ph_layout->setSpacing(0.00625 * w);
   ph_layout->setContentsMargins(0.0125 * w, 0.00234375 * h, 0.0125 * w,

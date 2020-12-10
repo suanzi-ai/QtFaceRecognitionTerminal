@@ -24,110 +24,87 @@ using namespace suanzi::io;
 
 RecognizeTipWidget::RecognizeTipWidget(int screen_width, int screen_height,
                                        QWidget *parent)
-    : QWidget(parent),
-      icon_(":asserts/location.png"),
-      icon_good_(":asserts/tick.png"),
-      icon_bad_(":asserts/cross.png"),
-      has_info_(false) {
+    : QWidget(parent), has_info_(false) {
   setAttribute(Qt::WA_StyledBackground, true);
   setStyleSheet(
       "QWidget {background-color:rgba(5, 0, 20, 150);margin:0px;} QLabel "
       "{background-color:transparent;color:white;border: 1px solid "
       "transparent;padding: 0px 0px 0px 0px;}");
-  move(0, 0.84375 * screen_height);
-  setFixedSize(screen_width, 0.171875 * screen_height);
 
-  //小时 分钟 布局
-  pl_hh_mm_ = new QLabel(this);
-  pl_hh_mm_->setAlignment(Qt::AlignTop);
+  const int w = screen_width;
+  const int h = screen_height;
 
-  QFont font;
-  font.setPointSize(0.0625 * screen_width);
-  pl_hh_mm_->setFont(font);
-  pl_hh_mm_->setText("00:00");
-  QSize tmp_size = pl_hh_mm_->sizeHint();
-  int h = tmp_size.height() - 40;
-  pl_hh_mm_->setFixedHeight(h);
-  pl_hh_mm_->setIndent(2);
+  move(0, 0.84375 * h);
+  setFixedSize(w, 0.171875 * h);
 
-  QHBoxLayout *ph_layout = new QHBoxLayout;
-  ph_layout->addWidget(pl_hh_mm_);
-  ph_layout->addSpacing(10);
-
-  //分割线
-  QLabel *pl_separator = new QLabel(this);
-  pl_separator->setFixedSize(2, h - 15);
-  pl_separator->setStyleSheet("QLabel {background-color:white;}");
-  ph_layout->addWidget(pl_separator);
-
-  //年月日 周 布局
-  font.setPointSize(0.02125 * screen_width);
-  pl_yyyy_mm_dd_ = new QLabel(this);
-  pl_yyyy_mm_dd_->setFont(font);
-  pl_week_ = new QLabel(this);
-  pl_week_->setFont(font);
-  QVBoxLayout *pv_layout = new QVBoxLayout;
-  pv_layout->addSpacing(5);
-  pv_layout->addWidget(pl_yyyy_mm_dd_);
-  pv_layout->addWidget(pl_week_);
-  pv_layout->setSpacing(0);
-  pv_layout->setMargin(0);
-  pv_layout->addStretch();
-
-  ph_layout->addLayout(pv_layout);
-  ph_layout->setSpacing(0);
-  ph_layout->setMargin(0);
-
-  QGridLayout *pg_layout = new QGridLayout;
-  pg_layout->addLayout(ph_layout, 1, 0, 2, 6, Qt::AlignLeft | Qt::AlignBottom);
-
-  //位置 主机名 布局
-  QLabel *pl_location_icon = new QLabel(this);
-  pl_location_icon->setFixedSize(0.025 * screen_width,
-                                 0.021875 * screen_height);
-  pl_location_icon->setStyleSheet(
-      "QLabel {border-image: url(:asserts/location.png);}");
-  pl_host_name_ = new QLabel(this);
-  pl_host_name_->setText("quface");
-  pl_host_name_->setFixedHeight(0.021875 * screen_height);
-
-  ph_layout = new QHBoxLayout;
-  ph_layout->addSpacing(20);
-  ph_layout->addWidget(pl_location_icon);
-  ph_layout->addWidget(pl_host_name_);
-  ph_layout->setMargin(0);
-  ph_layout->setSpacing(5);
-  pg_layout->addLayout(ph_layout, 3, 0, 1, 2, Qt::AlignLeft | Qt::AlignTop);
-
-  pl_sn_ = new QLabel(this);
-  font.setPointSize(0.02125 * screen_width);
-  pl_sn_->setFont(font);
-  pl_sn_->setIndent(20);
-  pl_sn_->setTextFormat(Qt::PlainText);
-  pg_layout->addWidget(pl_sn_, 4, 0, 1, 6, Qt::AlignLeft | Qt::AlignTop);
-
-  // 抓拍图片
-  pl_avatar_ = new QLabel(this);
-  pl_avatar_->setScaledContents(true);
-  pl_avatar_->setFixedSize(0.1375 * screen_width, 0.0859375 * screen_height);
-  pl_snapshot_ = new QLabel(this);
-  pl_snapshot_->setScaledContents(true);
-  pl_snapshot_->setFixedSize(0.1375 * screen_width, 0.0859375 * screen_height);
-
-  pg_layout->addWidget(pl_avatar_, 0, 6, 6, 3, Qt::AlignLeft | Qt::AlignCenter);
-  pg_layout->addWidget(pl_snapshot_, 0, 9, 6, 3,
-                       Qt::AlignLeft | Qt::AlignCenter);
-
-  setLayout(pg_layout);
-
-  /*font_.setFamily(QFontDatabase::applicationFontFamilies(
+  font_.setFamily(QFontDatabase::applicationFontFamilies(
                       QFontDatabase::addApplicationFont(":asserts/clock.ttf"))
                       .at(0));
 
-  int w = width, h = height;
-  temperature_rect_.addRoundedRect(
-      QRect(0.25625 * w, 0.109375 * h, 0.4875 * w, 0.05078125 * h), 0.04375 * w,
-      0.02734375 * h);*/
+  auto cfg = Config::get_user();
+  // draw time
+  font_.setPointSize(0.0625 * w);
+  pl_hh_mm_ = new QLabel(this);
+  pl_hh_mm_->setFont(font_);
+  pl_hh_mm_->setFixedHeight(0.055 * h);
+  pl_hh_mm_->move(0.0375 * w, 0.03 * h);
+  pl_hh_mm_->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+  pl_hh_mm_->setIndent(0);
+
+  // draw seperator
+  QLabel *pl_separator = new QLabel(this);
+  pl_separator->setFixedSize(0.0025 * w, 0.04 * h);
+  pl_separator->setStyleSheet("QLabel {background-color:white;}");
+  pl_separator->move(0.28125 * w, 0.04 * h);
+
+  // draw date and weekday
+  font_.setPointSize(0.02125 * w);
+  pl_yyyy_mm_dd_ = new QLabel(this);
+  pl_yyyy_mm_dd_->setFont(font_);
+  pl_yyyy_mm_dd_->setFixedHeight(0.0234375 * h);
+  pl_yyyy_mm_dd_->move(0.3 * w, 0.035 * h);
+  pl_yyyy_mm_dd_->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+  pl_yyyy_mm_dd_->setIndent(0);
+
+  pl_week_ = new QLabel(this);
+  pl_week_->setFont(font_);
+  pl_week_->setFixedHeight(0.0234375 * h);
+  pl_week_->move(0.3 * w, 0.0586 * h);
+  pl_week_->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+  pl_week_->setIndent(0);
+
+  // draw location icon and device name
+  QLabel *pl_location_icon = new QLabel(this);
+  pl_location_icon->setFixedSize(0.03125 * w, 0.025 * h);
+  pl_location_icon->setStyleSheet(
+      "QLabel {border-image: url(:asserts/location.png);}");
+  pl_location_icon->move(0.05625 * w, 0.09 * h);
+
+  // draw SN, FW and ip
+  pl_host_name_ = new QLabel(this);
+  pl_host_name_->setFont(font_);
+  pl_host_name_->setFixedHeight(0.0234375 * h);
+  pl_host_name_->move(0.1 * w, 0.09 * h);
+  pl_host_name_->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+  pl_host_name_->setIndent(0);
+
+  pl_sn_ = new QLabel(this);
+  pl_sn_->setFont(font_);
+  pl_sn_->setFixedHeight(0.0234375 * h);
+  pl_sn_->move(0.05625 * w, 0.1171875 * h);
+  pl_sn_->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+  pl_sn_->setIndent(0);
+
+  // draw avatar and snapshot
+  pl_avatar_ = new QLabel(this);
+  pl_avatar_->setScaledContents(true);
+  pl_avatar_->setFixedSize(0.1375 * w, 0.0859375 * h);
+  pl_avatar_->move(0.625 * w, 0.04 * h);
+
+  pl_snapshot_ = new QLabel(this);
+  pl_snapshot_->setScaledContents(true);
+  pl_snapshot_->setFixedSize(0.1375 * w, 0.0859375 * h);
+  pl_snapshot_->move(0.8125 * w, 0.04 * h);
 
   reset_timer_.setInterval(2000);
   reset_timer_.setSingleShot(true);
@@ -215,7 +192,7 @@ void RecognizeTipWidget::rx_update() {
   sn_str += " FW:1.1.1";
   sn_str += ip_.c_str();
 
-  //去掉换行符
+  // 去掉换行符
   sn_str = sn_str.replace(QRegExp("\\\n"), "");
   pl_sn_->setText(sn_str);
 
