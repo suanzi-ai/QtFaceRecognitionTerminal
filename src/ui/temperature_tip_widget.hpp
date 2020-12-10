@@ -16,12 +16,10 @@ class TemperatureTipWidget : public QWidget {
  private slots:
   void rx_temperature(bool bvisible, bool bnormal_temperature,
                       float temperature);
-  void rx_reset();
 
  private:
   QLabel *pl_ok_or_no_;
   QLabel *pl_temperature_;
-  QTimer reset_timer_;
 
   int radius_;
 };

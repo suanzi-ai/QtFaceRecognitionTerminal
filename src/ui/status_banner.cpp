@@ -20,9 +20,11 @@ StatusBanner::StatusBanner(int screen_width, int screen_height, QWidget *parent)
   db_ = std::make_shared<FaceDatabase>(Config::get_quface().db_name);
   db_->size(db_size_);
 
-  setStyleSheet(
-      "QWidget {background-color:rgba(5, 0, 20, 150);margin:0px;} QLabel "
-      "{background-color:transparent;}");
+  style_ =
+      "QWidget { background-color:%1; margin:0px; } "
+      "QLabel { background-color:transparent; }";
+  setStyleSheet(style_.arg("rgba(5, 0, 20, 150)"));
+
   setFixedSize(screen_width, 0.02734375 * screen_height);
 
   move(0, 0);
@@ -111,4 +113,12 @@ void StatusBanner::rx_display(bool invisible) {
     hide();
   else
     show();
+}
+
+void StatusBanner::rx_temperature(bool bvisible, bool bnormal_temperature,
+                                  float temperature) {
+  if (!bvisible) setStyleSheet(style_.arg("rgba(5, 0, 20, 150)"));
+
+  if (bvisible && !bnormal_temperature)
+    setStyleSheet(style_.arg("rgba(220, 0, 0, 150)"));
 }

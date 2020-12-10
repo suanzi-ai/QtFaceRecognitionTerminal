@@ -23,6 +23,9 @@ class StatusBanner : public QWidget {
   void rx_update();
   void rx_display(bool invisible);
 
+  void rx_temperature(bool bvisible, bool bnormal_temperature,
+                      float temperature);
+
  private:
   SZ_UINT32 db_size_;
 
@@ -35,6 +38,8 @@ class StatusBanner : public QWidget {
   QLabel *pl_net_;
 
   std::string name_, ip_, mac_, last_name_;
+
+  QString style_;
 };
 
 }  // namespace suanzi

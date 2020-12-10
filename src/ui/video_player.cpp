@@ -178,6 +178,10 @@ void VideoPlayer::init_widgets() {
   status_banner_->hide();
   connect((const QObject *)face_timer_, SIGNAL(tx_display_screen_saver(bool)),
           (const QObject *)status_banner_, SLOT(rx_display(bool)));
+  connect((const QObject *)recognize_tip_widget_,
+          SIGNAL(tx_temperature(bool, bool, float)),
+          (const QObject *)status_banner_,
+          SLOT(rx_temperature(bool, bool, float)));
 
   // 创建热力图控件
   heatmap_widget_ = new HeatmapWidget(screen_width, screen_height, this);

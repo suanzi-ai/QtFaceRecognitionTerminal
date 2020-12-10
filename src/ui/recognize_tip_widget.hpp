@@ -58,6 +58,8 @@ class RecognizeTipWidget : public QWidget {
   QLabel *pl_sn_;
   QLabel *pl_avatar_;
   QLabel *pl_snapshot_;
+
+  QString style_;
 };
 
 }  // namespace suanzi

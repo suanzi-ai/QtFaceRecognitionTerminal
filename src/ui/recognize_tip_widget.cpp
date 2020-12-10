@@ -26,10 +26,12 @@ RecognizeTipWidget::RecognizeTipWidget(int screen_width, int screen_height,
                                        QWidget *parent)
     : QWidget(parent), has_info_(false) {
   setAttribute(Qt::WA_StyledBackground, true);
-  setStyleSheet(
-      "QWidget {background-color:rgba(5, 0, 20, 150);margin:0px;} QLabel "
-      "{background-color:transparent;color:white;border: 1px solid "
-      "transparent;padding: 0px 0px 0px 0px;}");
+
+  style_ =
+      "QWidget { background-color:%1; margin:0px; } "
+      "QLabel { background-color:transparent; color:white; "
+      "border: 1px solid transparent; padding: 0px 0px 0px 0px; }";
+  setStyleSheet(style_.arg("rgba(5, 0, 20, 150)"));
 
   const int w = screen_width;
   const int h = screen_height;
@@ -146,16 +148,8 @@ void RecognizeTipWidget::rx_display(PersonData person, bool audio_duplicated,
   check_temperature(btemperature, bnormal_temperature);
   emit tx_temperature(btemperature, bnormal_temperature, person_.temperature);
 
-  if (bnormal_temperature)
-    setStyleSheet(
-        "QWidget {background-color:rgba(5, 0, 20, 150);margin:0px;} QLabel "
-        "{background-color:transparent;color:white;border: 1px solid "
-        "transparent;padding: 0px 0px 0px 0px;}");
-  else
-    setStyleSheet(
-        "QWidget {background-color:rgba(220, 0, 0, 150);margin:0px;} QLabel "
-        "{background-color:transparent;color:white;border: 1px solid "
-        "transparent;padding: 0px 0px 0px 0px;}");
+  if (btemperature && !bnormal_temperature)
+    setStyleSheet(style_.arg("rgba(220, 0, 0, 150)"));
 
   reset_timer_.stop();
   reset_timer_.start();
@@ -200,6 +194,9 @@ void RecognizeTipWidget::rx_update() {
 }
 
 void RecognizeTipWidget::rx_reset() {
+  setStyleSheet(style_.arg("rgba(5, 0, 20, 150)"));
+  emit tx_temperature(false, false, 0);
+
   pl_avatar_->hide();
   pl_snapshot_->hide();
 }

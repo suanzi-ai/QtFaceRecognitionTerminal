@@ -36,11 +36,6 @@ TemperatureTipWidget::TemperatureTipWidget(int screen_width, int screen_height,
   ph_layout->addSpacing(0.025 * w);
   ph_layout->addWidget(pl_temperature_);
   setLayout(ph_layout);
-
-  reset_timer_.setInterval(2000);
-  reset_timer_.setSingleShot(true);
-  connect((const QObject *)&reset_timer_, SIGNAL(timeout()),
-          (const QObject *)this, SLOT(rx_reset()));
 }
 
 TemperatureTipWidget::~TemperatureTipWidget() {}
@@ -74,8 +69,4 @@ void TemperatureTipWidget::rx_temperature(bool bvisible,
         style_str.arg("rgba(220, 0, 0, 150)", QString::number(radius_)));
 
   show();
-  reset_timer_.stop();
-  reset_timer_.start();
 }
-
-void TemperatureTipWidget::rx_reset() { hide(); }
