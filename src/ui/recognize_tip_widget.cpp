@@ -105,9 +105,7 @@ void RecognizeTipWidget::rx_update() {
   std::transform(mac_.begin(), mac_.end(), mac_.begin(), ::toupper);
 }
 
-void RecognizeTipWidget::rx_reset() {
-  has_info_ = false;
-}
+void RecognizeTipWidget::rx_reset() { has_info_ = false; }
 
 void RecognizeTipWidget::paint(QPainter *painter) {
   const int w = width();
@@ -166,7 +164,7 @@ void RecognizeTipWidget::paint(QPainter *painter) {
 
   // draw SN, FW and ip
   char buffer[100];
-  sprintf(buffer, "SN:%s FW:1.1.0%s", serial_number_.c_str(), ip_.c_str());
+  sprintf(buffer, "SN:%s FW:1.1.1%s", serial_number_.c_str(), ip_.c_str());
   font_.setPointSize(0.02125 * w);
   painter->setFont(font_);
   painter->drawText(0.05625 * w, 0.984375 * h, buffer);
