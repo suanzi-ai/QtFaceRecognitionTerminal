@@ -150,6 +150,8 @@ void RecognizeTipWidget::rx_display(PersonData person, bool audio_duplicated,
 
   if (btemperature && !bnormal_temperature)
     setStyleSheet(style_.arg("rgba(220, 0, 0, 150)"));
+  else
+    setStyleSheet(style_.arg("rgba(5, 0, 20, 150)"));
 
   reset_timer_.stop();
   reset_timer_.start();
