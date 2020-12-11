@@ -2,8 +2,9 @@
 #define __READER_TASK_HPP__
 
 #include <QThread>
-#include <quface-io/option.hpp>
+
 #include <quface-io/ic_reader.hpp>
+#include <quface-io/option.hpp>
 
 namespace suanzi {
 using namespace io;
@@ -17,7 +18,6 @@ class ReaderTask : public QThread {
 
  protected:
  signals:
-  
 
  private slots:
   void rx_enable();

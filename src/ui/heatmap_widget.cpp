@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <cstring>
 
+#include <QPaintEvent>
+
 #include "config.hpp"
 
 using namespace suanzi;
@@ -10,7 +12,6 @@ using namespace suanzi::io;
 
 HeatmapWidget::HeatmapWidget(int width, int height, QWidget *parent)
     : QWidget(parent), raw_(16, 16, CV_8UC3), init_(false), success_(0) {
-
   setAttribute(Qt::WA_StyledBackground, true);
   setAutoFillBackground(true);
 
@@ -20,6 +21,8 @@ HeatmapWidget::HeatmapWidget(int width, int height, QWidget *parent)
   int pos_y = 0.703125 * height;
   setFixedSize(w, h);
   move(pos_x, pos_y);
+
+  font_.setPointSize(0.1 * w);
 
   x_ = y_ = 0.5;
   detection_.x = 0.45;
@@ -34,7 +37,10 @@ HeatmapWidget::HeatmapWidget(int width, int height, QWidget *parent)
 
 HeatmapWidget::~HeatmapWidget() {}
 
-void HeatmapWidget::rx_init(int success) { success_ = success; update();}
+void HeatmapWidget::rx_init(int success) {
+  success_ = success;
+  update();
+}
 
 void HeatmapWidget::rx_update(TemperatureMatrix mat, DetectionRatio detection,
                               float x, float y) {
@@ -72,13 +78,12 @@ void HeatmapWidget::rx_update(TemperatureMatrix mat, DetectionRatio detection,
 }
 
 void HeatmapWidget::paintEvent(QPaintEvent *event) {
-
   QPainter painter(this);
   const int w = width();
   const int h = height();
 
-	if (Config::get_user().enable_temperature) {
-	const QRect target(0, 0, w, h);
+  if (Config::get_user().enable_temperature) {
+    const QRect target(0, 0, w, h);
     painter.drawPixmap(target, heatmap_, QRect());
     painter.setPen(Qt::white);
     if (init_) {
@@ -89,18 +94,19 @@ void HeatmapWidget::paintEvent(QPaintEvent *event) {
       painter.drawRect(face);
 
       painter.drawLine(target.x() + (x_ - 0.1) * target.width(),
-                        target.y() + y_ * target.height(),
-                        target.x() + (x_ + 0.1) * target.width(),
-                        target.y() + y_ * target.height());
+                       target.y() + y_ * target.height(),
+                       target.x() + (x_ + 0.1) * target.width(),
+                       target.y() + y_ * target.height());
       painter.drawLine(target.x() + x_ * target.width(),
-                        target.y() + (y_ - 0.1) * target.height(),
-                        target.x() + x_ * target.width(),
-                        target.y() + (y_ + 0.1) * target.height());
+                       target.y() + (y_ - 0.1) * target.height(),
+                       target.x() + x_ * target.width(),
+                       target.y() + (y_ + 0.1) * target.height());
     } else {
       char progress[100];
       sprintf(progress, "Loading %d%%", success_ * 10);
+      painter.setFont(font_);
       painter.drawText(target.x() + 0.05 * target.width(),
-                        target.y() + 0.55 * target.height(), progress);
+                       target.y() + 0.55 * target.height(), progress);
     }
   }
 }

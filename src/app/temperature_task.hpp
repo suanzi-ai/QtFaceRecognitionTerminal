@@ -37,7 +37,7 @@ class TemperatureTask : public QObject {
 
  private:
   void connect();
-  bool try_reading(TemperatureMatrix &mat);
+  bool try_reading(TemperatureMatrix& mat);
 
   TemperatureManufacturer m_;
   TemperatureReader::ptr temperature_reader_;

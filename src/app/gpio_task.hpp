@@ -12,9 +12,11 @@ class GPIOTask : QObject {
   Q_OBJECT
  public:
   static GPIOTask* get_instance();
+  static bool validate(PersonData person);
 
  private slots:
-  void rx_trigger(PersonData person, bool if_duplicated);
+  void rx_trigger(PersonData person, bool audio_duplicated,
+                  bool record_duplicated);
   void rx_reset();
 
  private:

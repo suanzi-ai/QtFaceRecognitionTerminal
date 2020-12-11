@@ -12,26 +12,34 @@ namespace suanzi {
 using json = nlohmann::json;
 
 struct PersonData {
-  SZ_UINT32 id;
-  SZ_FLOAT score;
-  std::string number;
-  std::string name;
-  std::string gender;
-  SZ_UINT32 age;
-  std::string department;
-  std::string mobile;
-  std::string status;
-  float temperature;
-  std::string face_url;
-  std::string face_path;
-  cv::Mat bgr_snapshot;
-  cv::Mat nir_snapshot;
-  cv::Mat face_snapshot;
-  bool is_duplicated;
-  bool has_mask;
+ public:
+  PersonData &operator=(const PersonData &other);
+
   bool is_status_normal();
   bool is_status_blacklist();
   bool is_temperature_normal();
+
+ public:
+  SZ_UINT32 id;
+  SZ_FLOAT score;
+  SZ_FLOAT temperature;
+  SZ_UINT32 age;
+
+  std::string number;
+  std::string name;
+  std::string gender;
+  std::string department;
+  std::string mobile;
+  std::string status;
+  std::string face_url;
+  std::string face_path;
+
+  cv::Mat bgr_snapshot;
+  cv::Mat nir_snapshot;
+  cv::Mat face_snapshot;
+
+  bool is_duplicated;
+  bool has_mask;
 };
 
 void to_json(json &j, const PersonData &p);

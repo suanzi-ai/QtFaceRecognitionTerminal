@@ -4,6 +4,8 @@
 
 #include "config.hpp"
 
+#define VALUE_AT(m, x, y) ((m.value)[(y)*16 + (x)])
+
 using namespace suanzi;
 using namespace suanzi::io;
 
@@ -103,8 +105,56 @@ bool TemperatureTask::try_reading(TemperatureMatrix& mat) {
   while (SZ_RETCODE_OK != temperature_reader_->read(mat) && ++trial < MAX_TRIAL)
     QThread::msleep(INTERVAL);
 
+  if (mat.size != 256) {
+    SZ_LOG_ERROR("only 16x16 is supported");
+    return false;
+  }
+
   bool ret = trial < MAX_TRIAL;
-  if (ret) QThread::msleep(INTERVAL);
+  if (ret) {
+    QThread::msleep(INTERVAL);
+    auto cfg = Config::get_temperature();
+    switch (cfg.sensor_rotation) {
+      case TemperatureRotation::ROTATION_90:
+        for (int y = 0; y < 16 / 2; y++) {
+          for (int x = y; x < 16 - y - 1; x++) {
+            float t = VALUE_AT(mat, x, y);
+            VALUE_AT(mat, x, y) = VALUE_AT(mat, y, 16 - x - 1);
+            VALUE_AT(mat, y, 16 - x - 1) =
+                VALUE_AT(mat, 16 - x - 1, 16 - y - 1);
+            VALUE_AT(mat, 16 - x - 1, 16 - y - 1) =
+                VALUE_AT(mat, 16 - y - 1, x);
+            VALUE_AT(mat, 16 - y - 1, x) = t;
+          }
+        }
+        break;
+      case TemperatureRotation::ROTATION_180:
+        for (int y = 0; y < 16 / 2; y++) {
+          for (int x = 0; x < 16; x++) {
+            float t = VALUE_AT(mat, x, y);
+            VALUE_AT(mat, x, y) = VALUE_AT(mat, 16 - x - 1, 16 - y - 1);
+            VALUE_AT(mat, 16 - x - 1, 16 - y - 1) = t;
+          }
+        }
+        break;
+      case TemperatureRotation::ROTATION_270:
+        for (int y = 0; y < 16 / 2; y++) {
+          for (int x = y; x < 16 - y - 1; x++) {
+            float t = VALUE_AT(mat, x, y);
+            VALUE_AT(mat, x, y) = VALUE_AT(mat, 16 - y - 1, x);
+            VALUE_AT(mat, 16 - y - 1, x) =
+                VALUE_AT(mat, 16 - x - 1, 16 - y - 1);
+            VALUE_AT(mat, 16 - x - 1, 16 - y - 1) =
+                VALUE_AT(mat, y, 16 - x - 1);
+            VALUE_AT(mat, y, 16 - x - 1) = t;
+          }
+        }
+        break;
+      default:
+        break;
+    }
+  }
+
   return ret;
 }
 
@@ -116,11 +166,21 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
   static TemperatureMatrix mat;
   while (!try_reading(mat)) QThread::msleep(1);
 
+  auto cfg = Config::get_temperature();
+
   if (!to_clear) {
-    detection.x += 0.125f;
-    detection.y -= detection.height * 0.2f;
-    detection.width = std::min(detection.width, 1.f - detection.x);
-    detection.height = detection.height * 0.4f;
+    float x1 = (cfg.max_x - cfg.min_x) * detection.x + cfg.min_x;
+    float x2 =
+        (cfg.max_x - cfg.min_x) * (detection.x + detection.width) + cfg.min_x;
+    detection.x = std::max(x1 - .0725f, 0.f);
+    detection.width = std::min((x2 - x1) + .125f, 1.f);
+
+    float y1 = (cfg.max_y - cfg.min_y) * detection.y + cfg.min_y;
+    float y2 =
+        (cfg.max_y - cfg.min_y) * (detection.y + detection.height) + cfg.min_y;
+
+    detection.y = y1 - (y2 - y1) * .2f;
+    detection.height = (y2 - y1) * .4f;
   } else {
     detection.x = 0.45;
     detection.y = 0.45;
@@ -162,15 +222,12 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
     face_temperature_ = surface_to_inner(
         measure_to_surface(max_temperature + Config::get_temperature_bias()));
 
-    SZ_LOG_DEBUG(
-        "ambient={:.2f}°C, face={:.2f}°C, max={:.2f}°C, avg={:.2f}°C, "
-        "var={:.2f}°C",
-        ambient_temperature_, face_temperature_, max_temperature, avg, var);
-
     if (!Config::enable_anti_spoofing() ||
-        var > Config::get_user().temperature_var)
+        var > Config::get_user().temperature_var) {
+      SZ_LOG_INFO("max={:.2f}°C, face={:.2f}°C, var={:.2f}°C", max_temperature,
+                  face_temperature_, var);
       emit tx_temperature(face_temperature_);
-    else {
+    } else {
       detection.x = 0.45;
       detection.y = 0.45;
       detection.width = 0.1;
@@ -180,7 +237,15 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
     }
   }
 
-  emit tx_heatmap(mat, detection, max_x, max_y);
+  static TemperatureMatrix output;
+  if (output.value == nullptr)
+    output.value = (float*)malloc(256 * sizeof(float));
+  if (output.size != 256)
+    output.value = (float*)realloc(output.value, 256 * sizeof(float));
+  output.size = 256;
+  memcpy(output.value, mat.value, output.size * sizeof(float));
+
+  emit tx_heatmap(output, detection, max_x, max_y);
 
   is_running_ = false;
 }

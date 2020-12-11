@@ -1,14 +1,13 @@
 #ifndef STATUS_BANNER_H
 #define STATUS_BANNER_H
 
+#include <QFont>
+#include <QLabel>
+#include <QPixmap>
 #include <QTimer>
 #include <QWidget>
-#include <QFont>
-#include <QPixmap>
-#include <QLabel>
-
-#include "quface_common.hpp"
 #include "person_service.hpp"
+#include "quface_common.hpp"
 
 namespace suanzi {
 
@@ -22,6 +21,8 @@ class StatusBanner : public QWidget {
  private slots:
   void rx_update();
   void rx_display(bool invisible);
+  void rx_temperature(bool bvisible, bool bnormal_temperature,
+                      float temperature);
 
  private:
   SZ_UINT32 db_size_;
@@ -33,8 +34,8 @@ class StatusBanner : public QWidget {
   QLabel *pl_person_num_;
   QLabel *pl_temperature_;
   QLabel *pl_net_;
-
   std::string name_, ip_, mac_, last_name_;
+  QString style_;
 };
 
 }  // namespace suanzi

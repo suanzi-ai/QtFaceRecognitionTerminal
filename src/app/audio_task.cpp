@@ -7,6 +7,7 @@
 #include <quface-io/engine.hpp>
 
 #include "config.hpp"
+#include "gpio_task.hpp"
 
 using namespace suanzi;
 
@@ -19,36 +20,31 @@ bool AudioTask::idle() { return !get_instance()->is_running_; }
 
 SZ_UINT16 AudioTask::duration(PersonData person) {
   auto user = Config::get_user();
+  if (!user.enable_audio) return 0;
+
   auto instance = get_instance();
   SZ_UINT16 total_duration = 0;
-  if (!user.enable_audio) return total_duration;
 
   if (user.enable_record_audio && !person.is_status_normal())
     total_duration += instance->fail_audio_.duration;
 
-  if (user.enable_temperature) {
-    if (user.enable_mask_audio && !person.has_mask)
-      total_duration += instance->warn_mask_audio_.duration;
+  if (user.enable_mask_audio && !person.has_mask)
+    total_duration += instance->warn_mask_audio_.duration;
 
+  if (user.enable_temperature) {
     if (user.enable_temperature_audio) {
       if (!person.is_temperature_normal())
         total_duration += instance->temperature_abnormal_audio_.duration;
       else
         total_duration += instance->temperature_normal_audio_.duration;
     }
+  }
 
-    if ((user.enable_record_audio || user.enable_mask_audio) &&
-        user.enable_pass_audio) {
-      if (person.is_status_normal() && person.is_temperature_normal() &&
-          person.has_mask)
-        total_duration += instance->pass_audio_.duration;
-    }
-  } else if (user.enable_record_audio && user.enable_pass_audio)
-    if (person.is_status_normal())
-      total_duration += instance->pass_audio_.duration;
+  if (user.enable_pass_audio && GPIOTask::validate(person))
+    total_duration += instance->pass_audio_.duration;
 
-  SZ_LOG_INFO("total_duration={}", total_duration / 1000);
-  return total_duration / 1000;
+  // SZ_LOG_INFO("total_duration={}", total_duration / 1000);
+  return total_duration / 1000 + 1;
 }
 
 AudioTask::AudioTask(QThread* thread, QObject* parent) : is_running_(false) {
@@ -135,7 +131,7 @@ void AudioTask::load_audio() {
     warn_distance_audio_.duration = 3000;
     warn_mask_audio_.duration = 1500;
 
-    pass_audio_.duration = 1500;
+    pass_audio_.duration = 2500;
   }
 
   read_audio(":asserts/beep.aac", beep_audio_);
@@ -160,34 +156,29 @@ void AudioTask::play_audio(Audio& audio) {
   }
 }
 
-void AudioTask::rx_report(PersonData person, bool duplicated) {
+void AudioTask::rx_report(PersonData person, bool audio_duplicated,
+                          bool record_duplicated) {
   auto user = Config::get_user();
-  if (!user.enable_audio || duplicated) return;
+  if (!user.enable_audio || audio_duplicated) return;
 
   is_running_ = true;
 
   if (user.enable_record_audio && !person.is_status_normal())
     play_audio(fail_audio_);
 
-  if (user.enable_temperature) {
-    if (user.enable_mask_audio && !person.has_mask)
-      play_audio(warn_mask_audio_);
+  if (user.enable_mask_audio && !person.has_mask) play_audio(warn_mask_audio_);
 
+  if (user.enable_temperature) {
     if (user.enable_temperature_audio) {
       if (!person.is_temperature_normal())
         play_audio(temperature_abnormal_audio_);
       else
         play_audio(temperature_normal_audio_);
     }
+  }
 
-    if ((user.enable_record_audio || user.enable_mask_audio) &&
-        user.enable_pass_audio) {
-      if (person.is_status_normal() && person.is_temperature_normal() &&
-          person.has_mask)
-        play_audio(pass_audio_);
-    }
-  } else if (user.enable_record_audio && user.enable_pass_audio)
-    if (person.is_status_normal()) play_audio(pass_audio_);
+  if (user.enable_pass_audio && GPIOTask::validate(person))
+    play_audio(pass_audio_);
 
   is_running_ = false;
 }

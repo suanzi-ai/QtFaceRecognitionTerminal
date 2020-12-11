@@ -5,8 +5,8 @@
 #include <QPainter>
 #include <QPushButton>
 #include <QTimer>
-#include "readcard_task.hpp"
 #include "config.hpp"
+#include "readcard_task.hpp"
 
 using namespace suanzi;
 using namespace suanzi::io;
@@ -24,14 +24,7 @@ VideoPlayer::VideoPlayer(QWidget *parent) : QWidget(parent) {
 
 VideoPlayer::~VideoPlayer() {}
 
-void VideoPlayer::paintEvent(QPaintEvent *event) {
-  //QWidget::paintEvent(event);
-
-  //QPainter painter(this);
-  //outline_widget_->paint(&painter);
-  //recognize_tip_widget_->paint(&painter);
-}
-
+void VideoPlayer::paintEvent(QPaintEvent *event) {}
 
 void VideoPlayer::init_workflow() {
   // 创建摄像头读取对象
@@ -66,45 +59,44 @@ void VideoPlayer::init_workflow() {
   // 创建继电器开关线程
   ReadCardTask *readcard_task = ReadCardTask::get_instance();
   gpio_task_ = GPIOTask::get_instance();
-  connect((const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool)),
-          (const QObject *)gpio_task_, SLOT(rx_trigger(PersonData, bool)));
-  connect((const QObject *)readcard_task, SIGNAL(tx_display(PersonData, bool)),
-          (const QObject *)gpio_task_, SLOT(rx_trigger(PersonData, bool)));
+  connect(
+      (const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool, bool)),
+      (const QObject *)gpio_task_, SLOT(rx_trigger(PersonData, bool, bool)));
+  // connect((const QObject *)readcard_task, SIGNAL(tx_display(PersonData,
+  // bool)), (const QObject *)gpio_task_, SLOT(rx_trigger(PersonData, bool)));
 
   // 创建人脸记录线程
   upload_task_ = UploadTask::get_instance();
-  connect((const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool)),
-          (const QObject *)upload_task_, SLOT(rx_upload(PersonData, bool)));
+  connect(
+      (const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool, bool)),
+      (const QObject *)upload_task_, SLOT(rx_upload(PersonData, bool, bool)));
 
   // 创建人脸计时器线程
   face_timer_ = FaceTimer::get_instance();
-  connect((const QObject *)detect_task_,
-          SIGNAL(tx_detect_result(bool)),
-          (const QObject *)face_timer_,
-
-          SLOT(rx_detect_result(bool)));
-  connect((const QObject *)face_timer_, SIGNAL(tx_white_led_timeout()),
-          (const QObject *)detect_task_, SLOT(rx_white_led_timeout()));
+  connect((const QObject *)detect_task_, SIGNAL(tx_detect_result(bool)),
+          (const QObject *)face_timer_, SLOT(rx_detect_result(bool)));
+  connect((const QObject *)face_timer_, SIGNAL(tx_reset()),
+          (const QObject *)record_task_, SLOT(rx_reset()));
 
   // 创建LED线程
   led_task_ = LEDTask::get_instance();
 
   // 创建语音播报线程
   audio_task_ = AudioTask::get_instance();
-  connect((const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool)),
-          (const QObject *)audio_task_, SLOT(rx_report(PersonData, bool)));
+  connect(
+      (const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool, bool)),
+      (const QObject *)audio_task_, SLOT(rx_report(PersonData, bool, bool)));
   connect((const QObject *)detect_task_, SIGNAL(tx_warn_distance()),
           (const QObject *)audio_task_, SLOT(rx_warn_distance()));
 
   // 创建人体测温线程
-  temperature_task_ = TemperatureTask::get_instance();
+  /*temperature_task_ = TemperatureTask::get_instance();
   connect((const QObject *)detect_task_,
           SIGNAL(tx_temperature_target(DetectionRatio, bool)),
           (const QObject *)temperature_task_,
           SLOT(rx_update(DetectionRatio, bool)));
   connect((const QObject *)temperature_task_, SIGNAL(tx_temperature(float)),
-          (const QObject *)record_task_, SLOT(rx_temperature(float)));
-
+          (const QObject *)record_task_, SLOT(rx_temperature(float)));*/
 }
 
 void VideoPlayer::init_widgets() {
@@ -150,32 +142,32 @@ void VideoPlayer::init_widgets() {
             SLOT(rx_display(DetectionRatio, bool, bool, bool)));
   }
 
-#if 0
-  temp_tip_widget_ = new TemperatureTipWidget(screen_width, screen_height, this);
+  temp_tip_widget_ =
+      new TemperatureTipWidget(screen_width, screen_height, this);
   temp_tip_widget_->hide();
 
   // 创建人脸识别记录控件
   recognize_tip_widget_ =
       new RecognizeTipWidget(screen_width, screen_height, this);
   recognize_tip_widget_->hide();
-  connect((const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool)),
-          (const QObject *)recognize_tip_widget_,
-          SLOT(rx_display(PersonData, bool)));
-  connect((const QObject *)recognize_tip_widget_, SIGNAL(tx_temperature(bool, bool, float)),
-          (const QObject *)temp_tip_widget_,
-          SLOT(rx_temperature(bool, bool, float)));
-#endif
 
   touch_widget_ = new TouchWidget(screen_width, screen_height, this);
   touch_widget_->hide();
 
+  connect((const QObject *)record_task_,
+          SIGNAL(tx_display(PersonData, bool, bool)),
+          (const QObject *)recognize_tip_widget_,
+          SLOT(rx_display(PersonData, bool, bool)));
+  connect((const QObject *)recognize_tip_widget_,
+          SIGNAL(tx_temperature(bool, bool, float)),
+          (const QObject *)temp_tip_widget_,
+          SLOT(rx_temperature(bool, bool, float)));
 
   // 创建屏保控件
   screen_saver_ = new ScreenSaverWidget(screen_width, screen_height);
   screen_saver_->hide();
   connect((const QObject *)face_timer_, SIGNAL(tx_display_screen_saver(bool)),
           (const QObject *)screen_saver_, SLOT(rx_display(bool)));
-
 
   // 创建人体轮廓控件
   outline_widget_ = new OutlineWidget(screen_width, screen_height, this);
@@ -187,29 +179,32 @@ void VideoPlayer::init_widgets() {
   status_banner_->hide();
   connect((const QObject *)face_timer_, SIGNAL(tx_display_screen_saver(bool)),
           (const QObject *)status_banner_, SLOT(rx_display(bool)));
+  connect((const QObject *)recognize_tip_widget_,
+          SIGNAL(tx_temperature(bool, bool, float)),
+          (const QObject *)status_banner_,
+          SLOT(rx_temperature(bool, bool, float)));
 
   // 创建热力图控件
   heatmap_widget_ = new HeatmapWidget(screen_width, screen_height, this);
   heatmap_widget_->hide();
-  connect((const QObject *)temperature_task_, SIGNAL(tx_heatmap_init(int)),
-          (const QObject *)heatmap_widget_, SLOT(rx_init(int)));
-  connect((const QObject *)temperature_task_,
-          SIGNAL(tx_heatmap(TemperatureMatrix, DetectionRatio, float, float)),
-          (const QObject *)heatmap_widget_,
-          SLOT(rx_update(TemperatureMatrix, DetectionRatio, float, float)));
+  /* connect((const QObject *)temperature_task_, SIGNAL(tx_heatmap_init(int)),
+           (const QObject *)heatmap_widget_, SLOT(rx_init(int)));
+   connect((const QObject *)temperature_task_,
+           SIGNAL(tx_heatmap(TemperatureMatrix, DetectionRatio, float, float)),
+           (const QObject *)heatmap_widget_,
+           SLOT(rx_update(TemperatureMatrix, DetectionRatio, float, float)));*/
 
-	isp_hist_widget_ = new ISPHistWidget(screen_width, 350, this);
-	isp_hist_widget_->move(0, 350);
-	isp_hist_widget_->hide();
-
+  isp_hist_widget_ = new ISPHistWidget(400, 300, this);
+  isp_hist_widget_->move(0, 50);
+  isp_hist_widget_->hide();
 
   QTimer::singleShot(1, this, SLOT(delay_init_widgets()));
 }
 
 void VideoPlayer::delay_init_widgets() {
-	status_banner_->show();
-	heatmap_widget_->show();
-	//recognize_tip_widget_->show();
-	//temp_tip_widget_->show();
-	touch_widget_->show();
+  status_banner_->show();
+  heatmap_widget_->show();
+  recognize_tip_widget_->show();
+  temp_tip_widget_->show();
+  touch_widget_->show();
 }

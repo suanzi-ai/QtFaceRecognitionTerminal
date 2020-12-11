@@ -42,6 +42,29 @@ void suanzi::from_json(const json &j, PersonData &p) {
 
 using namespace suanzi;
 
+PersonData &PersonData::operator=(const PersonData &other) {
+  id = other.id;
+  score = other.score;
+  temperature = other.temperature;
+  age = other.age;
+
+  number = other.number;
+  name = other.name;
+  gender = other.gender;
+  department = other.department;
+  mobile = other.mobile;
+  status = other.status;
+  face_url = other.face_url;
+  face_path = other.face_path;
+
+  other.bgr_snapshot.copyTo(bgr_snapshot);
+  other.nir_snapshot.copyTo(nir_snapshot);
+  other.face_snapshot.copyTo(face_snapshot);
+
+  is_duplicated = other.is_duplicated;
+  has_mask = other.has_mask;
+}
+
 bool PersonData::is_status_normal() {
   return status == PersonService::get_status(PersonStatus::Normal);
 }
@@ -93,7 +116,6 @@ SZ_RETCODE PersonService::get_person(std::string card_no, PersonData &person) {
   }
   return SZ_RETCODE_FAILED;
 }
-
 
 SZ_RETCODE PersonService::update_person_face_image(
     uint id, const std::vector<SZ_UINT8> &image_content) {
@@ -170,12 +192,13 @@ SZ_RETCODE PersonService::report_face_record(
     }
   }
 
+  float temperature = ((float)((int)((person.temperature + 0.05f) * 10))) / 10;
   json j = {
       {"personID", person.id},
       {"imagePath", bgr_file_path},
       {"irImagePath", nir_file_path},
       {"status", person.status},
-      {"temperature", person.temperature},
+      {"temperature", temperature},
       {"maskStatus", person.has_mask ? "correct" : "none"},
   };
   if (!Config::get_user().enable_temperature) j.erase("temperature");

@@ -15,6 +15,21 @@ GPIOTask* GPIOTask::get_instance() {
   return &instance;
 }
 
+bool GPIOTask::validate(PersonData person) {
+  auto user = Config::get_user();
+
+  bool all_pass = true;
+  if (user.relay_switch_cond & RelaySwitchCond::Status)
+    all_pass = all_pass && person.is_status_normal();
+  if (user.enable_temperature &&
+      (user.relay_switch_cond & RelaySwitchCond::Temperature))
+    all_pass = all_pass && person.is_temperature_normal();
+  if (user.relay_switch_cond & RelaySwitchCond::Mask)
+    all_pass = all_pass && person.has_mask;
+
+  return all_pass;
+}
+
 GPIOTask::GPIOTask(QThread* thread, QObject* parent) : event_count_(0) {
   // Create thread
   if (thread == nullptr) {
@@ -29,18 +44,11 @@ GPIOTask::GPIOTask(QThread* thread, QObject* parent) : event_count_(0) {
 
 GPIOTask::~GPIOTask() {}
 
-void GPIOTask::rx_trigger(PersonData person, bool if_duplicated) {
+void GPIOTask::rx_trigger(PersonData person, bool audio_duplicated,
+                          bool record_duplicated) {
   auto user = Config::get_user();
 
-  bool all_pass = true;
-  if (user.relay_switch_cond & RelaySwitchCond::Status)
-    all_pass = all_pass && person.is_status_normal();
-  if (user.enable_temperature &&
-      (user.relay_switch_cond & RelaySwitchCond::Temperature))
-    all_pass = all_pass && person.is_temperature_normal();
-  if (user.enable_temperature &&
-      (user.relay_switch_cond & RelaySwitchCond::Mask))
-    all_pass = all_pass && person.has_mask;
+  bool all_pass = GPIOTask::validate(person);
 
   bool switch_relay;
   if (user.relay_switch_mode == RelaySwitchMode::AllPass) {

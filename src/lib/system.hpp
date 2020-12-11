@@ -10,7 +10,7 @@ class System {
                                         std::string& mac_address);
   static SZ_RETCODE get_release_version(std::string& version);
   static SZ_RETCODE get_hostname(std::string& hostname);
-  static SZ_RETCODE get_serial_number(std::string &serial_number);
+  static SZ_RETCODE get_serial_number(std::string& serial_number);
 };
 
 }  // namespace suanzi

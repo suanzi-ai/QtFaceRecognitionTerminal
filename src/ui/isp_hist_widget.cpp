@@ -1,11 +1,12 @@
 #include "isp_hist_widget.hpp"
 
+#include <tuple>
+#include <vector>
+
 #include <QFontDatabase>
 #include <QPaintEvent>
 #include <QPainter>
 #include <QTimer>
-#include <tuple>
-#include <vector>
 
 #include "config.hpp"
 

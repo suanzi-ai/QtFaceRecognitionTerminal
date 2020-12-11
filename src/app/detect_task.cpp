@@ -138,8 +138,7 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
   emit tx_bgr_display(output->bgr_detection_, !output->bgr_face_detected_,
                       output->bgr_face_valid_, true);
 
-  if (Config::get_user().enable_temperature &&
-      TemperatureTask::get_instance()->idle())
+  if (TemperatureTask::get_instance()->idle())
     emit tx_temperature_target(output->bgr_detection_,
                                !output->bgr_face_detected_);
 
@@ -169,19 +168,14 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
   else
     QThread::usleep(10);
 
-  if (valid_dectect != last_valid_detect_) {
-	 last_valid_detect_ = valid_dectect;
-	 emit tx_detect_result(valid_dectect);
-  }
+  emit tx_detect_result(valid_dectect);  // fire FaceTimer event
 
   emit tx_finish();
 }
 
-
 void DetectTask::rx_white_led_timeout() {
-	last_valid_detect_ = false;//enable tx detect result
+  last_valid_detect_ = false;  // enable tx detect result
 }
-
 
 bool DetectTask::detect_and_select(const MmzImage *image,
                                    DetectionRatio &detection, bool is_bgr) {

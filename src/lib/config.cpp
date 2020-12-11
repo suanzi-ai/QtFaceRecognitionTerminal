@@ -1,7 +1,8 @@
 #include "config.hpp"
 
-#include <QFile>
 #include <regex>
+
+#include <QFile>
 
 using namespace suanzi;
 using namespace suanzi::io;
@@ -116,6 +117,11 @@ void suanzi::to_json(json &j, const TemperatureConfig &c) {
   SAVE_JSON_TO(j, "temperature_distance", c.temperature_distance);
   SAVE_JSON_TO(j, "manufacturer", c.manufacturer);
   SAVE_JSON_TO(j, "temperature_delay", c.temperature_delay);
+  SAVE_JSON_TO(j, "sensor_rotation", c.sensor_rotation);
+  SAVE_JSON_TO(j, "min_x", c.min_x);
+  SAVE_JSON_TO(j, "max_x", c.max_x);
+  SAVE_JSON_TO(j, "min_y", c.min_y);
+  SAVE_JSON_TO(j, "max_y", c.max_y);
 }
 
 void suanzi::from_json(const json &j, TemperatureConfig &c) {
@@ -126,6 +132,11 @@ void suanzi::from_json(const json &j, TemperatureConfig &c) {
   LOAD_JSON_TO(j, "temperature_distance", c.temperature_distance);
   LOAD_JSON_TO(j, "manufacturer", c.manufacturer);
   LOAD_JSON_TO(j, "temperature_delay", c.temperature_delay);
+  LOAD_JSON_TO(j, "sensor_rotation", c.sensor_rotation);
+  LOAD_JSON_TO(j, "min_x", c.min_x);
+  LOAD_JSON_TO(j, "max_x", c.max_x);
+  LOAD_JSON_TO(j, "min_y", c.min_y);
+  LOAD_JSON_TO(j, "max_y", c.max_y);
 }
 
 void suanzi::to_json(json &j, const QufaceConfig &c) {
@@ -307,6 +318,11 @@ void Config::load_defaults(ConfigData &c) {
       .temperature_distance = 0.68,
       .temperature_delay = 5,
       .manufacturer = 1,
+      .sensor_rotation = TemperatureRotation::None,
+      .min_x = 0.3125,
+      .max_x = 0.875,
+      .min_y = 0,
+      .max_y = 1,
   };
 
   c.user = {
@@ -671,13 +687,13 @@ SZ_RETCODE Config::reload() {
     std::unique_lock<std::mutex> lock(cfg_mutex_);
 
     SZ_LOG_INFO("Load from files ...");
-    try {
-      json config;
-      SZ_RETCODE ret = read_config(config);
-      if (ret != SZ_RETCODE_OK) {
-        return ret;
-      }
+    json config;
+    SZ_RETCODE ret = read_config(config);
+    if (ret != SZ_RETCODE_OK) {
+      return ret;
+    }
 
+    try {
       json config_patch;
       ret = read_override_config(config_patch);
       if (ret != SZ_RETCODE_OK) {
@@ -707,7 +723,9 @@ SZ_RETCODE Config::reload() {
       config.get_to(cfg_data_);
     } catch (std::exception &exc) {
       SZ_LOG_ERROR("Load error, will using defaults: {}", exc.what());
-      return SZ_RETCODE_FAILED;
+      config.get_to(cfg_data_);
+      dispatch("reload");
+      return SZ_RETCODE_OK;
     }
   }
 

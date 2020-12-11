@@ -11,6 +11,7 @@
 #include <QtCharts/QLineSeries>
 #include <QtCharts/QValueAxis>
 #include <QtWidgets/QGridLayout>
+
 #include <quface-io/engine.hpp>
 
 QT_CHARTS_BEGIN_NAMESPACE

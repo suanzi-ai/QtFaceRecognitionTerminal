@@ -4,8 +4,8 @@
 #include <QMetaType>
 #include <QThread>
 
-#include "image_package.hpp"
 #include "detection_data.hpp"
+#include "image_package.hpp"
 #include "recognize_data.hpp"
 
 namespace suanzi {
@@ -27,7 +27,7 @@ class PingPangBuffer {
   T *pang_;
 };
 
-}
+}  // namespace suanzi
 
 Q_DECLARE_METATYPE(suanzi::PingPangBuffer<suanzi::ImagePackage>);
 Q_DECLARE_METATYPE(suanzi::PingPangBuffer<suanzi::DetectionData>);

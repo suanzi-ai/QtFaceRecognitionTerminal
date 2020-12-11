@@ -32,7 +32,8 @@ class RecordTask : QObject {
   void tx_bgr_finish(bool if_finished);
 
   // for display
-  void tx_display(PersonData person, bool if_duplicated);
+  void tx_display(PersonData person, bool audio_duplicated,
+                  bool record_duplicated);
 
  private:
   RecordTask(QThread *thread = nullptr, QObject *parent = nullptr);
@@ -52,10 +53,12 @@ class RecordTask : QObject {
                             float &temperature);
   bool update_temperature_bias();
 
-  void update_person(RecognizeData *input, const SZ_UINT32 &face_id,
-                     PersonData &person);
-  bool if_duplicated(SZ_INT32 face_id, const FaceFeature &feature,
-                     PersonData &person);
+  void update_person_temperature(PersonData &person);
+  void update_person_info(RecognizeData *input, const SZ_UINT32 &face_id,
+                          PersonData &person);
+
+  bool if_duplicated(SZ_UINT32 &face_id, const FaceFeature &feature,
+                     int &duration, PersonData &person);
   bool if_temperature_updated(float &temperature);
 
   bool is_running_;
@@ -66,17 +69,20 @@ class RecordTask : QObject {
 
   std::vector<QueryResult> person_history_;
   std::vector<bool> mask_history_;
-  std::map<SZ_UINT32, std::chrono::steady_clock::time_point> query_clock_;
   std::map<SZ_UINT32, float> known_temperature_;
 
   std::vector<bool> live_history_;
-  std::map<SZ_UINT32, std::chrono::steady_clock::time_point>
-      unknown_query_clock_;
   std::map<SZ_UINT32, float> unknown_temperature_;
 
+  std::chrono::steady_clock::time_point last_query_clock_;
   int duplicated_counter_;
 
-  FaceFeature last_feature_;
+  bool has_unhandle_person_;
+  PersonData latest_person_;
+  SZ_UINT32 duplicated_id_;
+  int duplicated_duration_;
+
+  FaceFeature latest_feature_;
 
   std::vector<float> temperature_history_;
   float latest_temperature_;
