@@ -1,0 +1,182 @@
+{
+  "app": {
+          "boot_image_path": "boot.jpg",
+          "image_store_path": "/user/quface-app/var/db/upload/",
+          "infrared_window_percent": 25,
+          "person_service_base_url": "http://127.0.0.1",
+          "recognize_tip_top_percent": 78,
+          "screensaver_image_path": "background.jpg",
+          "server_host": "127.0.0.1",
+          "server_port": 8010,
+          "show_infrared_window": false,
+          "show_isp_info_window": 0
+  },
+  "cameras": {
+          "infrared": {
+                  "flip": 1,
+                  "index": 1,
+                  "rotate": 1
+          },
+          "normal": {
+                  "flip": 1,
+                  "index": 0,
+                  "rotate": 1
+          }
+  },
+  "isp": {
+          "adjust_window_size": 10,
+          "restore_size": 20
+  },
+  "pro": {
+          "detect_levels": {
+                  "high": {
+                          "max_pitch": 20,
+                          "max_roll": 20,
+                          "max_yaw": 20,
+                          "min_face_size": 40,
+                          "min_pitch": -20,
+                          "min_roll": -20,
+                          "min_tracking_iou": 0.9,
+                          "min_tracking_number": 3,
+                          "min_yaw": -20,
+                          "threshold": 0.4
+                  },
+                  "low": {
+                          "max_pitch": 35,
+                          "max_roll": 35,
+                          "max_yaw": 35,
+                          "min_face_size": 10,
+                          "min_pitch": -35,
+                          "min_roll": -35,
+                          "min_tracking_iou": 0.85,
+                          "min_tracking_number": 2,
+                          "min_yaw": -35,
+                          "threshold": 0.4
+                  },
+                  "medium": {
+                          "max_pitch": 25,
+                          "max_roll": 25,
+                          "max_yaw": 25,
+                          "min_face_size": 10,
+                          "min_pitch": -25,
+                          "min_roll": -25,
+                          "min_tracking_iou": 0.85,
+                          "min_tracking_number": 2,
+                          "min_yaw": -25,
+                          "threshold": 0.4
+                  }
+          },
+          "extract_levels": {
+                  "high": {
+                          "history_size": 2,
+                          "max_lost_age": 20,
+                          "min_accumulate_score": 1.6,
+                          "min_recognize_count": 2,
+                          "min_recognize_score": 0.8
+                  },
+                  "low": {
+                          "history_size": 1,
+                          "max_lost_age": 20,
+                          "min_accumulate_score": 0.775,
+                          "min_recognize_count": 1,
+                          "min_recognize_score": 0.775
+                  },
+                  "medium": {
+                          "history_size": 1,
+                          "max_lost_age": 10,
+                          "min_accumulate_score": 0.825,
+                          "min_recognize_count": 2,
+                          "min_recognize_score": 0.825
+                  }
+          },
+          "liveness_levels": {
+                  "high": {
+                          "continuous_max_lost_count": 3,
+                          "history_size": 5,
+                          "max_height_ratio_between_bgr": 2,
+                          "max_width_ratio_between_bgr": 2,
+                          "min_alive_count": 2,
+                          "min_height_ratio_between_bgr": 0.5,
+                          "min_iou_between_bgr": 0.1,
+                          "min_width_ratio_between_bgr": 0.5
+                  },
+                  "low": {
+                          "continuous_max_lost_count": 2,
+                          "history_size": 5,
+                          "max_height_ratio_between_bgr": 2,
+                          "max_width_ratio_between_bgr": 2,
+                          "min_alive_count": 1,
+                          "min_height_ratio_between_bgr": 0.5,
+                          "min_iou_between_bgr": 0.1,
+                          "min_width_ratio_between_bgr": 0.5
+                  },
+                  "medium": {
+                          "continuous_max_lost_count": 3,
+                          "history_size": 3,
+                          "max_height_ratio_between_bgr": 2,
+                          "max_width_ratio_between_bgr": 2,
+                          "min_alive_count": 1,
+                          "min_height_ratio_between_bgr": 0.5,
+                          "min_iou_between_bgr": 0.1,
+                          "min_width_ratio_between_bgr": 0.5
+                  }
+          }
+  },
+  "quface": {
+          "client_id": "face-service",
+          "db_name": "/user/quface-app/var/db/quface",
+          "device_name": "",
+          "device_secret": "",
+          "license_filename": "license.json",
+          "model_file_path": "facemodel.bin",
+          "product_key": ""
+  },
+  "temperature": {
+          "device_face_height": 0.5,
+          "device_face_width": 0.7,
+          "device_face_x": 0.15,
+          "device_face_y": 0.15,
+          "manufacturer": 1,
+          "temperature_delay": 0.3,
+          "temperature_distance": 0.4,
+          "max_x": 0.625,
+          "max_y": 0.875,
+          "min_x": 0.1875,
+          "min_y": 0,
+          "sensor_rotation": 180
+  },
+  "user": {
+          "blacklist_policy": "alarm",
+          "detect_level": "medium",
+          "duplication_interval": 2,
+          "duplication_limit": 10,
+          "enable_anti_spoofing": true,
+          "enable_audio": true,
+          "enable_distance_audio": true,
+          "enable_led": true,
+          "enable_mask_audio": true,
+          "enable_pass_audio": true,
+          "enable_record_audio": true,
+          "enable_screensaver": true,
+          "enable_temperature": true,
+          "enable_temperature_audio": true,
+          "extract_level": "medium",
+          "lang": "zh-CN",
+          "liveness_level": "medium",
+          "liveness_policy": "alarm",
+          "mask_score": 0.6,
+          "relay_default_state": 0,
+          "relay_restore_time": 10,
+          "relay_switch_cond": 7,
+          "relay_switch_mode": 0,
+          "screensaver_timeout": 60,
+          "temperature_bias": 0,
+          "temperature_finetune": 0,
+          "temperature_max": 37.3,
+          "temperature_min": 34,
+          "temperature_var": 5,
+          "upload_known_person": true,
+          "upload_unknown_person": true,
+          "wdr": true
+  }
+}
