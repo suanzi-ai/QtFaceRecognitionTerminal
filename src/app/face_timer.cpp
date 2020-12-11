@@ -17,8 +17,7 @@ FaceTimer::FaceTimer(QObject *parent) {
   screen_saver_timer_->setSingleShot(true);
   connect(screen_saver_timer_, SIGNAL(timeout()), this,
           SLOT(screen_saver_timeout()));
-  screen_saver_timer_->start(
-      /*Config::get_user().screensaver_timeout * */ 1000);
+  screen_saver_timer_->start(Config::get_user().screensaver_timeout * 1000);
 
   white_led_timer_ = new QTimer(this);
   white_led_timer_->setSingleShot(true);
