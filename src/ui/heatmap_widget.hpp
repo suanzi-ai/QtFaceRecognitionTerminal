@@ -1,6 +1,7 @@
 #ifndef HEATMAP_H
 #define HEATMAP_H
 
+#include <QFont>
 #include <QPainter>
 #include <QPixmap>
 #include <QWidget>
@@ -34,6 +35,8 @@ class HeatmapWidget : public QWidget {
   QColor to_rgb(float value);
 
  private:
+  QFont font_;
+
   float min_, max_;
   float x_, y_;
 

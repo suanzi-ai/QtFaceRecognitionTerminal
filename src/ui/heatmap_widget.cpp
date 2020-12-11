@@ -22,6 +22,8 @@ HeatmapWidget::HeatmapWidget(int width, int height, QWidget *parent)
   setFixedSize(w, h);
   move(pos_x, pos_y);
 
+  font_.setPointSize(0.1 * w);
+
   x_ = y_ = 0.5;
   detection_.x = 0.45;
   detection_.y = 0.45;
@@ -102,6 +104,7 @@ void HeatmapWidget::paintEvent(QPaintEvent *event) {
     } else {
       char progress[100];
       sprintf(progress, "Loading %d%%", success_ * 10);
+      painter.setFont(font_);
       painter.drawText(target.x() + 0.05 * target.width(),
                        target.y() + 0.55 * target.height(), progress);
     }
