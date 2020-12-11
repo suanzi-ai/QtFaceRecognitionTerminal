@@ -23,7 +23,6 @@ class DetectTask : QObject {
 
  private slots:
   void rx_frame(PingPangBuffer<ImagePackage> *buffer);
-  void rx_white_led_timeout();
 
  signals:
   void tx_finish();
@@ -66,7 +65,6 @@ class DetectTask : QObject {
 
   uint detect_count_ = 0;
   uint no_detect_count_ = 0;
-  bool last_valid_detect_;
 };
 
 }  // namespace suanzi

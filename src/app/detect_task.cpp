@@ -25,7 +25,7 @@ DetectTask *DetectTask::get_instance() {
 }
 
 DetectTask::DetectTask(QThread *thread, QObject *parent)
-    : buffer_inited_(false), last_valid_detect_(false) {
+    : buffer_inited_(false) {
   auto cfg = Config::get_quface();
   face_detector_ = std::make_shared<FaceDetector>(cfg.model_file_path);
   pose_estimator_ = std::make_shared<FacePoseEstimator>(cfg.model_file_path);
@@ -168,16 +168,8 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
   else
     QThread::usleep(10);
 
-  if (valid_dectect != last_valid_detect_) {
-    last_valid_detect_ = valid_dectect;
-    emit tx_detect_result(valid_dectect);
-  }
-
+  emit tx_detect_result(valid_dectect);  // fire FaceTimer event
   emit tx_finish();
-}
-
-void DetectTask::rx_white_led_timeout() {
-  last_valid_detect_ = false;  // enable tx detect result
 }
 
 bool DetectTask::detect_and_select(const MmzImage *image,

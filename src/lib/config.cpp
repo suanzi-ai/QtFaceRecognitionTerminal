@@ -40,10 +40,6 @@ void suanzi::to_json(json &j, const UserConfig &c) {
   SAVE_JSON_TO(j, "upload_unknown_person", c.upload_unknown_person);
   SAVE_JSON_TO(j, "mask_score", c.mask_score);
   SAVE_JSON_TO(j, "wdr", c.wdr);
-  SAVE_JSON_TO(j, "x", c.x);
-  SAVE_JSON_TO(j, "y", c.y);
-  SAVE_JSON_TO(j, "w", c.w);
-  SAVE_JSON_TO(j, "h", c.h);
 }
 
 void suanzi::from_json(const json &j, UserConfig &c) {
@@ -85,10 +81,6 @@ void suanzi::from_json(const json &j, UserConfig &c) {
   LOAD_JSON_TO(j, "upload_unknown_person", c.upload_unknown_person);
   LOAD_JSON_TO(j, "mask_score", c.mask_score);
   LOAD_JSON_TO(j, "wdr", c.wdr);
-  LOAD_JSON_TO(j, "x", c.x);
-  LOAD_JSON_TO(j, "y", c.y);
-  LOAD_JSON_TO(j, "w", c.w);
-  LOAD_JSON_TO(j, "h", c.h);
 }
 
 void suanzi::to_json(json &j, const AppConfig &c) {
@@ -366,10 +358,6 @@ void Config::load_defaults(ConfigData &c) {
       .upload_unknown_person = true,
       .mask_score = 0.7,
       .wdr = false,
-      .x = 30,
-      .y = 30,
-      .w = 30,
-      .h = 30,
   };
 
   c.quface = {

@@ -78,8 +78,8 @@ void VideoPlayer::init_workflow() {
   face_timer_ = FaceTimer::get_instance();
   connect((const QObject *)detect_task_, SIGNAL(tx_detect_result(bool)),
           (const QObject *)face_timer_, SLOT(rx_detect_result(bool)));
-  connect((const QObject *)face_timer_, SIGNAL(tx_white_led_timeout()),
-          (const QObject *)detect_task_, SLOT(rx_white_led_timeout()));
+  connect((const QObject *)face_timer_, SIGNAL(tx_reset()),
+          (const QObject *)record_task_, SLOT(rx_reset()));
 
   // 创建LED线程
   led_task_ = LEDTask::get_instance();

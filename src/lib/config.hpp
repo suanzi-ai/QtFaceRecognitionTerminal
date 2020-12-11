@@ -73,10 +73,6 @@ typedef struct {
   bool upload_unknown_person;
   SZ_FLOAT mask_score;
   bool wdr;
-  SZ_UINT32 x;
-  SZ_UINT32 y;
-  SZ_UINT32 w;
-  SZ_UINT32 h;
 } UserConfig;
 
 void to_json(json &j, const UserConfig &c);
