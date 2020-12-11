@@ -16,6 +16,16 @@ ScreenSaverWidget::ScreenSaverWidget(int width, int height, QWidget *parent)
   //
   setAttribute(Qt::WA_StyledBackground, true);
   setAutoFillBackground(true);
+  // set background image
+  QString style_str = "QWidget {border-image: url(";
+  QString filename(Config::get_app().screensaver_image_path.c_str());
+  if (QFile(filename).exists())
+    style_str += filename;
+  else {
+    style_str += ":asserts/background.jpg";
+  }
+  style_str += ");}";
+  setStyleSheet(style_str);
 
   move(0, 0);
   setFixedSize(width, height);

@@ -17,6 +17,7 @@ class TouchWidget : public QStackedWidget {
 
  private slots:
   void switch_stacked_widget(int index);
+  void rx_display(bool invisible);
 
  private:
   QStackedWidget *stacked_widget_;
@@ -25,7 +26,7 @@ class TouchWidget : public QStackedWidget {
   MenuKeyWidget *menu_key_widget_;
   int screen_width_;
   int screen_height_;
-  QWidget *touch_widget;
+  QWidget *parent_widget_;
 };
 
 }  // namespace suanzi

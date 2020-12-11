@@ -152,6 +152,8 @@ void VideoPlayer::init_widgets() {
   recognize_tip_widget_->hide();
 
   touch_widget_ = new TouchWidget(screen_width, screen_height, this);
+  connect((const QObject *)face_timer_, SIGNAL(tx_display_screen_saver(bool)),
+          (const QObject *)touch_widget_, SLOT(rx_display(bool)));
   touch_widget_->hide();
 
   connect((const QObject *)record_task_,

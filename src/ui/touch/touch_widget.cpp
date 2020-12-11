@@ -8,7 +8,7 @@ using namespace suanzi;
 TouchWidget::TouchWidget(int screen_width, int screen_height, QWidget *parent)
     : screen_width_(screen_width),
       screen_height_(screen_height),
-      touch_widget(parent) /*, QStackedWidget(parent)*/ {
+      parent_widget_(parent) /*, QStackedWidget(parent)*/ {
   // setStyleSheet("QWidget {background-color:transparent;margin:0px;}");
   // stacked_widget_ = new QStackedWidget(this);
 
@@ -38,24 +38,33 @@ TouchWidget::~TouchWidget() {}
 
 void TouchWidget::switch_stacked_widget(int index) {
   if (index == 0) {
-    setStyleSheet("QWidget {background-color:transparent;margin:0px;}");
+    setStyleSheet("QStackedWidget {background-color:transparent;margin:0px;}");
     int w = menu_key_widget_->width();
     int h = menu_key_widget_->height();
     setFixedSize(100, 300);
-    move(screen_width_ - 100, (screen_height_ - 300) / 2);
+    move(screen_width_ - 100, (screen_height_ - 350) / 2);
   } else if (index == 1) {
     setStyleSheet(
-        "QWidget {background-color:transparent;margin:0px;color:white;}");
+        "QStackedWidget "
+        "{background-color:transparent;margin:0px;color:white;}");
     setFixedSize(screen_width_, screen_height_);
     move(0, 0);
     qrcode_widget_->init();
   } else {
     setStyleSheet(
-        "QWidget {background-color:rgb(5, 0, 20);margin:0px;color:white;}");
+        "QStackedWidget {background-color:rgb(5, 0, "
+        "20);margin:0px;color:white;}");
     setFixedSize(screen_width_, screen_height_);
     move(0, 0);
     digit_key_widget_->init();
   }
   setCurrentIndex(index);
-  touch_widget->repaint();
+  parent_widget_->repaint();
+}
+
+void TouchWidget::rx_display(bool invisible) {
+  if (invisible)
+    hide();
+  else
+    show();
 }
