@@ -410,10 +410,9 @@ bool RecordTask::update_temperature_bias() {
     count += 1;
   }
 
-  if (count == 1 || count >= 5) {
+  if (count >= 5) {
     float bias = Config::get_temperature_bias();
     float diff;
-    if (count == 1) diff = AVE_TEMPERATURE - sum;
     if (count >= 5)
       diff = AVE_TEMPERATURE -
              (sum - max_temperature - min_temperature) / (count - 2);
