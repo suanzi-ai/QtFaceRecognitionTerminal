@@ -13,14 +13,14 @@ class OutlineWidget : public QWidget {
   OutlineWidget(int width, int height, QWidget *parent = nullptr);
   ~OutlineWidget() override;
 
-  void paint(QPainter *painter);
-
  private slots:
   void rx_warn_distance();
-  void rx_reset();
+  void rx_update();
 
  private:
   QTimer timer_;
+
+  QString background_style_, no_style_;
 
   bool show_valid_rect_;
 };

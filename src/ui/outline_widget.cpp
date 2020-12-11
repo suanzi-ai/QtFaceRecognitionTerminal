@@ -22,51 +22,36 @@ OutlineWidget::OutlineWidget(int width, int height, QWidget *parent)
   setFixedSize(width, height);
 
   // set background image
-  QString style_str = "QWidget {background-image: url(:asserts/outline.png);";
-  style_str += "background-repeat:no-repeat;margin-top: ";
-  style_str += QString::number(0.1875 * height) + "px;}";
-  setStyleSheet(style_str);
+  background_style_ =
+      QString(
+          "QWidget {background-image: url(:asserts/outline.png); "
+          "background-repeat:no-repeat; margin-top: %1px; }")
+          .arg(QString::number(0.1875 * height));
+
+  no_style_ = QString(
+                  "QWidget {background-image: none; "
+                  "background-repeat:no-repeat; margin-top: %1px; }")
+                  .arg(QString::number(0.1875 * height));
+
+  rx_update();
 
   timer_.setInterval(1000);
-  timer_.setSingleShot(true);
   connect((const QObject *)&timer_, SIGNAL(timeout()), (const QObject *)this,
-          SLOT(rx_reset()));
+          SLOT(rx_update()));
+  timer_.start();
 }
 
 OutlineWidget::~OutlineWidget() {}
 
-void OutlineWidget::paint(QPainter *painter) {
-  int w = width();   // 800
-  int h = height();  // 1280
-
-  if (show_valid_rect_) {
-    QDateTime now = QDateTime::currentDateTime();
-    bool flag = (now.currentMSecsSinceEpoch() / 250) % 2;
-    if (flag) {
-      auto cfg = Config::get_temperature();
-      float top_x = cfg.device_face_x * w;
-      float top_y = cfg.device_face_y * h;
-      float bottom_x = top_x + cfg.device_face_width * w;
-      float bottom_y = top_y + cfg.device_face_height * h;
-      float length = 0.06 * w;
-
-      painter->setPen(QPen(QColor(255, 0, 0, 200), 2));
-      painter->drawLine(top_x, top_y, top_x + length, top_y);
-      painter->drawLine(top_x, top_y, top_x, top_y + length);
-      painter->drawLine(top_x, bottom_y, top_x + length, bottom_y);
-      painter->drawLine(top_x, bottom_y, top_x, bottom_y - length);
-      painter->drawLine(bottom_x, top_y, bottom_x, top_y + length);
-      painter->drawLine(bottom_x, top_y, bottom_x - length, top_y);
-      painter->drawLine(bottom_x, bottom_y, bottom_x, bottom_y - length);
-      painter->drawLine(bottom_x, bottom_y, bottom_x - length, bottom_y);
-    }
+void OutlineWidget::rx_update() {
+  static bool enable_temperature = false;
+  if (enable_temperature != Config::get_user().enable_temperature) {
+    enable_temperature = Config::get_user().enable_temperature;
+    if (enable_temperature)
+      setStyleSheet(background_style_);
+    else
+      setStyleSheet(no_style_);
   }
 }
 
-void OutlineWidget::rx_warn_distance() {
-  show_valid_rect_ = true;
-  timer_.stop();
-  timer_.start();
-}
-
-void OutlineWidget::rx_reset() { show_valid_rect_ = false; }
+void OutlineWidget::rx_warn_distance() {}
