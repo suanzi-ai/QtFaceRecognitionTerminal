@@ -175,8 +175,7 @@ set_target_properties(
   temperature::temperature
   PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${TEMPERATURE_SDK_PREFIX}/include"
              IMPORTED_LOCATION "${TEMPERATURE_SDK_PREFIX}/lib/libtemperature.a"
-             IMPORTED_LOCATION
-             "${TEMPERATURE_SDK_PREFIX}/lib/libJQQRCodeReader.a"
+             IMPORTED_LOCATION "${TEMPERATURE_SDK_PREFIX}/lib/libzbar.a"
              # IMPORTED_LOCATION
              # "${TEMPERATURE_SDK_PREFIX}/lib/libJQQRCodeWriter.a"
              INTERFACE_POSITION_INDEPENDENT_CODE "ON")

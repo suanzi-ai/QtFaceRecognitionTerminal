@@ -90,7 +90,6 @@ void CameraReader::rx_finish() { rx_finished_ = true; }
 bool CameraReader::capture_frame(ImagePackage *pkg) {
   auto engine = Engine::instance();
   static int frame_idx = 0;
-
   SZ_RETCODE ret;
 
   {
@@ -115,6 +114,7 @@ bool CameraReader::capture_frame(ImagePackage *pkg) {
   }
 
   pkg->frame_idx = frame_idx++;
+
 
   return true;
 }

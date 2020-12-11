@@ -1,7 +1,6 @@
 #ifndef TOUCH_WIDGET_H
 #define TOUCH_WIDGET_H
 
-#include <QWidget>
 #include <QStackedWidget>
 #include "menu_key_widget.hpp"
 #include "qrcode_widget.hpp"
@@ -10,7 +9,7 @@
 
 namespace suanzi {
 
-class TouchWidget : public QWidget {
+class TouchWidget : public QStackedWidget {
   Q_OBJECT
 
  public:
@@ -26,6 +25,7 @@ class TouchWidget : public QWidget {
 	DigitKeyWidget *digit_key_widget_;
 	int screen_width_;
 	int screen_height_;
+	QWidget *touch_widget;
 };
 
 }  // namespace suanzi

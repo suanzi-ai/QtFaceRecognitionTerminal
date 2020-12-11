@@ -5,7 +5,7 @@
 #include <QPainter>
 #include <QPushButton>
 #include <QTimer>
-
+#include "readcard_task.hpp"
 #include "config.hpp"
 
 using namespace suanzi;
@@ -64,8 +64,11 @@ void VideoPlayer::init_workflow() {
           (const QObject *)recognize_task_, SLOT(rx_bgr_finish(bool)));
 
   // 创建继电器开关线程
+  ReadCardTask *readcard_task = ReadCardTask::get_instance();
   gpio_task_ = GPIOTask::get_instance();
   connect((const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool)),
+          (const QObject *)gpio_task_, SLOT(rx_trigger(PersonData, bool)));
+  connect((const QObject *)readcard_task, SIGNAL(tx_display(PersonData, bool)),
           (const QObject *)gpio_task_, SLOT(rx_trigger(PersonData, bool)));
 
   // 创建人脸记录线程
@@ -101,6 +104,7 @@ void VideoPlayer::init_workflow() {
           SLOT(rx_update(DetectionRatio, bool)));
   connect((const QObject *)temperature_task_, SIGNAL(tx_temperature(float)),
           (const QObject *)record_task_, SLOT(rx_temperature(float)));
+
 }
 
 void VideoPlayer::init_widgets() {
@@ -162,7 +166,7 @@ void VideoPlayer::init_widgets() {
           SLOT(rx_temperature(bool, bool, float)));
 #endif
 
-  touch_widget_ = new TouchWidget(screen_width, screen_height);
+  touch_widget_ = new TouchWidget(screen_width, screen_height, this);
   touch_widget_->hide();
 
 

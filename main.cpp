@@ -221,7 +221,8 @@ int main(int argc, char* argv[]) {
 
   // Step 3: 初始化QT（必须在Engine初始化之后）
   QApplication app(argc, argv);
-
+  //去掉触摸屏光标
+  QApplication::setOverrideCursor(Qt::BlankCursor);
   // Step 4: 多语言支持
   load_translator(app);
   config->appendListener("reload", [&app]() { load_translator(app); });
