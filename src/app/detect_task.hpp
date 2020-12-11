@@ -1,10 +1,9 @@
 #ifndef DETECT_TASK_H
 #define DETECT_TASK_H
 
-#include <atomic>
-
 #include <QObject>
 #include <QRect>
+#include <atomic>
 
 #include "config.hpp"
 #include "detection_data.hpp"
@@ -18,8 +17,6 @@ class DetectTask : QObject {
   Q_OBJECT
  public:
   static DetectTask *get_instance();
-
-  SZ_RETCODE adjust_isp_by_detection(const DetectionData *output);
 
  private slots:
   void rx_frame(PingPangBuffer<ImagePackage> *buffer);

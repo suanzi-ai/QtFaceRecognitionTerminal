@@ -36,7 +36,6 @@ class CameraReader : QThread {
 
   void run();
   bool capture_frame(ImagePackage *pkg);
-  bool isp_update();
 
   bool rx_finished_;
 

@@ -163,14 +163,12 @@ void suanzi::to_json(json &j, const CameraConfig &c) {
   SAVE_JSON_TO(j, "index", c.index);
   SAVE_JSON_TO(j, "rotate", c.rotate);
   SAVE_JSON_TO(j, "flip", c.flip);
-  SAVE_JSON_TO(j, "isp", c.isp);
 }
 
 void suanzi::from_json(const json &j, CameraConfig &c) {
   LOAD_JSON_TO(j, "index", c.index);
   LOAD_JSON_TO(j, "rotate", c.rotate);
   LOAD_JSON_TO(j, "flip", c.flip);
-  LOAD_JSON_TO(j, "isp", c.isp);
 }
 
 void suanzi::to_json(json &j, const DetectConfig &c) {
@@ -379,142 +377,12 @@ void Config::load_defaults(ConfigData &c) {
       .index = 1,
       .rotate = 1,
       .flip = 1,
-      .isp =
-          {
-              .stat =
-                  {
-                      .roi_enable = true,
-                      .roi_margin = 2,
-                      .roi_weight = 2,
-                      .non_roi_weight = 1,
-                      .crop_enable = false,
-                      .crop_margin = 25,
-                  },
-              .exposure =
-                  {
-                      .hist_stat_adjust = true,
-                      .speed = 0x60,             // default: 0x40
-                      .black_speed_bias = 0x90,  // default: 0x90
-                      .tolerance = 0x2,          // default: 0x2
-                      .compensation = 0x38,      // default: 0x38
-                      .ev_bias = 0x400,          // default: 0x400
-                      .ae_strategy_mode =
-                          1,  // 0: HIGHLIGHT_PRIOR 1: LOWLIGHT_PRIOR
-                      .hist_ratio_slope =
-                          0xFF,                 // default: 0x80 range: 0~0xffff
-                      .max_hist_offset = 0x10,  // default: 0x10 range: 0~0xff
-                      .antiflicker = false,
-                      .antiflicker_frequency = 50,
-                      .antiflicker_mode = 0,
-                  },
-              .wdr_exposure =
-                  {
-                      .exp_radio_type = "manual",
-                      .exp_radio = {3096, 64, 64},
-                      .exp_radio_max = 0x4000,
-                      .exp_radio_min = 0x40,
-                      .tolerance = 0xc,
-                      .speed = 0x20,
-                      .ratio_bias = 0x400,
-                  },
-              .wb =
-                  {
-                      .by_pass = false,
-                      .op_type = "auto",
-                  },
-              .saturation =
-                  {
-                      .op_type = "auto",
-                      .manual_saturation = 0x64,
-                  },
-              .gamma =
-                  {
-                      .enable = true,
-                      .curve_type = 3,
-                  },
-              .hlc =
-                  {
-                      .enable = false,
-                      .luma_threshold = 240,
-                      .luma_target = 10,
-                  },
-              .drc =
-                  {
-                      .enable = true,
-                      .op_type = "auto",
-                  },
-          },
   };
 
   c.infrared = {
       .index = 0,
       .rotate = 1,
       .flip = 1,
-      .isp =
-          {
-              .stat =
-                  {
-                      .roi_enable = true,
-                      .roi_margin = 2,
-                      .roi_weight = 2,
-                      .non_roi_weight = 1,
-                      .crop_enable = false,
-                      .crop_margin = 25,
-                  },
-              .exposure =
-                  {
-                      .hist_stat_adjust = true,
-                      .speed = 0x60,             // default: 0x40
-                      .black_speed_bias = 0x90,  // default: 0x90
-                      .tolerance = 0x2,          // default: 0x2
-                      .compensation = 0x38,      // default: 0x38
-                      .ev_bias = 0x400,          // default: 0x400
-                      .ae_strategy_mode =
-                          1,  // 0: HIGHLIGHT_PRIOR 1: LOWLIGHT_PRIOR
-                      .hist_ratio_slope =
-                          0xFFF,                // default: 0x80 range: 0~0xffff
-                      .max_hist_offset = 0x10,  // default: 0x10 range: 0~0xff
-                      .antiflicker = false,
-                      .antiflicker_frequency = 50,
-                      .antiflicker_mode = 0,
-                  },
-              .wdr_exposure =
-                  {
-                      .exp_radio_type = "manual",
-                      .exp_radio = {3096, 64, 64},
-                      .exp_radio_max = 0x4000,
-                      .exp_radio_min = 0x40,
-                      .tolerance = 0xc,
-                      .speed = 0x20,
-                      .ratio_bias = 0x400,
-                  },
-              .wb =
-                  {
-                      .by_pass = false,
-                      .op_type = "manual",
-                  },
-              .saturation =
-                  {
-                      .op_type = "manual",
-                      .manual_saturation = 0,
-                  },
-              .gamma =
-                  {
-                      .enable = true,
-                      .curve_type = 3,
-                  },
-              .hlc =
-                  {
-                      .enable = false,
-                      .luma_threshold = 240,
-                      .luma_target = 10,
-                  },
-              .drc =
-                  {
-                      .enable = true,
-                      .op_type = "auto",
-                  },
-          },
   };
 
   c.detect_levels_ = {

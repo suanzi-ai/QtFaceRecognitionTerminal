@@ -191,7 +191,6 @@ typedef struct {
   int index;
   int rotate;
   int flip;
-  ISPConfig isp;
 } CameraConfig;
 
 void to_json(json &j, const CameraConfig &c);

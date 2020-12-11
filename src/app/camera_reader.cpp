@@ -56,21 +56,6 @@ bool CameraReader::get_screen_size(int &width, int &height) {
   return true;
 }
 
-bool CameraReader::isp_update() {
-  auto engine = Engine::instance();
-  {
-    auto cfg = Config::get_camera(CAMERA_BGR);
-    SZ_RETCODE ret = engine->isp_update(CAMERA_BGR, &cfg.isp);
-    if (ret != SZ_RETCODE_OK) return false;
-  }
-  {
-    auto cfg = Config::get_camera(CAMERA_NIR);
-    SZ_RETCODE ret = engine->isp_update(CAMERA_NIR, &cfg.isp);
-    if (ret != SZ_RETCODE_OK) return false;
-  }
-  return true;
-}
-
 void CameraReader::start_sample() { start(); }
 
 void CameraReader::rx_finish() { rx_finished_ = true; }
