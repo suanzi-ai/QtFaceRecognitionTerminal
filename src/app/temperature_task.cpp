@@ -1,5 +1,7 @@
 #include "temperature_task.hpp"
 
+#include <cmath>
+
 #include <quface-io/engine.hpp>
 
 #include "config.hpp"
@@ -171,15 +173,15 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
     float x1 = (cfg.max_x - cfg.min_x) * detection.x + cfg.min_x;
     float x2 =
         (cfg.max_x - cfg.min_x) * (detection.x + detection.width) + cfg.min_x;
-    detection.x = std::max(x1 - .0725f, 0.f);
-    detection.width = std::min((x2 - x1) + .125f, 1.f);
+    detection.x = std::max(floor(x1 * 16) - 1, 0.f) / 16.f;
+    detection.width = std::min(ceil(x2 * 16) + 1, 16.f) / 16.f - detection.x;
 
     float y1 = (cfg.max_y - cfg.min_y) * detection.y + cfg.min_y;
     float y2 =
         (cfg.max_y - cfg.min_y) * (detection.y + detection.height) + cfg.min_y;
 
-    detection.y = y1 - (y2 - y1) * .2f;
-    detection.height = (y2 - y1) * .4f;
+    detection.y = std::max(floor((y1 - (y2 - y1) * .2f) * 16), 0.f) / 16.f;
+    detection.height = std::max((y2 - y1) * .4f * 16, 2.f) / 16.f;
   } else {
     detection.x = 0.45;
     detection.y = 0.45;
@@ -205,6 +207,7 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
     }
   }
 
+  static float current_var = -1;
   if (to_clear) {
     max_x = max_y = 0.5;
 
@@ -214,6 +217,7 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
     else
       ambient_temperature_ = ambient_temperature_ * 0.9 + max_temperature * 0.1;
     face_temperature_ = 0;
+    current_var = -1;
   } else {
     float avg = 0, var = 0;
     for (float v : statistics) avg += v / statistics.size();
@@ -221,10 +225,15 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
     face_temperature_ = surface_to_inner(
         measure_to_surface(max_temperature + Config::get_temperature_bias()));
 
+    if (current_var < 0)
+      current_var = var;
+    else
+      current_var = current_var * .8f + var * .2f;
+
     if (!Config::enable_anti_spoofing() ||
-        var > Config::get_user().temperature_var) {
+        current_var > Config::get_user().temperature_var) {
       SZ_LOG_INFO("max={:.2f}°C, face={:.2f}°C, var={:.2f}°C", max_temperature,
-                  face_temperature_, var);
+                  face_temperature_, current_var);
       emit tx_temperature(face_temperature_);
     } else {
       detection.x = 0.45;
