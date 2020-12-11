@@ -1,8 +1,7 @@
 #include "config.hpp"
 
-#include <regex>
-
 #include <QFile>
+#include <regex>
 
 using namespace suanzi;
 using namespace suanzi::io;
@@ -239,22 +238,11 @@ void suanzi::from_json(const json &j, LivenessConfig &c) {
                c.max_height_ratio_between_bgr);
 }
 
-void suanzi::to_json(json &j, const ISPGlobalConfig &c) {
-  SAVE_JSON_TO(j, "adjust_window_size", c.adjust_window_size);
-  SAVE_JSON_TO(j, "restore_size", c.restore_size);
-}
-
-void suanzi::from_json(const json &j, ISPGlobalConfig &c) {
-  LOAD_JSON_TO(j, "adjust_window_size", c.adjust_window_size);
-  LOAD_JSON_TO(j, "restore_size", c.restore_size);
-}
-
 void suanzi::from_json(const json &j, ConfigData &c) {
   LOAD_JSON_TO(j, "user", c.user);
   LOAD_JSON_TO(j, "app", c.app);
   LOAD_JSON_TO(j, "temperature", c.temperature);
   LOAD_JSON_TO(j, "quface", c.quface);
-  LOAD_JSON_TO(j, "isp", c.isp);
 
   if (j.contains("cameras")) {
     LOAD_JSON_TO(j.at("cameras"), "normal", c.normal);
@@ -284,8 +272,6 @@ void suanzi::to_json(json &j, const ConfigData &c) {
   SAVE_JSON_TO(pro, "extract_levels", c.extract_levels_);
   SAVE_JSON_TO(pro, "liveness_levels", c.liveness_levels_);
   SAVE_JSON_TO(j, "pro", pro);
-
-  SAVE_JSON_TO(j, "isp", c.isp);
 }
 
 Config Config::instance_;
@@ -366,11 +352,6 @@ void Config::load_defaults(ConfigData &c) {
       .db_name = APP_DIR_PREFIX "/var/db/quface",
       .model_file_path = "facemodel.bin",
       .license_filename = "license.json",
-  };
-
-  c.isp = {
-      .adjust_window_size = 10,
-      .restore_size = 20,
   };
 
   c.normal = {
@@ -826,11 +807,6 @@ const AppConfig &Config::get_app() {
 const QufaceConfig &Config::get_quface() {
   std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
   return instance_.cfg_data_.quface;
-}
-
-const ISPGlobalConfig &Config::get_isp() {
-  std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
-  return instance_.cfg_data_.isp;
 }
 
 const CameraConfig &Config::get_camera(io::CameraType tp) {

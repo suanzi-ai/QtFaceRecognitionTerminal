@@ -1,16 +1,16 @@
 #ifndef CONFIG_HPP
 #define CONFIG_HPP
 
+#include <eventpp/eventdispatcher.h>
+
 #include <fstream>
 #include <mutex>
-#include <string>
-
-#include <eventpp/eventdispatcher.h>
 #include <nlohmann/json.hpp>
 #include <quface-io/isp_option.hpp>
 #include <quface-io/option.hpp>
 #include <quface/common.hpp>
 #include <quface/logger.hpp>
+#include <string>
 
 #define APP_DIR_PREFIX "/user/quface-app"
 
@@ -180,14 +180,6 @@ void to_json(json &j, const LivenessConfig &c);
 void from_json(const json &j, LivenessConfig &c);
 
 typedef struct {
-  int adjust_window_size;  // 调整间隔，聚焦于人脸
-  int restore_size;        // 调整恢复间隔，聚焦于中心
-} ISPGlobalConfig;
-
-void to_json(json &j, const ISPGlobalConfig &c);
-void from_json(const json &j, ISPGlobalConfig &c);
-
-typedef struct {
   int index;
   int rotate;
   int flip;
@@ -234,7 +226,6 @@ typedef struct {
   QufaceConfig quface;
   CameraConfig normal;
   CameraConfig infrared;
-  ISPGlobalConfig isp;
   Levels<DetectConfig> detect_levels_;
   Levels<ExtractConfig> extract_levels_;
   Levels<LivenessConfig> liveness_levels_;
@@ -275,7 +266,6 @@ class Config : public ConfigEventEmitter {
   static const DetectConfig &get_detect();
   static const ExtractConfig &get_extract();
   static const LivenessConfig &get_liveness();
-  static const ISPGlobalConfig &get_isp();
 
   static std::string get_user_lang();
   static bool enable_anti_spoofing();
