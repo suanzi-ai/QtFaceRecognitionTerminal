@@ -98,11 +98,10 @@ void RecognizeTask::rx_frame(PingPangBuffer<DetectionData> *buffer) {
 
   if (input->bgr_face_valid()) {
     if (output->has_live) {
-      // if (!Config::enable_anti_spoofing())
-      //   output->is_live = true;
-      // else
-      //   output->is_live = is_live(input);
-      output->is_live = true;
+      if (!Config::enable_anti_spoofing())
+        output->is_live = true;
+      else
+        output->is_live = is_live(input);
     }
     if (output->has_person_info) {
       output->has_mask = has_mask(input);
@@ -132,20 +131,23 @@ void RecognizeTask::rx_bgr_finish(bool if_finished) {
 
 bool RecognizeTask::is_live(DetectionData *detection) {
   if (detection->nir_face_valid()) {
-    int width = detection->img_nir_large->width;
-    int height = detection->img_nir_large->height;
+    // TODO: train new antispoofing model
 
-    suanzi::FaceDetection face_detection;
-    suanzi::FacePose pose;
-    detection->nir_detection_.scale(width, height, face_detection, pose);
+    // int width = detection->img_nir_large->width;
+    // int height = detection->img_nir_large->height;
 
-    SZ_BOOL ret;
-    if (SZ_RETCODE_OK !=
-        anti_spoofing_->validate(
-            (const SVP_IMAGE_S *)detection->img_nir_large->pImplData,
-            face_detection, pose, ret))
-      return false;
-    return ret == SZ_TRUE;
+    // suanzi::FaceDetection face_detection;
+    // suanzi::FacePose pose;
+    // detection->nir_detection_.scale(width, height, face_detection, pose);
+
+    // SZ_BOOL ret;
+    // if (SZ_RETCODE_OK !=
+    //     anti_spoofing_->validate(
+    //         (const SVP_IMAGE_S *)detection->img_nir_large->pImplData,
+    //         face_detection, pose, ret))
+    //   return false;
+    // return ret == SZ_TRUE;
+    return true;
   } else
     return false;
 }
