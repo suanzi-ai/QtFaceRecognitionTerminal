@@ -4,6 +4,7 @@
 #include <quface-io/engine.hpp>
 
 #include "audio_task.hpp"
+#include "gpio_task.hpp"
 #include "static_config.hpp"
 
 using namespace suanzi;
@@ -370,6 +371,22 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
 
     json body(inner_state_info);
     res.set_content(body.dump(), "application/json");
+  });
+
+  server_->Post("/gpio-open", [&](const Request& req, Response& res) {
+    auto j = json::parse(req.body);
+
+    if (!j.contains("duration")) {
+      response_failed(res, "missing argument duration");
+      return;
+    }
+    int duration = j["duration"];
+    if (duration <= 0) {
+      response_failed(res, "assert duration > 0 failed");
+      return;
+    }
+
+    GPIOTask::get_instance()->trigger(duration);
   });
 
   server_->listen(host.c_str(), port);

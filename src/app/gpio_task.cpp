@@ -30,6 +30,16 @@ bool GPIOTask::validate(PersonData person) {
   return all_pass;
 }
 
+void GPIOTask::trigger(SZ_UINT32 duration) {
+  if (Config::get_user().relay_default_state == RelayState::Low) {
+    Engine::instance()->gpio_set(GpioPinDOOR, true);
+  } else {
+    Engine::instance()->gpio_set(GpioPinDOOR, false);
+  }
+  event_count_ += 1;
+  QTimer::singleShot(duration * 1000, this, SLOT(rx_reset()));
+}
+
 GPIOTask::GPIOTask(QThread* thread, QObject* parent) : event_count_(0) {
   // Create thread
   if (thread == nullptr) {

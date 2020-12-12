@@ -14,6 +14,8 @@ class GPIOTask : QObject {
   static GPIOTask* get_instance();
   static bool validate(PersonData person);
 
+  void trigger(SZ_UINT32 duration);
+
  private slots:
   void rx_trigger(PersonData person, bool audio_duplicated,
                   bool record_duplicated);
