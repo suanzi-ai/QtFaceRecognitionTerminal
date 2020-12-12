@@ -170,6 +170,8 @@ void VideoPlayer::init_widgets() {
   screen_saver_->hide();
   connect((const QObject *)face_timer_, SIGNAL(tx_display_screen_saver(bool)),
           (const QObject *)screen_saver_, SLOT(rx_display(bool)));
+  connect((const QObject *)screen_saver_, SIGNAL(tx_display_screen_saver(bool)),
+          (const QObject *)touch_widget_, SLOT(rx_display(bool)));
 
   // 创建人体轮廓控件
   outline_widget_ = new OutlineWidget(screen_width, screen_height, this);

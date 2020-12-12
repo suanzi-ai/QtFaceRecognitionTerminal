@@ -19,6 +19,9 @@ class ScreenSaverWidget : public QWidget {
   void paintEvent(QPaintEvent *event) override;
   void mousePressEvent(QMouseEvent *event) override;
 
+ signals:
+  void tx_display_screen_saver(bool visible);
+
  private slots:
   void rx_display(bool visible);
   void resfresh_timeout();
