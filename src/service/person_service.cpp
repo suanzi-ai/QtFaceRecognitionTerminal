@@ -117,7 +117,6 @@ SZ_RETCODE PersonService::get_person(std::string card_no, PersonData &person) {
   return SZ_RETCODE_FAILED;
 }
 
-
 SZ_RETCODE PersonService::update_person_face_image(
     uint id, const std::vector<SZ_UINT8> &image_content) {
   std::string path = "/api/v1/persons/" + std::to_string(id) + "/faceImage";
@@ -173,6 +172,30 @@ SZ_RETCODE PersonService::upload_image(
     return SZ_RETCODE_FAILED;
   }
 
+  return SZ_RETCODE_OK;
+}
+
+SZ_RETCODE PersonService::report_face_record(const PersonData &person) {
+  std::string bgr_file_path;
+
+  float temperature = ((float)((int)((person.temperature + 0.05f) * 10))) / 10;
+  json j = {
+      {"personID", person.id},           {"imagePath", person.face_path},
+      {"irImagePath", person.face_path}, {"status", person.status},
+      {"maskStatus", "correct"},
+  };
+
+  std::string path = "/api/v1/faceRecords";
+  auto res = client_.Post(path.c_str(), j.dump(), "application/json");
+  if (!res) {
+    SZ_LOG_ERROR("Created face record failed, no res");
+    return SZ_RETCODE_FAILED;
+  }
+
+  if (res->status >= 400) {
+    SZ_LOG_ERROR("Create record failed {}", res->body);
+    return SZ_RETCODE_FAILED;
+  }
   return SZ_RETCODE_OK;
 }
 

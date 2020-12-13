@@ -7,7 +7,6 @@
 #include <QTimer>
 
 #include "config.hpp"
-#include "reader_task.hpp"
 
 using namespace suanzi;
 using namespace suanzi::io;
@@ -64,14 +63,15 @@ void VideoPlayer::init_workflow() {
           (const QObject *)recognize_task_, SLOT(rx_bgr_finish(bool)));
 
   // 创建继电器开关线程
-  ReaderTask *reader_task = ReaderTask::get_instance();
   gpio_task_ = GPIOTask::get_instance();
   connect(
       (const QObject *)record_task_, SIGNAL(tx_display(PersonData, bool, bool)),
       (const QObject *)gpio_task_, SLOT(rx_trigger(PersonData, bool, bool)));
-  connect(
-      (const QObject *)reader_task, SIGNAL(tx_display(PersonData, bool, bool)),
-      (const QObject *)gpio_task_, SLOT(rx_trigger(PersonData, bool, bool)));
+
+  // 创建读卡器线程
+  reader_task_ = ReaderTask::get_instance();
+  connect((const QObject *)reader_task_, SIGNAL(tx_card_readed(QString)),
+          (const QObject *)record_task_, SLOT(rx_card_readed(QString)));
 
   // 创建人脸记录线程
   upload_task_ = UploadTask::get_instance();
@@ -82,6 +82,8 @@ void VideoPlayer::init_workflow() {
   // 创建人脸计时器线程
   face_timer_ = FaceTimer::get_instance();
   connect((const QObject *)detect_task_, SIGNAL(tx_detect_result(bool)),
+          (const QObject *)face_timer_, SLOT(rx_detect_result(bool)));
+  connect((const QObject *)reader_task_, SIGNAL(tx_detect_result(bool)),
           (const QObject *)face_timer_, SLOT(rx_detect_result(bool)));
   connect((const QObject *)face_timer_, SIGNAL(tx_reset()),
           (const QObject *)record_task_, SLOT(rx_reset()));

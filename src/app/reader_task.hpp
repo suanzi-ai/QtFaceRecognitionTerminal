@@ -3,6 +3,8 @@
 
 #include <QThread>
 
+#include <quface-io/ic_reader.hpp>
+
 #include "person_service.hpp"
 
 namespace suanzi {
@@ -18,10 +20,12 @@ class ReaderTask : QThread {
   void run() override;
 
  signals:
-  void tx_display(PersonData person, bool if_duplicated);
+  void tx_card_readed(QString card_no);
+  void tx_detect_result(bool valid_detect);
 
  private:
   PersonService::ptr person_service_;
+  io::ICReader::ptr reader_;
 };
 
 }  // namespace suanzi

@@ -28,6 +28,8 @@ RecordTask *RecordTask::get_instance() {
 
 bool RecordTask::idle() { return !get_instance()->is_running_; }
 
+bool RecordTask::card_readed() { return get_instance()->has_card_no_; };
+
 void RecordTask::clear_temperature() {
   auto task = get_instance();
 
@@ -39,7 +41,8 @@ RecordTask::RecordTask(QThread *thread, QObject *parent)
     : is_running_(false),
       duplicated_counter_(0),
       latest_temperature_(0),
-      has_unhandle_person_(false) {
+      has_unhandle_person_(false),
+      has_card_no_(false) {
   person_service_ = PersonService::get_instance();
   face_database_ = std::make_shared<FaceDatabase>(Config::get_quface().db_name);
 
@@ -150,7 +153,15 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
       }
     }
     reset_recognize();
+  } else if (has_card_no_) {
+    has_card_no_ = false;
+
+    PersonData person;
+    update_person_info(input, card_no_, person);
+    person.has_mask = true;
+    emit tx_display(person, false, false);
   }
+
   is_running_ = false;
 }
 
@@ -515,6 +526,72 @@ void RecordTask::update_person_info(RecognizeData *input,
          width * height * 3 / 2);
 }
 
+void RecordTask::update_person_info(RecognizeData *input,
+                                    const std::string &card_no,
+                                    PersonData &person) {
+  PersonStatus status = PersonStatus::Stranger;
+  if (SZ_RETCODE_OK == person_service_->get_person(card_no, person)) {
+    if (person.is_status_normal()) status = PersonStatus::Normal;
+    if (person.is_status_blacklist()) status = PersonStatus::Blacklist;
+  }
+  person.number = card_no;
+
+  switch (status) {
+    case PersonStatus::Blacklist:
+      if (Config::get_user().blacklist_policy == "alarm")
+        person.name = tr("黑名单").toStdString();
+      else {
+        person.name = tr("访客").toStdString();
+      }
+      person.face_path = ":asserts/avatar_unknown.jpg";
+    case PersonStatus::Normal:
+      break;
+    case PersonStatus::Stranger:
+      person.name = tr("访客").toStdString();
+      person.id = 0;
+      person.score = 0;
+      person.face_path = ":asserts/avatar_unknown.jpg";
+      person.status = person_service_->get_status(PersonStatus::Stranger);
+      break;
+  }
+
+  // record snapshots
+  int width = input->img_bgr_large->width;
+  int height = input->img_bgr_large->height;
+  person.bgr_snapshot.create(height, width, CV_8UC3);
+  memcpy(person.bgr_snapshot.data, input->img_bgr_large->pData,
+         width * height * 3 / 2);
+
+  width = input->img_bgr_small->width;
+  height = input->img_bgr_small->height;
+  static MmzImage *snapshot =
+      new MmzImage(width, height, SZ_IMAGETYPE_BGR_PACKAGE);
+
+  if (input->bgr_face_detected_ && width < height &&
+      Ive::getInstance()->yuv2RgbPacked(snapshot, input->img_bgr_small, true)) {
+    int crop_x = input->bgr_detection_.x * width;
+    int crop_y = input->bgr_detection_.y * height;
+    int crop_w = input->bgr_detection_.width * width;
+    int crop_h = input->bgr_detection_.height * height;
+
+    crop_x = std::max(0, crop_x - crop_w / 2);
+    crop_y = std::max(0, crop_y - crop_h / 4);
+    crop_w = std::min(width - crop_x - 1, crop_w * 2);
+    crop_h = std::min(height - crop_y - 1, crop_h * 3 / 2);
+
+    cv::Mat(height, width, CV_8UC3,
+            snapshot->pData)({crop_x, crop_y, crop_w, crop_h})
+        .copyTo(person.face_snapshot);
+  } else
+    person.face_snapshot = cv::Mat();
+
+  width = input->img_nir_large->width;
+  height = input->img_nir_large->height;
+  person.nir_snapshot.create(height, width, CV_8UC3);
+  memcpy(person.nir_snapshot.data, input->img_nir_large->pData,
+         width * height * 3 / 2);
+}
+
 bool RecordTask::if_duplicated(SZ_UINT32 &face_id, const FaceFeature &feature,
                                int &duration, PersonData &person) {
   bool ret = false;
@@ -610,6 +687,11 @@ void RecordTask::rx_temperature(float body_temperature) {
     emit tx_display(latest_person_, false, false);
   }
   is_running_ = false;
+}
+
+void RecordTask::rx_card_readed(QString card_no) {
+  has_card_no_ = true;
+  card_no_ = card_no.toStdString();
 }
 
 void RecordTask::rx_reset() {

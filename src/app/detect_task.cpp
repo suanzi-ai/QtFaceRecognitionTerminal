@@ -13,6 +13,7 @@
 #include "audio_task.hpp"
 #include "config.hpp"
 #include "recognize_task.hpp"
+#include "record_task.hpp"
 #include "temperature_task.hpp"
 
 using namespace suanzi;
@@ -90,7 +91,7 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
     no_detect_count_++;
   }
 
-  if (RecognizeTask::idle() && valid_dectect)
+  if (RecognizeTask::idle() && (valid_dectect || RecordTask::card_readed()))
     emit tx_frame_for_recognize(pingpang_buffer_);
   else
     QThread::usleep(10);

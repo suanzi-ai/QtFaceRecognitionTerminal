@@ -73,6 +73,7 @@ class PersonService {
   SZ_RETCODE update_person_face_image(
       uint id, const std::vector<SZ_UINT8> &image_content);
 
+  SZ_RETCODE report_face_record(const PersonData &person);
   SZ_RETCODE report_face_record(const PersonData &person,
                                 const std::vector<SZ_UINT8> &bgr_image_content,
                                 const std::vector<SZ_UINT8> &nir_image_content);
