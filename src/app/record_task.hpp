@@ -18,12 +18,15 @@ class RecordTask : QObject {
  public:
   static RecordTask *get_instance();
   static bool idle();
+  static bool card_readed();
 
   static void clear_temperature();
 
  private slots:
   void rx_frame(PingPangBuffer<RecognizeData> *buffer);
   void rx_temperature(float body_temperature);
+
+  void rx_card_readed(QString card_no);
 
   void rx_reset();
 
@@ -56,6 +59,8 @@ class RecordTask : QObject {
   void update_person_temperature(PersonData &person);
   void update_person_info(RecognizeData *input, const SZ_UINT32 &face_id,
                           PersonData &person);
+  void update_person_info(RecognizeData *input, const std::string &card_no,
+                          PersonData &person);
 
   bool if_duplicated(SZ_UINT32 &face_id, const FaceFeature &feature,
                      int &duration, PersonData &person);
@@ -86,6 +91,9 @@ class RecordTask : QObject {
 
   std::vector<float> temperature_history_;
   float latest_temperature_;
+
+  bool has_card_no_;
+  std::string card_no_;
 };
 
 }  // namespace suanzi

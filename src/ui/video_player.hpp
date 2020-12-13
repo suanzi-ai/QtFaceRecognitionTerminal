@@ -23,12 +23,12 @@
 #include "heatmap_widget.hpp"
 #include "isp_hist_widget.hpp"
 #include "outline_widget.hpp"
+#include "reader_task.hpp"
 #include "recognize_tip_widget.hpp"
 #include "screen_saver_widget.hpp"
 #include "status_banner.hpp"
 #include "temperature_tip_widget.hpp"
 #include "touch_widget.hpp"
-
 
 namespace suanzi {
 
@@ -73,6 +73,7 @@ class VideoPlayer : public QWidget {
   UploadTask *upload_task_;
   AudioTask *audio_task_;
   GPIOTask *gpio_task_;
+  ReaderTask *reader_task_;
   LEDTask *led_task_;
 
   TemperatureTask *temperature_task_;
