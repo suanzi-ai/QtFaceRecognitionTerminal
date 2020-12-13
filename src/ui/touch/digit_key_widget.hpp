@@ -4,6 +4,7 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QWidget>
+
 #include "person_service.hpp"
 
 namespace suanzi {
@@ -16,12 +17,17 @@ class DigitKeyWidget : public QWidget {
   ~DigitKeyWidget() override;
   void init();
 
+ protected:
+  void mousePressEvent(QMouseEvent *event) override;
+
  private:
   void setCommonAttribute(QPushButton *ppb);
 
  signals:
   void switch_stacked_widget(int index);
-  void tx_display(PersonData person, bool if_duplicated);
+
+  void tx_detect_result(bool valid_detect);
+  void tx_passwd_readed(QString);
 
  private slots:
   void clicked_back();
