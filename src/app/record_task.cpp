@@ -692,6 +692,7 @@ void RecordTask::rx_temperature(float body_temperature) {
 void RecordTask::rx_card_readed(QString card_no) {
   has_card_no_ = true;
   card_no_ = card_no.toStdString();
+  SZ_LOG_INFO("card no={}", card_no_);
 }
 
 void RecordTask::rx_reset() {

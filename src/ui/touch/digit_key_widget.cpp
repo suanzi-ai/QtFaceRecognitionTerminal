@@ -1,6 +1,10 @@
 #include "digit_key_widget.hpp"
+
 #include <QGridLayout>
 #include <QStackedWidget>
+
+#include "face_timer.hpp"
+#include "record_task.hpp"
 
 using namespace suanzi;
 
@@ -156,6 +160,14 @@ DigitKeyWidget::DigitKeyWidget(int screen_width, int screen_height,
 
   setLayout(pv_layout);
 
+  connect(this, SIGNAL(tx_detect_result(bool)),
+          (const QObject *)FaceTimer::get_instance(),
+          SLOT(rx_detect_result(bool)));
+
+  connect(this, SIGNAL(tx_passwd_readed(QString)),
+          (const QObject *)RecordTask::get_instance(),
+          SLOT(rx_card_readed(QString)));
+
   // rx_menu_type(2);
 }
 
@@ -163,68 +175,86 @@ DigitKeyWidget::~DigitKeyWidget() {}
 
 void DigitKeyWidget::init() { ple_input_tip_->clear(); }
 
+void DigitKeyWidget::mousePressEvent(QMouseEvent *event) {
+  emit tx_detect_result(true);
+}
+
 void DigitKeyWidget::setCommonAttribute(QPushButton *ppb) {
   ppb->setFixedSize(150, 150);
   ppb->setFocusPolicy(Qt::NoFocus);
 }
 
-void DigitKeyWidget::clicked_back() { emit switch_stacked_widget(0); }
+void DigitKeyWidget::clicked_back() {
+  emit switch_stacked_widget(0);
+  emit tx_detect_result(true);
+}
 
 void DigitKeyWidget::clicked_0_key() {
   ple_input_tip_->setText(ple_input_tip_->text() + "0");
+  emit tx_detect_result(true);
 }
 
 void DigitKeyWidget::clicked_1_key() {
   ple_input_tip_->setText(ple_input_tip_->text() + "1");
+  emit tx_detect_result(true);
 }
 
 void DigitKeyWidget::clicked_2_key() {
   ple_input_tip_->setText(ple_input_tip_->text() + "2");
+  emit tx_detect_result(true);
 }
 
 void DigitKeyWidget::clicked_3_key() {
   ple_input_tip_->setText(ple_input_tip_->text() + "3");
+  emit tx_detect_result(true);
 }
 
 void DigitKeyWidget::clicked_4_key() {
   ple_input_tip_->setText(ple_input_tip_->text() + "4");
+  emit tx_detect_result(true);
 }
 
 void DigitKeyWidget::clicked_5_key() {
   ple_input_tip_->setText(ple_input_tip_->text() + "5");
+  emit tx_detect_result(true);
 }
 
 void DigitKeyWidget::clicked_6_key() {
   ple_input_tip_->setText(ple_input_tip_->text() + "6");
+  emit tx_detect_result(true);
 }
 
 void DigitKeyWidget::clicked_7_key() {
   ple_input_tip_->setText(ple_input_tip_->text() + "7");
+  emit tx_detect_result(true);
 }
 
 void DigitKeyWidget::clicked_8_key() {
   ple_input_tip_->setText(ple_input_tip_->text() + "8");
+  emit tx_detect_result(true);
 }
 
 void DigitKeyWidget::clicked_9_key() {
   ple_input_tip_->setText(ple_input_tip_->text() + "9");
+  emit tx_detect_result(true);
 }
 
-void DigitKeyWidget::clicked_well_key() {}
+void DigitKeyWidget::clicked_well_key() { emit tx_detect_result(true); }
 
-void DigitKeyWidget::clicked_backspace_key() { ple_input_tip_->backspace(); }
+void DigitKeyWidget::clicked_backspace_key() {
+  ple_input_tip_->backspace();
+  emit tx_detect_result(true);
+}
 
-void DigitKeyWidget::clicked_doorbell_key() {}
+void DigitKeyWidget::clicked_doorbell_key() { emit tx_detect_result(true); }
 
-void DigitKeyWidget::clicked_intercom_key() {}
+void DigitKeyWidget::clicked_intercom_key() { emit tx_detect_result(true); }
 
-void DigitKeyWidget::clicked_video_key() {}
+void DigitKeyWidget::clicked_video_key() { emit tx_detect_result(true); }
 
 void DigitKeyWidget::clicked_ok_key() {
-  if (ple_input_tip_->text() == "123456") {
-    printf("password ok\n");
-    // emit tx_display(person_data, person_data.is_duplicated);
-  }
+  emit tx_detect_result(true);
+  emit tx_passwd_readed(ple_input_tip_->text());
   emit switch_stacked_widget(0);
 }
 

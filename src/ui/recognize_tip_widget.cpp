@@ -143,6 +143,8 @@ void RecognizeTipWidget::rx_display(PersonData person, bool audio_duplicated,
                person.face_snapshot.step, QImage::Format_RGB888));
   }
 
+  if (person.face_snapshot.empty()) snapshot_ = QPixmap();
+
   bool btemperature = false;
   bool bnormal_temperature = false;
   check_temperature(btemperature, bnormal_temperature);
