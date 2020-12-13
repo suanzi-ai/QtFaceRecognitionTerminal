@@ -140,7 +140,8 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
 
         update_record |= if_temperature_updated(person.temperature);
 
-        if (person.temperature > 0) {
+        if (person.temperature > 0 ||
+            Config::get_temperature().manufacturer <= 0) {
           has_unhandle_person_ = false;
           if (!duplicated) duplicated_counter_++;
           emit tx_display(person, duplicated, !update_record);

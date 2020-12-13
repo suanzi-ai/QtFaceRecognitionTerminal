@@ -100,13 +100,15 @@ void VideoPlayer::init_workflow() {
           (const QObject *)audio_task_, SLOT(rx_warn_distance()));
 
   // 创建人体测温线程
-  /*temperature_task_ = TemperatureTask::get_instance();
-  connect((const QObject *)detect_task_,
-          SIGNAL(tx_temperature_target(DetectionRatio, bool)),
-          (const QObject *)temperature_task_,
-          SLOT(rx_update(DetectionRatio, bool)));
-  connect((const QObject *)temperature_task_, SIGNAL(tx_temperature(float)),
-          (const QObject *)record_task_, SLOT(rx_temperature(float)));*/
+  if (Config::get_temperature().manufacturer > 0) {
+    temperature_task_ = TemperatureTask::get_instance();
+    connect((const QObject *)detect_task_,
+            SIGNAL(tx_temperature_target(DetectionRatio, bool)),
+            (const QObject *)temperature_task_,
+            SLOT(rx_update(DetectionRatio, bool)));
+    connect((const QObject *)temperature_task_, SIGNAL(tx_temperature(float)),
+            (const QObject *)record_task_, SLOT(rx_temperature(float)));
+  }
 }
 
 void VideoPlayer::init_widgets() {
@@ -198,13 +200,15 @@ void VideoPlayer::init_widgets() {
 
   // 创建热力图控件
   heatmap_widget_ = new HeatmapWidget(screen_width, screen_height, this);
-  heatmap_widget_->hide();
-  /*connect((const QObject *)temperature_task_, SIGNAL(tx_heatmap_init(int)),
-          (const QObject *)heatmap_widget_, SLOT(rx_init(int)));
-  connect((const QObject *)temperature_task_,
-          SIGNAL(tx_heatmap(TemperatureMatrix, DetectionRatio, float, float)),
-          (const QObject *)heatmap_widget_,
-          SLOT(rx_update(TemperatureMatrix, DetectionRatio, float, float)));*/
+  if (Config::get_temperature().manufacturer > 0) {
+    heatmap_widget_->hide();
+    connect((const QObject *)temperature_task_, SIGNAL(tx_heatmap_init(int)),
+            (const QObject *)heatmap_widget_, SLOT(rx_init(int)));
+    connect((const QObject *)temperature_task_,
+            SIGNAL(tx_heatmap(TemperatureMatrix, DetectionRatio, float, float)),
+            (const QObject *)heatmap_widget_,
+            SLOT(rx_update(TemperatureMatrix, DetectionRatio, float, float)));
+  }
 
   isp_hist_widget_ = new ISPHistWidget(400, 300, this);
   isp_hist_widget_->move(0, 50);
