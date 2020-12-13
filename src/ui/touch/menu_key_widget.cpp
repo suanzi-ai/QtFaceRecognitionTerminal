@@ -7,6 +7,7 @@ using namespace suanzi;
 
 MenuKeyWidget::MenuKeyWidget(int width, int height, QWidget *parent)
     : QWidget(parent) {
+  // TODO: 支持动态Size
   QPushButton *ppb_qrcode = new QPushButton(this);
   ppb_qrcode->setFixedSize(100, 100);
   ppb_qrcode->setStyleSheet(
@@ -32,8 +33,9 @@ MenuKeyWidget::MenuKeyWidget(int width, int height, QWidget *parent)
   pv_layout->addStretch();
   setLayout(pv_layout);
 
-  connect(ppb_qrcode, SIGNAL(pressed()), this, SLOT(clicked_qrcode()));
-  connect(ppb_intercom, SIGNAL(pressed()), this, SLOT(clicked_intercom()));
+  // TODO: 暂时禁用二维码和语音对讲
+  // connect(ppb_qrcode, SIGNAL(pressed()), this, SLOT(clicked_qrcode()));
+  // connect(ppb_intercom, SIGNAL(pressed()), this, SLOT(clicked_intercom()));
   connect(ppb_password, SIGNAL(pressed()), this, SLOT(clicked_password()));
 }
 

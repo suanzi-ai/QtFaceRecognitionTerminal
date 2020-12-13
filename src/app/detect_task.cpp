@@ -23,7 +23,7 @@ DetectTask *DetectTask::get_instance() {
 }
 
 DetectTask::DetectTask(QThread *thread, QObject *parent)
-    : buffer_inited_(false), last_valid_detect_(false) {
+    : buffer_inited_(false) {
   auto cfg = Config::get_quface();
   face_detector_ = std::make_shared<FaceDetector>(cfg.model_file_path);
   pose_estimator_ = std::make_shared<FacePoseEstimator>(cfg.model_file_path);

@@ -20,7 +20,7 @@ class ScreenSaverWidget : public QWidget {
   void mousePressEvent(QMouseEvent *event) override;
 
  signals:
-  void tx_display_screen_saver(bool visible);
+  void tx_detect_result(bool visible);
 
  private slots:
   void rx_display(bool visible);

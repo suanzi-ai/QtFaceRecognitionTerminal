@@ -1,4 +1,5 @@
 #include "face_timer.hpp"
+
 #include <quface-io/engine.hpp>
 
 #include "config.hpp"
@@ -17,7 +18,6 @@ FaceTimer::FaceTimer(QObject *parent) {
   screen_saver_timer_->setSingleShot(true);
   connect(screen_saver_timer_, SIGNAL(timeout()), this,
           SLOT(screen_saver_timeout()));
-  screen_saver_timer_->start(Config::get_user().screensaver_timeout * 1000);
 
   white_led_timer_ = new QTimer(this);
   white_led_timer_->setSingleShot(true);
@@ -31,7 +31,7 @@ FaceTimer::FaceTimer(QObject *parent) {
 FaceTimer::~FaceTimer() {}
 
 void FaceTimer::rx_detect_result(bool valid_detect) {
-  static bool has_face = false;
+  static bool has_face = true;
 
   // on has_face changes
   if (has_face != valid_detect) {
