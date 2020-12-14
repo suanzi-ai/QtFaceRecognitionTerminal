@@ -8,6 +8,8 @@
 #include <zbar.h>
 #include <opencv2/opencv.hpp>
 
+#include <QFile>
+
 #include <quface-io/engine.hpp>
 #include <quface/logger.hpp>
 
@@ -16,6 +18,12 @@
 
 using namespace suanzi;
 using namespace suanzi::io;
+
+void trim(std::string& s) {
+  s.erase(0, s.find_first_not_of(" "));
+  s.erase(s.find_last_not_of(" ") + 1);
+  s.erase(s.find_last_not_of("\n") + 1);
+}
 
 std::string zbar_decoder(const cv::Mat& img) {
   zbar::ImageScanner scanner;
@@ -55,22 +63,7 @@ std::string RETURN_CODE(const cv::Mat& image) {
                         cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, 33,
                         0);
 
-  std::string ret = return_code_from_binary_image(binary_image);
-  if (!ret.empty()) SZ_LOG_INFO("qr_code={}", ret);
-
-  int threshold = 110;
-  while (ret.empty() && threshold < 110) {
-    cv::threshold(image, binary_image, threshold, 255, cv::THRESH_BINARY);
-    ret = return_code_from_binary_image(binary_image);
-
-    if (!ret.empty()) {
-      SZ_LOG_INFO("threshold={}, qr_code={}", threshold, ret);
-      break;
-    }
-
-    threshold += 20;
-  }
-  return ret;
+  return return_code_from_binary_image(binary_image);
 }
 
 bool SCAN_QRCODE() {
@@ -82,13 +75,8 @@ bool SCAN_QRCODE() {
   auto engine = Engine::instance();
 
   static MmzImage* mmz_yuv_image = NULL;
-  if (mmz_yuv_image == NULL) {
-    Size bgr_size;
-    engine->get_frame_size(CAMERA_BGR, 0, bgr_size);
-    SZ_LOG_INFO("width={}, height={}", bgr_size.width, bgr_size.height);
-    mmz_yuv_image =
-        new MmzImage(bgr_size.width, bgr_size.height, SZ_IMAGETYPE_NV21);
-  }
+  if (mmz_yuv_image == NULL)
+    mmz_yuv_image = new MmzImage(1072, 1728, SZ_IMAGETYPE_NV21);
 
   if (SZ_RETCODE_OK ==
       engine->capture_frame(io::CAMERA_BGR, 0, *mmz_yuv_image)) {
@@ -98,19 +86,44 @@ bool SCAN_QRCODE() {
     cv::Mat yuvImage(mmz_yuv_image->height, mmz_yuv_image->width, CV_8UC1,
                      mmz_yuv_image->pData);
     yuvImage(cv::Rect((screen_width - QRCODE_WIDTH) * 1.35 / 2,
-                      (screen_height - QRCODE_HEIGHT) * 1.35 / 2 * 1.35,
+                      (screen_height - QRCODE_HEIGHT) * 1.35 / 2,
                       QRCODE_WIDTH * 1.35, QRCODE_HEIGHT * 1.35))
         .copyTo(qr_image);
 
     cv::flip(qr_image, qr_image, 1);
-    cv::imwrite(std::to_string(++index) + ".jpg", qr_image);
 
     std::string qr_code = RETURN_CODE(qr_image);
     std::string r;
-    if (!qr_code.empty())
-      System::exec(("echo \"" + qr_code + "\" >> /etc/qrcode").c_str(), r);
+    if (!qr_code.empty()) {
+      trim(qr_code);
+      auto pos = qr_code.find(' ');
+      if (pos != std::string::npos) {
+        auto mac_address = qr_code.substr(0, pos);
+        auto sn = qr_code.substr(pos + 1);
+        if (mac_address.length() == 12 && sn.length() == 11) {
+          std::transform(mac_address.begin(), mac_address.end(),
+                         mac_address.begin(),
+                         [](unsigned char c) { return std::tolower(c); });
+          for (size_t i = 5; i > 0; i--) mac_address.insert(i * 2, ":");
+          SZ_LOG_INFO("mac={}, sn={}", mac_address, sn);
 
-    return !qr_code.empty();
+          char cmd[100];
+          std::string output;
+          sprintf(cmd, "echo %s > /etc/serial-number", sn.c_str());
+          if (SZ_RETCODE_OK != System::exec(cmd, output)) {
+            SZ_LOG_ERROR("Save serial-number failed: {}", output);
+            return false;
+          }
+
+          sprintf(cmd, "fw_setenv ethaddr %s", mac_address.c_str());
+          if (SZ_RETCODE_OK != System::exec(cmd, output)) {
+            SZ_LOG_ERROR("Save mac address failed: {}", output);
+            return false;
+          }
+          return true;
+        }
+      }
+    }
   }
 
   return false;
@@ -175,46 +188,33 @@ void INIT_ENGINE() {
 
   engine->set_option(opt);
   engine->start();
-
-  // {
-  //   for (int i = 0; i < 5; i++) {
-  //     SZ_LOG_INFO("Turn on light box ... {}", i);
-  //     engine->gpio_set(GpioPinLightBox, true);
-  //     std::this_thread::sleep_for(std::chrono::milliseconds(500));
-  //     SZ_LOG_INFO("Turn off light box ... {}", i);
-  //     engine->gpio_set(GpioPinLightBox, false);
-  //     std::this_thread::sleep_for(std::chrono::milliseconds(500));
-  //   }
-  // }
-
-  // {
-  //   std::string name = ":asserts/zh-CN/recognition_succeed.aac";
-  //   std::vector<SZ_BYTE> audio;
-  //   QFile audio_file(name.c_str());
-  //   if (!audio_file.open(QIODevice::ReadOnly)) {
-  //     SZ_LOG_ERROR("Open {} failed", name);
-  //   }
-
-  //   auto data = audio_file.readAll();
-  //   audio.assign(data.begin(), data.end());
-
-  //   engine->audio_set_volume(100);
-
-  //   for (int i = 0; i < 5; i++) {
-  //     SZ_LOG_INFO("Play audio ... {}", i);
-  //     engine->audio_play(audio);
-  //     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-  //   }
-  // }
 }
 
 int main() {
   HI_MPI_SYS_Init();
   INIT_ENGINE();
 
+  std::string name = ":asserts/zh-CN/recognition_succeed.aac";
+  std::vector<SZ_BYTE> audio;
+  QFile audio_file(name.c_str());
+  audio_file.open(QIODevice::ReadOnly);
+  auto data = audio_file.readAll();
+  audio.assign(data.begin(), data.end());
+
+  auto engine = Engine::instance();
+  engine->audio_set_volume(100);
+
   while (true) {
-    SCAN_QRCODE();
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    if (SCAN_QRCODE()) {
+      engine->audio_play(audio);
+      for (int i = 0; i < 3; i++) {
+        engine->gpio_set(GpioPinLightBox, true);
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        engine->gpio_set(GpioPinLightBox, false);
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+      }
+    } else
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
 
   HI_MPI_SYS_Exit();
