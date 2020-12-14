@@ -100,7 +100,8 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
         return;
       }
 
-      bool pre_wdr = Config::get_user().wdr;
+      auto pre_user = Config::get_user();
+      auto pre_app = Config::get_app();
 
       ret = cfg->reload();
       if (ret != SZ_RETCODE_OK) {
@@ -108,9 +109,16 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
         return;
       }
 
-      bool post_wdr = Config::get_user().wdr;
+      auto post_user = Config::get_user();
+      auto post_app = Config::get_app();
 
-      if (pre_wdr != post_wdr) {
+      if (pre_app.show_infrared_window != post_app.show_infrared_window) {
+        if (!Engine::instance()->switch_secondary_window()) {
+          SZ_LOG_ERROR("Switch secondary window failed");
+        }
+      }
+
+      if (pre_user.wdr != post_user.wdr) {
         if (!Engine::instance()->switch_wdr_mode()) {
           SZ_LOG_ERROR("Switch WDR mode failed");
         }
