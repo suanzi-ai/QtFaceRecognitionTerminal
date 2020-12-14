@@ -193,7 +193,7 @@ void RecognizeTipWidget::rx_update() {
   // 去掉换行符
   sn_str = sn_str.replace(QRegExp("\\\n"), "");
   pl_sn_->setText(sn_str);
-
+  pl_sn_->adjustSize();
   rx_timeout();
 }
 
