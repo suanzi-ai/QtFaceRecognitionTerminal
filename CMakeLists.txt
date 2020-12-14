@@ -123,13 +123,13 @@ if(DOWNLOAD_DEPENDENCY)
 
   download_and_extract(
     URL
-    https://quvision.oss-cn-beijing.aliyuncs.com/qufacesdk/hisi/rp-hi3516dv300-sdk-v3.tgz
+    https://quvision.oss-cn-beijing.aliyuncs.com/qufacesdk/hisi/rp-hi3516dv300-sdk-v4.tgz
     FILENAME
-    ${DOWNLOAD_DIR}/rp-hi3516dv300-sdk-v3.tgz
+    ${DOWNLOAD_DIR}/rp-hi3516dv300-sdk-v4.tgz
     HASH_TYPE
     SHA256
     HASH
-    1f0a7cce9207744bb1a4d74338d8999c30de1a408093c02e24fbb98dd0c2682d
+    836ac201aab6c6f5b5e16fe0bf1a1d3a9de7f2928a65db492fe6be6e285efac9
     EXTRACT_DIR
     ${HISI_SDK_PREFIX})
 
