@@ -100,7 +100,7 @@ void VideoPlayer::init_workflow() {
           (const QObject *)audio_task_, SLOT(rx_warn_distance()));
 
   // 创建人体测温线程
-  if (Config::get_temperature().manufacturer > 0) {
+  if (Config::has_temperature_device()) {
     temperature_task_ = TemperatureTask::get_instance();
     connect((const QObject *)detect_task_,
             SIGNAL(tx_temperature_target(DetectionRatio, bool)),

@@ -56,7 +56,8 @@ class RecordTask : QObject {
                             float &temperature);
   bool update_temperature_bias();
 
-  void update_person_temperature(PersonData &person);
+  bool update_person_temperature(const SZ_UINT32 &face_id, int duration,
+                                 PersonData &person);
   void update_person_info(RecognizeData *input, const SZ_UINT32 &face_id,
                           PersonData &person);
   void update_person_info(RecognizeData *input, const std::string &card_no,

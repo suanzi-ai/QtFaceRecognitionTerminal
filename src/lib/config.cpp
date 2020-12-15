@@ -757,6 +757,15 @@ bool Config::write_audio_volume(int volume_percent) {
   return true;
 }
 
+bool Config::has_temperature_device() {
+  return Config::get_temperature().manufacturer > 0;
+}
+
+bool Config::display_temperature() {
+  return Config::get_user().enable_temperature &&
+         Config::get_temperature().manufacturer > 0;
+}
+
 void Config::set_temperature_finetune(float diff) {
   std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
   instance_.cfg_data_.user.temperature_finetune += diff;

@@ -31,7 +31,7 @@ SZ_UINT16 AudioTask::duration(PersonData person) {
   if (user.enable_mask_audio && !person.has_mask)
     total_duration += instance->warn_mask_audio_.duration;
 
-  if (user.enable_temperature) {
+  if (Config::display_temperature()) {
     if (user.enable_temperature_audio) {
       if (!person.is_temperature_normal())
         total_duration += instance->temperature_abnormal_audio_.duration;
@@ -168,7 +168,7 @@ void AudioTask::rx_report(PersonData person, bool audio_duplicated,
 
   if (user.enable_mask_audio && !person.has_mask) play_audio(warn_mask_audio_);
 
-  if (user.enable_temperature) {
+  if (Config::display_temperature()) {
     if (user.enable_temperature_audio) {
       if (!person.is_temperature_normal())
         play_audio(temperature_abnormal_audio_);
@@ -186,7 +186,7 @@ void AudioTask::rx_report(PersonData person, bool audio_duplicated,
 void AudioTask::rx_warn_distance() {
   auto user = Config::get_user();
   if (!user.enable_audio || !user.enable_distance_audio ||
-      !user.enable_temperature)
+      !Config::display_temperature())
     return;
 
   is_running_ = true;

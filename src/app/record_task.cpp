@@ -124,32 +124,24 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
         int duration;
         bool duplicated =
             if_duplicated(face_id, latest_feature_, duration, person);
-        if (!duplicated) latest_temperature_ = 0;
 
-        update_person_temperature(person);
-        if (person.temperature > 0 && Config::get_user().enable_temperature) {
-          if (person.status ==
-              PersonService::get_status(PersonStatus::Stranger))
-            sequence_temperature(face_id, duration, unknown_temperature_,
-                                 person.temperature);
-          else
-            sequence_temperature(face_id, duration, known_temperature_,
-                                 person.temperature);
-          update_temperature_bias();
-        }
-
-        update_record |= if_temperature_updated(person.temperature);
-
-        if (person.temperature > 0 ||
-            Config::get_temperature().manufacturer <= 0) {
-          has_unhandle_person_ = false;
+        if (Config::has_temperature_device()) {
+          if (!duplicated) latest_temperature_ = 0;
+          update_record |= update_person_temperature(face_id, duration, person);
+          if (person.temperature > 0) {
+            has_unhandle_person_ = false;
+            if (!duplicated) duplicated_counter_++;
+            emit tx_display(person, duplicated, !update_record);
+          } else if (latest_temperature_ == 0) {
+            duplicated_id_ = face_id;
+            duplicated_duration_ = duration;
+            latest_person_ = person;
+            has_unhandle_person_ = true;
+          }
+        } else {
+          update_record = !duplicated;
           if (!duplicated) duplicated_counter_++;
           emit tx_display(person, duplicated, !update_record);
-        } else if (latest_temperature_ == 0) {
-          duplicated_id_ = face_id;
-          duplicated_duration_ = duration;
-          latest_person_ = person;
-          has_unhandle_person_ = true;
         }
       }
     }
@@ -452,11 +444,24 @@ bool RecordTask::update_temperature_bias() {
   return false;
 }
 
-void RecordTask::update_person_temperature(PersonData &person) {
+bool RecordTask::update_person_temperature(const SZ_UINT32 &face_id,
+                                           int duration, PersonData &person) {
   person.temperature = 0;
   for (float temperature : temperature_history_)
     person.temperature = std::max(temperature, person.temperature);
   temperature_history_.clear();
+
+  if (person.temperature > 0 && Config::get_user().enable_temperature) {
+    if (person.status == PersonService::get_status(PersonStatus::Stranger))
+      sequence_temperature(face_id, duration, unknown_temperature_,
+                           person.temperature);
+    else
+      sequence_temperature(face_id, duration, known_temperature_,
+                           person.temperature);
+    update_temperature_bias();
+  }
+
+  return if_temperature_updated(person.temperature);
 }
 
 void RecordTask::update_person_info(RecognizeData *input,
@@ -640,10 +645,7 @@ bool RecordTask::if_duplicated(SZ_UINT32 &face_id, const FaceFeature &feature,
         ret = true;
 
     } else {
-      if (face_id == 0) {
-        face_id = (db_size % 100) + 1;
-        unknown_temperature_[face_id] = person.temperature;
-      }
+      if (face_id == 0) face_id = (db_size % 100) + 1;
 
       unknown_database_->add(face_id, feature);
       last_query_clock_ = current_query_clock;
@@ -669,20 +671,8 @@ void RecordTask::rx_temperature(float body_temperature) {
   temperature_history_.push_back(body_temperature);
   if (has_unhandle_person_) {
     is_running_ = true;
-    update_person_temperature(latest_person_);
-    if (Config::get_user().enable_temperature) {
-      if (latest_person_.status ==
-          PersonService::get_status(PersonStatus::Stranger))
-        sequence_temperature(duplicated_id_, duplicated_duration_,
-                             unknown_temperature_, latest_person_.temperature);
-      else
-        sequence_temperature(duplicated_id_, duplicated_duration_,
-                             known_temperature_, latest_person_.temperature);
-
-      update_temperature_bias();
-    }
-
-    if_temperature_updated(latest_person_.temperature);
+    update_person_temperature(duplicated_id_, duplicated_duration_,
+                              latest_person_);
     has_unhandle_person_ = false;
     duplicated_counter_++;
     emit tx_display(latest_person_, false, false);

@@ -37,9 +37,6 @@ void UploadTask::rx_upload(PersonData person, bool audio_duplicated,
 
   auto cfg = Config::get_user();
   if (!record_duplicated) {
-    // whether temperature is enabled but no temperature data
-    if (person.temperature == 0) return;
-
     // whether is known person
     if ((person.status == PersonService::get_status(PersonStatus::Normal) ||
          person.status == PersonService::get_status(PersonStatus::Blacklist)) &&
