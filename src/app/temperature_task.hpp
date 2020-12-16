@@ -16,7 +16,7 @@ class TemperatureTask : public QObject {
   Q_OBJECT
 
  public:
-  static TemperatureTask* get_instance();
+  static TemperatureTask *get_instance();
   static bool idle();
 
  signals:
@@ -31,21 +31,32 @@ class TemperatureTask : public QObject {
  private:
   static constexpr float DEFAULT_OFFSET = 6;
 
-  TemperatureTask(TemperatureManufacturer m, QThread* thread = nullptr,
-                  QObject* parent = nullptr);
+  TemperatureTask(TemperatureManufacturer m, QThread *thread = nullptr,
+                  QObject *parent = nullptr);
   ~TemperatureTask();
+  void init_valid_temperature_area(DetectionRatio &detection);
+  void get_valid_temperature_area(DetectionRatio &detection, bool to_clear);
+  void get_valid_temperature(const TemperatureMatrix &mat,
+                             const DetectionRatio &detection,
+                             std::vector<float> &statistics, float &max_x,
+                             float &max_y, float &max_temperature);
+  bool get_final_temperature(const std::vector<float> &statistics,
+                             float max_temperature);
+  void rotate_temperature_matrix(TemperatureMatrix &mat);
 
  private:
   void connect();
-  bool try_reading(TemperatureMatrix& mat);
+  bool try_reading(TemperatureMatrix &mat);
 
   TemperatureManufacturer m_;
   TemperatureReader::ptr temperature_reader_;
 
   bool is_running_;
-
   float ambient_temperature_;
   float face_temperature_;
+  float current_var_;
+
+  TemperatureMatrix temperature_matrix_;
 };
 
 }  // namespace suanzi

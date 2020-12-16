@@ -53,7 +53,7 @@ static float measure_to_surface(float temperature) {
     return temperature + 4.9;
 }
 
-TemperatureTask* TemperatureTask::get_instance() {
+TemperatureTask *TemperatureTask::get_instance() {
   static TemperatureTask instance(
       (io::TemperatureManufacturer)Config::get_temperature().manufacturer);
   return &instance;
@@ -61,8 +61,8 @@ TemperatureTask* TemperatureTask::get_instance() {
 
 bool TemperatureTask::idle() { return !get_instance()->is_running_; }
 
-TemperatureTask::TemperatureTask(TemperatureManufacturer m, QThread* thread,
-                                 QObject* parent)
+TemperatureTask::TemperatureTask(TemperatureManufacturer m, QThread *thread,
+                                 QObject *parent)
     : m_(m),
       temperature_reader_(nullptr),
       is_running_(false),
@@ -81,25 +81,62 @@ TemperatureTask::TemperatureTask(TemperatureManufacturer m, QThread* thread,
 TemperatureTask::~TemperatureTask() {}
 
 void TemperatureTask::connect() {
-  static TemperatureMatrix mat;
-  int success = 0;
-  do {
-    while (temperature_reader_ == nullptr)
-      temperature_reader_ = Engine::instance()->get_temperature_reader(m_);
-    QThread::msleep(500);
+  if (temperature_reader_ == nullptr)
+    temperature_reader_ = Engine::instance()->get_temperature_reader(m_);
 
-    if (try_reading(mat)) {
+  int success = 0;
+  while (temperature_reader_ != nullptr && success < 10) {
+    if (try_reading(temperature_matrix_)) {
       success++;
       emit tx_heatmap_init(success);
+      QThread::msleep(500);
     } else {
       temperature_reader_ = nullptr;
       SZ_LOG_WARN("re-connecting for successive failure");
     }
-
-  } while (success < 10);
+  }
 }
 
-bool TemperatureTask::try_reading(TemperatureMatrix& mat) {
+void TemperatureTask::rotate_temperature_matrix(TemperatureMatrix &mat) {
+  auto cfg = Config::get_temperature();
+  switch (cfg.sensor_rotation) {
+    case TemperatureRotation::ROTATION_90:
+      for (int y = 0; y < 16 / 2; y++) {
+        for (int x = y; x < 16 - y - 1; x++) {
+          float t = VALUE_AT(mat, x, y);
+          VALUE_AT(mat, x, y) = VALUE_AT(mat, y, 16 - x - 1);
+          VALUE_AT(mat, y, 16 - x - 1) = VALUE_AT(mat, 16 - x - 1, 16 - y - 1);
+          VALUE_AT(mat, 16 - x - 1, 16 - y - 1) = VALUE_AT(mat, 16 - y - 1, x);
+          VALUE_AT(mat, 16 - y - 1, x) = t;
+        }
+      }
+      break;
+    case TemperatureRotation::ROTATION_180:
+      for (int y = 0; y < 16 / 2; y++) {
+        for (int x = 0; x < 16; x++) {
+          float t = VALUE_AT(mat, x, y);
+          VALUE_AT(mat, x, y) = VALUE_AT(mat, 16 - x - 1, 16 - y - 1);
+          VALUE_AT(mat, 16 - x - 1, 16 - y - 1) = t;
+        }
+      }
+      break;
+    case TemperatureRotation::ROTATION_270:
+      for (int y = 0; y < 16 / 2; y++) {
+        for (int x = y; x < 16 - y - 1; x++) {
+          float t = VALUE_AT(mat, x, y);
+          VALUE_AT(mat, x, y) = VALUE_AT(mat, 16 - y - 1, x);
+          VALUE_AT(mat, 16 - y - 1, x) = VALUE_AT(mat, 16 - x - 1, 16 - y - 1);
+          VALUE_AT(mat, 16 - x - 1, 16 - y - 1) = VALUE_AT(mat, y, 16 - x - 1);
+          VALUE_AT(mat, y, 16 - x - 1) = t;
+        }
+      }
+      break;
+    default:
+      break;
+  }
+}
+
+bool TemperatureTask::try_reading(TemperatureMatrix &mat) {
   const int MAX_TRIAL = 10;
   const int INTERVAL = 200;
   int trial = 0;
@@ -114,62 +151,24 @@ bool TemperatureTask::try_reading(TemperatureMatrix& mat) {
   bool ret = trial < MAX_TRIAL;
   if (ret) {
     QThread::msleep(INTERVAL);
-    auto cfg = Config::get_temperature();
-    switch (cfg.sensor_rotation) {
-      case TemperatureRotation::ROTATION_90:
-        for (int y = 0; y < 16 / 2; y++) {
-          for (int x = y; x < 16 - y - 1; x++) {
-            float t = VALUE_AT(mat, x, y);
-            VALUE_AT(mat, x, y) = VALUE_AT(mat, y, 16 - x - 1);
-            VALUE_AT(mat, y, 16 - x - 1) =
-                VALUE_AT(mat, 16 - x - 1, 16 - y - 1);
-            VALUE_AT(mat, 16 - x - 1, 16 - y - 1) =
-                VALUE_AT(mat, 16 - y - 1, x);
-            VALUE_AT(mat, 16 - y - 1, x) = t;
-          }
-        }
-        break;
-      case TemperatureRotation::ROTATION_180:
-        for (int y = 0; y < 16 / 2; y++) {
-          for (int x = 0; x < 16; x++) {
-            float t = VALUE_AT(mat, x, y);
-            VALUE_AT(mat, x, y) = VALUE_AT(mat, 16 - x - 1, 16 - y - 1);
-            VALUE_AT(mat, 16 - x - 1, 16 - y - 1) = t;
-          }
-        }
-        break;
-      case TemperatureRotation::ROTATION_270:
-        for (int y = 0; y < 16 / 2; y++) {
-          for (int x = y; x < 16 - y - 1; x++) {
-            float t = VALUE_AT(mat, x, y);
-            VALUE_AT(mat, x, y) = VALUE_AT(mat, 16 - y - 1, x);
-            VALUE_AT(mat, 16 - y - 1, x) =
-                VALUE_AT(mat, 16 - x - 1, 16 - y - 1);
-            VALUE_AT(mat, 16 - x - 1, 16 - y - 1) =
-                VALUE_AT(mat, y, 16 - x - 1);
-            VALUE_AT(mat, y, 16 - x - 1) = t;
-          }
-        }
-        break;
-      default:
-        break;
-    }
+    rotate_temperature_matrix(mat);
   }
-
   return ret;
 }
 
-void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
-  is_running_ = true;
+void TemperatureTask::init_valid_temperature_area(DetectionRatio &detection) {
+  detection.x = 0.45;
+  detection.y = 0.45;
+  detection.width = 0.1;
+  detection.height = 0.1;
+}
 
-  if (ambient_temperature_ == 0) connect();
-
-  static TemperatureMatrix mat;
-  while (!try_reading(mat)) QThread::msleep(1);
-
-  auto cfg = Config::get_temperature();
-
-  if (!to_clear) {
+void TemperatureTask::get_valid_temperature_area(DetectionRatio &detection,
+                                                 bool to_clear) {
+  if (to_clear) {
+    init_valid_temperature_area(detection);
+  } else {
+    auto cfg = Config::get_temperature();
     float x1 = (cfg.max_x - cfg.min_x) * detection.x + cfg.min_x;
     float x2 =
         (cfg.max_x - cfg.min_x) * (detection.x + detection.width) + cfg.min_x;
@@ -182,16 +181,14 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
 
     detection.y = std::max(floor((y1 - (y2 - y1) * .2f) * 16), 0.f) / 16.f;
     detection.height = std::max((y2 - y1) * .4f * 16, 2.f) / 16.f;
-  } else {
-    detection.x = 0.45;
-    detection.y = 0.45;
-    detection.width = 0.1;
-    detection.height = 0.1;
   }
+}
 
-  float max_x, max_y;
-  float max_temperature = 0;
-  static std::vector<float> statistics;
+void TemperatureTask::get_valid_temperature(const TemperatureMatrix &mat,
+                                            const DetectionRatio &detection,
+                                            std::vector<float> &statistics,
+                                            float &max_x, float &max_y,
+                                            float &max_temperature) {
   statistics.clear();
   for (size_t i = 0; i < 256; i++) {
     float x = (i % 16) / 16.f, y = (i / 16) / 16.f;
@@ -206,54 +203,69 @@ void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
       }
     }
   }
+}
 
-  static float current_var = -1;
-  if (to_clear) {
-    max_x = max_y = 0.5;
+bool TemperatureTask::get_final_temperature(
+    const std::vector<float> &statistics, float max_temperature) {
+  float avg = 0, var = 0;
+  for (float v : statistics) avg += v / statistics.size();
+  for (float v : statistics) var += (v - avg) * (v - avg);
+  face_temperature_ = surface_to_inner(
+      measure_to_surface(max_temperature + Config::get_temperature_bias()));
 
-    // update ambient temperature if no detection
-    if (ambient_temperature_ == 0)
-      ambient_temperature_ = max_temperature;
-    else
-      ambient_temperature_ = ambient_temperature_ * 0.9 + max_temperature * 0.1;
-    face_temperature_ = 0;
-    current_var = -1;
-  } else {
-    float avg = 0, var = 0;
-    for (float v : statistics) avg += v / statistics.size();
-    for (float v : statistics) var += (v - avg) * (v - avg);
-    face_temperature_ = surface_to_inner(
-        measure_to_surface(max_temperature + Config::get_temperature_bias()));
+  if (current_var_ < 0)
+    current_var_ = var;
+  else
+    current_var_ = current_var_ * .8f + var * .2f;
 
-    if (current_var < 0)
-      current_var = var;
-    else
-      current_var = current_var * .8f + var * .2f;
-
-    if (!Config::enable_anti_spoofing() ||
-        current_var > Config::get_user().temperature_var) {
-      SZ_LOG_INFO("max={:.2f}°C, face={:.2f}°C, var={:.2f}°C", max_temperature,
-                  face_temperature_, current_var);
-      emit tx_temperature(face_temperature_);
-    } else {
-      detection.x = 0.45;
-      detection.y = 0.45;
-      detection.width = 0.1;
-      detection.height = 0.1;
-
-      max_x = max_y = 0.5;
-    }
+  if (!Config::enable_anti_spoofing() ||
+      current_var_ > Config::get_user().temperature_var) {
+    SZ_LOG_INFO("max={:.2f}°C, face={:.2f}°C, var={:.2f}°C", max_temperature,
+                face_temperature_, current_var_);
+    emit tx_temperature(face_temperature_);
+    return true;
   }
+  return false;
+}
 
-  static TemperatureMatrix output;
-  if (output.value == nullptr)
-    output.value = (float*)malloc(256 * sizeof(float));
-  if (output.size != 256)
-    output.value = (float*)realloc(output.value, 256 * sizeof(float));
-  output.size = 256;
-  memcpy(output.value, mat.value, output.size * sizeof(float));
+void TemperatureTask::rx_update(DetectionRatio detection, bool to_clear) {
+  is_running_ = true;
 
-  emit tx_heatmap(output, detection, max_x, max_y);
+  if (temperature_reader_ == nullptr) {
+    connect();
+  } else {
+    while (!try_reading(temperature_matrix_))
+      ;
+
+    get_valid_temperature_area(detection, to_clear);
+
+    float max_x, max_y, max_temperature;
+    static std::vector<float> statistics;
+    get_valid_temperature(temperature_matrix_, detection, statistics, max_x,
+                          max_y, max_temperature);
+    if (to_clear) {
+      max_x = max_y = 0.5;
+      if (ambient_temperature_ == 0)
+        ambient_temperature_ = max_temperature;
+      else
+        ambient_temperature_ =
+            ambient_temperature_ * 0.9 + max_temperature * 0.1;
+    } else {
+      if (!get_final_temperature(statistics, max_temperature)) {
+        init_valid_temperature_area(detection);
+        max_x = max_y = 0.5;
+      }
+    }
+
+    static TemperatureMatrix output;
+    if (output.value == nullptr) {
+      output.value = (float *)malloc(temperature_matrix_.size * sizeof(float));
+      output.size = temperature_matrix_.size;
+    }
+    memcpy(output.value, temperature_matrix_.value,
+           output.size * sizeof(float));
+    emit tx_heatmap(output, detection, max_x, max_y);
+  }
 
   is_running_ = false;
 }
