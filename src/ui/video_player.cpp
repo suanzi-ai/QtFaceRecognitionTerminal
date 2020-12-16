@@ -4,8 +4,8 @@
 #include <QDebug>
 #include <QPainter>
 #include <QPushButton>
+#include <QRectF>
 #include <QTimer>
-
 #include "config.hpp"
 
 using namespace suanzi;
@@ -189,9 +189,9 @@ void VideoPlayer::init_widgets() {
   connect((const QObject *)temperature_task_, SIGNAL(tx_heatmap_init(int)),
           (const QObject *)heatmap_widget_, SLOT(rx_init(int)));
   connect((const QObject *)temperature_task_,
-          SIGNAL(tx_heatmap(TemperatureMatrix, DetectionRatio, float, float)),
+          SIGNAL(tx_heatmap(TemperatureMatrix, QRectF, float, float)),
           (const QObject *)heatmap_widget_,
-          SLOT(rx_update(TemperatureMatrix, DetectionRatio, float, float)));
+          SLOT(rx_update(TemperatureMatrix, QRectF, float, float)));
 
   isp_hist_widget_ = new ISPHistWidget(400, 300, this);
   isp_hist_widget_->move(0, 50);

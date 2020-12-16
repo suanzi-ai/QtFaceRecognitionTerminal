@@ -28,8 +28,7 @@ class HeatmapWidget : public QWidget {
 
  private slots:
   void rx_init(int success);
-  void rx_update(TemperatureMatrix mat, DetectionRatio detection, float x,
-                 float y);
+  void rx_update(TemperatureMatrix mat, QRectF detection, float x, float y);
 
  private:
   QColor to_rgb(float value);
@@ -43,7 +42,7 @@ class HeatmapWidget : public QWidget {
   cv::Mat raw_;
   bool init_;
   QPixmap heatmap_;
-  DetectionRatio detection_;
+  QRectF detection_;
   int success_;
 };
 

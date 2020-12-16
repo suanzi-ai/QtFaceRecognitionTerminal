@@ -2,7 +2,6 @@
 
 #include <cstdio>
 #include <quface-io/engine.hpp>
-
 #include "audio_task.hpp"
 #include "gpio_task.hpp"
 #include "static_config.hpp"
