@@ -93,6 +93,7 @@ void suanzi::to_json(json &j, const AppConfig &c) {
   SAVE_JSON_TO(j, "show_isp_info_window", c.show_isp_info_window);
   SAVE_JSON_TO(j, "boot_image_path", c.boot_image_path);
   SAVE_JSON_TO(j, "screensaver_image_path", c.screensaver_image_path);
+  SAVE_JSON_TO(j, "has_touch_screen", c.has_touch_screen);
 }
 
 void suanzi::from_json(const json &j, AppConfig &c) {
@@ -106,6 +107,7 @@ void suanzi::from_json(const json &j, AppConfig &c) {
   LOAD_JSON_TO(j, "show_isp_info_window", c.show_isp_info_window);
   LOAD_JSON_TO(j, "boot_image_path", c.boot_image_path);
   LOAD_JSON_TO(j, "screensaver_image_path", c.screensaver_image_path);
+  LOAD_JSON_TO(j, "has_touch_screen", c.has_touch_screen);
 }
 
 void suanzi::to_json(json &j, const TemperatureConfig &c) {
@@ -292,6 +294,7 @@ void Config::load_defaults(ConfigData &c) {
       .show_isp_info_window = ISPInfoWindowNONE,
       .boot_image_path = "boot.jpg",
       .screensaver_image_path = "background.jpg",
+      .has_touch_screen = false,
   };
 
   c.temperature = {
@@ -301,7 +304,7 @@ void Config::load_defaults(ConfigData &c) {
       .device_face_width = 0.48,
       .temperature_distance = 0.68,
       .temperature_delay = 5,
-      .manufacturer = 1,
+      .manufacturer = -1,
       .sensor_rotation = TemperatureRotation::None,
       .min_x = 0.3125,
       .max_x = 0.875,
@@ -847,6 +850,11 @@ const LivenessConfig &Config::get_liveness() {
 bool Config::enable_anti_spoofing() {
   std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
   return instance_.cfg_data_.user.enable_anti_spoofing;
+}
+
+bool Config::has_touch_screen() {
+  std::unique_lock<std::mutex> lock(instance_.cfg_mutex_);
+  return instance_.cfg_data_.app.has_touch_screen;
 }
 
 bool Config::read_image(const std::string &image, const std::string &fallback,

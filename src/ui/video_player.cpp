@@ -203,7 +203,7 @@ void VideoPlayer::init_widgets() {
 
   // 创建热力图控件
   heatmap_widget_ = new HeatmapWidget(screen_width, screen_height, this);
-  if (Config::get_temperature().manufacturer > 0) {
+  if (Config::has_temperature_device()) {
     heatmap_widget_->hide();
     connect((const QObject *)temperature_task_, SIGNAL(tx_heatmap_init(int)),
             (const QObject *)heatmap_widget_, SLOT(rx_init(int)));
@@ -222,8 +222,11 @@ void VideoPlayer::init_widgets() {
 
 void VideoPlayer::delay_init_widgets() {
   status_banner_->show();
-  heatmap_widget_->show();
   recognize_tip_widget_->show();
-  temp_tip_widget_->show();
-  touch_widget_->show();
+
+  if (Config::has_temperature_device()) {
+    heatmap_widget_->show();
+    temp_tip_widget_->show();
+  }
+  if (Config::has_touch_screen()) touch_widget_->show();
 }

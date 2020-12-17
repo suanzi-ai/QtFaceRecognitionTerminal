@@ -97,6 +97,7 @@ typedef struct {
   ISPInfoWindowType show_isp_info_window;
   std::string boot_image_path;
   std::string screensaver_image_path;
+  bool has_touch_screen;
 } AppConfig;
 
 void to_json(json &j, const AppConfig &c);
@@ -273,6 +274,8 @@ class Config : public ConfigEventEmitter {
 
   static std::string get_user_lang();
   static bool enable_anti_spoofing();
+
+  static bool has_touch_screen();
 
   static bool read_boot_background(std::vector<SZ_BYTE> &data);
   static bool read_screen_saver_background(std::vector<SZ_BYTE> &data);
