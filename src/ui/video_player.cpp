@@ -202,7 +202,7 @@ void VideoPlayer::init_widgets() {
 
 void VideoPlayer::delay_init_widgets() {
   status_banner_->show();
-  heatmap_widget_->show();
+  // heatmap_widget_->show();
   recognize_tip_widget_->show();
   temp_tip_widget_->show();
 }

@@ -115,6 +115,7 @@ void suanzi::to_json(json &j, const TemperatureConfig &c) {
   SAVE_JSON_TO(j, "device_face_width", c.device_face_width);
   SAVE_JSON_TO(j, "temperature_distance", c.temperature_distance);
   SAVE_JSON_TO(j, "manufacturer", c.manufacturer);
+  SAVE_JSON_TO(j, "temperature_type", c.temperature_type);
   SAVE_JSON_TO(j, "temperature_delay", c.temperature_delay);
   SAVE_JSON_TO(j, "sensor_rotation", c.sensor_rotation);
   SAVE_JSON_TO(j, "min_x", c.min_x);
@@ -130,6 +131,7 @@ void suanzi::from_json(const json &j, TemperatureConfig &c) {
   LOAD_JSON_TO(j, "device_face_width", c.device_face_width);
   LOAD_JSON_TO(j, "temperature_distance", c.temperature_distance);
   LOAD_JSON_TO(j, "manufacturer", c.manufacturer);
+  LOAD_JSON_TO(j, "temperature_type", c.temperature_type);
   LOAD_JSON_TO(j, "temperature_delay", c.temperature_delay);
   LOAD_JSON_TO(j, "sensor_rotation", c.sensor_rotation);
   LOAD_JSON_TO(j, "min_x", c.min_x);
@@ -302,6 +304,7 @@ void Config::load_defaults(ConfigData &c) {
       .temperature_distance = 0.68,
       .temperature_delay = 5,
       .manufacturer = 1,
+      .temperature_type = 1,
       .sensor_rotation = TemperatureRotation::None,
       .min_x = 0.3125,
       .max_x = 0.875,

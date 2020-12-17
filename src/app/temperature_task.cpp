@@ -1,6 +1,7 @@
 #include "temperature_task.hpp"
 #include <cmath>
 #include "matrix_temperature_app.hpp"
+#include "single_temperature_app.hpp"
 
 #include <quface-io/engine.hpp>
 
@@ -27,7 +28,12 @@ TemperatureTask::TemperatureTask(QThread *thread, QObject *parent)
     thread->start();
   }
 
-  temperature_app_ = new MatrixTemperatureApp(this);
+  int temperature_type = Config::get_temperature().temperature_type;
+  if (temperature_type == 0) {
+    temperature_app_ = new MatrixTemperatureApp(this);
+  } else {
+    temperature_app_ = new SingleTemperatureApp(this);
+  }
 }
 
 TemperatureTask::~TemperatureTask() { delete temperature_app_; }

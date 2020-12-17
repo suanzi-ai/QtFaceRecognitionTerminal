@@ -36,6 +36,7 @@ HeatmapWidget::~HeatmapWidget() {}
 
 void HeatmapWidget::rx_init(int success) {
   success_ = success;
+  show();
   update();
 }
 
