@@ -105,8 +105,19 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
     ir_finished = sequence_antispoof(live_history_, is_live);
   }
 
-  if (bgr_finished && ir_finished) {
-    if (is_enabled_ && is_live) {
+  if (has_card_no_) {
+    PersonData person;
+    update_person_info(input, card_no_, person);
+    person.has_mask = true;
+    emit tx_display(person, false, false);
+
+    rx_reset();
+    QThread::msleep(AudioTask::duration(person) * 1000);
+
+    has_card_no_ = false;
+
+  } else if (is_enabled_ && bgr_finished && ir_finished) {
+    if (is_live) {
       SZ_UINT32 face_id;
       PersonData person;
       if (sequence_query(person_history_, mask_history_, has_mask, face_id,
@@ -147,13 +158,6 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
       }
     }
     reset_recognize();
-  } else if (has_card_no_) {
-    has_card_no_ = false;
-
-    PersonData person;
-    update_person_info(input, card_no_, person);
-    person.has_mask = true;
-    emit tx_display(person, false, false);
   }
 
   is_running_ = false;
@@ -682,12 +686,19 @@ void RecordTask::rx_temperature(float body_temperature) {
 }
 
 void RecordTask::rx_card_readed(QString card_no) {
-  has_card_no_ = true;
-  card_no_ = card_no.toStdString();
-  SZ_LOG_INFO("card no={}", card_no_);
+  if (!has_card_no_) {
+    has_card_no_ = true;
+    card_no_ = card_no.toStdString();
+    SZ_LOG_INFO("card no={}", card_no_);
+
+    rx_reset();
+  }
 }
 
-void RecordTask::rx_enable(bool enable) { is_enabled_ = enable; }
+void RecordTask::rx_enable(bool enable) {
+  is_enabled_ = enable;
+  rx_reset();
+}
 
 void RecordTask::rx_reset() {
   reset_recognize();
