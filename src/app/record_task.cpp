@@ -42,7 +42,8 @@ RecordTask::RecordTask(QThread *thread, QObject *parent)
       duplicated_counter_(0),
       latest_temperature_(0),
       has_unhandle_person_(false),
-      has_card_no_(false) {
+      has_card_no_(false),
+      is_enabled_(true) {
   person_service_ = PersonService::get_instance();
   face_database_ = std::make_shared<FaceDatabase>(Config::get_quface().db_name);
 
@@ -105,7 +106,7 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
   }
 
   if (bgr_finished && ir_finished) {
-    if (is_live) {
+    if (is_enabled_ && is_live) {
       SZ_UINT32 face_id;
       PersonData person;
       if (sequence_query(person_history_, mask_history_, has_mask, face_id,
@@ -685,6 +686,8 @@ void RecordTask::rx_card_readed(QString card_no) {
   card_no_ = card_no.toStdString();
   SZ_LOG_INFO("card no={}", card_no_);
 }
+
+void RecordTask::rx_enable(bool enable) { is_enabled_ = enable; }
 
 void RecordTask::rx_reset() {
   reset_recognize();

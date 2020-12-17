@@ -30,6 +30,8 @@ class RecordTask : QObject {
 
   void rx_reset();
 
+  void rx_enable(bool enable);
+
  signals:
   void tx_nir_finish(bool if_finished);
   void tx_bgr_finish(bool if_finished);
@@ -95,6 +97,8 @@ class RecordTask : QObject {
 
   bool has_card_no_;
   std::string card_no_;
+
+  bool is_enabled_;
 };
 
 }  // namespace suanzi

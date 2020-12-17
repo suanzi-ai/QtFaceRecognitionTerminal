@@ -2,10 +2,10 @@
 #define TOUCH_WIDGET_H
 
 #include <QStackedWidget>
+
+#include "digit_key_widget.hpp"
 #include "menu_key_widget.hpp"
 #include "qrcode_widget.hpp"
-#include "digit_key_widget.hpp"
-
 
 namespace suanzi {
 
@@ -15,6 +15,9 @@ class TouchWidget : public QStackedWidget {
  public:
   TouchWidget(int width, int height, QWidget *parent = nullptr);
   ~TouchWidget() override;
+
+ signals:
+  void tx_enable_face_recognition(bool enable);
 
  private slots:
   void switch_stacked_widget(int index);

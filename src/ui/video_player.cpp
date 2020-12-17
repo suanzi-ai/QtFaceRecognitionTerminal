@@ -164,6 +164,9 @@ void VideoPlayer::init_widgets() {
   recognize_tip_widget_->hide();
 
   touch_widget_ = new TouchWidget(screen_width, screen_height, this);
+  connect((const QObject *)touch_widget_,
+          SIGNAL(tx_enable_face_recognition(bool)),
+          (const QObject *)record_task_, SLOT(rx_enable(bool)));
   touch_widget_->hide();
 
   connect((const QObject *)record_task_,

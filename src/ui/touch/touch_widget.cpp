@@ -1,6 +1,8 @@
 #include "touch_widget.hpp"
+
 #include <QTimer>
 #include <QVBoxLayout>
+
 #include <quface/logger.hpp>
 
 using namespace suanzi;
@@ -44,6 +46,9 @@ void TouchWidget::switch_stacked_widget(int index) {
     int h = menu_key_widget_->height();
     setFixedSize(100, 300);
     move(screen_width_ - 100, (screen_height_ - 350) / 2);
+
+    // TODO: enable face recognition
+    emit tx_enable_face_recognition(true);
   } else if (index == 1) {
     setStyleSheet(
         "QStackedWidget "
@@ -51,6 +56,8 @@ void TouchWidget::switch_stacked_widget(int index) {
     setFixedSize(screen_width_, screen_height_);
     move(0, 0);
     qrcode_widget_->init();
+    // TODO: disable face recognition
+    emit tx_enable_face_recognition(false);
   } else {
     setStyleSheet(
         "QStackedWidget {background-color:rgb(5, 0, "
@@ -58,6 +65,8 @@ void TouchWidget::switch_stacked_widget(int index) {
     setFixedSize(screen_width_, screen_height_);
     move(0, 0);
     digit_key_widget_->init();
+    // TODO: disable face recognition
+    emit tx_enable_face_recognition(false);
   }
   setCurrentIndex(index);
   parent_widget_->repaint();
