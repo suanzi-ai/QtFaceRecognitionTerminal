@@ -37,7 +37,15 @@ void GPIOTask::trigger(SZ_UINT32 duration) {
     Engine::instance()->gpio_set(GpioPinDOOR, false);
   }
   event_count_ += 1;
-  QTimer::singleShot(duration * 1000, this, SLOT(rx_reset()));
+  QThread::msleep(duration * 1000);
+  if (--event_count_ <= 0) {
+    event_count_ = 0;
+    if (Config::get_user().relay_default_state == RelayState::Low) {
+      Engine::instance()->gpio_set(GpioPinDOOR, false);
+    } else {
+      Engine::instance()->gpio_set(GpioPinDOOR, true);
+    }
+  }
 }
 
 GPIOTask::GPIOTask(QThread* thread, QObject* parent) : event_count_(0) {

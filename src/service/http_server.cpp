@@ -395,6 +395,7 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
     }
 
     GPIOTask::get_instance()->trigger(duration);
+    response_ok(res);
   });
 
   server_->listen(host.c_str(), port);
