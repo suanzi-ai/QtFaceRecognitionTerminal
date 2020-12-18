@@ -21,6 +21,7 @@ void SingleTemperatureApp::read_temperature(const QRectF &face_area,
 
   float face_temperature = 0.0;
   if (SZ_RETCODE_OK == temperature_reader_->read(face_temperature)) {
+    printf("face temperature %0.2f \n", face_temperature);
     emit temperature_task_->tx_temperature(face_temperature);
   }
 }

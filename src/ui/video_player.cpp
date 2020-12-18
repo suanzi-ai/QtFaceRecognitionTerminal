@@ -172,6 +172,8 @@ void VideoPlayer::init_widgets() {
   outline_widget_ = new OutlineWidget(screen_width, screen_height, this);
   connect((const QObject *)detect_task_, SIGNAL(tx_display_rectangle()),
           (const QObject *)outline_widget_, SLOT(rx_warn_distance()));
+  connect((const QObject *)temperature_task_, SIGNAL(tx_temperature(float)),
+          (const QObject *)outline_widget_, SLOT(rx_temperature(float)));
 
   // 创建顶部状态栏控件
   status_banner_ = new StatusBanner(screen_width, screen_height, this);
