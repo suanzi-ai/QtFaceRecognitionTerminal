@@ -64,6 +64,7 @@ class RecordTask : QObject {
                           PersonData &person);
   void update_person_info(RecognizeData *input, const std::string &card_no,
                           PersonData &person);
+  void update_person_snapshot(RecognizeData *input, PersonData &person);
 
   bool if_duplicated(SZ_UINT32 &face_id, const FaceFeature &feature,
                      int &duration, PersonData &person);

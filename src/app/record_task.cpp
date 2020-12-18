@@ -501,40 +501,7 @@ void RecordTask::update_person_info(RecognizeData *input,
   }
 
   // record snapshots
-  int width = input->img_bgr_large->width;
-  int height = input->img_bgr_large->height;
-  person.bgr_snapshot.create(height, width, CV_8UC3);
-  memcpy(person.bgr_snapshot.data, input->img_bgr_large->pData,
-         width * height * 3 / 2);
-
-  width = input->img_bgr_small->width;
-  height = input->img_bgr_small->height;
-  static MmzImage *snapshot =
-      new MmzImage(width, height, SZ_IMAGETYPE_BGR_PACKAGE);
-
-  if (input->bgr_face_detected_ && width < height &&
-      Ive::getInstance()->yuv2RgbPacked(snapshot, input->img_bgr_small, true)) {
-    int crop_x = input->bgr_detection_.x * width;
-    int crop_y = input->bgr_detection_.y * height;
-    int crop_w = input->bgr_detection_.width * width;
-    int crop_h = input->bgr_detection_.height * height;
-
-    crop_x = std::max(0, crop_x - crop_w / 2);
-    crop_y = std::max(0, crop_y - crop_h / 4);
-    crop_w = std::min(width - crop_x - 1, crop_w * 2);
-    crop_h = std::min(height - crop_y - 1, crop_h * 3 / 2);
-
-    cv::Mat(height, width, CV_8UC3,
-            snapshot->pData)({crop_x, crop_y, crop_w, crop_h})
-        .copyTo(person.face_snapshot);
-  } else
-    person.face_snapshot = cv::Mat();
-
-  width = input->img_nir_large->width;
-  height = input->img_nir_large->height;
-  person.nir_snapshot.create(height, width, CV_8UC3);
-  memcpy(person.nir_snapshot.data, input->img_nir_large->pData,
-         width * height * 3 / 2);
+  update_person_snapshot(input, person);
 }
 
 void RecordTask::update_person_info(RecognizeData *input,
@@ -567,19 +534,30 @@ void RecordTask::update_person_info(RecognizeData *input,
   }
 
   // record snapshots
-  int width = input->img_bgr_large->width;
-  int height = input->img_bgr_large->height;
-  person.bgr_snapshot.create(height, width, CV_8UC3);
-  memcpy(person.bgr_snapshot.data, input->img_bgr_large->pData,
-         width * height * 3 / 2);
+  update_person_snapshot(input, person);
+}
 
-  width = input->img_bgr_small->width;
-  height = input->img_bgr_small->height;
+void RecordTask::update_person_snapshot(RecognizeData *input,
+                                        PersonData &person) {
+  MmzImage *bgr, *ir;
+  if (Config::get_user().upload_hd_snapshot) {
+    bgr = input->img_bgr_large;
+    ir = input->img_nir_large;
+  } else {
+    bgr = input->img_bgr_small;
+    ir = input->img_nir_small;
+  }
+
+  int width = bgr->width;
+  int height = bgr->height;
+  person.bgr_snapshot.create(height, width, CV_8UC3);
+  memcpy(person.bgr_snapshot.data, bgr->pData, width * height * 3 / 2);
+
   static MmzImage *snapshot =
       new MmzImage(width, height, SZ_IMAGETYPE_BGR_PACKAGE);
 
   if (input->bgr_face_detected_ && width < height &&
-      Ive::getInstance()->yuv2RgbPacked(snapshot, input->img_bgr_small, true)) {
+      Ive::getInstance()->yuv2RgbPacked(snapshot, bgr, true)) {
     int crop_x = input->bgr_detection_.x * width;
     int crop_y = input->bgr_detection_.y * height;
     int crop_w = input->bgr_detection_.width * width;
@@ -596,11 +574,10 @@ void RecordTask::update_person_info(RecognizeData *input,
   } else
     person.face_snapshot = cv::Mat();
 
-  width = input->img_nir_large->width;
-  height = input->img_nir_large->height;
+  width = ir->width;
+  height = ir->height;
   person.nir_snapshot.create(height, width, CV_8UC3);
-  memcpy(person.nir_snapshot.data, input->img_nir_large->pData,
-         width * height * 3 / 2);
+  memcpy(person.nir_snapshot.data, ir->pData, width * height * 3 / 2);
 }
 
 bool RecordTask::if_duplicated(SZ_UINT32 &face_id, const FaceFeature &feature,

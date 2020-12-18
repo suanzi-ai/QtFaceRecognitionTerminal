@@ -37,6 +37,7 @@ void suanzi::to_json(json &j, const UserConfig &c) {
   SAVE_JSON_TO(j, "screensaver_timeout", c.screensaver_timeout);
   SAVE_JSON_TO(j, "upload_known_person", c.upload_known_person);
   SAVE_JSON_TO(j, "upload_unknown_person", c.upload_unknown_person);
+  SAVE_JSON_TO(j, "upload_hd_snapshot", c.upload_hd_snapshot);
   SAVE_JSON_TO(j, "mask_score", c.mask_score);
   SAVE_JSON_TO(j, "wdr", c.wdr);
 }
@@ -78,6 +79,7 @@ void suanzi::from_json(const json &j, UserConfig &c) {
   LOAD_JSON_TO(j, "screensaver_timeout", c.screensaver_timeout);
   LOAD_JSON_TO(j, "upload_known_person", c.upload_known_person);
   LOAD_JSON_TO(j, "upload_unknown_person", c.upload_unknown_person);
+  LOAD_JSON_TO(j, "upload_hd_snapshot", c.upload_hd_snapshot);
   LOAD_JSON_TO(j, "mask_score", c.mask_score);
   LOAD_JSON_TO(j, "wdr", c.wdr);
 }
@@ -343,6 +345,7 @@ void Config::load_defaults(ConfigData &c) {
       .screensaver_timeout = 60,
       .upload_known_person = true,
       .upload_unknown_person = true,
+      .upload_hd_snapshot = false,
       .mask_score = 0.7,
       .wdr = false,
   };

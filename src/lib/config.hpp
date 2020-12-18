@@ -73,6 +73,7 @@ typedef struct {
   SZ_UINT16 screensaver_timeout;
   bool upload_known_person;
   bool upload_unknown_person;
+  bool upload_hd_snapshot;
   SZ_FLOAT mask_score;
   bool wdr;
 } UserConfig;
