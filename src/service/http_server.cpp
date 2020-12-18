@@ -381,7 +381,7 @@ void HTTPServer::run(uint16_t port, const std::string& host) {
     res.set_content(body.dump(), "application/json");
   });
 
-  server_->Post("/gpio-open", [&](const Request& req, Response& res) {
+  server_->Post("/trigger-relay", [&](const Request& req, Response& res) {
     auto j = json::parse(req.body);
 
     if (!j.contains("duration")) {
