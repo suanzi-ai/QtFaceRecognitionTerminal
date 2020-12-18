@@ -36,12 +36,7 @@ OutlineWidget::OutlineWidget(int width, int height, QWidget *parent)
   connect((const QObject *)&timer_, SIGNAL(timeout()), (const QObject *)this,
           SLOT(rx_update()));
 
-  pl_temperature_ = new TemperatureTipLabel();
-  pl_temperature_->setFixedSize(240, 165);
-  pl_temperature_->move(width / 2 - 124, 0.24 * height);
-  pl_temperature_->setStyleSheet(
-      "QLabel { background-color:transparent; color:blue; }");
-  pl_temperature_->hide();
+  pl_temperature_ = new TemperatureTipLabel(width, height);
 
   timer_.start();
 }
@@ -50,7 +45,6 @@ OutlineWidget::~OutlineWidget() {}
 
 void OutlineWidget::rx_temperature(float temp) {
   pl_temperature_->set_temperature(temp);
-  pl_temperature_->show();
 }
 
 void OutlineWidget::rx_update() {

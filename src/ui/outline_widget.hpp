@@ -11,12 +11,23 @@ namespace suanzi {
 class TemperatureTipLabel : public QLabel {
   Q_OBJECT
  public:
-  TemperatureTipLabel(QWidget *parent = 0) { temperature_ = 0.0; }
+  TemperatureTipLabel(int screen_width, int screen_height,
+                      QWidget *parent = 0) {
+    temperature_ = 0.0;
+    setFixedSize(240, 165);
+    move(screen_width / 2 - 124, 0.24 * screen_height);
+    setStyleSheet("QLabel { background-color:transparent; color:blue; }");
+    hide();
+    QTimer::singleShot(1, this, SLOT(delay_init_widgets()));
+  }
 
   void set_temperature(float temperature) {
     temperature_ = temperature;
     update();
   }
+
+ private slots:
+  void delay_init_widgets() { show(); }
 
  private:
   void paintEvent(QPaintEvent *event) override {
