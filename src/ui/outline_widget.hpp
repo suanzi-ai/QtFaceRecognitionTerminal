@@ -37,34 +37,38 @@ class TemperatureTipLabel : public QLabel {
     painter.setRenderHint(QPainter::Antialiasing);
 
     int arc_width = 240;
-    int arc_height1 = 170;
-    int arc_height2 = 80;
+    int up_arc_height = 170;
+    int down_arc_height = 80;
 
-    QRectF rect(0, 0, arc_width, arc_height1);
+    // draw up arc
+    QRectF rect(0, 0, arc_width, up_arc_height);
     QPainterPath path;
-    path.moveTo(arc_width / 2, arc_height1 / 2);
+    path.moveTo(arc_width / 2, up_arc_height / 2);
     path.arcTo(rect, 0, 180);
     // painter.setBrush(QBrush(QColor(255, 255, 255, 125)));
     painter.setPen(Qt::NoPen);
     // painter.drawPath(path);
     painter.fillPath(path, QBrush(QColor(255, 255, 255, 10)));
 
-    rect.setRect(0, (arc_height1 - arc_height2) / 2, arc_width, arc_height2);
-    path.moveTo(arc_width / 2, arc_height1 / 2);
+    // draw down arc
+    rect.setRect(0, (up_arc_height - down_arc_height) / 2, arc_width,
+                 down_arc_height);
     path.arcTo(rect, 180, 180);
     painter.fillPath(path, QBrush(QColor(255, 255, 255, 150)));
     // painter.drawPath(path);
 
+    // draw temperature
     QFont font = painter.font();
     font.setPixelSize(45);
     font.setBold(true);
     painter.setFont(font);
     painter.setPen(Qt::blue);
-    painter.drawText(arc_width / 2 - 38, arc_height1 / 2 - 43,
+    painter.drawText(arc_width / 2 - 38, up_arc_height / 2 - 43,
                      QString::number(temperature_, 'f', 1));
 
+    // draw test temperature point
     painter.setBrush(QBrush(Qt::red));
-    painter.drawEllipse(QPoint(arc_width / 2, arc_height1 / 2 - 20), 15, 15);
+    painter.drawEllipse(QPoint(arc_width / 2, up_arc_height / 2 - 20), 15, 15);
   }
 
  private:
