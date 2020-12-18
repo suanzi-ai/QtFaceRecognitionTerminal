@@ -13,7 +13,7 @@ FaceTimer *FaceTimer::get_instance() {
   return &instance;
 }
 
-FaceTimer::FaceTimer(QObject *parent) {
+FaceTimer::FaceTimer(QObject *parent) : QThread(parent) {
   screen_saver_timer_ = new QTimer(this);
   screen_saver_timer_->setSingleShot(true);
   connect(screen_saver_timer_, SIGNAL(timeout()), this,

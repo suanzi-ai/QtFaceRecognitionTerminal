@@ -42,6 +42,24 @@
     <file>asserts/cross.png</file>
 </qresource>
 <qresource>
+    <file>asserts/co2/co2_level1.png</file>
+</qresource>
+<qresource>
+    <file>asserts/co2/co2_level2.png</file>
+</qresource>
+<qresource>
+    <file>asserts/co2/co2_level3.png</file>
+</qresource>
+<qresource>
+    <file>asserts/co2/co2_level4.png</file>
+</qresource>
+<qresource>
+    <file>asserts/co2/co2_level5.png</file>
+</qresource>
+<qresource>
+    <file>asserts/co2/co2_level6.png</file>
+</qresource>
+<qresource>
     <file>asserts/clock.ttf</file>
 </qresource>
 <qresource>
