@@ -15,7 +15,7 @@ class TemperatureTipLabel : public QLabel {
                       QWidget *parent = 0) {
     temperature_ = 0.0;
     setFixedSize(240, 165);
-    move(screen_width / 2 - 124, 0.24 * screen_height);
+    move(screen_width / 2 - 120, 0.24 * screen_height);
     setStyleSheet("QLabel { background-color:transparent; color:blue; }");
     hide();
     QTimer::singleShot(1, this, SLOT(delay_init_widgets()));
@@ -63,8 +63,12 @@ class TemperatureTipLabel : public QLabel {
     font.setBold(true);
     painter.setFont(font);
     painter.setPen(Qt::blue);
-    painter.drawText(arc_width / 2 - 38, up_arc_height / 2 - 43,
-                     QString::number(temperature_, 'f', 1));
+
+    QFontMetrics fontMetrics(font);
+    QString temp_str = QString::number(temperature_, 'f', 1);
+    int font_width = fontMetrics.width(temp_str);
+    painter.drawText((arc_width - font_width) / 2, up_arc_height / 2 - 43,
+                     temp_str);
 
     // draw test temperature point
     painter.setBrush(QBrush(Qt::red));

@@ -3,6 +3,7 @@
 
 #include <QThread>
 #include <QTimer>
+#include <quface-io/co2_reader.hpp>
 #include <quface-io/option.hpp>
 
 namespace suanzi {
@@ -29,6 +30,7 @@ class Co2Task : public QThread {
 
  private:
   QTimer *reader_timer_;
+  Co2Reader::ptr co2_reader_;
 };
 
 }  // namespace suanzi

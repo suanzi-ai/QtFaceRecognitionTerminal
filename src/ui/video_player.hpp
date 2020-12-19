@@ -10,6 +10,7 @@
 
 #include "audio_task.hpp"
 #include "camera_reader.hpp"
+#include "co2_task.hpp"
 #include "detect_task.hpp"
 #include "face_timer.hpp"
 #include "gpio_task.hpp"
@@ -19,6 +20,7 @@
 #include "temperature_task.hpp"
 #include "upload_task.hpp"
 
+#include "co2_tip_widget.hpp"
 #include "detect_tip_widget.hpp"
 #include "heatmap_widget.hpp"
 #include "isp_hist_widget.hpp"
@@ -73,6 +75,7 @@ class VideoPlayer : public QWidget {
   LEDTask *led_task_;
 
   TemperatureTask *temperature_task_;
+  Co2Task *co2_task_;
 };
 
 }  // namespace suanzi

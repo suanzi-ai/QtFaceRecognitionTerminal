@@ -10,8 +10,8 @@ Co2TipWidget::Co2TipWidget(int screen_width, int screen_height, QWidget *parent)
   setStyleSheet("QWidget {border-image: url(:asserts/co2/co2_level1.png);}");
   const int w = screen_width;
   const int h = screen_height;
-  move(0.275 * w, 0.11796875 * h);
-  setFixedSize(0.4875 * w, 0.05078125 * h);
+  move(w - 220, 0.84375 * h - 88);
+  setFixedSize(220, 88);
 
   hide();
   QTimer::singleShot(1, this, SLOT(delay_init_widgets()));
@@ -51,9 +51,9 @@ void Co2TipWidget::paintEvent(QPaintEvent *event) {
   QPainter painter(this);
 
   QFont font = painter.font();
-  font.setPixelSize(45);
+  font.setPixelSize(30);
   font.setBold(true);
   painter.setFont(font);
   painter.setPen(Qt::blue);
-  painter.drawText(10, 10, "CO2:" + QString::number(cur_ppm_value_) + "ppm");
+  painter.drawText(80, 54, QString::number(cur_ppm_value_) + "ppm");
 }

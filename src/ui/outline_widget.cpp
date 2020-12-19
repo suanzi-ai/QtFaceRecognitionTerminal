@@ -18,12 +18,22 @@ OutlineWidget::OutlineWidget(int width, int height, QWidget *parent)
   move(0, 0);
   setFixedSize(width, height);
 
+  // background-position: 10% 40%;margin-top: %1px;
   // set background image
-  background_style_ =
-      QString(
-          "QWidget {color:red;background-image: url(:asserts/outline.png); "
-          "background-repeat:no-repeat; margin-top: %1px; }")
-          .arg(QString::number(0.1875 * height));
+  if (width == 800) {
+    background_style_ =
+        QString(
+            "QWidget {color:red;background-image: url(:asserts/outline.png); "
+            "background-repeat:no-repeat;margin-top: %1px;}")
+            .arg(QString::number(0.1875 * height));
+  } else {
+    background_style_ =
+        QString(
+            "QWidget {color:red;background-image: url(:asserts/outline.png); "
+            "background-repeat:no-repeat;background-size: 61% "
+            "61%;background-position: 10% 40%; margin-top: %1px;}")
+            .arg(QString::number(0.165 * height));
+  }
 
   no_style_ = QString(
                   "QWidget {color:red;background-image: none; "

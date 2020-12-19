@@ -9,7 +9,7 @@ ReaderTask::ReaderTask() {
   auto engine = Engine::instance();
   ic_reader_ = engine->get_ic_reader();
   if (ic_reader_ == nullptr) {
-    SZ_LOG_ERROR("Get temperature reader error");
+    SZ_LOG_ERROR("Get ic reader error");
     return;
   }
 
