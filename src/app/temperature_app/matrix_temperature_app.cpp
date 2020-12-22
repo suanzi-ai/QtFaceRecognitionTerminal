@@ -168,8 +168,8 @@ bool MatrixTemperatureApp::get_face_temperature(
   float current_var = get_valid_temperature_variance(statistics);
   if (!Config::enable_anti_spoofing() ||
       current_var > Config::get_user().temperature_var) {
-    SZ_LOG_INFO("max={:.2f}°C, face={:.2f}°C, var={:.2f}°C", max_temperature,
-                face_temperature, current_var);
+    // SZ_LOG_INFO("max={:.2f}°C, face={:.2f}°C, var={:.2f}°C", max_temperature,
+    // face_temperature, current_var);
     emit temperature_task_->tx_temperature(face_temperature);
     return true;
   }

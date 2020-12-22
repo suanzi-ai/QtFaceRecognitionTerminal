@@ -46,7 +46,7 @@ OutlineWidget::OutlineWidget(int width, int height, QWidget *parent)
   connect((const QObject *)&timer_, SIGNAL(timeout()), (const QObject *)this,
           SLOT(rx_update()));
 
-  // pl_temperature_ = new TemperatureTipLabel(width, height);
+  pl_temperature_ = new TemperatureTipLabel(width, height);
 
   timer_.start();
 }
@@ -54,7 +54,7 @@ OutlineWidget::OutlineWidget(int width, int height, QWidget *parent)
 OutlineWidget::~OutlineWidget() {}
 
 void OutlineWidget::rx_temperature(float temp) {
-  // pl_temperature_->set_temperature(temp);
+  pl_temperature_->set_temperature(temp);
 }
 
 void OutlineWidget::rx_update() {

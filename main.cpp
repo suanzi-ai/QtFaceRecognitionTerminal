@@ -229,7 +229,13 @@ int main(int argc, char* argv[]) {
   // Step 3: 初始化QT（必须在Engine初始化之后）
   QApplication app(argc, argv);
 
-  // Step 4: 多语言支持
+  // Step 4: 播放自定义开机画面
+  std::vector<SZ_BYTE> img;
+  if (Config::read_boot_background(img)) {
+    engine->start_boot_ui("boot.jpg");
+  }
+
+  // Step 5: 多语言支持
   load_translator(app);
   config->appendListener("reload", [&app]() { load_translator(app); });
 
@@ -239,12 +245,6 @@ int main(int argc, char* argv[]) {
   config->appendListener("reload", trigger_led);
   config->appendListener("reload", trigger_gpio);
   config->appendListener("reload", reset_temperature);
-
-  // Step 5: 播放自定义开机画面
-  std::vector<SZ_BYTE> img;
-  if (Config::read_boot_background(img)) {
-    engine->start_boot_ui(img);
-  }
 
   // Step 6: 启动主程序UI
   auto gui = create_gui();
@@ -268,7 +268,8 @@ int main(int argc, char* argv[]) {
 
       server->stop();
     }
-  }).detach();
+  })
+      .detach();
 
   return app.exec();
 }

@@ -14,8 +14,10 @@ class Co2Task : public QThread {
 
  public:
   static Co2Task *get_instance();
+  bool is_exist();
 
  private:
+  bool check_co2();
   void run() override;
 
  signals:
@@ -31,6 +33,7 @@ class Co2Task : public QThread {
  private:
   QTimer *reader_timer_;
   Co2Reader::ptr co2_reader_;
+  bool has_co2_;
 };
 
 }  // namespace suanzi

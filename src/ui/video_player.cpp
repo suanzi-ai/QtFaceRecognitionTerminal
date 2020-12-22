@@ -198,10 +198,12 @@ void VideoPlayer::init_widgets() {
           (const QObject *)heatmap_widget_,
           SLOT(rx_update(TemperatureMatrix, QRectF, float, float)));
 
-  Co2TipWidget *co2_tip_widget =
-      new Co2TipWidget(screen_width, screen_height, this);
-  connect((const QObject *)co2_task_, SIGNAL(tx_co2(int)),
-          (const QObject *)co2_tip_widget, SLOT(rx_co2(int)));
+  if (co2_task_->is_exist()) {
+    Co2TipWidget *co2_tip_widget =
+        new Co2TipWidget(screen_width, screen_height, this);
+    connect((const QObject *)co2_task_, SIGNAL(tx_co2(int)),
+            (const QObject *)co2_tip_widget, SLOT(rx_co2(int)));
+  }
 
   isp_hist_widget_ = new ISPHistWidget(400, 300, this);
   isp_hist_widget_->move(0, 50);
