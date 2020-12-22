@@ -85,6 +85,9 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
     // reset if new person appear
     if (if_fresh(input->person_feature)) {
       reset_recognize();
+      reset_temperature();
+
+      has_unhandle_person_ = false;
       update_record = true;
     }
 
@@ -203,7 +206,7 @@ bool RecordTask::if_fresh(const FaceFeature &feature) {
   memcpy(latest_feature_.value, feature.value,
          SZ_FEATURE_NUM * sizeof(SZ_FLOAT));
 
-  return score / 2 + 0.5f < 0.8;
+  return score / 2 + 0.5f < 0.75;
 }
 
 void RecordTask::reset_recognize() {
@@ -452,6 +455,9 @@ bool RecordTask::update_temperature_bias() {
 bool RecordTask::update_person_temperature(const SZ_UINT32 &face_id,
                                            int duration, PersonData &person) {
   person.temperature = 0;
+  if (temperature_history_.size() < Config::get_temperature().min_size)
+    return false;
+
   for (float temperature : temperature_history_)
     person.temperature = std::max(temperature, person.temperature);
   temperature_history_.clear();
@@ -651,15 +657,15 @@ bool RecordTask::if_temperature_updated(float &temperature) {
 
 void RecordTask::rx_temperature(float body_temperature) {
   temperature_history_.push_back(body_temperature);
-  if (has_unhandle_person_) {
-    is_running_ = true;
-    update_person_temperature(duplicated_id_, duplicated_duration_,
-                              latest_person_);
-    has_unhandle_person_ = false;
-    duplicated_counter_++;
-    emit tx_display(latest_person_, false, false);
-  }
-  is_running_ = false;
+  // if (has_unhandle_person_) {
+  //   is_running_ = true;
+  //   update_person_temperature(duplicated_id_, duplicated_duration_,
+  //                             latest_person_);
+  //   has_unhandle_person_ = false;
+  //   duplicated_counter_++;
+  //   emit tx_display(latest_person_, false, false);
+  // }
+  // is_running_ = false;
 }
 
 void RecordTask::rx_card_readed(QString card_no) {

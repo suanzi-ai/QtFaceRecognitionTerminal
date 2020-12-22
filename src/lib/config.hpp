@@ -117,7 +117,7 @@ typedef struct {
   SZ_FLOAT device_face_height;
   SZ_FLOAT device_face_width;
   SZ_FLOAT temperature_distance;
-  SZ_FLOAT temperature_delay;
+  int min_size;
   int manufacturer;
   TemperatureRotation sensor_rotation;
   SZ_FLOAT min_x;
