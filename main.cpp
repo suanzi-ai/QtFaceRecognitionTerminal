@@ -232,7 +232,7 @@ int main(int argc, char* argv[]) {
   // Step 4: 播放自定义开机画面
   std::vector<SZ_BYTE> img;
   if (Config::read_boot_background(img)) {
-    engine->start_boot_ui("boot.jpg");
+    engine->start_boot_ui(img);
   }
 
   // Step 5: 多语言支持
