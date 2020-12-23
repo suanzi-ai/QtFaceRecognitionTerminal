@@ -27,7 +27,6 @@ class TouchWidget : public QStackedWidget {
   QStackedWidget *stacked_widget_;
   QrcodeWidget *qrcode_widget_;
   DigitKeyWidget *digit_key_widget_;
-  MenuKeyWidget *menu_key_widget_;
   int screen_width_;
   int screen_height_;
   QWidget *parent_widget_;

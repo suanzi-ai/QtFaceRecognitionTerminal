@@ -42,8 +42,6 @@ TouchWidget::~TouchWidget() {}
 void TouchWidget::switch_stacked_widget(int index) {
   if (index == 0) {
     setStyleSheet("QStackedWidget {background-color:transparent;margin:0px;}");
-    int w = menu_key_widget_->width();
-    int h = menu_key_widget_->height();
     setFixedSize(100, 300);
     move(screen_width_ - 100, (screen_height_ - 350) / 2);
 
