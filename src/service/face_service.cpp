@@ -250,7 +250,7 @@ json FaceService::db_add(const json &body) {
     if (db_size >= MAX_DATABASE_SIZE) {
       return {
           {"ok", false},
-          {"message", "max database size(2.5w) exceeds"},
+          {"message", "max database size exceeds"},
           {"code", "MAX_DATABASE_SIZE_EXCEEDS"},
       };
     }
@@ -342,7 +342,7 @@ json FaceService::db_add_many(const json &body) {
       if (db_size >= MAX_DATABASE_SIZE) {
         return {
             {"ok", false},
-            {"message", "max database size(2.5w) exceeds"},
+            {"message", "max database size exceeds"},
             {"code", "MAX_DATABASE_SIZE_EXCEEDS"},
         };
       }
