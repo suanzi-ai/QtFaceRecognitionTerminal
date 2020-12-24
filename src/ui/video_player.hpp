@@ -22,13 +22,11 @@
 
 #include "co2_tip_widget.hpp"
 #include "detect_tip_widget.hpp"
-#include "heatmap_widget.hpp"
 #include "isp_hist_widget.hpp"
 #include "outline_widget.hpp"
 #include "recognize_tip_widget.hpp"
 #include "screen_saver_widget.hpp"
 #include "status_banner.hpp"
-#include "temperature_tip_widget.hpp"
 
 namespace suanzi {
 
@@ -54,12 +52,10 @@ class VideoPlayer : public QWidget {
   DetectTipWidget *detect_tip_widget_bgr_;
   DetectTipWidget *detect_tip_widget_nir_;
   RecognizeTipWidget *recognize_tip_widget_;
-  TemperatureTipWidget *temp_tip_widget_;
 
   ScreenSaverWidget *screen_saver_;
   OutlineWidget *outline_widget_;
   StatusBanner *status_banner_;
-  HeatmapWidget *heatmap_widget_;
   ISPHistWidget *isp_hist_widget_;
 
   CameraReader *camera_reader_;

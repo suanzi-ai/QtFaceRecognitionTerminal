@@ -146,10 +146,6 @@ void VideoPlayer::init_widgets() {
             SLOT(rx_display(DetectionRatio, bool, bool, bool)));
   }
 
-  // temp_tip_widget_ =
-  // new TemperatureTipWidget(screen_width, screen_height, this);
-  // temp_tip_widget_->hide();
-
   // 创建人脸识别记录控件
   recognize_tip_widget_ =
       new RecognizeTipWidget(screen_width, screen_height, this);
@@ -158,10 +154,6 @@ void VideoPlayer::init_widgets() {
           SIGNAL(tx_display(PersonData, bool, bool)),
           (const QObject *)recognize_tip_widget_,
           SLOT(rx_display(PersonData, bool, bool)));
-  /*connect((const QObject *)recognize_tip_widget_,
-          SIGNAL(tx_temperature(bool, bool, float)),
-          (const QObject *)temp_tip_widget_,
-          SLOT(rx_temperature(bool, bool, float)));*/
 
   // 创建屏保控件
   screen_saver_ = new ScreenSaverWidget(screen_width, screen_height);
@@ -196,16 +188,6 @@ void VideoPlayer::init_widgets() {
           (const QObject *)status_banner_,
           SLOT(rx_temperature(bool, bool, float)));
 
-  // 创建热力图控件
-  /*heatmap_widget_ = new HeatmapWidget(screen_width, screen_height, this);
-  heatmap_widget_->hide();
-  connect((const QObject *)temperature_task_, SIGNAL(tx_heatmap_init(int)),
-          (const QObject *)heatmap_widget_, SLOT(rx_init(int)));
-  connect((const QObject *)temperature_task_,
-          SIGNAL(tx_heatmap(TemperatureMatrix, QRectF, float, float)),
-          (const QObject *)heatmap_widget_,
-          SLOT(rx_update(TemperatureMatrix, QRectF, float, float)));*/
-
   if (co2_task_->is_exist()) {
     Co2TipWidget *co2_tip_widget =
         new Co2TipWidget(screen_width, screen_height, this);
@@ -223,5 +205,4 @@ void VideoPlayer::init_widgets() {
 void VideoPlayer::delay_init_widgets() {
   status_banner_->show();
   recognize_tip_widget_->show();
-  // temp_tip_widget_->show();
 }
