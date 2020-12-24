@@ -561,7 +561,7 @@ void RecordTask::update_person_snapshot(RecognizeData *input,
 
   static MmzImage *snapshot =
       new MmzImage(width, height, SZ_IMAGETYPE_BGR_PACKAGE);
-
+  snapshot->set_size(width, height);
   if (input->bgr_face_detected_ && width < height &&
       Ive::getInstance()->yuv2RgbPacked(snapshot, bgr, true)) {
     int crop_x = input->bgr_detection_.x * width;
