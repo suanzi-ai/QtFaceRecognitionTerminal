@@ -83,6 +83,9 @@ Config* read_cfg(int argc, char* argv[]) {
 }
 
 Engine* create_engine() {
+  ROTATION_E vo_rotate;
+  Config::load_vo_rotation(vo_rotate);
+
   // 读取屏幕类型
   LCDScreenType lcd_screen_type;
   if (!Config::load_screen_type(lcd_screen_type)) return NULL;
@@ -177,6 +180,7 @@ Engine* create_engine() {
       .screen =
           {
               .type = lcd_screen_type,
+              .rotate = vo_rotate,
           },
       .show_secondary_win = app_cfg.show_infrared_window,
       .secondary_win_percent =

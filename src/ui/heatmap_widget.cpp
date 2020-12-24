@@ -30,6 +30,7 @@ HeatmapWidget::HeatmapWidget(int width, int height, QWidget *parent)
   raw_ = cv::Scalar(0, 255, 0);
   heatmap_ = QPixmap::fromImage(
       QImage((unsigned char *)raw_.data, 16, 16, QImage::Format_RGB888));
+  hide();
 }
 
 HeatmapWidget::~HeatmapWidget() {}

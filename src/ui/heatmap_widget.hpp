@@ -26,7 +26,7 @@ class HeatmapWidget : public QWidget {
  private:
   void paintEvent(QPaintEvent *event) override;
 
- private slots:
+ public slots:
   void rx_init(int success);
   void rx_update(TemperatureMatrix mat, QRectF detection, float x, float y);
 

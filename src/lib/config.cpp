@@ -342,6 +342,7 @@ void Config::load_defaults(ConfigData &c) {
       .enable_pass_audio = true,
       .enable_led = true,
       .enable_screensaver = true,
+      .enable_co2 = true,
       .screensaver_timeout = 60,
       .upload_known_person = true,
       .upload_unknown_person = true,
@@ -732,6 +733,41 @@ bool Config::load_sensor_type(SensorType &sensor0_type,
     }
   }
 
+  return true;
+}
+
+bool Config::load_vo_rotation(ROTATION_E &rotation) {
+  rotation = ROTATION_E::ROTATION_0;
+  std::string conf_filename = "/userdata/user.conf";
+  std::ifstream conf(conf_filename);
+  if (!conf.is_open()) {
+    SZ_LOG_ERROR("Can't open {}", conf_filename);
+    return false;
+  }
+
+  std::string line;
+  std::regex reg("^HIFB_ROTATE=(\\d+)$", std::regex_constants::ECMAScript |
+                                             std::regex_constants::icase);
+  std::smatch matches;
+  while (std::getline(conf, line)) {
+    if (std::regex_match(line, matches, reg)) {
+      if (matches.size() == 2) {
+        std::ssub_match base_sub_match = matches[1];
+        std::string hifb_rotation_value = base_sub_match.str();
+
+        SZ_LOG_INFO("Load HIFB_ROTATE {}", hifb_rotation_value);
+        if (hifb_rotation_value == "0") {
+          rotation = ROTATION_E::ROTATION_0;
+        } else if (hifb_rotation_value == "90") {
+        } else if (hifb_rotation_value == "180") {
+          rotation = ROTATION_E::ROTATION_180;
+        } else if (hifb_rotation_value == "270") {
+        } else {
+          return false;
+        }
+      }
+    }
+  }
   return true;
 }
 

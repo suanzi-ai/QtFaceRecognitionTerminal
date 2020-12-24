@@ -7,6 +7,7 @@
 using namespace suanzi;
 
 TemperatureTipWidget::TemperatureTipWidget(int screen_width, int screen_height,
+                                           int parent_widget_pos_y,
                                            QWidget *parent)
     : QWidget(parent), radius_(0.025 * screen_height) {
   setAttribute(Qt::WA_StyledBackground, true);
@@ -15,8 +16,9 @@ TemperatureTipWidget::TemperatureTipWidget(int screen_width, int screen_height,
   const int w = screen_width;
   const int h = screen_height;
 
-  move(0.275 * w, 0.11796875 * h);
-  setFixedSize(0.4875 * w, 0.05078125 * h);
+  move(0.275 * w, parent_widget_pos_y - 0.05578125 * h - 10);
+
+  setFixedSize(0.4875 * w, 0.05578125 * h);
 
   pl_ok_or_no_ = new QLabel(this);
   pl_ok_or_no_->setFixedSize(0.05625 * w, 0.03515625 * h);
@@ -36,6 +38,7 @@ TemperatureTipWidget::TemperatureTipWidget(int screen_width, int screen_height,
   ph_layout->addSpacing(0.025 * w);
   ph_layout->addWidget(pl_temperature_);
   setLayout(ph_layout);
+  hide();
 }
 
 TemperatureTipWidget::~TemperatureTipWidget() {}

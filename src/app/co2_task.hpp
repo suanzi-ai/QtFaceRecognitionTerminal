@@ -32,7 +32,6 @@ class Co2Task : public QThread {
  private:
   QTimer *reader_timer_;
   Co2Reader::ptr co2_reader_;
-  bool has_co2_;
 };
 
 }  // namespace suanzi

@@ -5,6 +5,8 @@
 #include <QPainter>
 #include <QTimer>
 #include <QWidget>
+#include "heatmap_widget.hpp"
+#include "temperature_tip_widget.hpp"
 
 namespace suanzi {
 
@@ -12,10 +14,11 @@ class TemperatureTipLabel : public QLabel {
   Q_OBJECT
  public:
   TemperatureTipLabel(int screen_width, int screen_height,
-                      QWidget *parent = 0) {
+                      int parent_widget_pos_y, QWidget *parent = 0) {
     temperature_ = 0.0;
     setFixedSize(240, 165);
-    move(screen_width / 2 - 120, 0.24 * screen_height);
+    move(screen_width / 2 - 120, parent_widget_pos_y + 67);
+    // move(screen_width / 2 - 120, 0.24 * screen_height + 200);
     setStyleSheet("QLabel { background-color:transparent; color:blue; }");
     hide();
     QTimer::singleShot(1, this, SLOT(delay_init_widgets()));
@@ -58,7 +61,7 @@ class TemperatureTipLabel : public QLabel {
     // painter.drawPath(path);
 
     // draw temperature
-    QFont font = painter.font();
+    /*QFont font = painter.font();
     font.setPixelSize(45);
     font.setBold(true);
     painter.setFont(font);
@@ -68,7 +71,7 @@ class TemperatureTipLabel : public QLabel {
     QString temp_str = QString::number(temperature_, 'f', 1);
     int font_width = fontMetrics.width(temp_str);
     painter.drawText((arc_width - font_width) / 2, up_arc_height / 2 - 43,
-                     temp_str);
+                     temp_str);*/
 
     // draw test temperature point
     painter.setBrush(QBrush(Qt::red));
@@ -90,6 +93,10 @@ class OutlineWidget : public QWidget {
   void rx_warn_distance();
   void rx_update();
   void rx_temperature(float temp);
+  void rx_temperature(bool bvisible, bool bnormal_temperature,
+                      float temperature);
+  void rx_init(int success);
+  void rx_update(TemperatureMatrix mat, QRectF detection, float x, float y);
 
  private:
   QTimer timer_;
@@ -98,6 +105,8 @@ class OutlineWidget : public QWidget {
 
   bool show_valid_rect_;
   TemperatureTipLabel *pl_temperature_;
+  TemperatureTipWidget *temp_tip_widget_;
+  HeatmapWidget *heatmap_widget_;
 };
 
 }  // namespace suanzi
