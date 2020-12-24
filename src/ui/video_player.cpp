@@ -28,8 +28,6 @@ void VideoPlayer::paintEvent(QPaintEvent *event) {
   QWidget::paintEvent(event);
 
   QPainter painter(this);
-  //   outline_widget_->paint(&painter);
-  //   recognize_tip_widget_->paint(&painter);
 }
 
 void VideoPlayer::init_workflow() {
@@ -214,7 +212,6 @@ void VideoPlayer::init_widgets() {
 
 void VideoPlayer::delay_init_widgets() {
   status_banner_->show();
-  // heatmap_widget_->show();
   recognize_tip_widget_->show();
   temp_tip_widget_->show();
 }

@@ -17,7 +17,6 @@ class Co2Task : public QThread {
   bool is_exist();
 
  private:
-  bool check_co2();
   void run() override;
 
  signals:

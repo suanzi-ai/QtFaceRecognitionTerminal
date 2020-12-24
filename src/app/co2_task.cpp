@@ -12,6 +12,10 @@ Co2Task *Co2Task::get_instance() {
 }
 
 Co2Task::Co2Task(QObject *parent) : QThread(parent) {
+  if (!is_exist()) {
+    return;
+  }
+
   auto engine = Engine::instance();
   co2_reader_ = engine->get_co2_reader();
   if (co2_reader_ == nullptr) {
@@ -21,13 +25,6 @@ Co2Task::Co2Task(QObject *parent) : QThread(parent) {
 
   reader_timer_ = new QTimer(this);
   connect(reader_timer_, SIGNAL(timeout()), this, SLOT(read_co2()));
-
-  has_co2_ = false;
-  if (!check_co2()) {
-    return;
-  }
-
-  has_co2_ = true;
   reader_timer_->start(250);
 
   moveToThread(this);
@@ -38,10 +35,7 @@ Co2Task::~Co2Task() {}
 
 void Co2Task::run() { exec(); }
 
-bool Co2Task::check_co2() {
-  int value = 0;
-  return co2_reader_ != nullptr && SZ_RETCODE_OK == co2_reader_->read(value);
-}
+bool Co2Task::is_exist() { return Config::get_user().enable_co2; }
 
 void Co2Task::read_co2() {
   int value = 0;
@@ -49,5 +43,3 @@ void Co2Task::read_co2() {
     emit tx_co2(value);
   }
 }
-
-bool Co2Task::is_exist() { return has_co2_; }

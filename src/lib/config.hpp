@@ -68,6 +68,7 @@ typedef struct {
   bool enable_pass_audio;
   bool enable_led;
   bool enable_screensaver;
+  bool enable_co2;
   SZ_UINT16 screensaver_timeout;
   bool upload_known_person;
   bool upload_unknown_person;

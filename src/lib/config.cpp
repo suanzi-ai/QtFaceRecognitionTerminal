@@ -34,6 +34,7 @@ void suanzi::to_json(json &j, const UserConfig &c) {
   SAVE_JSON_TO(j, "enable_pass_audio", c.enable_pass_audio);
   SAVE_JSON_TO(j, "enable_led", c.enable_led);
   SAVE_JSON_TO(j, "enable_screensaver", c.enable_screensaver);
+  SAVE_JSON_TO(j, "enable_co2", c.enable_co2);
   SAVE_JSON_TO(j, "screensaver_timeout", c.screensaver_timeout);
   SAVE_JSON_TO(j, "upload_known_person", c.upload_known_person);
   SAVE_JSON_TO(j, "upload_unknown_person", c.upload_unknown_person);
@@ -75,6 +76,7 @@ void suanzi::from_json(const json &j, UserConfig &c) {
   LOAD_JSON_TO(j, "enable_pass_audio", c.enable_pass_audio);
   LOAD_JSON_TO(j, "enable_led", c.enable_led);
   LOAD_JSON_TO(j, "enable_screensaver", c.enable_screensaver);
+  LOAD_JSON_TO(j, "enable_co2", c.enable_co2);
   LOAD_JSON_TO(j, "screensaver_timeout", c.screensaver_timeout);
   LOAD_JSON_TO(j, "upload_known_person", c.upload_known_person);
   LOAD_JSON_TO(j, "upload_unknown_person", c.upload_unknown_person);
