@@ -120,6 +120,17 @@ bool SCAN_QRCODE() {
             SZ_LOG_ERROR("Save mac address failed: {}", output);
             return false;
           }
+
+          if (SZ_RETCODE_OK !=
+              System::exec("sed -i '/qrcode-test/d' /usr/script/sample.sh && "
+                           "echo '/user/quface-app/bin/supervisord -c "
+                           "/user/quface-app/etc/supervisord.conf -d' >> "
+                           "/usr/script/sample.sh",
+                           output)) {
+            SZ_LOG_ERROR("Update sample.sh failed: {}", output);
+            return false;
+          }
+
           return true;
         }
       }
@@ -204,19 +215,23 @@ int main() {
   auto engine = Engine::instance();
   engine->audio_set_volume(100);
 
-  while (true) {
-    if (SCAN_QRCODE()) {
-      engine->audio_play(audio);
-      for (int i = 0; i < 3; i++) {
-        engine->gpio_set(GpioPinLightBox, true);
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
-        engine->gpio_set(GpioPinLightBox, false);
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
-      }
-    } else
-      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  while (!SCAN_QRCODE()) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  }
+  engine->audio_play(audio);
+  for (int i = 0; i < 3; i++) {
+    engine->gpio_set(GpioPinLightBox, true);
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    engine->gpio_set(GpioPinLightBox, false);
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
   }
 
+  std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+
   HI_MPI_SYS_Exit();
+
+  std::string output;
+  System::exec("reboot -d 10 &", output);
+
   return 0;
 }
