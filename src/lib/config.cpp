@@ -311,7 +311,7 @@ void Config::load_defaults(ConfigData &c) {
       .temperature_distance = 0.68,
       .min_size = 1,
       .manufacturer = -1,
-      .temperature_type = 1,
+      .temperature_type = 0,
       .sensor_rotation = TemperatureRotation::None,
       .min_x = 0.3125,
       .max_x = 0.875,
