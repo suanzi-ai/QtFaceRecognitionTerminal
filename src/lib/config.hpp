@@ -1,12 +1,11 @@
 #ifndef CONFIG_HPP
 #define CONFIG_HPP
 
-#include <eventpp/eventdispatcher.h>
-
 #include <fstream>
 #include <mutex>
 #include <string>
 
+#include <eventpp/eventdispatcher.h>
 #include <nlohmann/json.hpp>
 
 #include <quface-io/isp_option.hpp>
@@ -76,6 +75,7 @@ typedef struct {
   bool upload_unknown_person;
   bool upload_hd_snapshot;
   SZ_FLOAT mask_score;
+  SZ_FLOAT antispoof_score;
   bool wdr;
 } UserConfig;
 

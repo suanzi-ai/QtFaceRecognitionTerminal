@@ -131,23 +131,22 @@ void RecognizeTask::rx_bgr_finish(bool if_finished) {
 
 bool RecognizeTask::is_live(DetectionData *detection) {
   if (detection->nir_face_valid()) {
-    // TODO: train new antispoofing model
+    int width = detection->img_bgr_large->width;
+    int height = detection->img_bgr_large->height;
 
-    // int width = detection->img_nir_large->width;
-    // int height = detection->img_nir_large->height;
+    suanzi::FaceDetection face_detection;
+    suanzi::FacePose pose;
+    detection->bgr_detection_.scale(width, height, face_detection, pose);
 
-    // suanzi::FaceDetection face_detection;
-    // suanzi::FacePose pose;
-    // detection->nir_detection_.scale(width, height, face_detection, pose);
+    SZ_BOOL is_live;
+    SZ_RETCODE ret = anti_spoofing_->validate(
+        (const SVP_IMAGE_S *)detection->img_bgr_large->pImplData,
+        face_detection, is_live, Config::get_user().antispoof_score);
 
-    // SZ_BOOL ret;
-    // if (SZ_RETCODE_OK !=
-    //     anti_spoofing_->validate(
-    //         (const SVP_IMAGE_S *)detection->img_nir_large->pImplData,
-    //         face_detection, pose, ret))
-    //   return false;
-    // return ret == SZ_TRUE;
-    return true;
+    if (SZ_RETCODE_OK == ret && is_live == SZ_TRUE)
+      return true;
+    else
+      return false;
   } else
     return false;
 }

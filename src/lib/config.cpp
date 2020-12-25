@@ -40,6 +40,7 @@ void suanzi::to_json(json &j, const UserConfig &c) {
   SAVE_JSON_TO(j, "upload_unknown_person", c.upload_unknown_person);
   SAVE_JSON_TO(j, "upload_hd_snapshot", c.upload_hd_snapshot);
   SAVE_JSON_TO(j, "mask_score", c.mask_score);
+  SAVE_JSON_TO(j, "antispoof_score", c.antispoof_score);
   SAVE_JSON_TO(j, "wdr", c.wdr);
 }
 
@@ -83,6 +84,7 @@ void suanzi::from_json(const json &j, UserConfig &c) {
   LOAD_JSON_TO(j, "upload_unknown_person", c.upload_unknown_person);
   LOAD_JSON_TO(j, "upload_hd_snapshot", c.upload_hd_snapshot);
   LOAD_JSON_TO(j, "mask_score", c.mask_score);
+  LOAD_JSON_TO(j, "antispoof_score", c.antispoof_score);
   LOAD_JSON_TO(j, "wdr", c.wdr);
 }
 
@@ -363,6 +365,7 @@ void Config::load_defaults(ConfigData &c) {
       .upload_unknown_person = true,
       .upload_hd_snapshot = false,
       .mask_score = 0.7,
+      .antispoof_score = 0.7,
       .wdr = false,
   };
 
