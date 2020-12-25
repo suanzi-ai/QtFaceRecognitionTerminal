@@ -10,10 +10,11 @@ class TemperatureTipWidget : public QWidget {
   Q_OBJECT
 
  public:
-  TemperatureTipWidget(int width, int height, QWidget *parent = nullptr);
+  TemperatureTipWidget(int width, int height, int parent_widget_pos_y,
+                       QWidget *parent = nullptr);
   ~TemperatureTipWidget() override;
 
- private slots:
+ public slots:
   void rx_temperature(bool bvisible, bool bnormal_temperature,
                       float temperature);
 

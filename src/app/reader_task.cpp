@@ -18,7 +18,10 @@ ReaderTask *ReaderTask::get_instance() {
 ReaderTask::ReaderTask(QThread *thread, QObject *parent) {
   person_service_ = PersonService::get_instance();
   reader_ = Engine::instance()->get_ic_reader();
-
+  if (reader_ == nullptr) {
+    SZ_LOG_ERROR("Get ic reader error");
+    return;
+  }
   start();
 }
 

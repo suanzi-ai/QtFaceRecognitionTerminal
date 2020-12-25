@@ -4,8 +4,8 @@
 #include <QDebug>
 #include <QPainter>
 #include <QPushButton>
+#include <QRectF>
 #include <QTimer>
-
 #include "config.hpp"
 
 using namespace suanzi;
@@ -28,8 +28,6 @@ void VideoPlayer::paintEvent(QPaintEvent *event) {
   QWidget::paintEvent(event);
 
   QPainter painter(this);
-  //   outline_widget_->paint(&painter);
-  //   recognize_tip_widget_->paint(&painter);
 }
 
 void VideoPlayer::init_workflow() {
@@ -109,6 +107,8 @@ void VideoPlayer::init_workflow() {
     connect((const QObject *)temperature_task_, SIGNAL(tx_temperature(float)),
             (const QObject *)record_task_, SLOT(rx_temperature(float)));
   }
+  // 创建CO2任务
+  co2_task_ = Co2Task::get_instance();
 }
 
 void VideoPlayer::init_widgets() {
@@ -154,10 +154,6 @@ void VideoPlayer::init_widgets() {
             SLOT(rx_display(DetectionRatio, bool, bool, bool)));
   }
 
-  temp_tip_widget_ =
-      new TemperatureTipWidget(screen_width, screen_height, this);
-  temp_tip_widget_->hide();
-
   // 创建人脸识别记录控件
   recognize_tip_widget_ =
       new RecognizeTipWidget(screen_width, screen_height, this);
@@ -173,10 +169,6 @@ void VideoPlayer::init_widgets() {
           SIGNAL(tx_display(PersonData, bool, bool)),
           (const QObject *)recognize_tip_widget_,
           SLOT(rx_display(PersonData, bool, bool)));
-  connect((const QObject *)recognize_tip_widget_,
-          SIGNAL(tx_temperature(bool, bool, float)),
-          (const QObject *)temp_tip_widget_,
-          SLOT(rx_temperature(bool, bool, float)));
 
   // 创建屏保控件
   screen_saver_ = new ScreenSaverWidget(screen_width, screen_height);
@@ -187,9 +179,24 @@ void VideoPlayer::init_widgets() {
           (const QObject *)face_timer_, SLOT(rx_detect_result(bool)));
 
   // 创建人体轮廓控件
-  outline_widget_ = new OutlineWidget(screen_width, screen_height, this);
-  connect((const QObject *)detect_task_, SIGNAL(tx_display_rectangle()),
-          (const QObject *)outline_widget_, SLOT(rx_warn_distance()));
+  if (Config::has_temperature_device()) {
+    outline_widget_ = new OutlineWidget(screen_width, screen_height, this);
+    connect((const QObject *)detect_task_, SIGNAL(tx_display_rectangle()),
+            (const QObject *)outline_widget_, SLOT(rx_warn_distance()));
+    connect((const QObject *)recognize_tip_widget_,
+            SIGNAL(tx_temperature(bool, bool, float)),
+            (const QObject *)outline_widget_,
+            SLOT(rx_temperature(bool, bool, float)));
+    connect((const QObject *)temperature_task_, SIGNAL(tx_heatmap_init(int)),
+            (const QObject *)outline_widget_, SLOT(rx_init(int)));
+    connect((const QObject *)temperature_task_,
+            SIGNAL(tx_heatmap(TemperatureMatrix, QRectF, float, float)),
+            (const QObject *)outline_widget_,
+            SLOT(rx_update(TemperatureMatrix, QRectF, float, float)));
+    // connect((const QObject *)temperature_task_,
+    // SIGNAL(tx_temperature(float)),
+    //(const QObject *)outline_widget_, SLOT(rx_temperature(float)));
+  }
 
   // 创建顶部状态栏控件
   status_banner_ = new StatusBanner(screen_width, screen_height, this);
@@ -201,16 +208,11 @@ void VideoPlayer::init_widgets() {
           (const QObject *)status_banner_,
           SLOT(rx_temperature(bool, bool, float)));
 
-  // 创建热力图控件
-  heatmap_widget_ = new HeatmapWidget(screen_width, screen_height, this);
-  if (Config::has_temperature_device()) {
-    heatmap_widget_->hide();
-    connect((const QObject *)temperature_task_, SIGNAL(tx_heatmap_init(int)),
-            (const QObject *)heatmap_widget_, SLOT(rx_init(int)));
-    connect((const QObject *)temperature_task_,
-            SIGNAL(tx_heatmap(TemperatureMatrix, DetectionRatio, float, float)),
-            (const QObject *)heatmap_widget_,
-            SLOT(rx_update(TemperatureMatrix, DetectionRatio, float, float)));
+  if (co2_task_->is_exist()) {
+    Co2TipWidget *co2_tip_widget =
+        new Co2TipWidget(screen_width, screen_height, this);
+    connect((const QObject *)co2_task_, SIGNAL(tx_co2(int)),
+            (const QObject *)co2_tip_widget, SLOT(rx_co2(int)));
   }
 
   isp_hist_widget_ = new ISPHistWidget(400, 300, this);
@@ -223,10 +225,5 @@ void VideoPlayer::init_widgets() {
 void VideoPlayer::delay_init_widgets() {
   status_banner_->show();
   recognize_tip_widget_->show();
-
-  if (Config::has_temperature_device()) {
-    heatmap_widget_->show();
-    temp_tip_widget_->show();
-  }
   if (Config::has_touch_screen()) touch_widget_->show();
 }

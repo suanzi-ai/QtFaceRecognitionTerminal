@@ -83,6 +83,9 @@ Config* read_cfg(int argc, char* argv[]) {
 }
 
 Engine* create_engine() {
+  ROTATION_E vo_rotate;
+  Config::load_vo_rotation(vo_rotate);
+
   // 读取屏幕类型
   LCDScreenType lcd_screen_type;
   if (!Config::load_screen_type(lcd_screen_type)) return NULL;
@@ -177,6 +180,7 @@ Engine* create_engine() {
       .screen =
           {
               .type = lcd_screen_type,
+              .rotate = vo_rotate,
           },
       .show_secondary_win = app_cfg.show_infrared_window,
       .secondary_win_percent =
@@ -230,7 +234,14 @@ int main(int argc, char* argv[]) {
   QApplication app(argc, argv);
   //去掉触摸屏光标
   QApplication::setOverrideCursor(Qt::BlankCursor);
-  // Step 4: 多语言支持
+
+  // Step 4: 播放自定义开机画面
+  std::vector<SZ_BYTE> img;
+  if (Config::read_boot_background(img)) {
+    engine->start_boot_ui(img);
+  }
+
+  // Step 5: 多语言支持
   load_translator(app);
   config->appendListener("reload", [&app]() { load_translator(app); });
 
@@ -240,12 +251,6 @@ int main(int argc, char* argv[]) {
   config->appendListener("reload", trigger_led);
   config->appendListener("reload", trigger_gpio);
   config->appendListener("reload", reset_temperature);
-
-  // Step 5: 播放自定义开机画面
-  std::vector<SZ_BYTE> img;
-  if (Config::read_boot_background(img)) {
-    engine->start_boot_ui(img);
-  }
 
   // Step 6: 启动主程序UI
   auto gui = create_gui();
@@ -269,7 +274,8 @@ int main(int argc, char* argv[]) {
 
       server->stop();
     }
-  }).detach();
+  })
+      .detach();
 
   return app.exec();
 }

@@ -34,6 +34,7 @@ void suanzi::to_json(json &j, const UserConfig &c) {
   SAVE_JSON_TO(j, "enable_pass_audio", c.enable_pass_audio);
   SAVE_JSON_TO(j, "enable_led", c.enable_led);
   SAVE_JSON_TO(j, "enable_screensaver", c.enable_screensaver);
+  SAVE_JSON_TO(j, "enable_co2", c.enable_co2);
   SAVE_JSON_TO(j, "screensaver_timeout", c.screensaver_timeout);
   SAVE_JSON_TO(j, "upload_known_person", c.upload_known_person);
   SAVE_JSON_TO(j, "upload_unknown_person", c.upload_unknown_person);
@@ -76,6 +77,7 @@ void suanzi::from_json(const json &j, UserConfig &c) {
   LOAD_JSON_TO(j, "enable_pass_audio", c.enable_pass_audio);
   LOAD_JSON_TO(j, "enable_led", c.enable_led);
   LOAD_JSON_TO(j, "enable_screensaver", c.enable_screensaver);
+  LOAD_JSON_TO(j, "enable_co2", c.enable_co2);
   LOAD_JSON_TO(j, "screensaver_timeout", c.screensaver_timeout);
   LOAD_JSON_TO(j, "upload_known_person", c.upload_known_person);
   LOAD_JSON_TO(j, "upload_unknown_person", c.upload_unknown_person);
@@ -120,6 +122,7 @@ void suanzi::to_json(json &j, const TemperatureConfig &c) {
   SAVE_JSON_TO(j, "temperature_distance", c.temperature_distance);
   SAVE_JSON_TO(j, "manufacturer", c.manufacturer);
   SAVE_JSON_TO(j, "min_size", c.min_size);
+  SAVE_JSON_TO(j, "temperature_type", c.temperature_type);
   SAVE_JSON_TO(j, "sensor_rotation", c.sensor_rotation);
   SAVE_JSON_TO(j, "min_x", c.min_x);
   SAVE_JSON_TO(j, "max_x", c.max_x);
@@ -135,6 +138,7 @@ void suanzi::from_json(const json &j, TemperatureConfig &c) {
   LOAD_JSON_TO(j, "temperature_distance", c.temperature_distance);
   LOAD_JSON_TO(j, "manufacturer", c.manufacturer);
   LOAD_JSON_TO(j, "min_size", c.min_size);
+  LOAD_JSON_TO(j, "temperature_type", c.temperature_type);
   LOAD_JSON_TO(j, "sensor_rotation", c.sensor_rotation);
   LOAD_JSON_TO(j, "min_x", c.min_x);
   LOAD_JSON_TO(j, "max_x", c.max_x);
@@ -307,6 +311,7 @@ void Config::load_defaults(ConfigData &c) {
       .temperature_distance = 0.68,
       .min_size = 1,
       .manufacturer = -1,
+      .temperature_type = 1,
       .sensor_rotation = TemperatureRotation::None,
       .min_x = 0.3125,
       .max_x = 0.875,
@@ -342,6 +347,7 @@ void Config::load_defaults(ConfigData &c) {
       .enable_pass_audio = true,
       .enable_led = true,
       .enable_screensaver = true,
+      .enable_co2 = true,
       .screensaver_timeout = 60,
       .upload_known_person = true,
       .upload_unknown_person = true,
@@ -733,6 +739,41 @@ bool Config::load_sensor_type(SensorType &sensor0_type,
     }
   }
 
+  return true;
+}
+
+bool Config::load_vo_rotation(ROTATION_E &rotation) {
+  rotation = ROTATION_E::ROTATION_0;
+  std::string conf_filename = "/userdata/user.conf";
+  std::ifstream conf(conf_filename);
+  if (!conf.is_open()) {
+    SZ_LOG_ERROR("Can't open {}", conf_filename);
+    return false;
+  }
+
+  std::string line;
+  std::regex reg("^HIFB_ROTATE=(\\d+)$", std::regex_constants::ECMAScript |
+                                             std::regex_constants::icase);
+  std::smatch matches;
+  while (std::getline(conf, line)) {
+    if (std::regex_match(line, matches, reg)) {
+      if (matches.size() == 2) {
+        std::ssub_match base_sub_match = matches[1];
+        std::string hifb_rotation_value = base_sub_match.str();
+
+        SZ_LOG_INFO("Load HIFB_ROTATE {}", hifb_rotation_value);
+        if (hifb_rotation_value == "0") {
+          rotation = ROTATION_E::ROTATION_0;
+        } else if (hifb_rotation_value == "90") {
+        } else if (hifb_rotation_value == "180") {
+          rotation = ROTATION_E::ROTATION_180;
+        } else if (hifb_rotation_value == "270") {
+        } else {
+          return false;
+        }
+      }
+    }
+  }
   return true;
 }
 

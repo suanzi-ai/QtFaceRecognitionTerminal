@@ -70,6 +70,7 @@ typedef struct {
   bool enable_pass_audio;
   bool enable_led;
   bool enable_screensaver;
+  bool enable_co2;
   SZ_UINT16 screensaver_timeout;
   bool upload_known_person;
   bool upload_unknown_person;
@@ -119,6 +120,7 @@ typedef struct {
   SZ_FLOAT temperature_distance;
   int min_size;
   int manufacturer;
+  int temperature_type;
   TemperatureRotation sensor_rotation;
   SZ_FLOAT min_x;
   SZ_FLOAT max_x;
@@ -254,7 +256,7 @@ class Config : public ConfigEventEmitter {
   static bool load_screen_type(io::LCDScreenType &lcd_screen_type);
   static bool load_sensor_type(io::SensorType &sensor0_type,
                                io::SensorType &sensor1_type);
-
+  static bool load_vo_rotation(ROTATION_E &rotation);
   static bool write_audio_volume(int volume_percent);
   static bool read_audio_volume(int &volume_percent);
 
