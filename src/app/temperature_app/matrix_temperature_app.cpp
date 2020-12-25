@@ -168,8 +168,8 @@ bool MatrixTemperatureApp::get_face_temperature(
   float current_var = get_valid_temperature_variance(statistics);
   if (!Config::enable_anti_spoofing() ||
       current_var > Config::get_user().temperature_var) {
-    // SZ_LOG_INFO("max={:.2f}°C, face={:.2f}°C, var={:.2f}°C", max_temperature,
-    // face_temperature, current_var);
+    SZ_LOG_INFO("max={:.2f}°C, face={:.2f}°C, var={:.2f}°C", max_temperature,
+                face_temperature, current_var);
     emit temperature_task_->tx_temperature(face_temperature);
     return true;
   }
@@ -229,7 +229,7 @@ void MatrixTemperatureApp::get_temperature_area(const QRectF &face_area,
                cfg.min_x;
     temperature_area.setX(std::max(floor(x1 * 16) - 1, 0.f) / 16.f);
     temperature_area.setWidth(std::min(ceil(x2 * 16) + 1, 16.f) / 16.f -
-                              face_area.x());
+                              temperature_area.x());
 
     float y1 = (cfg.max_y - cfg.min_y) * face_area.y() + cfg.min_y;
     float y2 = (cfg.max_y - cfg.min_y) * (face_area.y() + face_area.height()) +

@@ -347,7 +347,7 @@ void Config::load_defaults(ConfigData &c) {
       .enable_pass_audio = true,
       .enable_led = true,
       .enable_screensaver = true,
-      .enable_co2 = true,
+      .enable_co2 = false,
       .screensaver_timeout = 60,
       .upload_known_person = true,
       .upload_unknown_person = true,

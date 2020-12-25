@@ -17,8 +17,8 @@ HeatmapWidget::HeatmapWidget(int width, int height, QWidget *parent)
 
   int w = 0.1875 * width;
   int h = 0.1171875 * height;
-  int pos_x = 0;                               // 0.0625 * width;
-  int pos_y = (0.84375 - 0.1171875) * height;  // 0.733125 * height;
+  int pos_x = 0.0625 * width;
+  int pos_y = 0.703125 * height;
   setFixedSize(w, h);
   move(pos_x, pos_y);
 

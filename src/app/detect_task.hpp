@@ -31,7 +31,7 @@ class DetectTask : QObject {
                       bool show_pose);
 
   // for read temperature
-  void tx_temperature_target(DetectionRatio detection, bool to_clear);
+  void tx_temperature_target(DetectionRatio detection, bool valid_face_area);
 
   // for audio warning
   void tx_warn_distance();
