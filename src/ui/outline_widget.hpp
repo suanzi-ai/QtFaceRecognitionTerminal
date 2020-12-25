@@ -89,6 +89,9 @@ class OutlineWidget : public QWidget {
   OutlineWidget(int width, int height, QWidget *parent = nullptr);
   ~OutlineWidget() override;
 
+ private:
+  void paintEvent(QPaintEvent *event) override;
+
  private slots:
   void rx_warn_distance();
   void rx_update();

@@ -67,12 +67,15 @@ bool DetectionRatio::is_valid_position() {
     min_x = min_y = 0.01;
     max_x = max_y = 0.99;
   } else {
-    min_x = 0.15;
+    /*min_x = 0.15;
     min_y = 0.05;
     max_x = 0.85;
-    max_y = 0.95;
+    max_y = 0.95;*/
+    min_x = temperature.temperature_area_x;
+    min_y = temperature.temperature_area_y;
+    max_x = min_x + temperature.temperature_area_width;
+    max_y = min_y + temperature.temperature_area_height;
   }
-
   return x > min_x && y > min_y && x + width < max_x && y + height < max_y;
 }
 
@@ -82,11 +85,8 @@ bool DetectionRatio::is_valid_size() {
   if (!user.enable_temperature)
     return true;
   else {
-    float min_width =
-        temperature.device_face_width * temperature.temperature_distance;
-    float min_height =
-        temperature.device_face_height * temperature.temperature_distance;
-
+    float min_width = temperature.min_face_width;
+    float min_height = temperature.min_face_height;
     return width > min_width && height > min_height;
   }
 }

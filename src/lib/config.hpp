@@ -113,11 +113,14 @@ typedef enum TemperatureRotation {
 } TemperatureRotation;
 
 typedef struct {
-  SZ_FLOAT device_face_x;
-  SZ_FLOAT device_face_y;
-  SZ_FLOAT device_face_height;
-  SZ_FLOAT device_face_width;
-  SZ_FLOAT temperature_distance;
+  bool temperature_area_debug;
+  SZ_FLOAT temperature_area_x;
+  SZ_FLOAT temperature_area_y;
+  SZ_FLOAT temperature_area_width;
+  SZ_FLOAT temperature_area_height;
+  SZ_FLOAT min_face_width;
+  SZ_FLOAT min_face_height;
+
   int min_size;
   int manufacturer;
   int temperature_type;

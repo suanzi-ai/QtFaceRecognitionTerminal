@@ -109,10 +109,10 @@ void DetectTipWidget::paint(QPainter *painter) {
 
 void DetectTipWidget::rx_display(DetectionRatio detection, bool to_clear,
                                  bool valid, bool is_bgr) {
-  if (Config::get_user().enable_temperature) {
+  /*if (Config::get_user().enable_temperature) {
     hide();
     return;
-  }
+  }*/
 
   int box_x = 1;
   int box_y = 1;

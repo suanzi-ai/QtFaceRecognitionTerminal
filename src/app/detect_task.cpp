@@ -74,8 +74,7 @@ void DetectTask::rx_frame(PingPangBuffer<ImagePackage> *buffer) {
                       output->bgr_face_valid_, true);
 
   if (TemperatureTask::get_instance()->idle())
-    emit tx_temperature_target(output->bgr_detection_,
-                               output->bgr_face_detected_);
+    emit tx_temperature_target(output->bgr_detection_, output->bgr_face_valid_);
 
   output->nir_face_detected_ =
       detect_and_select(input->img_nir_small, output->nir_detection_, false);

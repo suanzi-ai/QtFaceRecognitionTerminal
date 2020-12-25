@@ -115,11 +115,13 @@ void suanzi::from_json(const json &j, AppConfig &c) {
 }
 
 void suanzi::to_json(json &j, const TemperatureConfig &c) {
-  SAVE_JSON_TO(j, "device_face_x", c.device_face_x);
-  SAVE_JSON_TO(j, "device_face_y", c.device_face_y);
-  SAVE_JSON_TO(j, "device_face_height", c.device_face_height);
-  SAVE_JSON_TO(j, "device_face_width", c.device_face_width);
-  SAVE_JSON_TO(j, "temperature_distance", c.temperature_distance);
+  SAVE_JSON_TO(j, "temperature_area_debug", c.temperature_area_debug);
+  SAVE_JSON_TO(j, "temperature_area_x", c.temperature_area_x);
+  SAVE_JSON_TO(j, "temperature_area_y", c.temperature_area_y);
+  SAVE_JSON_TO(j, "temperature_area_width", c.temperature_area_width);
+  SAVE_JSON_TO(j, "temperature_area_height", c.temperature_area_height);
+  SAVE_JSON_TO(j, "min_face_height", c.min_face_height);
+  SAVE_JSON_TO(j, "min_face_width", c.min_face_width);
   SAVE_JSON_TO(j, "manufacturer", c.manufacturer);
   SAVE_JSON_TO(j, "min_size", c.min_size);
   SAVE_JSON_TO(j, "temperature_type", c.temperature_type);
@@ -131,11 +133,13 @@ void suanzi::to_json(json &j, const TemperatureConfig &c) {
 }
 
 void suanzi::from_json(const json &j, TemperatureConfig &c) {
-  LOAD_JSON_TO(j, "device_face_x", c.device_face_x);
-  LOAD_JSON_TO(j, "device_face_y", c.device_face_y);
-  LOAD_JSON_TO(j, "device_face_height", c.device_face_height);
-  LOAD_JSON_TO(j, "device_face_width", c.device_face_width);
-  LOAD_JSON_TO(j, "temperature_distance", c.temperature_distance);
+  LOAD_JSON_TO(j, "temperature_area_debug", c.temperature_area_debug);
+  LOAD_JSON_TO(j, "temperature_area_x", c.temperature_area_x);
+  LOAD_JSON_TO(j, "temperature_area_y", c.temperature_area_y);
+  LOAD_JSON_TO(j, "temperature_area_width", c.temperature_area_width);
+  LOAD_JSON_TO(j, "temperature_area_height", c.temperature_area_height);
+  LOAD_JSON_TO(j, "min_face_height", c.min_face_height);
+  LOAD_JSON_TO(j, "min_face_width", c.min_face_width);
   LOAD_JSON_TO(j, "manufacturer", c.manufacturer);
   LOAD_JSON_TO(j, "min_size", c.min_size);
   LOAD_JSON_TO(j, "temperature_type", c.temperature_type);
@@ -304,11 +308,17 @@ void Config::load_defaults(ConfigData &c) {
   };
 
   c.temperature = {
-      .device_face_x = 0.289,
+      .temperature_area_debug = true,
+      /*.device_face_x = 0.289,
       .device_face_y = 0.18,
       .device_face_height = 0.35,
-      .device_face_width = 0.48,
-      .temperature_distance = 0.68,
+      .device_face_width = 0.48,*/
+      .temperature_area_x = 0.15,
+      .temperature_area_y = 0.05,
+      .temperature_area_width = 0.7,
+      .temperature_area_height = 0.9,
+      .min_face_width = 0.48 * 0.35,
+      .min_face_height = 0.68 * 0.35,
       .min_size = 1,
       .manufacturer = -1,
       .temperature_type = 0,

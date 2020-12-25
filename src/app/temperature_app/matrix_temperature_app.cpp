@@ -107,7 +107,6 @@ void MatrixTemperatureApp::read_temperature(const QRectF &face_area,
   static std::vector<float> statistics;
   get_valid_temperature(statistics, max_x, max_y, max_temperature);
   if (valid_face_area) {
-    float final_temperature = 0.0;
     if (!get_face_temperature(statistics, max_temperature)) {
       init_temperature_area(temperature_area_);
       max_x = max_y = 0.5;
