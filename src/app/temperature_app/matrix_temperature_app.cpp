@@ -236,7 +236,8 @@ void MatrixTemperatureApp::get_temperature_area(const QRectF &face_area,
 
     temperature_area.setY(std::max(floor((y1 - (y2 - y1) * .2f) * 16), 0.f) /
                           16.f);
-    temperature_area.setHeight(std::max((y2 - y1) * .4f * 16, 2.f) / 16.f);
+    temperature_area.setHeight(std::max(ceil((y2 - y1) * .4f * 16), 2.f) /
+                               16.f);
   } else {
     init_temperature_area(temperature_area);
   }
