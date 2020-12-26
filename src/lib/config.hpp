@@ -75,7 +75,8 @@ typedef struct {
   bool upload_unknown_person;
   bool upload_hd_snapshot;
   SZ_FLOAT mask_score;
-  SZ_FLOAT antispoof_score;
+  SZ_FLOAT ir_validate_score;
+  SZ_FLOAT bgr_validate_score;
   bool wdr;
 } UserConfig;
 
