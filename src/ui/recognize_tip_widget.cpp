@@ -170,6 +170,7 @@ void RecognizeTipWidget::rx_update() {
   System::get_current_network(name_, ip_, mac_);
   System::get_hostname(hostname_);
   System::get_serial_number(serial_number_);
+  System::get_fw_version(fw_version_);
 
   if (name_ == "eth0" || name_ == "wlan0") {
     std::istringstream sin(ip_);
@@ -186,10 +187,9 @@ void RecognizeTipWidget::rx_update() {
 
   pl_host_name_->setText(hostname_.c_str());
   pl_host_name_->adjustSize();
-  QString sn_str = "SN:";
-  sn_str += serial_number_.c_str();
-  sn_str += " FW:1.1.4";
-  sn_str += ip_.c_str();
+  QString sn_str =
+      QString("SN:%1 FW:%2%3")
+          .arg(serial_number_.c_str(), fw_version_.c_str(), ip_.c_str());
 
   // 去掉换行符
   sn_str = sn_str.replace(QRegExp("\\\n"), "");

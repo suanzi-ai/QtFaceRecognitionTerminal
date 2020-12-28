@@ -8,6 +8,8 @@
 
 #include <quface/logger.hpp>
 
+#include "static_config.hpp"
+
 using json = nlohmann::json;
 
 using namespace suanzi;
@@ -101,14 +103,28 @@ SZ_RETCODE System::get_release_version(std::string& version) {
 }
 
 SZ_RETCODE System::get_hostname(std::string& hostname) {
-  hostname = "";
-  return exec("hostname", hostname);
+  SZ_RETCODE ret = exec(
+      "cat /user/quface-app/etc/dynamic.yaml | grep \"  name: \"", hostname);
+  if (SZ_RETCODE_OK != ret)
+    hostname = "3S";
+  else
+    hostname = hostname.substr(8);
+
+  return ret;
 }
 
 SZ_RETCODE System::get_serial_number(std::string& serial_number) {
   std::string name, ip, mac;
   System::get_current_network(name, ip, mac);
 
-  serial_number = "20200602" + mac.substr(0, 2);
-  return exec("cat /etc/serial-number", serial_number);
+  SZ_RETCODE ret = exec("cat /etc/serial-number", serial_number);
+  if (SZ_RETCODE_OK != ret) {
+    serial_number = "20200602" + mac.substr(0, 2);
+  }
+  return ret;
+}
+
+SZ_RETCODE System::get_fw_version(std::string& fw_version) {
+  fw_version = APP_VERSION;
+  return SZ_RETCODE_OK;
 }

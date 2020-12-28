@@ -48,6 +48,7 @@ class RecognizeTipWidget : public QWidget {
   std::string ip_, name_, mac_;
   std::string hostname_;
   std::string serial_number_;
+  std::string fw_version_;
 
   int screen_width_;
   int screen_height_;
