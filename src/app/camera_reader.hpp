@@ -26,6 +26,8 @@ class CameraReader : QThread {
 
  private slots:
   void rx_finish();
+  void start_read_cameral();
+  void stop_read_cameral();
 
  signals:
   void tx_frame(PingPangBuffer<ImagePackage> *buffer);
@@ -41,6 +43,7 @@ class CameraReader : QThread {
 
   ImagePackage *buffer_ping_, *buffer_pang_;
   PingPangBuffer<ImagePackage> *pingpang_buffer_;
+  bool read_cameral_;
 };
 
 }  // namespace suanzi

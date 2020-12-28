@@ -34,7 +34,7 @@ MenuKeyWidget::MenuKeyWidget(int width, int height, QWidget *parent)
   setLayout(pv_layout);
 
   // TODO: 暂时禁用二维码和语音对讲
-  // connect(ppb_qrcode, SIGNAL(pressed()), this, SLOT(clicked_qrcode()));
+  connect(ppb_qrcode, SIGNAL(pressed()), this, SLOT(clicked_qrcode()));
   // connect(ppb_intercom, SIGNAL(pressed()), this, SLOT(clicked_intercom()));
   connect(ppb_password, SIGNAL(pressed()), this, SLOT(clicked_password()));
 }

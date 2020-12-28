@@ -71,6 +71,14 @@ void VideoPlayer::init_workflow() {
   connect((const QObject *)reader_task_, SIGNAL(tx_card_readed(QString)),
           (const QObject *)record_task_, SLOT(rx_card_readed(QString)));
 
+  qrcode_task_ = QrcodeTask::get_instance();
+  connect((const QObject *)qrcode_task_, SIGNAL(tx_qrcode(QString)),
+          (const QObject *)record_task_, SLOT(rx_card_readed(QString)));
+  connect((const QObject *)qrcode_task_, SIGNAL(start_read_cameral()),
+          (const QObject *)camera_reader_, SLOT(start_read_cameral()));
+  connect((const QObject *)qrcode_task_, SIGNAL(stop_read_cameral()),
+          (const QObject *)camera_reader_, SLOT(stop_read_cameral()));
+
   // 创建人脸记录线程
   upload_task_ = UploadTask::get_instance();
   connect(
@@ -82,6 +90,8 @@ void VideoPlayer::init_workflow() {
   connect((const QObject *)detect_task_, SIGNAL(tx_detect_result(bool)),
           (const QObject *)face_timer_, SLOT(rx_detect_result(bool)));
   connect((const QObject *)reader_task_, SIGNAL(tx_detect_result(bool)),
+          (const QObject *)face_timer_, SLOT(rx_detect_result(bool)));
+  connect((const QObject *)qrcode_task_, SIGNAL(tx_detect_result(bool)),
           (const QObject *)face_timer_, SLOT(rx_detect_result(bool)));
   connect((const QObject *)face_timer_, SIGNAL(tx_reset()),
           (const QObject *)record_task_, SLOT(rx_reset()));

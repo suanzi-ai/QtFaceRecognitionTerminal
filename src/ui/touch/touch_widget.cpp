@@ -49,10 +49,11 @@ void TouchWidget::switch_stacked_widget(int index) {
     emit tx_enable_face_recognition(true);
   } else if (index == 1) {
     setStyleSheet(
-        "QStackedWidget "
+        "QWidget "
         "{background-color:transparent;margin:0px;color:white;}");
     setFixedSize(screen_width_, screen_height_);
     move(0, 0);
+    // setMask(QRegion(QRect((screen_width_ - 400)/ 2, 100, 400, 400)));
     qrcode_widget_->init();
     // TODO: disable face recognition
     emit tx_enable_face_recognition(false);

@@ -36,6 +36,7 @@ CameraReader::CameraReader(QObject *parent) {
       new PingPangBuffer<ImagePackage>(buffer_ping_, buffer_pang_);
 
   rx_finished_ = true;
+  read_cameral_ = true;
 }
 
 CameraReader::~CameraReader() {
@@ -101,7 +102,7 @@ void CameraReader::run() {
   while (true) {
     ImagePackage *output = pingpang_buffer_->get_ping();
 
-    if (capture_frame(output) && rx_finished_) {
+    if (read_cameral_ && capture_frame(output) && rx_finished_) {
       rx_finished_ = false;
       emit tx_frame(pingpang_buffer_);
     } else {
@@ -109,3 +110,7 @@ void CameraReader::run() {
     }
   }
 }
+
+void CameraReader::start_read_cameral() { read_cameral_ = true; }
+
+void CameraReader::stop_read_cameral() { read_cameral_ = false; }
