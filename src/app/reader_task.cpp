@@ -2,7 +2,6 @@
 
 #include <QDebug>
 #include <QThread>
-
 #include <quface-io/engine.hpp>
 
 #include "config.hpp"
@@ -16,6 +15,8 @@ ReaderTask *ReaderTask::get_instance() {
 }
 
 ReaderTask::ReaderTask(QThread *thread, QObject *parent) {
+  setObjectName("ReaderTask");
+
   person_service_ = PersonService::get_instance();
   reader_ = Engine::instance()->get_ic_reader();
   if (reader_ == nullptr) {

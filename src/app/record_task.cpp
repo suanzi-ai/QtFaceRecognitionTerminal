@@ -1,14 +1,11 @@
 #include "record_task.hpp"
 
-#include <chrono>
-#include <string>
-
 #include <QThread>
-
+#include <chrono>
 #include <opencv2/opencv.hpp>
-
 #include <quface-io/ive.hpp>
 #include <quface/logger.hpp>
+#include <string>
 
 #include "audio_task.hpp"
 #include "config.hpp"
@@ -54,9 +51,11 @@ RecordTask::RecordTask(QThread *thread, QObject *parent)
   if (thread == nullptr) {
     static QThread new_thread;
     moveToThread(&new_thread);
+    new_thread.setObjectName("RecordTask");
     new_thread.start();
   } else {
     moveToThread(thread);
+    thread->setObjectName("RecordTask");
     thread->start();
   }
 }

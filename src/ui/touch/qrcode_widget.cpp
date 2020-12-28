@@ -1,4 +1,5 @@
 #include "qrcode_widget.hpp"
+
 #include <QDebug>
 #include <QPainter>
 #include <QPushButton>
@@ -9,6 +10,7 @@
 #include <quface-io/ive.hpp>
 #include <quface-io/mmzimage.hpp>
 #include <quface/common.hpp>
+
 #include "config.hpp"
 
 //#include "JQQRCodeReader/JQQRCodeReader.h"

@@ -1,13 +1,11 @@
 #include "recognize_task.hpp"
 
+#include <QThread>
 #include <chrono>
 #include <ctime>
 #include <iostream>
-#include <string>
-
-#include <QThread>
-
 #include <quface/logger.hpp>
+#include <string>
 
 #include "config.hpp"
 #include "record_task.hpp"
@@ -64,9 +62,11 @@ RecognizeTask::RecognizeTask(QThread *thread, QObject *parent)
   if (thread == nullptr) {
     static QThread new_thread;
     moveToThread(&new_thread);
+    new_thread.setObjectName("RecognizeTask");
     new_thread.start();
   } else {
     moveToThread(thread);
+    thread->setObjectName("RecognizeTask");
     thread->start();
   }
 

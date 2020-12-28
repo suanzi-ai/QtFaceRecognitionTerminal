@@ -1,6 +1,8 @@
 #include "co2_task.hpp"
+
 #include <cmath>
 #include <quface-io/engine.hpp>
+
 #include "config.hpp"
 
 using namespace suanzi;
@@ -12,6 +14,7 @@ Co2Task *Co2Task::get_instance() {
 }
 
 Co2Task::Co2Task(QObject *parent) : QThread(parent) {
+  setObjectName("Co2Task");
   if (!is_exist()) {
     return;
   }

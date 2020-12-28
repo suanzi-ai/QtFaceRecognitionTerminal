@@ -1,7 +1,6 @@
 #include "upload_task.hpp"
 
 #include <QThread>
-
 #include <quface-io/engine.hpp>
 
 #include "config.hpp"
@@ -21,9 +20,11 @@ UploadTask::UploadTask(QThread *thread, QObject *parent) {
   if (thread == nullptr) {
     static QThread new_thread;
     moveToThread(&new_thread);
+    new_thread.setObjectName("UploadTask");
     new_thread.start();
   } else {
     moveToThread(thread);
+    thread->setObjectName("UploadTask");
     thread->start();
   }
 }

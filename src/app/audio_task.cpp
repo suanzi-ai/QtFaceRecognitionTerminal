@@ -3,7 +3,6 @@
 #include <QFile>
 #include <QThread>
 #include <QTimer>
-
 #include <quface-io/engine.hpp>
 
 #include "config.hpp"
@@ -65,9 +64,11 @@ AudioTask::AudioTask(QThread* thread, QObject* parent) : is_running_(false) {
   if (thread == nullptr) {
     static QThread new_thread;
     moveToThread(&new_thread);
+    new_thread.setObjectName("AudioTask");
     new_thread.start();
   } else {
     moveToThread(thread);
+    thread->setObjectName("AudioTask");
     thread->start();
   }
 }

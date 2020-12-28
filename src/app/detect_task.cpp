@@ -1,16 +1,14 @@
 #include "detect_task.hpp"
 
+#include <QRect>
+#include <QThread>
 #include <chrono>
 #include <ctime>
 #include <iostream>
-#include <string>
-
-#include <QRect>
-#include <QThread>
-
 #include <quface-io/engine.hpp>
 #include <quface/common.hpp>
 #include <quface/face.hpp>
+#include <string>
 
 #include "audio_task.hpp"
 #include "config.hpp"
@@ -35,9 +33,11 @@ DetectTask::DetectTask(QThread *thread, QObject *parent)
   if (thread == nullptr) {
     static QThread new_thread;
     moveToThread(&new_thread);
+    new_thread.setObjectName("DetectTask");
     new_thread.start();
   } else {
     moveToThread(thread);
+    thread->setObjectName("DetectTask");
     thread->start();
   }
 }

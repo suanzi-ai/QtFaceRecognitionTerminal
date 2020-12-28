@@ -101,6 +101,8 @@ QrcodeTask* QrcodeTask::get_instance() {
 }
 
 QrcodeTask::QrcodeTask(QThread* thread, QObject* parent) {
+  setObjectName("QrcodeTask");
+
   person_service_ = PersonService::get_instance();
 
   reader_timer_ = new QTimer(this);

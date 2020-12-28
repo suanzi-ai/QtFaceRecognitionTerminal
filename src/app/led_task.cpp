@@ -1,7 +1,6 @@
 #include "led_task.hpp"
 
 #include <QTimer>
-
 #include <quface-io/engine.hpp>
 #include <quface/logger.hpp>
 
@@ -22,10 +21,11 @@ LEDTask::LEDTask(QThread* thread, QObject* parent)
   // Create thread
   if (thread == nullptr) {
     static QThread new_thread;
-    moveToThread(&new_thread);
+    new_thread.setObjectName("LEDTask");
     new_thread.start();
   } else {
     moveToThread(thread);
+    thread->setObjectName("LEDTask");
     thread->start();
   }
 }

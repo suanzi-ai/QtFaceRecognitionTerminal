@@ -14,6 +14,8 @@ FaceTimer *FaceTimer::get_instance() {
 }
 
 FaceTimer::FaceTimer(QObject *parent) : QThread(parent) {
+  setObjectName("FaceTimer");
+
   screen_saver_timer_ = new QTimer(this);
   screen_saver_timer_->setSingleShot(true);
   connect(screen_saver_timer_, SIGNAL(timeout()), this,

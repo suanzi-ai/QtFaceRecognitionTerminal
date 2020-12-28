@@ -1,7 +1,6 @@
 #include "gpio_task.hpp"
 
 #include <QTimer>
-
 #include <quface-io/engine.hpp>
 #include <quface/logger.hpp>
 
@@ -52,10 +51,11 @@ GPIOTask::GPIOTask(QThread* thread, QObject* parent) : event_count_(0) {
   // Create thread
   if (thread == nullptr) {
     static QThread new_thread;
-    moveToThread(&new_thread);
+    new_thread.setObjectName("GPIOTask");
     new_thread.start();
   } else {
     moveToThread(thread);
+    thread->setObjectName("GPIOTask");
     thread->start();
   }
 }

@@ -14,6 +14,8 @@ CameraReader *CameraReader::get_instance() {
 }
 
 CameraReader::CameraReader(QObject *parent) {
+  setObjectName("CameraReader");
+
   auto app = Config::get_app();
 
   auto engine = Engine::instance();
