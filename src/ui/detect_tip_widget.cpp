@@ -74,8 +74,8 @@ void DetectTipWidget::get_detect_position(float &x, float &y, float &width,
 }
 
 void DetectTipWidget::paint(QPainter *painter) {
-  // if (rects_.size() > 0 && !Config::get_user().enable_temperature) {
-  if (rects_.size() > 0) {
+  if (rects_.size() > 0 && (!Config::get_user().enable_temperature ||
+                            Config::get_temperature().temperature_area_debug)) {
     float width = detect_width_;
     float height = detect_height_;
     float top_x = 1.0;

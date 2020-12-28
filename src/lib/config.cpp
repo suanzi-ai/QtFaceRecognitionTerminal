@@ -312,11 +312,7 @@ void Config::load_defaults(ConfigData &c) {
   };
 
   c.temperature = {
-      .temperature_area_debug = true,
-      /*.device_face_x = 0.289,
-      .device_face_y = 0.18,
-      .device_face_height = 0.35,
-      .device_face_width = 0.48,*/
+      .temperature_area_debug = false,
       .temperature_area_x = 0.15,
       .temperature_area_y = 0.05,
       .temperature_area_width = 0.7,
