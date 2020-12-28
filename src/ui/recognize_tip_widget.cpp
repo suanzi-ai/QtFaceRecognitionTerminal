@@ -185,9 +185,10 @@ void RecognizeTipWidget::rx_update() {
   std::transform(mac_.begin(), mac_.end(), mac_.begin(), ::toupper);
 
   pl_host_name_->setText(hostname_.c_str());
+  pl_host_name_->adjustSize();
   QString sn_str = "SN:";
   sn_str += serial_number_.c_str();
-  sn_str += " FW:1.1.1";
+  sn_str += " FW:1.1.4";
   sn_str += ip_.c_str();
 
   // 去掉换行符
