@@ -16,6 +16,9 @@ class TouchWidget : public QStackedWidget {
   TouchWidget(int width, int height, QWidget *parent = nullptr);
   ~TouchWidget() override;
 
+ private:
+  void paintEvent(QPaintEvent *event);
+
  signals:
   void tx_enable_face_recognition(bool enable);
 

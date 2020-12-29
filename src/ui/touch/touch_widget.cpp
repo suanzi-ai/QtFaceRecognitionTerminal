@@ -41,6 +41,18 @@ TouchWidget::TouchWidget(int screen_width, int screen_height, QWidget *parent)
 
 TouchWidget::~TouchWidget() {}
 
+void TouchWidget::paintEvent(QPaintEvent *event) {
+  if (currentIndex() == 1) {
+    QPainter p(this);
+    p.setCompositionMode(QPainter::CompositionMode_Clear);
+    int x = (screen_width_ - 400) / 2;
+    int y = 100;
+    int width = 400;
+    int height = 400;
+    p.fillRect(x, y, width, height, QColor(0, 0, 0, 255));
+  }
+}
+
 void TouchWidget::switch_stacked_widget(int index) {
   if (index == 0) {
     setStyleSheet("QStackedWidget {background-color:transparent;margin:0px;}");
@@ -51,8 +63,8 @@ void TouchWidget::switch_stacked_widget(int index) {
     emit tx_enable_face_recognition(true);
   } else if (index == 1) {
     setStyleSheet(
-        "QWidget "
-        "{background-color:transparent;margin:0px;color:white;}");
+        "QStackedWidget "
+        "{background-color:rgb(5, 0, 20);margin:0px;color:white;}");
     setFixedSize(screen_width_, screen_height_);
     move(0, 0);
     qrcode_widget_->init();

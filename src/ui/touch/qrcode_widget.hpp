@@ -32,9 +32,9 @@ class QrcodeScanWidget : public QLabel {
     timer_ = new QTimer(this);
     connect(timer_, SIGNAL(timeout()), this, SLOT(update_lightneedle_pos()));
 
-    /*setStyleSheet(
-    "QWidget "
-    "{background-color:transparent;margin:0px;color:white;}");*/
+    setStyleSheet(
+        "QWidget "
+        "{background-color:transparent;margin:0px;color:white;}");
   }
 
   void start_qrcode() {
@@ -58,7 +58,7 @@ class QrcodeScanWidget : public QLabel {
   void paintEvent(QPaintEvent *event) override {
     QPainter painter(this);
     QPen pen = painter.pen();
-    pen.setWidth(5);
+    pen.setWidth(10);
     pen.setBrush(QColor(2, 168, 223));
     painter.setPen(pen);
 
