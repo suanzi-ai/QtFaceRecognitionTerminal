@@ -26,8 +26,6 @@ class QrcodeTask : QThread {
  signals:
   void tx_qrcode(QString qrcode);
   void tx_detect_result(bool valid_detect);
-  void stop_read_cameral();
-  void start_read_cameral();
   void tx_ok();
 
  private:

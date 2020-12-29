@@ -111,6 +111,4 @@ void CameraReader::run() {
   }
 }
 
-void CameraReader::start_read_cameral() { read_cameral_ = true; }
-
-void CameraReader::stop_read_cameral() { read_cameral_ = false; }
+void CameraReader::enable_read_cameral(bool enable) { read_cameral_ = enable; }

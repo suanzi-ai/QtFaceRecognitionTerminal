@@ -116,12 +116,6 @@ void QrcodeTask::read_qrcode() { scan_qrcode(); }
 
 void QrcodeTask::run() { exec(); }
 
-void QrcodeTask::start_qrcode_task() {
-  reader_timer_->start(250);
-  emit stop_read_cameral();
-}
+void QrcodeTask::start_qrcode_task() { reader_timer_->start(250); }
 
-void QrcodeTask::stop_qrcode_task() {
-  reader_timer_->stop();
-  emit start_read_cameral();
-}
+void QrcodeTask::stop_qrcode_task() { reader_timer_->stop(); }

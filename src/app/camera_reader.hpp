@@ -26,8 +26,7 @@ class CameraReader : QThread {
 
  private slots:
   void rx_finish();
-  void start_read_cameral();
-  void stop_read_cameral();
+  void enable_read_cameral(bool enable);
 
  signals:
   void tx_frame(PingPangBuffer<ImagePackage> *buffer);
