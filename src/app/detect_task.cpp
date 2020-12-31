@@ -2,13 +2,15 @@
 
 #include <QRect>
 #include <QThread>
+
 #include <chrono>
 #include <ctime>
 #include <iostream>
+#include <string>
+
 #include <quface-io/engine.hpp>
 #include <quface/common.hpp>
 #include <quface/face.hpp>
-#include <string>
 
 #include "audio_task.hpp"
 #include "config.hpp"

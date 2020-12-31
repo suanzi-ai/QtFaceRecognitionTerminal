@@ -83,10 +83,8 @@ void RecordTask::rx_frame(PingPangBuffer<RecognizeData> *buffer) {
   if (input->has_person_info) {
     // reset if new person appear
     if (if_fresh(input->person_feature)) {
-      reset_recognize();
-      reset_temperature();
+      rx_reset();
 
-      has_unhandle_person_ = false;
       update_record = true;
     }
 
@@ -205,7 +203,7 @@ bool RecordTask::if_fresh(const FaceFeature &feature) {
   memcpy(latest_feature_.value, feature.value,
          SZ_FEATURE_NUM * sizeof(SZ_FLOAT));
 
-  return score / 2 + 0.5f < 0.75;
+  return score / 2 + 0.5f < 0.7;
 }
 
 void RecordTask::reset_recognize() {

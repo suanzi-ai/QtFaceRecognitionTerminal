@@ -6,6 +6,7 @@
 #include <QStackedWidget>
 #include <QTimer>
 #include <QVBoxLayout>
+
 #include <quface-io/engine.hpp>
 #include <quface-io/ive.hpp>
 #include <quface-io/mmzimage.hpp>
@@ -13,12 +14,9 @@
 
 #include "config.hpp"
 
-//#include "JQQRCodeReader/JQQRCodeReader.h"
-#include "zbar.h"
-
 using namespace suanzi;
 using namespace suanzi::io;
-using namespace zbar;
+
 QrcodeWidget::QrcodeWidget(int screen_width, int screen_height, QWidget *parent)
     : screen_width_(screen_width),
       screen_height_(screen_height),

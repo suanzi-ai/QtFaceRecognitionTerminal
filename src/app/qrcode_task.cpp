@@ -1,8 +1,11 @@
 #include "qrcode_task.hpp"
-#include <zbar.h>
+
 #include <QDebug>
+
+#include <zbar.h>
 #include <opencv2/opencv.hpp>
 #include <quface-io/engine.hpp>
+
 #include "config.hpp"
 #include "qrcode_task.hpp"
 
@@ -82,7 +85,7 @@ bool QrcodeTask::scan_qrcode() {
 
     std::string qr_code = reture_code(qr_image);
     if (!qr_code.empty()) {
-      printf("%s\n", qr_code.c_str());
+      stop_qrcode_task();
       emit tx_ok();
       emit tx_detect_result(true);
       emit tx_qrcode(QString(qr_code.c_str()));
