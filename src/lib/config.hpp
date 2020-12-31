@@ -70,6 +70,7 @@ typedef struct {
   bool enable_led;
   bool enable_screensaver;
   bool enable_co2;
+  bool enable_read_card;
   SZ_UINT16 screensaver_timeout;
   bool upload_known_person;
   bool upload_unknown_person;
@@ -265,6 +266,7 @@ class Config : public ConfigEventEmitter {
   static bool read_audio_volume(int &volume_percent);
 
   static bool has_temperature_device();
+  static bool has_read_card_device();
   static bool display_temperature();
   static void set_temperature_finetune(float bias);
   static float get_temperature_bias();

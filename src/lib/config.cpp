@@ -35,6 +35,7 @@ void suanzi::to_json(json &j, const UserConfig &c) {
   SAVE_JSON_TO(j, "enable_led", c.enable_led);
   SAVE_JSON_TO(j, "enable_screensaver", c.enable_screensaver);
   SAVE_JSON_TO(j, "enable_co2", c.enable_co2);
+  SAVE_JSON_TO(j, "enable_read_card", c.enable_read_card);
   SAVE_JSON_TO(j, "screensaver_timeout", c.screensaver_timeout);
   SAVE_JSON_TO(j, "upload_known_person", c.upload_known_person);
   SAVE_JSON_TO(j, "upload_unknown_person", c.upload_unknown_person);
@@ -80,6 +81,7 @@ void suanzi::from_json(const json &j, UserConfig &c) {
   LOAD_JSON_TO(j, "enable_led", c.enable_led);
   LOAD_JSON_TO(j, "enable_screensaver", c.enable_screensaver);
   LOAD_JSON_TO(j, "enable_co2", c.enable_co2);
+  LOAD_JSON_TO(j, "enable_read_card", c.enable_read_card);
   LOAD_JSON_TO(j, "screensaver_timeout", c.screensaver_timeout);
   LOAD_JSON_TO(j, "upload_known_person", c.upload_known_person);
   LOAD_JSON_TO(j, "upload_unknown_person", c.upload_unknown_person);
@@ -358,6 +360,7 @@ void Config::load_defaults(ConfigData &c) {
       .enable_led = true,
       .enable_screensaver = true,
       .enable_co2 = false,
+      .enable_read_card = false,
       .screensaver_timeout = 60,
       .upload_known_person = true,
       .upload_unknown_person = true,
@@ -818,6 +821,10 @@ bool Config::write_audio_volume(int volume_percent) {
 
 bool Config::has_temperature_device() {
   return Config::get_temperature().manufacturer > 0;
+}
+
+bool Config::has_read_card_device() {
+  return Config::get_user().enable_read_card;
 }
 
 bool Config::display_temperature() {

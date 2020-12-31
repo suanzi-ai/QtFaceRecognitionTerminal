@@ -16,7 +16,7 @@ ReaderTask *ReaderTask::get_instance() {
 
 ReaderTask::ReaderTask(QThread *thread, QObject *parent) {
   setObjectName("ReaderTask");
-
+  if (!Config::has_read_card_device()) return;
   person_service_ = PersonService::get_instance();
   reader_ = Engine::instance()->get_ic_reader();
   if (reader_ == nullptr) {
