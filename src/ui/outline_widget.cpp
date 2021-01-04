@@ -76,11 +76,7 @@ void OutlineWidget::rx_update() {
     if (enable_temperature)
       show();
     else
-<<<<<<< Updated upstream
       hide();
-=======
-      setStyleSheet("QWidget {background-image: none;}");
->>>>>>> Stashed changes
   }
 }
 
