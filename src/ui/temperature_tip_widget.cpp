@@ -1,6 +1,7 @@
 #include "temperature_tip_widget.hpp"
-
 #include <QHBoxLayout>
+#include <QPainter>
+#include <QStyleOption>
 
 #include "config.hpp"
 
@@ -10,8 +11,10 @@ TemperatureTipWidget::TemperatureTipWidget(int screen_width, int screen_height,
                                            int parent_widget_pos_y,
                                            QWidget *parent)
     : QWidget(parent), radius_(0.025 * screen_height) {
-  setAttribute(Qt::WA_StyledBackground, true);
-  setStyleSheet("QLabel {background-color:transparent;color:white;}");
+  // setAttribute(Qt::WA_StyledBackground, true);
+  // setStyleSheet("QWidget {background-color:transparent;color:white;}");
+  setWindowFlags(Qt::FramelessWindowHint);
+  setAttribute(Qt::WA_TranslucentBackground);
 
   const int w = screen_width;
   const int h = screen_height;
@@ -51,7 +54,9 @@ void TemperatureTipWidget::rx_temperature(bool bvisible,
     return;
   }
 
-  QString style_str = "QLabel {border-image: url(:asserts/%1.png);}";
+  QString style_str =
+      "QLabel {background-color:transparent;border-image: "
+      "url(:asserts/%1.png);}";
   if (bnormal_temperature)
     pl_ok_or_no_->setStyleSheet(style_str.arg("tick"));
   else
@@ -60,9 +65,7 @@ void TemperatureTipWidget::rx_temperature(bool bvisible,
   pl_temperature_->setText(tr("体温") + ":" +
                            QString::number(temperature, 'f', 1) + "°C");
 
-  style_str =
-      "QWidget { background-color:%1; margin:0px;border-radius:%2px; }"
-      "QLabel { background-color:transparent; }";
+  style_str = "QWidget { background-color:%1; margin:0px;border-radius:%2px; }";
 
   if (bnormal_temperature)
     setStyleSheet(
@@ -72,4 +75,11 @@ void TemperatureTipWidget::rx_temperature(bool bvisible,
         style_str.arg("rgba(220, 0, 0, 150)", QString::number(radius_)));
 
   show();
+}
+
+void TemperatureTipWidget::paintEvent(QPaintEvent *event) {
+  QStyleOption opt;
+  opt.init(this);
+  QPainter painter(this);
+  style()->drawPrimitive(QStyle::PE_Widget, &opt, &painter, this);
 }

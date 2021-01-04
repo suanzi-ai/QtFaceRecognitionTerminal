@@ -14,6 +14,9 @@ class TemperatureTipWidget : public QWidget {
                        QWidget *parent = nullptr);
   ~TemperatureTipWidget() override;
 
+ private:
+  void paintEvent(QPaintEvent *event);
+
  public slots:
   void rx_temperature(bool bvisible, bool bnormal_temperature,
                       float temperature);
