@@ -40,6 +40,8 @@ OutlineWidget::OutlineWidget(int width, int height, QWidget *parent)
             "61%;background-position: 10% 40%; margin-top: %1px;}")
             .arg(QString::number(margin_top));
   }
+  setStyleSheet(background_style_);
+  hide();
 
   rx_update();
 
@@ -69,12 +71,12 @@ void OutlineWidget::rx_temperature(bool bvisible, bool bnormal_temperature,
 
 void OutlineWidget::rx_update() {
   static bool enable_temperature = false;
-  if (enable_temperature != Config::get_user().enable_temperature) {
-    enable_temperature = Config::get_user().enable_temperature;
+  if (enable_temperature != Config::display_temperature()) {
+    enable_temperature = Config::display_temperature();
     if (enable_temperature)
-      setStyleSheet(background_style_);
+      show();
     else
-      setStyleSheet("QWidget {background-image: none;");
+      hide();
   }
 }
 

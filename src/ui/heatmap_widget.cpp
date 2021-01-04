@@ -37,12 +37,19 @@ HeatmapWidget::~HeatmapWidget() {}
 
 void HeatmapWidget::rx_init(int success) {
   success_ = success;
-  show();
+  if (Config::display_temperature()) show();
   update();
 }
 
 void HeatmapWidget::rx_update(TemperatureMatrix mat, QRectF detection, float x,
                               float y) {
+  if (Config::display_temperature())
+    show();
+  else {
+    hide();
+    return;
+  }
+
   assert(mat.size == 256);
   init_ = true;
 
@@ -81,7 +88,7 @@ void HeatmapWidget::paintEvent(QPaintEvent *event) {
   const int w = width();
   const int h = height();
 
-  if (Config::get_user().enable_temperature) {
+  if (Config::display_temperature()) {
     const QRect target(0, 0, w, h);
     painter.drawPixmap(target, heatmap_, QRect());
     painter.setPen(Qt::white);
