@@ -71,10 +71,10 @@ bool DetectionRatio::is_valid_position() {
     min_y = 0.05;
     max_x = 0.85;
     max_y = 0.95;*/
-    min_x = temperature.temperature_area_x;
-    min_y = temperature.temperature_area_y;
-    max_x = min_x + temperature.temperature_area_width;
-    max_y = min_y + temperature.temperature_area_height;
+    min_x = temperature.detect_area_x;
+    min_y = temperature.detect_area_y;
+    max_x = min_x + temperature.detect_area_width;
+    max_y = min_y + temperature.detect_area_height;
   }
   return x > min_x && y > min_y && x + width < max_x && y + height < max_y;
 }
@@ -87,6 +87,8 @@ bool DetectionRatio::is_valid_size() {
   else {
     float min_width = temperature.min_face_width;
     float min_height = temperature.min_face_height;
+    // printf("width=%.2f min_width=%.2f height=%.2f min_height=%.2f\n", width,
+    // min_width, height, min_height);
     return width > min_width && height > min_height;
   }
 }

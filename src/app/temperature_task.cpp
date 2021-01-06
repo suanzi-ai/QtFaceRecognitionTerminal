@@ -42,7 +42,6 @@ TemperatureTask::~TemperatureTask() { delete temperature_app_; }
 
 void TemperatureTask::rx_update(DetectionRatio detection, bool valid_face) {
   is_running_ = true;
-
   temperature_app_->read_temperature(
       QRectF(detection.x, detection.y, detection.width, detection.height),
       valid_face);

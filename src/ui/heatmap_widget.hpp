@@ -25,6 +25,7 @@ class HeatmapWidget : public QWidget {
 
  private:
   void paintEvent(QPaintEvent *event) override;
+  void init(int temperature_width, int temperature_height);
 
  public slots:
   void rx_init(int success);

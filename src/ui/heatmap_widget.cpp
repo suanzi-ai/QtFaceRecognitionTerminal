@@ -11,8 +11,9 @@ using namespace suanzi;
 using namespace suanzi::io;
 
 HeatmapWidget::HeatmapWidget(int width, int height, QWidget *parent)
-    : QWidget(parent), raw_(16, 16, CV_8UC3), init_(false), success_(0) {
-  setAttribute(Qt::WA_StyledBackground, true);
+    : QWidget(parent), init_(false), success_(0) {
+  // setAttribute(Qt::WA_StyledBackground, true);
+  setStyleSheet("QWidget {background-color:rgb(0, 255, 0);}");
   setAutoFillBackground(true);
 
   int w = 0.1875 * width;
@@ -27,13 +28,23 @@ HeatmapWidget::HeatmapWidget(int width, int height, QWidget *parent)
   x_ = y_ = 0.5;
   detection_.setRect(0.45, 0.45, 0.1, 0.1);
 
-  raw_ = cv::Scalar(0, 255, 0);
-  heatmap_ = QPixmap::fromImage(
-      QImage((unsigned char *)raw_.data, 16, 16, QImage::Format_RGB888));
+  // raw_ = cv::Scalar(0, 255, 0);
+  // heatmap_ = QPixmap::fromImage(
+  // QImage((unsigned char *)raw_.data, 16, 16, QImage::Format_RGB888));
   hide();
 }
 
 HeatmapWidget::~HeatmapWidget() {}
+
+void HeatmapWidget::init(int temperature_width, int temperature_height) {
+  if (raw_.empty()) {
+    raw_ = cv::Mat(temperature_height, temperature_width, CV_8UC3);
+    raw_ = cv::Scalar(0, 255, 0);
+    heatmap_ =
+        QPixmap::fromImage(QImage((unsigned char *)raw_.data, temperature_width,
+                                  temperature_height, QImage::Format_RGB888));
+  }
+}
 
 void HeatmapWidget::rx_init(int success) {
   success_ = success;
@@ -50,17 +61,18 @@ void HeatmapWidget::rx_update(TemperatureMatrix mat, QRectF detection, float x,
     return;
   }
 
-  assert(mat.size == 256);
+  assert(mat.size == 256 || mat.size == 1024);
+  init(mat.width, mat.height);
   init_ = true;
 
   min_ = max_ = mat.value[0];
-  for (size_t i = 1; i < 256; i++) {
+  for (size_t i = 1; i < mat.size; i++) {
     min_ = std::min(min_, mat.value[i]);
     max_ = std::max(max_, mat.value[i]);
   }
 
-  for (size_t i = 0; i < 256; i++) {
-    int x = i % 16, y = i / 16;
+  for (size_t i = 0; i < mat.size; i++) {
+    int x = i % mat.width, y = i / mat.width;
 
     float value = mat.value[i];
     float ratio = 2 * (value - min_) / (max_ - min_);
@@ -75,8 +87,8 @@ void HeatmapWidget::rx_update(TemperatureMatrix mat, QRectF detection, float x,
     raw_.at<cv::Vec3b>(y, x) = color;
   }
 
-  heatmap_ = QPixmap::fromImage(
-      QImage((unsigned char *)raw_.data, 16, 16, QImage::Format_RGB888));
+  heatmap_ = QPixmap::fromImage(QImage((unsigned char *)raw_.data, mat.width,
+                                       mat.width, QImage::Format_RGB888));
   detection_ = detection;
   x_ = x;
   y_ = y;
