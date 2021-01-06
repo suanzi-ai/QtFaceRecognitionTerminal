@@ -1,11 +1,13 @@
 #include "matrix_temperature_app.hpp"
-#include "temperature_task.hpp"
 
 #include <cmath>
 #include <quface-io/engine.hpp>
-#include "config.hpp"
 
-#define VALUE_AT(m, x, y) ((m.value)[(y)*m.width + (x)])
+#include "config.hpp"
+#include "temperature_task.hpp"
+
+#define VALUE_AT(m, x, y) (((m).value)[(y) * (m).width + (x)])
+#define IS_NULL(t) (std::abs((t)-INVALID_TEMPERATURE) < 0.001)
 
 using namespace suanzi;
 using namespace suanzi::io;
@@ -170,20 +172,18 @@ float MatrixTemperatureApp::get_valid_temperature_variance(
 bool MatrixTemperatureApp::get_face_temperature(
     const std::vector<float> &statistics, float max_temperature) {
   float face_temperature = 0.0;
-  // invalid body temperature,need to statistic temperature by matrix pixel
-  // temperature
-  if (std::abs(temperatures_.body_temperature - INVALID_TEMPERATURE) < 0.001) {
-    face_temperature = surface_to_inner(
-        measure_to_surface(max_temperature + Config::get_temperature_bias()));
-  } else {
-    /*float x = (float)temperatures_.body_temperature_x / temperatures_.width;
-    float y = (float)temperatures_.body_temperature_y / temperatures_.height;
-    bool valid_area = (x > temperature_area_.x() && y > temperature_area_.y() &&
-    x < temperature_area_.x() + temperature_area_.width() && y <
-    temperature_area_.y() + temperature_area_.height()); if (valid_area)
-            face_temperature = temperatures_.body_temperature;
-    else */
-    face_temperature = max_temperature;
+
+  switch (Config::get_temperature().manufacturer) {
+    case TemperatureManufacturer::Otpa:
+      face_temperature = surface_to_inner(
+          measure_to_surface(max_temperature + Config::get_temperature_bias()));
+      break;
+    case TemperatureManufacturer::Haiman_NdkF4l5:
+      face_temperature = max_temperature;
+      break;
+    default:
+      face_temperature = max_temperature;
+      break;
   }
 
   float current_var = get_valid_temperature_variance(statistics);
