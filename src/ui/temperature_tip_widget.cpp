@@ -1,4 +1,5 @@
 #include "temperature_tip_widget.hpp"
+
 #include <QHBoxLayout>
 #include <QPainter>
 #include <QStyleOption>
@@ -10,7 +11,7 @@ using namespace suanzi;
 TemperatureTipWidget::TemperatureTipWidget(int screen_width, int screen_height,
                                            int parent_widget_pos_y,
                                            QWidget *parent)
-    : QWidget(parent), radius_(0.025 * screen_height) {
+    : QWidget(parent), radius_(0.04 * screen_height) {
   // setAttribute(Qt::WA_StyledBackground, true);
   // setStyleSheet("QWidget {background-color:transparent;color:white;}");
   setWindowFlags(Qt::FramelessWindowHint);
@@ -19,12 +20,12 @@ TemperatureTipWidget::TemperatureTipWidget(int screen_width, int screen_height,
   const int w = screen_width;
   const int h = screen_height;
 
-  move(0.275 * w, parent_widget_pos_y - 0.05578125 * h - 10);
+  move(0.165 * w, parent_widget_pos_y - 0.1 * h - 10);
 
-  setFixedSize(0.4875 * w, 0.05578125 * h);
+  setFixedSize(0.675 * w, 0.0875 * h);
 
   pl_ok_or_no_ = new QLabel(this);
-  pl_ok_or_no_->setFixedSize(0.05625 * w, 0.03515625 * h);
+  pl_ok_or_no_->setFixedSize(0.1 * w, 0.065 * h);
 
   pl_temperature_ = new QLabel(this);
   pl_temperature_->setAlignment(Qt::AlignTop);
@@ -33,7 +34,7 @@ TemperatureTipWidget::TemperatureTipWidget(int screen_width, int screen_height,
       "QLabel {background-color:transparent;color:white;}");
 
   QFont font;
-  font.setPointSize(0.02875 * w);
+  font.setPointSize(0.0625 * w);
   pl_temperature_->setFont(font);
 
   QHBoxLayout *ph_layout = new QHBoxLayout;

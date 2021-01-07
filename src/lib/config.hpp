@@ -116,21 +116,25 @@ typedef enum TemperatureRotation {
 
 typedef struct {
   bool temperature_area_debug;
+
+  SZ_FLOAT detect_area_x;
+  SZ_FLOAT detect_area_y;
+  SZ_FLOAT detect_area_width;
+  SZ_FLOAT detect_area_height;
+
+  SZ_FLOAT min_face_width;
+  SZ_FLOAT min_face_height;
+
   SZ_FLOAT temperature_area_x;
   SZ_FLOAT temperature_area_y;
   SZ_FLOAT temperature_area_width;
   SZ_FLOAT temperature_area_height;
-  SZ_FLOAT min_face_width;
-  SZ_FLOAT min_face_height;
+  SZ_FLOAT temperature_area_radius;
 
   int min_size;
   int manufacturer;
   int temperature_type;
   TemperatureRotation sensor_rotation;
-  SZ_FLOAT min_x;
-  SZ_FLOAT max_x;
-  SZ_FLOAT min_y;
-  SZ_FLOAT max_y;
 } TemperatureConfig;
 
 void to_json(json &j, const TemperatureConfig &c);

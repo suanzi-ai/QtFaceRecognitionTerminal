@@ -1,11 +1,13 @@
 #include "matrix_temperature_app.hpp"
-#include "temperature_task.hpp"
 
 #include <cmath>
 #include <quface-io/engine.hpp>
-#include "config.hpp"
 
-#define VALUE_AT(m, x, y) ((m.value)[(y)*16 + (x)])
+#include "config.hpp"
+#include "temperature_task.hpp"
+
+#define VALUE_AT(m, x, y) (((m).value)[(y) * (m).width + (x)])
+#define IS_NULL(t) (std::abs((t)-INVALID_TEMPERATURE) < 0.001)
 
 using namespace suanzi;
 using namespace suanzi::io;
@@ -79,8 +81,8 @@ bool MatrixTemperatureApp::try_read() {
          ++trial < MAX_TRIAL)
     QThread::msleep(INTERVAL);
 
-  if (temperatures_.size != 256) {
-    SZ_LOG_ERROR("only 16x16 is supported");
+  if (temperatures_.size != 256 && temperatures_.size != 1024) {
+    SZ_LOG_ERROR("only 16x16 and 32x32 is supported");
     return false;
   }
 
@@ -101,16 +103,21 @@ void MatrixTemperatureApp::read_temperature(const QRectF &face_area,
   while (!try_read())
     ;
 
-  get_temperature_area(face_area, valid_face_area, temperature_area_);
+  face_area_to_temperature_area(face_area, valid_face_area, temperature_area_);
 
   float max_x, max_y, max_temperature;
   static std::vector<float> statistics;
+
   get_valid_temperature(statistics, max_x, max_y, max_temperature);
   if (valid_face_area) {
     if (!get_face_temperature(statistics, max_temperature)) {
       init_temperature_area(temperature_area_);
       max_x = max_y = 0.5;
     }
+
+    // printf("body temp(%d, %d)=%.2f max temp(%.1f, %.1f)=%.2f\n",
+    // temperatures_.body_temperature_x, temperatures_.body_temperature_y,
+    // temperatures_.body_temperature, max_x*32, max_y*32, max_temperature);
   } else {
     current_variance_ = -1;
     max_x = max_y = 0.5;
@@ -129,9 +136,12 @@ void MatrixTemperatureApp::get_valid_temperature(std::vector<float> &statistics,
                                                  float &max_temperature) {
   statistics.clear();
   max_temperature = 0.0;
-  for (int i = 0; i < 256; i++) {
-    float x = (i % 16) / 16.f, y = (i / 16) / 16.f;
-    if (pow(x - 0.5f, 2) + pow(y - 0.5f, 2) <= pow(6.f / 16.f, 2) &&
+  auto cfg = Config::get_temperature();
+  for (int i = 0; i < temperatures_.size; i++) {
+    float x = (i % temperatures_.width) * 1.0 / temperatures_.width,
+          y = (i / temperatures_.height) * 1.0 / temperatures_.height;
+    if (pow(x - 0.5f, 2) + pow(y - 0.5f, 2) <=
+            pow(cfg.temperature_area_radius, 2) &&
         temperature_area_.x() <= x &&
         x <= temperature_area_.x() + temperature_area_.width() &&
         temperature_area_.y() <= y &&
@@ -161,8 +171,20 @@ float MatrixTemperatureApp::get_valid_temperature_variance(
 
 bool MatrixTemperatureApp::get_face_temperature(
     const std::vector<float> &statistics, float max_temperature) {
-  float face_temperature = surface_to_inner(
-      measure_to_surface(max_temperature + Config::get_temperature_bias()));
+  float face_temperature = 0.0;
+
+  switch (Config::get_temperature().manufacturer) {
+    case TemperatureManufacturer::Otpa:
+      face_temperature = surface_to_inner(
+          measure_to_surface(max_temperature + Config::get_temperature_bias()));
+      break;
+    case TemperatureManufacturer::Haiman_NdkF4l5:
+      face_temperature = max_temperature;
+      break;
+    default:
+      face_temperature = max_temperature;
+      break;
+  }
 
   float current_var = get_valid_temperature_variance(statistics);
   if (!Config::enable_anti_spoofing() ||
@@ -176,36 +198,43 @@ bool MatrixTemperatureApp::get_face_temperature(
 }
 
 void MatrixTemperatureApp::rotate_temperature_matrix(TemperatureMatrix &mat) {
+  if (mat.width != mat.height) return;
+
   auto cfg = Config::get_temperature();
   switch (cfg.sensor_rotation) {
     case TemperatureRotation::ROTATION_90:
-      for (int y = 0; y < 16 / 2; y++) {
-        for (int x = y; x < 16 - y - 1; x++) {
+      for (int y = 0; y < mat.height / 2; y++) {
+        for (int x = y; x < mat.width - y - 1; x++) {
           float t = VALUE_AT(mat, x, y);
-          VALUE_AT(mat, x, y) = VALUE_AT(mat, y, 16 - x - 1);
-          VALUE_AT(mat, y, 16 - x - 1) = VALUE_AT(mat, 16 - x - 1, 16 - y - 1);
-          VALUE_AT(mat, 16 - x - 1, 16 - y - 1) = VALUE_AT(mat, 16 - y - 1, x);
-          VALUE_AT(mat, 16 - y - 1, x) = t;
+          VALUE_AT(mat, x, y) = VALUE_AT(mat, y, mat.width - x - 1);
+          VALUE_AT(mat, y, mat.width - x - 1) =
+              VALUE_AT(mat, mat.width - x - 1, mat.width - y - 1);
+          VALUE_AT(mat, mat.width - x - 1, mat.width - y - 1) =
+              VALUE_AT(mat, mat.width - y - 1, x);
+          VALUE_AT(mat, mat.width - y - 1, x) = t;
         }
       }
       break;
     case TemperatureRotation::ROTATION_180:
-      for (int y = 0; y < 16 / 2; y++) {
-        for (int x = 0; x < 16; x++) {
+      for (int y = 0; y < mat.height / 2; y++) {
+        for (int x = 0; x < mat.width; x++) {
           float t = VALUE_AT(mat, x, y);
-          VALUE_AT(mat, x, y) = VALUE_AT(mat, 16 - x - 1, 16 - y - 1);
-          VALUE_AT(mat, 16 - x - 1, 16 - y - 1) = t;
+          VALUE_AT(mat, x, y) =
+              VALUE_AT(mat, mat.width - x - 1, mat.width - y - 1);
+          VALUE_AT(mat, mat.width - x - 1, mat.width - y - 1) = t;
         }
       }
       break;
     case TemperatureRotation::ROTATION_270:
-      for (int y = 0; y < 16 / 2; y++) {
-        for (int x = y; x < 16 - y - 1; x++) {
+      for (int y = 0; y < mat.height / 2; y++) {
+        for (int x = y; x < mat.width - y - 1; x++) {
           float t = VALUE_AT(mat, x, y);
-          VALUE_AT(mat, x, y) = VALUE_AT(mat, 16 - y - 1, x);
-          VALUE_AT(mat, 16 - y - 1, x) = VALUE_AT(mat, 16 - x - 1, 16 - y - 1);
-          VALUE_AT(mat, 16 - x - 1, 16 - y - 1) = VALUE_AT(mat, y, 16 - x - 1);
-          VALUE_AT(mat, y, 16 - x - 1) = t;
+          VALUE_AT(mat, x, y) = VALUE_AT(mat, mat.width - y - 1, x);
+          VALUE_AT(mat, mat.width - y - 1, x) =
+              VALUE_AT(mat, mat.width - x - 1, mat.width - y - 1);
+          VALUE_AT(mat, mat.width - x - 1, mat.width - y - 1) =
+              VALUE_AT(mat, y, mat.width - x - 1);
+          VALUE_AT(mat, y, mat.width - x - 1) = t;
         }
       }
       break;
@@ -218,26 +247,37 @@ void MatrixTemperatureApp::init_temperature_area(QRectF &temperature_area) {
   temperature_area.setRect(0.45, 0.45, 0.1, 0.1);
 }
 
-void MatrixTemperatureApp::get_temperature_area(const QRectF &face_area,
-                                                bool valid_face_area,
-                                                QRectF &temperature_area) {
+void MatrixTemperatureApp::face_area_to_temperature_area(
+    const QRectF &face_area, bool valid_face_area, QRectF &temperature_area) {
   if (valid_face_area) {
     auto cfg = Config::get_temperature();
-    float x1 = (cfg.max_x - cfg.min_x) * face_area.x() + cfg.min_x;
-    float x2 = (cfg.max_x - cfg.min_x) * (face_area.x() + face_area.width()) +
-               cfg.min_x;
-    temperature_area.setX(std::max(floor(x1 * 16) - 1, 0.f) / 16.f);
-    temperature_area.setWidth(std::min(ceil(x2 * 16) + 1, 16.f) / 16.f -
+
+    // face area map to temperature area
+    float x1 =
+        cfg.temperature_area_width * face_area.x() + cfg.temperature_area_x;
+    float x2 =
+        cfg.temperature_area_width * (face_area.x() + face_area.width()) +
+        cfg.temperature_area_x;
+
+    temperature_area.setX(std::max(floor(x1 * temperatures_.width) - 1, 0.f) /
+                          temperatures_.width);
+    temperature_area.setWidth(std::min(ceil(x2 * temperatures_.width) + 1,
+                                       (float)temperatures_.width) /
+                                  (float)temperatures_.width -
                               temperature_area.x());
 
-    float y1 = (cfg.max_y - cfg.min_y) * face_area.y() + cfg.min_y;
-    float y2 = (cfg.max_y - cfg.min_y) * (face_area.y() + face_area.height()) +
-               cfg.min_y;
+    float y1 =
+        cfg.temperature_area_height * face_area.y() + cfg.temperature_area_y;
+    float y2 =
+        cfg.temperature_area_height * (face_area.y() + face_area.height()) +
+        cfg.temperature_area_y;
 
-    temperature_area.setY(std::max(floor((y1 - (y2 - y1) * .2f) * 16), 0.f) /
-                          16.f);
-    temperature_area.setHeight(std::max(ceil((y2 - y1) * .4f * 16), 2.f) /
-                               16.f);
+    temperature_area.setY(
+        std::max(floor((y1 - (y2 - y1) * .2f) * temperatures_.height), 0.f) /
+        temperatures_.height);
+    temperature_area.setHeight(
+        std::max(ceil((y2 - y1) * .4f * temperatures_.height), 2.f) /
+        temperatures_.height);
   } else {
     init_temperature_area(temperature_area);
   }

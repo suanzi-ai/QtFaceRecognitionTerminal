@@ -16,8 +16,9 @@ class MatrixTemperatureApp : public TemperatureApp {
   bool init();
   bool try_read();
   void init_temperature_area(QRectF &temperature_area);
-  void get_temperature_area(const QRectF &face_area, bool valid_face_area,
-                            QRectF &temperature_area);
+  void face_area_to_temperature_area(const QRectF &face_area,
+                                     bool valid_face_area,
+                                     QRectF &temperature_area);
   void get_valid_temperature(std::vector<float> &statistics, float &max_x,
                              float &max_y, float &max_temperature);
 

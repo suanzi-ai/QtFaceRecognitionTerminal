@@ -84,17 +84,17 @@ void OutlineWidget::paintEvent(QPaintEvent *event) {
   QPainter painter(this);
   auto temperature = Config::get_temperature();
   if (temperature.temperature_area_debug) {
-    float min_x = temperature.temperature_area_x * width();
-    float min_y = temperature.temperature_area_y * height();
-    float w = temperature.temperature_area_width * width();
-    float h = temperature.temperature_area_height * height();
+    float min_x = temperature.detect_area_x * width();
+    float min_y = temperature.detect_area_y * height();
+    float w = temperature.detect_area_width * width();
+    float h = temperature.detect_area_height * height();
 
     // draw max temperature detection area
     painter.drawRect(min_x, min_y, w, h);
 
     // draw min temperature detection area
-    float min_w = temperature.min_face_width;
-    float min_h = temperature.min_face_height;
+    float min_w = temperature.min_face_width * width();
+    float min_h = temperature.min_face_height * height();
     painter.drawRect(min_x + (w - min_w) / 2, min_y + (h - min_h) / 2, min_w,
                      min_h);
   }

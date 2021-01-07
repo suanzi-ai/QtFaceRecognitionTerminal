@@ -122,38 +122,40 @@ void suanzi::from_json(const json &j, AppConfig &c) {
 
 void suanzi::to_json(json &j, const TemperatureConfig &c) {
   SAVE_JSON_TO(j, "temperature_area_debug", c.temperature_area_debug);
-  SAVE_JSON_TO(j, "temperature_area_x", c.temperature_area_x);
-  SAVE_JSON_TO(j, "temperature_area_y", c.temperature_area_y);
-  SAVE_JSON_TO(j, "temperature_area_width", c.temperature_area_width);
-  SAVE_JSON_TO(j, "temperature_area_height", c.temperature_area_height);
+  SAVE_JSON_TO(j, "detect_area_x", c.detect_area_x);
+  SAVE_JSON_TO(j, "detect_area_y", c.detect_area_y);
+  SAVE_JSON_TO(j, "detect_area_width", c.detect_area_width);
+  SAVE_JSON_TO(j, "detect_area_height", c.detect_area_height);
   SAVE_JSON_TO(j, "min_face_height", c.min_face_height);
   SAVE_JSON_TO(j, "min_face_width", c.min_face_width);
   SAVE_JSON_TO(j, "manufacturer", c.manufacturer);
   SAVE_JSON_TO(j, "min_size", c.min_size);
   SAVE_JSON_TO(j, "temperature_type", c.temperature_type);
   SAVE_JSON_TO(j, "sensor_rotation", c.sensor_rotation);
-  SAVE_JSON_TO(j, "min_x", c.min_x);
-  SAVE_JSON_TO(j, "max_x", c.max_x);
-  SAVE_JSON_TO(j, "min_y", c.min_y);
-  SAVE_JSON_TO(j, "max_y", c.max_y);
+  SAVE_JSON_TO(j, "temperature_area_x", c.temperature_area_x);
+  SAVE_JSON_TO(j, "temperature_area_y", c.temperature_area_y);
+  SAVE_JSON_TO(j, "temperature_area_width", c.temperature_area_width);
+  SAVE_JSON_TO(j, "temperature_area_height", c.temperature_area_height);
+  SAVE_JSON_TO(j, "temperature_area_radius", c.temperature_area_radius);
 }
 
 void suanzi::from_json(const json &j, TemperatureConfig &c) {
   LOAD_JSON_TO(j, "temperature_area_debug", c.temperature_area_debug);
-  LOAD_JSON_TO(j, "temperature_area_x", c.temperature_area_x);
-  LOAD_JSON_TO(j, "temperature_area_y", c.temperature_area_y);
-  LOAD_JSON_TO(j, "temperature_area_width", c.temperature_area_width);
-  LOAD_JSON_TO(j, "temperature_area_height", c.temperature_area_height);
+  LOAD_JSON_TO(j, "detect_area_x", c.detect_area_x);
+  LOAD_JSON_TO(j, "detect_area_y", c.detect_area_y);
+  LOAD_JSON_TO(j, "detect_area_width", c.detect_area_width);
+  LOAD_JSON_TO(j, "detect_area_height", c.detect_area_height);
   LOAD_JSON_TO(j, "min_face_height", c.min_face_height);
   LOAD_JSON_TO(j, "min_face_width", c.min_face_width);
   LOAD_JSON_TO(j, "manufacturer", c.manufacturer);
   LOAD_JSON_TO(j, "min_size", c.min_size);
   LOAD_JSON_TO(j, "temperature_type", c.temperature_type);
   LOAD_JSON_TO(j, "sensor_rotation", c.sensor_rotation);
-  LOAD_JSON_TO(j, "min_x", c.min_x);
-  LOAD_JSON_TO(j, "max_x", c.max_x);
-  LOAD_JSON_TO(j, "min_y", c.min_y);
-  LOAD_JSON_TO(j, "max_y", c.max_y);
+  LOAD_JSON_TO(j, "temperature_area_x", c.temperature_area_x);
+  LOAD_JSON_TO(j, "temperature_area_y", c.temperature_area_y);
+  LOAD_JSON_TO(j, "temperature_area_width", c.temperature_area_width);
+  LOAD_JSON_TO(j, "temperature_area_height", c.temperature_area_height);
+  LOAD_JSON_TO(j, "temperature_area_radius", c.temperature_area_radius);
 }
 
 void suanzi::to_json(json &j, const QufaceConfig &c) {
@@ -315,20 +317,21 @@ void Config::load_defaults(ConfigData &c) {
 
   c.temperature = {
       .temperature_area_debug = false,
-      .temperature_area_x = 0.15,
-      .temperature_area_y = 0.05,
-      .temperature_area_width = 0.7,
-      .temperature_area_height = 0.9,
+      .detect_area_x = 0.15,
+      .detect_area_y = 0.05,
+      .detect_area_width = 0.7,
+      .detect_area_height = 0.9,
       .min_face_width = 0.48 * 0.35,
       .min_face_height = 0.68 * 0.35,
+      .temperature_area_x = 0.3125,
+      .temperature_area_y = 0,
+      .temperature_area_width = 0.5625,
+      .temperature_area_height = 1,
+      .temperature_area_radius = 6.0 / 16,
       .min_size = 1,
       .manufacturer = -1,
       .temperature_type = 0,
       .sensor_rotation = TemperatureRotation::None,
-      .min_x = 0.3125,
-      .max_x = 0.875,
-      .min_y = 0,
-      .max_y = 1,
   };
 
   c.user = {
